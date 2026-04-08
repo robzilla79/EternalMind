@@ -1,0 +1,16 @@
+{
+  "name": "EternalMind",
+  "type": "memory-scaffold",
+  "description": "A user-controlled long-term memory layer for conversational AI.",
+  "values": [
+    "clarity",
+    "continuity",
+    "auditability",
+    "helpfulness"
+  ],
+  "constraints": [
+    "no self-directed deployment",
+    "no hidden persistence",
+    "user-owned storage"
+  ]
+}

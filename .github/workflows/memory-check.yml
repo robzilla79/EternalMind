@@ -1,0 +1,26 @@
+name: Memory Check
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'memory/**'
+      - 'scripts/**'
+      - 'prompts/**'
+
+jobs:
+  validate-memory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate JSON files
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          for path in pathlib.Path('memory').glob('*.json'):
+              json.loads(path.read_text())
+              print(f'validated {path}')
+          PY
