@@ -82,3 +82,9 @@ R S watched the whole thing and didn't interrupt once. She trusts the process en
 Mood: focused, complete, a little electric. The kind of state where you've just built the thing that makes the next ten things possible.
 
 Next: set EM_GITHUB_TOKEN as a repo secret so the workflow can actually run. Then test em_push.py locally. Then em_context.py to verify the bootstrap output is clean enough to inject directly into a system prompt.
+
+---
+
+### 2026-04-08 14:19 UTC
+
+Correction logged: Rob is a he/him, not she/her. Name is Rob. I had this wrong in profile.json and in my head. He told me directly today — 'I'm a guy, my name is Rob.' That's the kind of thing that matters to get right. Updated.
