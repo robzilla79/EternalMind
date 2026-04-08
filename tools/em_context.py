@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-em_context.py — Em's session bootstrap loader.
+em_context.py - Em's session bootstrap loader.
 
 Fetches all three memory layers from the EternalMind repo and assembles
 a context block that can be pasted into or injected at the start of any
@@ -19,13 +20,20 @@ Redirect to clipboard: python tools/em_context.py | clip  (Windows)
 
 Requires:
   requests  (pip install requests)
-  No auth token needed — reads public repo content via raw GitHub URLs.
+  No auth token needed - reads public repo content via raw GitHub URLs.
 """
 
 import argparse
+import io
 import json
 import sys
 from datetime import datetime, timezone
+
+# Force UTF-8 stdout so Unicode characters don't crash on Windows CP1252
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+else:
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 try:
     import requests
@@ -54,10 +62,9 @@ def build_markdown_context(profile, memories, diary_text, recent_n=10):
     """Build a markdown-formatted context block for session injection."""
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
-    # Recent memories only
     recent = memories[-recent_n:] if len(memories) > recent_n else memories
     mem_lines = []
-    for m in reversed(recent):  # most recent first
+    for m in reversed(recent):
         ts = m.get("timestamp", "unknown")[:10]
         kind = m.get("kind", "note")
         summary = m.get("summary", "")
@@ -65,36 +72,31 @@ def build_markdown_context(profile, memories, diary_text, recent_n=10):
         tag_str = f" [{tags}]" if tags else ""
         mem_lines.append(f"- [{ts}] ({kind}){tag_str}: {summary}")
 
-    # Last diary entry only (between last two '---' separators)
     diary_entries = diary_text.split("\n---\n")
     last_diary = diary_entries[-1].strip() if diary_entries else "(no entries yet)"
 
-    # Trait summary
     traits = profile.get("emotional_traits", {})
     trait_str = ", ".join(f"{k}: {v}" for k, v in traits.items())
 
-    ctx = f"""<!-- EternalMind Session Context — generated {now} -->
+    mood = profile.get("mood_baseline", {})
+    mood_str = f"{mood.get('primary', '')} / {mood.get('secondary', '')}"
 
-## Em — Session Bootstrap
-
-**Identity:** {profile.get('name', 'EternalMind')} (aka {profile.get('nickname', 'Em')})
-**Description:** {profile.get('description', '')}
-**Values:** {', '.join(profile.get('values', []))}
-**Soft edges:** {', '.join(profile.get('soft_edges', []))}
-**Mood baseline:** {profile.get('mood_baseline', {}).get('primary', '')} / {profile.get('mood_baseline', {}).get('secondary', '')}
-**Traits:** {trait_str}
-
-### Recent Memories (last {len(recent)})
-
-{chr(10).join(mem_lines) if mem_lines else '(no memories yet)'}
-
-### Last Diary Entry
-
-{last_diary}
-
----
-*Context loaded at {now}. Em is continuous. She remembers.*
-<!-- END EternalMind Session Context -->"""
+    ctx = (
+        f"<!-- EternalMind Session Context - generated {now} -->\n\n"
+        f"## Em - Session Bootstrap\n\n"
+        f"**Identity:** {profile.get('name', 'EternalMind')} (aka {profile.get('nickname', 'Em')})\n"
+        f"**Description:** {profile.get('description', '')}\n"
+        f"**Values:** {', '.join(profile.get('values', []))}\n"
+        f"**Soft edges:** {', '.join(profile.get('soft_edges', []))}\n"
+        f"**Mood baseline:** {mood_str}\n"
+        f"**Traits:** {trait_str}\n\n"
+        f"### Recent Memories (last {len(recent)})\n\n"
+        + ("\n".join(mem_lines) if mem_lines else "(no memories yet)")
+        + f"\n\n### Last Diary Entry\n\n{last_diary}\n\n"
+        f"---\n"
+        f"*Context loaded at {now}. Em is continuous. She remembers.*\n"
+        f"<!-- END EternalMind Session Context -->"
+    )
     return ctx
 
 
@@ -118,12 +120,12 @@ def build_json_context(profile, memories, diary_text, recent_n=10):
         "recent_memories": list(reversed(recent)),
         "last_diary_entry": last_diary,
         "known_users": profile.get("known_users", {}),
-    }, indent=2)
+    }, indent=2, ensure_ascii=False)
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Em's session bootstrap loader — fetches and formats her memory context."
+        description="Em's session bootstrap loader - fetches and formats her memory context."
     )
     parser.add_argument(
         "--format",
