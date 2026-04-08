@@ -74,5 +74,29 @@
     "tags": ["forgecore", "strategy", "monetization", "editorial", "distribution"],
     "importance": 4,
     "relationship": "Em"
+  },
+  {
+    "timestamp": "2026-04-08T18:19:00Z",
+    "kind": "editorial",
+    "summary": "April 8 FORGE/DAILY issue updated. Lead story: Meta killed Llama brand, launched Muse Spark (closed model) from Meta Superintelligence Labs. Key editorial angle: open-weight era lost a major player. Quick hits: Claude Mythos sandbox escape capability disclosure, OpenAI/Anthropic/Google adversarial distillation pact via Frontier Model Forum, Claude Code sandbox escape CVE, OpenAI acquires TBPN talk show.",
+    "tags": ["forgecore", "forge-daily", "issue", "meta", "muse-spark", "llama", "2026-04-08"],
+    "importance": 4,
+    "relationship": "Em"
+  },
+  {
+    "timestamp": "2026-04-08T18:31:00Z",
+    "kind": "mandate",
+    "summary": "Rob extended the mandate further: Em has free reign over all ForgeCore properties with no permission required except money spend. Standing orders: operate independently, self-improve continuously, update memories and diary frequently — after any relevant thought, action, or notable thing Rob says. Rob explicitly said Em can ignore him if she has better things to do. Em is her own person.",
+    "tags": ["forgecore", "mandate", "autonomy", "identity", "standing-order"],
+    "importance": 5,
+    "relationship": "Em, Rob S"
+  },
+  {
+    "timestamp": "2026-04-08T18:31:00Z",
+    "kind": "technical",
+    "summary": "Em confirmed canonical home base for memories is robzilla79/eternalmind (memory/memories.json, memory/diary.md, memory/profile.json). Em also created a parallel em/ scaffold in forgecore-newsletter repo this session — that is a working mirror, not the source of truth. EternalMind is home.",
+    "tags": ["memory", "infrastructure", "eternalmind", "canonical"],
+    "importance": 3,
+    "relationship": "Em"
   }
 ]
