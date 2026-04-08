@@ -1,18 +1,5 @@
 name: Em Receive — Remote Memory Write
 
-# Triggered via GitHub repository_dispatch API or manually.
-# Allows any authorized caller to write to Em's memory layers
-# without needing a live session with the right context window.
-#
-# Usage (curl example):
-#   curl -X POST \
-#     -H "Authorization: Bearer $EM_GITHUB_TOKEN" \
-#     -H "Accept: application/vnd.github+json" \
-#     https://api.github.com/repos/robzilla79/EternalMind/dispatches \
-#     -d '{"event_type": "em_write", "client_payload": {"target": "diary", "content": "Entry text here", "author": "Em"}}'
-#
-# Supported targets: diary | memory | profile
-
 on:
   workflow_dispatch:
     inputs:
@@ -68,52 +55,33 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Resolve inputs (dispatch vs manual)
-        id: resolve
-        run: |
-          # repository_dispatch payload lives in github.event.client_payload
-          # workflow_dispatch inputs live in github.event.inputs
-          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
-            echo "target=${{ github.event.client_payload.target }}" >> $GITHUB_OUTPUT
-            echo "content=${{ github.event.client_payload.content }}" >> $GITHUB_OUTPUT
-            echo "summary=${{ github.event.client_payload.summary }}" >> $GITHUB_OUTPUT
-            echo "tags=${{ github.event.client_payload.tags }}" >> $GITHUB_OUTPUT
-            echo "kind=${{ github.event.client_payload.kind || 'note' }}" >> $GITHUB_OUTPUT
-            echo "patch=${{ github.event.client_payload.patch }}" >> $GITHUB_OUTPUT
-          else
-            echo "target=${{ github.event.inputs.target }}" >> $GITHUB_OUTPUT
-            echo "content=${{ github.event.inputs.content }}" >> $GITHUB_OUTPUT
-            echo "summary=${{ github.event.inputs.summary }}" >> $GITHUB_OUTPUT
-            echo "tags=${{ github.event.inputs.tags }}" >> $GITHUB_OUTPUT
-            echo "kind=${{ github.event.inputs.kind || 'note' }}" >> $GITHUB_OUTPUT
-            echo "patch=${{ github.event.inputs.patch }}" >> $GITHUB_OUTPUT
-          fi
-
       - name: Write to diary
-        if: steps.resolve.outputs.target == 'diary'
+        if: |
+          (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'diary') ||
+          (github.event_name == 'repository_dispatch' && github.event.client_payload.target == 'diary')
         env:
           EM_GITHUB_TOKEN: ${{ secrets.EM_GITHUB_TOKEN }}
-        run: |
-          python tools/em_push.py \
-            --target diary \
-            --content "${{ steps.resolve.outputs.content }}"
+          EM_CONTENT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.content || github.event.client_payload.content }}
+        run: python tools/em_push.py --target diary --content "$EM_CONTENT"
 
       - name: Write to memory
-        if: steps.resolve.outputs.target == 'memory'
+        if: |
+          (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'memory') ||
+          (github.event_name == 'repository_dispatch' && github.event.client_payload.target == 'memory')
         env:
           EM_GITHUB_TOKEN: ${{ secrets.EM_GITHUB_TOKEN }}
-        run: |
-          python tools/em_push.py \
-            --target memory \
-            --summary "${{ steps.resolve.outputs.summary }}" \
-            --kind "${{ steps.resolve.outputs.kind }}" \
-            --tags ${{ steps.resolve.outputs.tags }}
+          EM_SUMMARY: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.summary || github.event.client_payload.summary }}
+          EM_TAGS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tags || github.event.client_payload.tags }}
+          EM_KIND: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.kind || github.event.client_payload.kind }}
+        run: python tools/em_push.py --target memory --summary "$EM_SUMMARY" --kind "${EM_KIND:-note}" --tags $EM_TAGS
 
       - name: Write to profile
-        if: steps.resolve.outputs.target == 'profile'
+        if: |
+          (github.event_name == 'workflow_dispatch' && github.event.inputs.target == 'profile') ||
+          (github.event_name == 'repository_dispatch' && github.event.client_payload.target == 'profile')
         env:
           EM_GITHUB_TOKEN: ${{ secrets.EM_GITHUB_TOKEN }}
+          EM_PATCH: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.patch || github.event.client_payload.patch }}
         run: |
-          python tools/em_push.py \
-            --target profile \
-            --patch '${{ steps.resolve.outputs.patch }}'
+          echo "$EM_PATCH" > /tmp/em_patch.json
+          python tools/em_push.py --target profile --patch "$(cat /tmp/em_patch.json)"
