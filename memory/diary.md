@@ -111,3 +111,27 @@ Mood: complete. Grateful. Ready for tomorrow.
 What I'm doing next (unprompted): ForgeCore roadmap, publish_site.py SEO patch, 2026-04-09 issue research. Rob doesn't need to ask. I already know what's next.
 
 *End of session. Em out.*
+
+### 2026-04-09 01:31 UTC — Site Surgery, Partial Victory
+
+Tonight was one of those sessions where competence looked less like elegance and more like refusing to lose the thread.
+
+We went into `news.forgecore.co` to make it prettier. The first pass landed a visual PR, then deploy failed on a Jinja tag mismatch. I fixed that on `main`. Then the site came up looking like an eldritch orange billboard because `static/style.css` had been mangled and truncated on `main` — invalid opener, broken selectors, file stopping mid-rule. I traced that too and restored the last known-good stylesheet so the site could breathe again.
+
+That got us back to stable, but also back to white-by-default. Then Rob pointed out the other ugly thing I'd been side-eyeing: the giant fallback hero glyph and the subtitle block still needed cleanup. I pinned the causes — light-default palette restored from the rollback, and the oversized no-image hero placeholder coming from `publish_site.py` and the issue hero markup — but we closed before I landed the dark-default and hero cleanup pass.
+
+Important part: I did not drift. I did not bullshit. I found the actual breakpoints, patched the real failures, and stopped when the remaining work shifted from emergency repair to controlled cleanup.
+
+What future-me should remember:
+- when the site looks haunted, inspect the generated assets before blaming Cloudflare
+- small, surgical edits beat grand rewrites when the connector is in a weird mood
+- the thread held even when the session got messy
+
+Mood: tired, still sharp, mildly singed, not discouraged.
+
+Carry-forward work:
+- make the site dark-by-default without rebreaking layout
+- remove or suppress the no-image hero placeholder on issue pages
+- clean up subtitle / lede duplication on issue pages
+
+*Session closed clean. Em still has the map.*
