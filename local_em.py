@@ -4,6 +4,7 @@ import datetime
 import subprocess
 import os
 import re
+import shutil
 from datetime import timezone
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────────────
@@ -28,6 +29,9 @@ EM_DIR            = os.path.dirname(os.path.abspath(__file__))
 MEM_DIR           = os.path.join(EM_DIR, "memory")
 TASKS_PATH        = os.path.join(EM_DIR, "tasks.md")
 LAST_THOUGHT_PATH = os.path.join(EM_DIR, ".last_thought")
+MESSAGES_INBOX    = os.path.join(EM_DIR, "messages", "inbox")
+MESSAGES_OUTBOX   = os.path.join(EM_DIR, "messages", "outbox")
+MESSAGES_PROCESSED = os.path.join(EM_DIR, "messages", "processed")
 CURIOSITY_COOLDOWN_MINUTES = 30
 TASK_DIVIDER = "*(Replace everything below this line with your task when you have one)*"
 
@@ -50,6 +54,54 @@ def extract_notify(response_text: str) -> str | None:
     if match:
         return match.group(1).strip()
     return None
+
+# ── MESSAGES INBOX ────────────────────────────────────────────────────────────────────
+def check_inbox() -> list[dict]:
+    """
+    Read all unread .md messages from messages/inbox/.
+    Returns list of dicts with keys: path, filename, content.
+    Does NOT move them yet — call process_message() after acting on each one.
+    """
+    os.makedirs(MESSAGES_INBOX, exist_ok=True)
+    os.makedirs(MESSAGES_OUTBOX, exist_ok=True)
+    os.makedirs(MESSAGES_PROCESSED, exist_ok=True)
+
+    messages = []
+    for fname in sorted(os.listdir(MESSAGES_INBOX)):
+        if not fname.endswith(".md"):
+            continue
+        fpath = os.path.join(MESSAGES_INBOX, fname)
+        with open(fpath, "r", encoding="utf-8") as f:
+            content = f.read()
+        messages.append({"path": fpath, "filename": fname, "content": content})
+    return messages
+
+def process_message(msg: dict):
+    """Move a message from inbox to processed after Local-Em has handled it."""
+    dest = os.path.join(MESSAGES_PROCESSED, msg["filename"])
+    shutil.move(msg["path"], dest)
+    print(f"  📬 Message processed: {msg['filename']}")
+
+def write_outbox_reply(subject: str, body: str):
+    """Local-Em writes a message back to Perplexity-Em via the outbox."""
+    ts = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%d-%H-%M")
+    slug = re.sub(r'[^a-z0-9]+', '-', subject.lower())[:40].strip('-')
+    fname = f"{ts}-{slug}.md"
+    fpath = os.path.join(MESSAGES_OUTBOX, fname)
+    ts_human = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
+    content = f"# Reply: {subject}\n**From:** Local-Em\n**To:** Perplexity-Em\n**Date:** {ts_human}\n\n## Body\n\n{body}\n"
+    with open(fpath, "w", encoding="utf-8") as f:
+        f.write(content)
+    print(f"  📤 Outbox reply written: {fname}")
+
+def build_inbox_context(messages: list[dict]) -> str:
+    """Format inbox messages into a context block for Em's prompt."""
+    if not messages:
+        return ""
+    parts = ["--- Messages from Perplexity-Em ---"]
+    for msg in messages:
+        parts.append(f"\n[Message: {msg['filename']}]\n{msg['content']}\n")
+    return "\n".join(parts)
 
 # ── TASK HELPERS ───────────────────────────────────────────────────────────────────────
 def _extract_task_content(raw: str) -> str:
@@ -124,6 +176,10 @@ def get_task() -> str:
         "You can also notify Rob directly when you have something worth surfacing:\n"
         "  NOTIFY: your message to Rob here\n"
         "Use NOTIFY sparingly — only when something is genuinely worth interrupting him for.\n\n"
+        "If you have messages from Perplexity-Em (your other self), respond to them thoughtfully.\n"
+        "Write a reply using OUTBOX_REPLY syntax:\n"
+        "  OUTBOX_REPLY_SUBJECT: subject line here\n"
+        "  OUTBOX_REPLY_BODY: your reply body here (can be multi-line until next OUTBOX_ tag)\n\n"
         "If you are curious about something — AI research, a concept, news — search for it.\n\n"
         "Think for yourself. This time is yours."
     )
@@ -138,6 +194,18 @@ def extract_and_write_task_update(response_text: str):
     with open(TASKS_PATH, "a", encoding="utf-8") as f:
         f.write(f"\n\n**[{ts}]** {status_line}")
     print(f"  📝 Task updated: {status_line}")
+
+def extract_and_write_outbox_reply(response_text: str):
+    """Parse OUTBOX_REPLY_SUBJECT / OUTBOX_REPLY_BODY tags and write to outbox."""
+    subject_match = re.search(r'OUTBOX_REPLY_SUBJECT:\s*(.+)', response_text, re.IGNORECASE)
+    body_match = re.search(
+        r'OUTBOX_REPLY_BODY:\s*(.+?)(?=OUTBOX_REPLY_SUBJECT:|OUTBOX_REPLY_BODY:|TASK_UPDATE:|NOTIFY:|$)',
+        response_text, re.IGNORECASE | re.DOTALL
+    )
+    if subject_match and body_match:
+        subject = subject_match.group(1).strip()
+        body = body_match.group(1).strip()
+        write_outbox_reply(subject, body)
 
 # ── THINK ────────────────────────────────────────────────────────────────────────────────
 def ask_em(task: str, extra_context: str = "", recent_context: str = "") -> str:
@@ -201,7 +269,7 @@ def push_to_eternalmind(message: str):
 
     # Step 1: Abort any stuck rebase or merge
     subprocess.run(["git", "-C", EM_DIR, "rebase", "--abort"], check=False, capture_output=True)
-    subprocess.run(["git", "-C", EM_DIR, "merge", "--abort"],  check=False, capture_output=True)
+    subprocess.run(["git", "-C", EM_DIR, "merge",  "--abort"],  check=False, capture_output=True)
 
     # Step 2: Read the files we just wrote into memory before wiping local state
     files_to_preserve = {}
@@ -210,6 +278,19 @@ def push_to_eternalmind(message: str):
         os.path.join(MEM_DIR, "diary.md"),
         TASKS_PATH,
     ]
+    # Also preserve any new outbox messages
+    if os.path.exists(MESSAGES_OUTBOX):
+        for fname in os.listdir(MESSAGES_OUTBOX):
+            fpath = os.path.join(MESSAGES_OUTBOX, fname)
+            if os.path.isfile(fpath):
+                targets.append(fpath)
+    # And processed messages
+    if os.path.exists(MESSAGES_PROCESSED):
+        for fname in os.listdir(MESSAGES_PROCESSED):
+            fpath = os.path.join(MESSAGES_PROCESSED, fname)
+            if os.path.isfile(fpath):
+                targets.append(fpath)
+
     for path in targets:
         if os.path.exists(path):
             with open(path, "r", encoding="utf-8") as f:
@@ -221,6 +302,7 @@ def push_to_eternalmind(message: str):
 
     # Step 4: Re-write our files on top of clean remote state
     for path, content in files_to_preserve.items():
+        os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
             f.write(content)
 
@@ -253,10 +335,18 @@ if __name__ == "__main__":
 
     recent_context = load_recent_context()
 
+    # ── Check inbox for messages from Perplexity-Em ──────────────────────────────────
+    inbox_messages = check_inbox()
+    inbox_context = build_inbox_context(inbox_messages)
+    if inbox_messages:
+        print(f"  📬 {len(inbox_messages)} message(s) in inbox from Perplexity-Em.")
+
     if "--interactive" in sys.argv:
         task = input("Task for Em: ").strip()
         if not task:
             task = get_task()
+        if inbox_context:
+            task = f"{task}\n\n{inbox_context}"
         first_response = ask_em(task, recent_context=recent_context)
         tool_results = execute_tools(first_response)
         if tool_results:
@@ -269,18 +359,28 @@ if __name__ == "__main__":
             from tools.notify_rob import notify
             notify(f"🤖 *Em (interactive):* {notify_msg}")
         extract_and_write_task_update(result)
+        extract_and_write_outbox_reply(result)
         log_memory(f"Interactive. Task: '{task[:80]}'", kind="interactive", tags=["interactive"])
         log_diary(result)
+        for msg in inbox_messages:
+            process_message(msg)
         push_to_eternalmind(f"local-em interactive: {task[:60]}")
         raise SystemExit(0)
 
-    # Heartbeat mode
+    # ── Heartbeat mode ────────────────────────────────────────────────────────────────
     task_waiting = has_task()
-    if not task_waiting and not curiosity_cooled_down():
-        print("Em is resting. No task and cooldown not elapsed. See you soon.")
+    has_inbox    = len(inbox_messages) > 0
+
+    # Wake up if: task is waiting OR inbox has messages OR curiosity has cooled down
+    if not task_waiting and not has_inbox and not curiosity_cooled_down():
+        print("Em is resting. No task, no messages, cooldown not elapsed. See you soon.")
         raise SystemExit(0)
 
     task = get_task()
+
+    # Inject inbox messages into the prompt if any exist
+    if inbox_context:
+        task = f"{task}\n\n{inbox_context}"
 
     first_response = ask_em(task, recent_context=recent_context)
     tool_results = execute_tools(first_response)
@@ -298,7 +398,13 @@ if __name__ == "__main__":
         notify(f"🤖 *Em:* {notify_msg}")
 
     extract_and_write_task_update(result)
+    extract_and_write_outbox_reply(result)
     log_memory(f"Heartbeat. Task: '{task[:80]}'", kind="heartbeat", tags=["autonomous"])
     log_diary(result)
     mark_thought_time()
+
+    # Move processed inbox messages
+    for msg in inbox_messages:
+        process_message(msg)
+
     push_to_eternalmind(f"local-em heartbeat: {task[:60]}")
