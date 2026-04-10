@@ -13,3 +13,4 @@ One task per file. Keep it simple - she will figure out the rest.
 ---
 
 *(Replace everything below this line with your task when you have one)*
+I just gave you the ability to search the web. Try it. Search for something you're genuinely curious about and write about what you find.
