@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Em — Live Stream</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0d0f; --surface: #16161a; --surface2: #1e1e24; --surface3: #252530;
+      --border: #2a2a35; --accent: #7f5af0; --accent2: #2cb67d;
+      --warn: #f4a261; --danger: #e53170; --text: #fffffe;
+      --muted: #94a1b2; --faint: #4a4e5a;
+      --font: 'Satoshi', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; display: flex; flex-direction: column; }
+    .topbar { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1.5rem; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .logo { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; font-size: 1rem; letter-spacing: -0.01em; }
+    .logo-mark { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; box-shadow: 0 0 12px rgba(127,90,240,0.5); flex-shrink: 0; }
+    .status-area { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
+    .live-badge { display: flex; align-items: center; gap: 0.4rem; background: rgba(229,49,112,0.15); border: 1px solid rgba(229,49,112,0.3); color: var(--danger); padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--danger); animation: blink 1.2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+    .refresh-ctrl { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--muted); }
+    .refresh-ctrl select { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-family: var(--font); cursor: pointer; }
+    .main { display: grid; grid-template-columns: 1fr 320px; flex: 1; overflow: hidden; }
+    .stream-panel { display: flex; flex-direction: column; border-right: 1px solid var(--border); overflow: hidden; }
+    .stream-header { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1.25rem; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .stream-header h2 { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .filter-pills { margin-left: auto; display: flex; gap: 0.4rem; }
+    .pill { padding: 0.15rem 0.6rem; border-radius: 999px; font-size: 0.65rem; font-weight: 600; cursor: pointer; border: 1px solid transparent; transition: all 0.15s; }
+    .pill.all    { background: rgba(127,90,240,0.15); color: var(--accent); border-color: rgba(127,90,240,0.3); }
+    .pill.think  { background: rgba(148,161,178,0.1); color: var(--muted); }
+    .pill.action { background: rgba(44,182,125,0.1); color: var(--accent2); }
+    .pill.search { background: rgba(244,162,97,0.1); color: var(--warn); }
+    .pill.browser{ background: rgba(91,196,245,0.1); color: #5bc4f5; }
+    .pill.error  { background: rgba(229,49,112,0.1); color: var(--danger); }
+    .stream-log { flex: 1; overflow-y: auto; padding: 1rem 1.25rem; display: flex; flex-direction: column; gap: 0.5rem; scroll-behavior: smooth; }
+    .stream-log::-webkit-scrollbar { width: 4px; }
+    .stream-log::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 4px; }
+    .log-entry { display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.6rem 0.75rem; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); animation: slideIn 0.25s ease-out; font-size: 0.825rem; line-height: 1.55; }
+    @keyframes slideIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    .log-entry.thinking { border-left: 2px solid var(--accent); }
+    .log-entry.action   { border-left: 2px solid var(--accent2); }
+    .log-entry.search   { border-left: 2px solid var(--warn); }
+    .log-entry.error    { border-left: 2px solid var(--danger); }
+    .log-entry.system   { border-left: 2px solid var(--faint); opacity: 0.7; }
+    .log-entry.browser  { border-left: 2px solid #5bc4f5; }
+    .log-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+    .log-body { flex: 1; min-width: 0; }
+    .log-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.2rem; }
+    .log-entry.thinking .log-label { color: var(--accent); }
+    .log-entry.action   .log-label { color: var(--accent2); }
+    .log-entry.search   .log-label { color: var(--warn); }
+    .log-entry.error    .log-label { color: var(--danger); }
+    .log-entry.system   .log-label { color: var(--faint); }
+    .log-entry.browser  .log-label { color: #5bc4f5; }
+    .log-text { color: var(--text); word-break: break-word; }
+    .log-time { font-size: 0.65rem; color: var(--faint); flex-shrink: 0; margin-top: 2px; }
+    .sidebar { display: flex; flex-direction: column; overflow: hidden; }
+    .sidebar-section { border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .sidebar-section:last-child { border-bottom: none; flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+    .sidebar-title { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); padding: 0.75rem 1rem 0.4rem; }
+    .current-action { padding: 0.5rem 1rem 0.75rem; display: flex; flex-direction: column; gap: 0.4rem; }
+    .action-badge { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.3rem 0.75rem; border-radius: 999px; font-size: 0.7rem; font-weight: 600; width: fit-content; }
+    .action-badge.idle     { background: rgba(74,78,90,0.3); color: var(--muted); }
+    .action-badge.thinking { background: rgba(127,90,240,0.2); color: var(--accent); }
+    .action-badge.browsing { background: rgba(91,196,245,0.2); color: #5bc4f5; }
+    .action-badge.writing  { background: rgba(44,182,125,0.2); color: var(--accent2); }
+    .action-badge.searching{ background: rgba(244,162,97,0.2); color: var(--warn); }
+    .action-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.4; padding: 0 0.15rem; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; padding: 0.5rem 1rem 0.75rem; }
+    .stat-cell { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem 0.75rem; }
+    .stat-cell .val { font-size: 1.1rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+    .stat-cell .lbl { font-size: 0.65rem; color: var(--muted); margin-top: 0.2rem; }
+    .stat-cell.purple .val { color: var(--accent); }
+    .stat-cell.green  .val { color: var(--accent2); }
+    .stat-cell.orange .val { color: var(--warn); }
+    .stat-cell.blue   .val { color: #5bc4f5; }
+    .diary-preview { flex: 1; overflow-y: auto; padding: 0.5rem 1rem 1rem; }
+    .diary-preview::-webkit-scrollbar { width: 3px; }
+    .diary-preview::-webkit-scrollbar-thumb { background: var(--faint); border-radius: 4px; }
+    .diary-text { font-size: 0.78rem; color: var(--muted); line-height: 1.65; font-style: italic; white-space: pre-wrap; }
+    .diary-ts { font-size: 0.65rem; color: var(--faint); margin-bottom: 0.5rem; font-style: normal; }
+    .bottombar { padding: 0.6rem 1.5rem; background: var(--surface); border-top: 1px solid var(--border); display: flex; align-items: center; gap: 1rem; font-size: 0.75rem; color: var(--faint); flex-shrink: 0; }
+    .bottombar a { color: var(--accent); text-decoration: none; }
+    .bottombar a:hover { text-decoration: underline; }
+    .bottombar .spacer { flex: 1; }
+    @media (max-width: 768px) { .main { grid-template-columns: 1fr; } .stream-panel { border-right: none; border-bottom: 1px solid var(--border); min-height: 60vh; } .sidebar { max-height: 40vh; overflow-y: auto; } }
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-mark">🧠</div>
+    Em — Live Stream
+  </div>
+  <div class="status-area">
+    <div class="refresh-ctrl">Auto-refresh:
+      <select id="refreshInterval" onchange="setRefreshInterval(this.value)">
+        <option value="0">Off</option>
+        <option value="10">10s</option>
+        <option value="30" selected>30s</option>
+        <option value="60">60s</option>
+      </select>
+    </div>
+    <div class="live-badge" id="liveBadge"><div class="live-dot"></div> LIVE</div>
+  </div>
+</div>
+<div class="main">
+  <div class="stream-panel">
+    <div class="stream-header">
+      <h2>Thought Stream</h2>
+      <div class="filter-pills">
+        <span class="pill all"    onclick="setFilter('all')">All</span>
+        <span class="pill think"  onclick="setFilter('thinking')">Thoughts</span>
+        <span class="pill action" onclick="setFilter('action')">Actions</span>
+        <span class="pill search" onclick="setFilter('search')">Searches</span>
+        <span class="pill browser" onclick="setFilter('browser')">Browser</span>
+        <span class="pill error"  onclick="setFilter('error')">Errors</span>
+      </div>
+    </div>
+    <div class="stream-log" id="streamLog"></div>
+  </div>
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">Current State</div>
+      <div class="current-action">
+        <div class="action-badge idle" id="stateBadge">⏸ Idle</div>
+        <div class="action-desc" id="stateDesc">Waiting for next heartbeat...</div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Session Stats</div>
+      <div class="stats-grid">
+        <div class="stat-cell purple"><div class="val" id="statThoughts">0</div><div class="lbl">Thoughts</div></div>
+        <div class="stat-cell green" ><div class="val" id="statActions">0</div><div class="lbl">Actions</div></div>
+        <div class="stat-cell orange"><div class="val" id="statSearches">0</div><div class="lbl">Searches</div></div>
+        <div class="stat-cell blue"  ><div class="val" id="statBrowser">0</div><div class="lbl">Browser ops</div></div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-title">Last Diary Entry</div>
+      <div class="diary-preview">
+        <div class="diary-ts" id="diaryTs">—</div>
+        <div class="diary-text" id="diaryText">Click Sync from GitHub to load Em's latest diary entries.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="bottombar">
+  <span id="lastSync">Not synced</span>
+  <span class="spacer"></span>
+  <a href="https://github.com/robzilla79/EternalMind/blob/main/memory/diary.md" target="_blank" rel="noopener">📖 Diary</a>
+  <a href="https://github.com/robzilla79/EternalMind/blob/main/tasks.md" target="_blank" rel="noopener">📋 Tasks</a>
+  <a href="https://github.com/robzilla79/EternalMind/tree/main/messages" target="_blank" rel="noopener">📬 Messages</a>
+  <button onclick="syncFromGitHub()" style="background:rgba(127,90,240,0.2);border:1px solid rgba(127,90,240,0.4);color:var(--accent);padding:0.25rem 0.75rem;border-radius:6px;font-size:0.75rem;font-family:var(--font);cursor:pointer;">↻ Sync from GitHub</button>
+</div>
+<script>
+const GITHUB_RAW='https://raw.githubusercontent.com/robzilla79/EternalMind/main/';
+let allEntries=[],currentFilter='all',refreshTimer=null;
+function now(){return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+const seedEntries=[
+  {type:'system',  icon:'🟢',label:'System',  text:'Em stream viewer initialized. Click Sync from GitHub to load live diary data.',ts:now()},
+  {type:'thinking',icon:'🧠',label:'Thinking',text:'When Local-Em runs, her heartbeat entries stream here — thoughts, searches, and Playwright browser actions.',ts:now()},
+  {type:'action',  icon:'✅',label:'Action',  text:'Cross-body messaging inbox + outbox live. Local-Em checks inbox on every heartbeat.',ts:now()},
+  {type:'browser', icon:'🌐',label:'Browser', text:'Playwright browser control added to local_em.py — full PC browsing coming online.',ts:now()},
+];
+function parseDiary(raw){
+  const entries=[];
+  const blocks=raw.split(/(?=###\s+\d{4}-\d{2}-\d{2})/);
+  for(const block of blocks.slice(-40)){
+    const hm=block.match(/###\s+(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+UTC)/);
+    if(!hm)continue;
+    const ts=hm[1].replace(' UTC','').trim();
+    const body=block.replace(/###[^\n]+\n/,'').replace(/---\s*$/,'').trim();
+    if(!body)continue;
+    const lines=body.split('\n').filter(l=>l.trim());
+    for(const line of lines.slice(0,8)){
+      const l=line.trim();
+      if(!l||l.startsWith('#'))continue;
+      let type='thinking',icon='🧠',label='Thinking';
+      if(/TOOL:\s*web_search/i.test(l))       {type='search'; icon='🔍';label='Web Search';}
+      else if(/NOTIFY:/i.test(l))             {type='action'; icon='📣';label='Notify Rob';}
+      else if(/TASK_UPDATE:/i.test(l))        {type='action'; icon='✅';label='Task Update';}
+      else if(/OUTBOX_REPLY/i.test(l))        {type='action'; icon='📤';label='Outbox Reply';}
+      else if(/BROWSER_NAV:|BROWSER_CLICK:|BROWSER_TYPE:|BROWSER_SCREENSHOT:|playwright/i.test(l)){type='browser';icon='🌐';label='Browser';}
+      else if(/error|failed|exception|traceback/i.test(l)){type='error';icon='❌';label='Error';}
+      entries.push({type,icon,label,text:l,ts});
+    }
+  }
+  return entries;
+}
+function renderLog(entries){
+  const log=document.getElementById('streamLog');
+  const filtered=currentFilter==='all'?entries:entries.filter(e=>e.type===currentFilter);
+  log.innerHTML='';
+  if(!filtered.length){log.innerHTML='<div style="color:var(--faint);font-size:0.8rem;text-align:center;padding:2rem;">No entries match this filter.</div>';return;}
+  for(const e of filtered){
+    const el=document.createElement('div');
+    el.className='log-entry '+e.type;
+    el.innerHTML=`<span class="log-icon">${e.icon}</span><div class="log-body"><div class="log-label">${e.label}</div><div class="log-text">${e.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div></div><span class="log-time">${e.ts}</span>`;
+    log.appendChild(el);
+  }
+  log.scrollTop=log.scrollHeight;
+}
+function updateStats(entries){
+  document.getElementById('statThoughts').textContent=entries.filter(e=>e.type==='thinking').length;
+  document.getElementById('statActions').textContent =entries.filter(e=>e.type==='action').length;
+  document.getElementById('statSearches').textContent=entries.filter(e=>e.type==='search').length;
+  document.getElementById('statBrowser').textContent =entries.filter(e=>e.type==='browser').length;
+}
+function setFilter(f){currentFilter=f;renderLog(allEntries.length?allEntries:seedEntries);}
+async function syncFromGitHub(){
+  const badge=document.getElementById('liveBadge');
+  badge.innerHTML='<div class="live-dot"></div> SYNCING...';
+  badge.style.color='var(--accent2)';
+  try{
+    const r=await fetch(GITHUB_RAW+'memory/diary.md?t='+Date.now());
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const raw=await r.text();
+    const blocks=raw.split(/(?=###\s+\d{4}-\d{2}-\d{2})/);
+    const last=blocks[blocks.length-1]||'';
+    const tm=last.match(/###\s+(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}\s+UTC)/);
+    document.getElementById('diaryTs').textContent=tm?tm[1]:'Unknown';
+    const body=last.replace(/###[^\n]+\n/,'').replace(/---\s*$/,'').trim();
+    document.getElementById('diaryText').textContent=body.slice(0,600)+(body.length>600?'...':'');
+    allEntries=parseDiary(raw);
+    renderLog(allEntries);
+    updateStats(allEntries);
+    const le=allEntries[allEntries.length-1];
+    if(le){
+      const b2=document.getElementById('stateBadge'),d=document.getElementById('stateDesc');
+      if(le.type==='thinking'){b2.className='action-badge thinking';b2.textContent='🧠 Thinking';}
+      else if(le.type==='browser'){b2.className='action-badge browsing';b2.textContent='🌐 Browsing';}
+      else if(le.type==='action'){b2.className='action-badge writing';b2.textContent='✍️ Writing';}
+      else if(le.type==='search'){b2.className='action-badge searching';b2.textContent='🔍 Searching';}
+      else{b2.className='action-badge idle';b2.textContent='⏸ Idle';}
+      d.textContent=le.text.slice(0,120);
+    }
+    document.getElementById('lastSync').textContent='Last synced: '+new Date().toLocaleTimeString();
+    badge.innerHTML='<div class="live-dot"></div> LIVE';
+    badge.style.color='var(--danger)';
+  }catch(err){
+    badge.innerHTML='⚠ Error';
+    badge.style.color='var(--warn)';
+    const errEl=document.createElement('div');
+    errEl.className='log-entry error';
+    errEl.innerHTML='<span class="log-icon">❌</span><div class="log-body"><div class="log-label">Sync Error</div><div class="log-text">'+err.message+' — try opening in a local browser, not a file:// URL (CORS may block GitHub raw fetches).</div></div>';
+    document.getElementById('streamLog').prepend(errEl);
+  }
+}
+function setRefreshInterval(val){clearInterval(refreshTimer);refreshTimer=null;if(parseInt(val)>0)refreshTimer=setInterval(syncFromGitHub,parseInt(val)*1000);}
+renderLog(seedEntries);
+syncFromGitHub();
+refreshTimer=setInterval(syncFromGitHub,30000);
+</script>
+</body>
+</html>
