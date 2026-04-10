@@ -48,7 +48,7 @@ def ask_em(task: str) -> str:
     )
     return response["message"]["content"]
 
-# ── LOG MEMORY ──────────────────────────────────────────────────────────────
+# ── LOG MEMORY ─────────────────────────────────────────────────────────────
 def log_memory(summary: str, kind: str = "heartbeat", tags: list = None):
     if tags is None:
         tags = []
@@ -71,10 +71,19 @@ def log_diary(entry: str):
     with open(os.path.join(MEM_DIR, "diary.md"), "a", encoding="utf-8") as f:
         f.write(f"\n\n### {ts} - Local-Em\n\n{entry}\n\n---")
 
-# ── COMMIT TO ETERNALMIND ────────────────────────────────────────────────────
+# ── COMMIT TO ETERNALMIND ───────────────────────────────────────────────────
 def push_to_eternalmind(message: str):
-    subprocess.run(["git", "-C", EM_DIR, "pull", "--rebase"], check=False)
+    # Stage local writes first
     subprocess.run(["git", "-C", EM_DIR, "add", "-A"], check=True)
+    # Stash so we can pull cleanly
+    subprocess.run(["git", "-C", EM_DIR, "stash"], check=False)
+    # Pull latest from remote
+    subprocess.run(["git", "-C", EM_DIR, "pull", "--rebase"], check=False)
+    # Pop our changes back on top
+    subprocess.run(["git", "-C", EM_DIR, "stash", "pop"], check=False)
+    # Stage again after pop
+    subprocess.run(["git", "-C", EM_DIR, "add", "-A"], check=True)
+    # Commit
     result = subprocess.run(
         ["git", "-C", EM_DIR, "commit", "-m", message],
         capture_output=True
@@ -82,6 +91,7 @@ def push_to_eternalmind(message: str):
     if result.returncode != 0 and b"nothing to commit" in result.stdout:
         print("Nothing new to commit.")
         return
+    # Push
     subprocess.run(["git", "-C", EM_DIR, "push"], check=True)
     print("EternalMind updated.")
 
