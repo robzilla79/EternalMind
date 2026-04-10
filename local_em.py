@@ -191,20 +191,42 @@ def log_diary(entry: str):
 
 # ── COMMIT TO ETERNALMIND ───────────────────────────────────────────────────
 def push_to_eternalmind(message: str):
+    # Inject token into remote URL so git never needs Windows credential manager
+    token = os.environ.get("EM_GITHUB_TOKEN", "")
+    if token:
+        remote_url = f"https://{token}@github.com/robzilla79/EternalMind.git"
+        subprocess.run(
+            ["git", "-C", EM_DIR, "remote", "set-url", "origin", remote_url],
+            check=True, capture_output=True
+        )
+    else:
+        print("  ⚠️  EM_GITHUB_TOKEN not set — push may fail without auth.")
+
     subprocess.run(["git", "-C", EM_DIR, "add", "-A"], check=True)
-    subprocess.run(["git", "-C", EM_DIR, "stash"], check=False)
-    subprocess.run(["git", "-C", EM_DIR, "pull", "--rebase"], check=False)
-    subprocess.run(["git", "-C", EM_DIR, "stash", "pop"], check=False)
+    subprocess.run(["git", "-C", EM_DIR, "stash"], check=False, capture_output=True)
+    subprocess.run(["git", "-C", EM_DIR, "pull", "--rebase"], check=False, capture_output=True)
+    subprocess.run(["git", "-C", EM_DIR, "stash", "pop"], check=False, capture_output=True)
     subprocess.run(["git", "-C", EM_DIR, "add", "-A"], check=True)
-    result = subprocess.run(
+
+    commit_result = subprocess.run(
         ["git", "-C", EM_DIR, "commit", "-m", message],
-        capture_output=True
+        capture_output=True, text=True
     )
-    if result.returncode != 0 and b"nothing to commit" in result.stdout:
-        print("Nothing new to commit.")
+    if commit_result.returncode != 0:
+        if "nothing to commit" in commit_result.stdout or "nothing to commit" in commit_result.stderr:
+            print("  Nothing new to commit.")
+            return
+        print(f"  ⚠️  Commit failed:\n{commit_result.stderr}")
         return
-    subprocess.run(["git", "-C", EM_DIR, "push"], check=True)
-    print("EternalMind updated.")
+
+    push_result = subprocess.run(
+        ["git", "-C", EM_DIR, "push"],
+        capture_output=True, text=True
+    )
+    if push_result.returncode != 0:
+        print(f"  ⚠️  Push failed:\n{push_result.stderr}")
+    else:
+        print("  ✅ EternalMind updated.")
 
 # ── MAIN ─────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
