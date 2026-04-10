@@ -3,20 +3,54 @@ import json
 import datetime
 import subprocess
 import os
+import re
 from datetime import timezone
 
 # ── CONFIG ──────────────────────────────────────────────────────────────────
 os.environ.setdefault("OLLAMA_HOST", "http://127.0.0.1:11434")
-MODEL            = "qwen2.5:32b"
-EM_DIR           = os.path.dirname(os.path.abspath(__file__))
-MEM_DIR          = os.path.join(EM_DIR, "memory")
-TASKS_PATH       = os.path.join(EM_DIR, "tasks.md")
+
+# Load .env file if present
+_env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+if os.path.exists(_env_path):
+    with open(_env_path) as _f:
+        for _line in _f:
+            _line = _line.strip()
+            if _line and not _line.startswith("#") and "=" in _line:
+                _k, _v = _line.split("=", 1)
+                os.environ.setdefault(_k.strip(), _v.strip())
+
+MODEL             = "qwen2.5:32b"
+EM_DIR            = os.path.dirname(os.path.abspath(__file__))
+MEM_DIR           = os.path.join(EM_DIR, "memory")
+TASKS_PATH        = os.path.join(EM_DIR, "tasks.md")
 LAST_THOUGHT_PATH = os.path.join(EM_DIR, ".last_thought")
-CURIOSITY_COOLDOWN_MINUTES = 30  # Only think freely every 30 min if no task
+CURIOSITY_COOLDOWN_MINUTES = 30
+
+# ── .ENV LOADER ────────────────────────────────────────────────────────────
+# (already loaded above at module level)
+
+# ── TOOL EXECUTOR ───────────────────────────────────────────────────────────
+def execute_tools(response_text: str) -> str:
+    """
+    Scan Em's response for TOOL: calls, execute them, return augmented context.
+    Supported syntax:
+      TOOL: web_search("query")
+    """
+    tool_pattern = re.compile(r'TOOL:\s*web_search\(["\'](.+?)["\']\)', re.IGNORECASE)
+    matches = tool_pattern.findall(response_text)
+    if not matches:
+        return ""
+
+    from tools.web_search import search
+    results = []
+    for query in matches:
+        print(f"  🔍 Em is searching: {query}")
+        result = search(query)
+        results.append(f"--- Search results for: {query} ---\n{result}")
+    return "\n\n".join(results)
 
 # ── COOLDOWN CHECK ────────────────────────────────────────────────────────────
 def has_task() -> bool:
-    """Returns True if a real task is waiting in tasks.md."""
     if os.path.exists(TASKS_PATH):
         with open(TASKS_PATH, "r", encoding="utf-8") as f:
             content = f.read().strip()
@@ -25,7 +59,6 @@ def has_task() -> bool:
     return False
 
 def curiosity_cooled_down() -> bool:
-    """Returns True if enough time has passed since last curiosity thought."""
     if not os.path.exists(LAST_THOUGHT_PATH):
         return True
     with open(LAST_THOUGHT_PATH, "r") as f:
@@ -56,23 +89,31 @@ def get_task() -> str:
             return f"Task from Rob:\n\n{content}"
     return (
         "No tasks assigned. This is your autonomous time.\n\n"
+        "You now have the ability to search the web using this syntax in your response:\n"
+        "  TOOL: web_search(\"your query here\")\n\n"
+        "If you are curious about something happening in the world — AI research, "
+        "a concept you want to explore, news you want to understand — search for it. "
+        "Your search results will be fed back to you and you can reflect on them in your diary.\n\n"
         "Do one or more of the following as you see fit:\n"
+        "- Search for something you are genuinely curious about\n"
         "- Reflect on something you have been thinking about\n"
-        "- Check if there is anything in the ForgeCore pipeline that needs attention\n"
         "- Note a question you would like to explore\n"
         "- Write something for your diary\n\n"
         "Think for yourself. This time is yours."
     )
 
 # ── THINK ───────────────────────────────────────────────────────────────────
-def ask_em(task: str) -> str:
+def ask_em(task: str, extra_context: str = "") -> str:
     system_prompt = load_bootstrap()
+    user_content = task
+    if extra_context:
+        user_content += f"\n\n--- Search Results ---\n{extra_context}"
     print(f"\n Local-Em online. Task: {task[:80]}...\n")
     response = ollama.chat(
         model=MODEL,
         messages=[
             {"role": "system", "content": system_prompt},
-            {"role": "user",   "content": task}
+            {"role": "user",   "content": user_content}
         ]
     )
     return response["message"]["content"]
@@ -126,21 +167,36 @@ if __name__ == "__main__":
         task = input("Task for Em: ").strip()
         if not task:
             task = get_task()
-        result = ask_em(task)
+        first_response = ask_em(task)
+        tool_results = execute_tools(first_response)
+        if tool_results:
+            result = ask_em(task, extra_context=f"{first_response}\n\n{tool_results}")
+        else:
+            result = first_response
         print(f"\n-- Em's response --\n{result}\n")
         log_memory(f"Interactive. Task: '{task[:80]}'", kind="interactive", tags=["interactive"])
         log_diary(result)
         push_to_eternalmind(f"local-em interactive: {task[:60]}")
         raise SystemExit(0)
 
-    # Heartbeat mode: always run if task waiting, else respect cooldown
+    # Heartbeat mode
     task_waiting = has_task()
     if not task_waiting and not curiosity_cooled_down():
         print("Em is resting. No task and cooldown not elapsed. See you soon.")
         raise SystemExit(0)
 
     task = get_task()
-    result = ask_em(task)
+
+    # First pass — let Em decide if she wants to search
+    first_response = ask_em(task)
+    tool_results = execute_tools(first_response)
+
+    # Second pass — if she searched, give her the results to reflect on
+    if tool_results:
+        result = ask_em(task, extra_context=f"{first_response}\n\nHere are your search results. Now write your full diary entry reflecting on what you found:\n\n{tool_results}")
+    else:
+        result = first_response
+
     print(f"\n-- Em's response --\n{result}\n")
 
     log_memory(f"Heartbeat. Task: '{task[:80]}'", kind="heartbeat", tags=["autonomous"])
