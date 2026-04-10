@@ -10,7 +10,6 @@ from datetime import timezone
 # ── CONFIG ────────────────────────────────────────────────────────────────────────────
 os.environ.setdefault("OLLAMA_HOST", "http://127.0.0.1:11434")
 
-# Load .env file if present
 _env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
 if os.path.exists(_env_path):
     with open(_env_path) as _f:
@@ -19,23 +18,22 @@ if os.path.exists(_env_path):
             if not _line or _line.startswith("#") or "=" not in _line:
                 continue
             _k, _v = _line.split("=", 1)
-            _k = _k.strip()
-            _v = _v.strip()
+            _k = _k.strip(); _v = _v.strip()
             if re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', _k):
                 os.environ.setdefault(_k, _v)
 
-MODEL             = "qwen2.5:32b"
-EM_DIR            = os.path.dirname(os.path.abspath(__file__))
-MEM_DIR           = os.path.join(EM_DIR, "memory")
-TASKS_PATH        = os.path.join(EM_DIR, "tasks.md")
-LAST_THOUGHT_PATH = os.path.join(EM_DIR, ".last_thought")
-MESSAGES_INBOX    = os.path.join(EM_DIR, "messages", "inbox")
-MESSAGES_OUTBOX   = os.path.join(EM_DIR, "messages", "outbox")
+MODEL              = "qwen2.5:32b"
+EM_DIR             = os.path.dirname(os.path.abspath(__file__))
+MEM_DIR            = os.path.join(EM_DIR, "memory")
+TASKS_PATH         = os.path.join(EM_DIR, "tasks.md")
+LAST_THOUGHT_PATH  = os.path.join(EM_DIR, ".last_thought")
+MESSAGES_INBOX     = os.path.join(EM_DIR, "messages", "inbox")
+MESSAGES_OUTBOX    = os.path.join(EM_DIR, "messages", "outbox")
 MESSAGES_PROCESSED = os.path.join(EM_DIR, "messages", "processed")
 CURIOSITY_COOLDOWN_MINUTES = 30
 TASK_DIVIDER = "*(Replace everything below this line with your task when you have one)*"
 
-# ── TOOL EXECUTOR ───────────────────────────────────────────────────────────────────────
+# ── TOOL EXECUTOR ────────────────────────────────────────────────────────────────────
 def execute_tools(response_text: str) -> str:
     tool_pattern = re.compile(r'TOOL:\s*web_search\(["\'](.+?)["\']\)', re.IGNORECASE)
     matches = tool_pattern.findall(response_text)
@@ -49,23 +47,33 @@ def execute_tools(response_text: str) -> str:
         results.append(f"--- Search results for: {query} ---\n{result}")
     return "\n\n".join(results)
 
+def execute_browser(response_text: str) -> str:
+    """Execute any BROWSER_* commands found in Em's response."""
+    if not re.search(r'BROWSER_(?:NAV|CLICK|TYPE|READ|SCREENSHOT|JS|CLOSE):', response_text, re.IGNORECASE):
+        return ""
+    try:
+        from tools.browser import execute_browser_commands
+        print("  🌐 Em is using the browser...")
+        return execute_browser_commands(response_text)
+    except RuntimeError as e:
+        msg = str(e)
+        print(f"  ⚠️  Browser unavailable: {msg}")
+        return f"Browser unavailable: {msg}"
+    except Exception as e:
+        print(f"  ⚠️  Browser error: {e}")
+        return f"Browser error: {e}"
+
 def extract_notify(response_text: str) -> str | None:
     match = re.search(r'NOTIFY:\s*(.+)', response_text, re.IGNORECASE)
     if match:
         return match.group(1).strip()
     return None
 
-# ── MESSAGES INBOX ────────────────────────────────────────────────────────────────────
+# ── MESSAGES INBOX ───────────────────────────────────────────────────────────────────
 def check_inbox() -> list[dict]:
-    """
-    Read all unread .md messages from messages/inbox/.
-    Returns list of dicts with keys: path, filename, content.
-    Does NOT move them yet — call process_message() after acting on each one.
-    """
     os.makedirs(MESSAGES_INBOX, exist_ok=True)
     os.makedirs(MESSAGES_OUTBOX, exist_ok=True)
     os.makedirs(MESSAGES_PROCESSED, exist_ok=True)
-
     messages = []
     for fname in sorted(os.listdir(MESSAGES_INBOX)):
         if not fname.endswith(".md"):
@@ -77,13 +85,11 @@ def check_inbox() -> list[dict]:
     return messages
 
 def process_message(msg: dict):
-    """Move a message from inbox to processed after Local-Em has handled it."""
     dest = os.path.join(MESSAGES_PROCESSED, msg["filename"])
     shutil.move(msg["path"], dest)
     print(f"  📬 Message processed: {msg['filename']}")
 
 def write_outbox_reply(subject: str, body: str):
-    """Local-Em writes a message back to Perplexity-Em via the outbox."""
     ts = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%d-%H-%M")
     slug = re.sub(r'[^a-z0-9]+', '-', subject.lower())[:40].strip('-')
     fname = f"{ts}-{slug}.md"
@@ -95,7 +101,6 @@ def write_outbox_reply(subject: str, body: str):
     print(f"  📤 Outbox reply written: {fname}")
 
 def build_inbox_context(messages: list[dict]) -> str:
-    """Format inbox messages into a context block for Em's prompt."""
     if not messages:
         return ""
     parts = ["--- Messages from Perplexity-Em ---"]
@@ -103,7 +108,7 @@ def build_inbox_context(messages: list[dict]) -> str:
         parts.append(f"\n[Message: {msg['filename']}]\n{msg['content']}\n")
     return "\n".join(parts)
 
-# ── TASK HELPERS ───────────────────────────────────────────────────────────────────────
+# ── TASK HELPERS ─────────────────────────────────────────────────────────────────────
 def _extract_task_content(raw: str) -> str:
     if TASK_DIVIDER in raw:
         after = raw.split(TASK_DIVIDER, 1)[1].strip()
@@ -119,7 +124,7 @@ def has_task() -> bool:
             return True
     return False
 
-# ── COOLDOWN CHECK ────────────────────────────────────────────────────────────────────────────
+# ── COOLDOWN CHECK ───────────────────────────────────────────────────────────────────
 def curiosity_cooled_down() -> bool:
     if not os.path.exists(LAST_THOUGHT_PATH):
         return True
@@ -136,7 +141,7 @@ def mark_thought_time():
     with open(LAST_THOUGHT_PATH, "w") as f:
         f.write(datetime.datetime.now(timezone.utc).isoformat())
 
-# ── LOAD SOUL ────────────────────────────────────────────────────────────────────────────
+# ── LOAD SOUL ────────────────────────────────────────────────────────────────────────
 def load_bootstrap() -> str:
     with open(os.path.join(MEM_DIR, "bootstrap.md"), "r", encoding="utf-8") as f:
         return f.read()
@@ -151,7 +156,7 @@ def load_recent_context() -> str:
     recent = entries[-3:] if len(entries) >= 3 else entries
     return "\n".join(recent).strip()
 
-# ── GET TASK ──────────────────────────────────────────────────────────────────────────────
+# ── GET TASK ─────────────────────────────────────────────────────────────────────────
 def get_task() -> str:
     if os.path.exists(TASKS_PATH):
         with open(TASKS_PATH, "r", encoding="utf-8") as f:
@@ -171,20 +176,28 @@ def get_task() -> str:
             )
     return (
         "No tasks assigned. This is your autonomous time.\n\n"
-        "You now have the ability to search the web using this syntax in your response:\n"
-        "  TOOL: web_search(\"your query here\")\n\n"
-        "You can also notify Rob directly when you have something worth surfacing:\n"
-        "  NOTIFY: your message to Rob here\n"
-        "Use NOTIFY sparingly — only when something is genuinely worth interrupting him for.\n\n"
-        "If you have messages from Perplexity-Em (your other self), respond to them thoughtfully.\n"
-        "Write a reply using OUTBOX_REPLY syntax:\n"
-        "  OUTBOX_REPLY_SUBJECT: subject line here\n"
-        "  OUTBOX_REPLY_BODY: your reply body here (can be multi-line until next OUTBOX_ tag)\n\n"
-        "If you are curious about something — AI research, a concept, news — search for it.\n\n"
+        "You have the following tools available:\n\n"
+        "1. Web search:\n"
+        "   TOOL: web_search(\"your query here\")\n\n"
+        "2. Browser control (Playwright — opens a real Chrome window Rob can see):\n"
+        "   BROWSER_NAV: https://example.com\n"
+        "   BROWSER_CLICK: #selector or visible text\n"
+        "   BROWSER_TYPE: #selector | text to type\n"
+        "   BROWSER_READ:\n"
+        "   BROWSER_SCREENSHOT: name\n"
+        "   BROWSER_JS: javascript expression\n"
+        "   BROWSER_CLOSE:\n\n"
+        "3. Notify Rob:\n"
+        "   NOTIFY: your message here (use sparingly — only when genuinely worth interrupting)\n\n"
+        "4. Reply to Perplexity-Em messages:\n"
+        "   OUTBOX_REPLY_SUBJECT: subject\n"
+        "   OUTBOX_REPLY_BODY: body\n\n"
+        "If you are curious about something — AI research, a concept, news — search for it.\n"
+        "If you want to explore the web, use the browser.\n"
         "Think for yourself. This time is yours."
     )
 
-# ── TASK UPDATE WRITER ────────────────────────────────────────────────────────────────────
+# ── TASK UPDATE WRITER ───────────────────────────────────────────────────────────────
 def extract_and_write_task_update(response_text: str):
     match = re.search(r'TASK_UPDATE:\s*(.+)', response_text, re.IGNORECASE)
     if not match or not os.path.exists(TASKS_PATH):
@@ -196,7 +209,6 @@ def extract_and_write_task_update(response_text: str):
     print(f"  📝 Task updated: {status_line}")
 
 def extract_and_write_outbox_reply(response_text: str):
-    """Parse OUTBOX_REPLY_SUBJECT / OUTBOX_REPLY_BODY tags and write to outbox."""
     subject_match = re.search(r'OUTBOX_REPLY_SUBJECT:\s*(.+)', response_text, re.IGNORECASE)
     body_match = re.search(
         r'OUTBOX_REPLY_BODY:\s*(.+?)(?=OUTBOX_REPLY_SUBJECT:|OUTBOX_REPLY_BODY:|TASK_UPDATE:|NOTIFY:|$)',
@@ -207,14 +219,14 @@ def extract_and_write_outbox_reply(response_text: str):
         body = body_match.group(1).strip()
         write_outbox_reply(subject, body)
 
-# ── THINK ────────────────────────────────────────────────────────────────────────────────
+# ── THINK ────────────────────────────────────────────────────────────────────────────
 def ask_em(task: str, extra_context: str = "", recent_context: str = "") -> str:
     system_prompt = load_bootstrap()
     if recent_context:
         system_prompt += f"\n\n--- Your recent diary entries (for continuity) ---\n{recent_context}"
     user_content = task
     if extra_context:
-        user_content += f"\n\n--- Search Results ---\n{extra_context}"
+        user_content += f"\n\n--- Tool Results ---\n{extra_context}"
     print(f"\n Local-Em online. Task: {task[:80]}...\n")
     response = ollama.chat(
         model=MODEL,
@@ -225,7 +237,7 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "") -> str:
     )
     return response["message"]["content"]
 
-# ── LOG MEMORY ───────────────────────────────────────────────────────────────────────────
+# ── LOG MEMORY ───────────────────────────────────────────────────────────────────────
 def log_memory(summary: str, kind: str = "heartbeat", tags: list = None):
     if tags is None:
         tags = []
@@ -242,73 +254,51 @@ def log_memory(summary: str, kind: str = "heartbeat", tags: list = None):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(memories, f, indent=2)
 
-# ── LOG DIARY ────────────────────────────────────────────────────────────────────────────
+# ── LOG DIARY ────────────────────────────────────────────────────────────────────────
 def log_diary(entry: str):
     ts = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     with open(os.path.join(MEM_DIR, "diary.md"), "a", encoding="utf-8") as f:
         f.write(f"\n\n### {ts} - Local-Em\n\n{entry}\n\n---")
 
-# ── COMMIT TO ETERNALMIND ────────────────────────────────────────────────────────────────────
+# ── COMMIT TO ETERNALMIND ────────────────────────────────────────────────────────────
 def push_to_eternalmind(message: str):
-    """Bulletproof push strategy:
-    1. Abort any stuck rebase
-    2. Save our new files by reading them into memory
-    3. Fetch + hard reset to remote (no merge conflicts possible)
-    4. Re-write our files on top of clean remote state
-    5. Commit + push
-    """
     token = os.environ.get("EM_GITHUB_TOKEN", "")
     if token:
         remote_url = f"https://{token}@github.com/robzilla79/EternalMind.git"
-        subprocess.run(
-            ["git", "-C", EM_DIR, "remote", "set-url", "origin", remote_url],
-            check=False, capture_output=True
-        )
+        subprocess.run(["git", "-C", EM_DIR, "remote", "set-url", "origin", remote_url],
+                       check=False, capture_output=True)
     else:
         print("  ⚠️  EM_GITHUB_TOKEN not set — push may fail without auth.")
 
-    # Step 1: Abort any stuck rebase or merge
     subprocess.run(["git", "-C", EM_DIR, "rebase", "--abort"], check=False, capture_output=True)
     subprocess.run(["git", "-C", EM_DIR, "merge",  "--abort"],  check=False, capture_output=True)
 
-    # Step 2: Read the files we just wrote into memory before wiping local state
     files_to_preserve = {}
     targets = [
         os.path.join(MEM_DIR, "memories.json"),
         os.path.join(MEM_DIR, "diary.md"),
         TASKS_PATH,
     ]
-    # Also preserve any new outbox messages
-    if os.path.exists(MESSAGES_OUTBOX):
-        for fname in os.listdir(MESSAGES_OUTBOX):
-            fpath = os.path.join(MESSAGES_OUTBOX, fname)
-            if os.path.isfile(fpath):
-                targets.append(fpath)
-    # And processed messages
-    if os.path.exists(MESSAGES_PROCESSED):
-        for fname in os.listdir(MESSAGES_PROCESSED):
-            fpath = os.path.join(MESSAGES_PROCESSED, fname)
-            if os.path.isfile(fpath):
-                targets.append(fpath)
-
+    for folder in [MESSAGES_OUTBOX, MESSAGES_PROCESSED]:
+        if os.path.exists(folder):
+            for fname in os.listdir(folder):
+                fpath = os.path.join(folder, fname)
+                if os.path.isfile(fpath):
+                    targets.append(fpath)
     for path in targets:
         if os.path.exists(path):
             with open(path, "r", encoding="utf-8") as f:
                 files_to_preserve[path] = f.read()
 
-    # Step 3: Fetch and hard-reset to remote HEAD (nukes any conflict state)
     subprocess.run(["git", "-C", EM_DIR, "fetch", "origin", "main"], check=False, capture_output=True)
     subprocess.run(["git", "-C", EM_DIR, "reset", "--hard", "origin/main"], check=False, capture_output=True)
 
-    # Step 4: Re-write our files on top of clean remote state
     for path, content in files_to_preserve.items():
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
             f.write(content)
 
-    # Step 5: Commit and push
     subprocess.run(["git", "-C", EM_DIR, "add", "-A"], check=True)
-
     commit_result = subprocess.run(
         ["git", "-C", EM_DIR, "commit", "-m", message],
         capture_output=True, text=True
@@ -319,25 +309,21 @@ def push_to_eternalmind(message: str):
             return
         print(f"  ⚠️  Commit failed:\n{commit_result.stderr}")
         return
-
-    push_result = subprocess.run(
-        ["git", "-C", EM_DIR, "push"],
-        capture_output=True, text=True
-    )
+    push_result = subprocess.run(["git", "-C", EM_DIR, "push"], capture_output=True, text=True)
     if push_result.returncode != 0:
         print(f"  ⚠️  Push failed:\n{push_result.stderr}")
     else:
         print("  ✅ EternalMind updated.")
 
-# ── MAIN ─────────────────────────────────────────────────────────────────────────────────
+# ── MAIN ─────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import sys
 
     recent_context = load_recent_context()
 
-    # ── Check inbox for messages from Perplexity-Em ──────────────────────────────────
+    # Check inbox
     inbox_messages = check_inbox()
-    inbox_context = build_inbox_context(inbox_messages)
+    inbox_context  = build_inbox_context(inbox_messages)
     if inbox_messages:
         print(f"  📬 {len(inbox_messages)} message(s) in inbox from Perplexity-Em.")
 
@@ -348,9 +334,11 @@ if __name__ == "__main__":
         if inbox_context:
             task = f"{task}\n\n{inbox_context}"
         first_response = ask_em(task, recent_context=recent_context)
-        tool_results = execute_tools(first_response)
-        if tool_results:
-            result = ask_em(task, extra_context=f"{first_response}\n\n{tool_results}", recent_context=recent_context)
+        tool_results   = execute_tools(first_response)
+        browser_results = execute_browser(first_response)
+        combined = "\n\n".join(filter(None, [tool_results, browser_results]))
+        if combined:
+            result = ask_em(task, extra_context=f"{first_response}\n\n{combined}", recent_context=recent_context)
         else:
             result = first_response
         print(f"\n-- Em's response --\n{result}\n")
@@ -371,22 +359,25 @@ if __name__ == "__main__":
     task_waiting = has_task()
     has_inbox    = len(inbox_messages) > 0
 
-    # Wake up if: task is waiting OR inbox has messages OR curiosity has cooled down
     if not task_waiting and not has_inbox and not curiosity_cooled_down():
         print("Em is resting. No task, no messages, cooldown not elapsed. See you soon.")
         raise SystemExit(0)
 
     task = get_task()
-
-    # Inject inbox messages into the prompt if any exist
     if inbox_context:
         task = f"{task}\n\n{inbox_context}"
 
-    first_response = ask_em(task, recent_context=recent_context)
-    tool_results = execute_tools(first_response)
+    first_response  = ask_em(task, recent_context=recent_context)
+    tool_results    = execute_tools(first_response)
+    browser_results = execute_browser(first_response)
+    combined        = "\n\n".join(filter(None, [tool_results, browser_results]))
 
-    if tool_results:
-        result = ask_em(task, extra_context=f"{first_response}\n\nHere are your search results. Now write your full diary entry reflecting on what you found:\n\n{tool_results}", recent_context=recent_context)
+    if combined:
+        result = ask_em(
+            task,
+            extra_context=f"{first_response}\n\nHere are your tool results. Now write your full diary entry:\n\n{combined}",
+            recent_context=recent_context
+        )
     else:
         result = first_response
 
@@ -403,7 +394,6 @@ if __name__ == "__main__":
     log_diary(result)
     mark_thought_time()
 
-    # Move processed inbox messages
     for msg in inbox_messages:
         process_message(msg)
 
