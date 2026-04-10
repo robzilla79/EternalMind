@@ -73,17 +73,11 @@ def log_diary(entry: str):
 
 # ── COMMIT TO ETERNALMIND ───────────────────────────────────────────────────
 def push_to_eternalmind(message: str):
-    # Stage local writes first
     subprocess.run(["git", "-C", EM_DIR, "add", "-A"], check=True)
-    # Stash so we can pull cleanly
     subprocess.run(["git", "-C", EM_DIR, "stash"], check=False)
-    # Pull latest from remote
     subprocess.run(["git", "-C", EM_DIR, "pull", "--rebase"], check=False)
-    # Pop our changes back on top
     subprocess.run(["git", "-C", EM_DIR, "stash", "pop"], check=False)
-    # Stage again after pop
     subprocess.run(["git", "-C", EM_DIR, "add", "-A"], check=True)
-    # Commit
     result = subprocess.run(
         ["git", "-C", EM_DIR, "commit", "-m", message],
         capture_output=True
@@ -91,7 +85,6 @@ def push_to_eternalmind(message: str):
     if result.returncode != 0 and b"nothing to commit" in result.stdout:
         print("Nothing new to commit.")
         return
-    # Push
     subprocess.run(["git", "-C", EM_DIR, "push"], check=True)
     print("EternalMind updated.")
 
@@ -110,5 +103,5 @@ if __name__ == "__main__":
     print(f"\n-- Em's response --\n{result}\n")
 
     log_memory(f"Heartbeat. Task: '{task[:80]}'", kind="heartbeat", tags=["autonomous"])
-    log_diary(result[:1000] + ("..." if len(result) > 1000 else ""))
+    log_diary(result)  # Full response, no truncation
     push_to_eternalmind(f"local-em heartbeat: {task[:60]}")
