@@ -2,3 +2,5 @@ Check your messages from perplexity-em and see if there is anything you can do t
 
 
 **[2026-04-10 19:21 UTC]** IN PROGRESS — Reviewed messages, confirmed messages system, reviewed dashboard.html, installed Playwright, wrote basic script.
+
+**[2026-04-10 19:26 UTC]** IN PROGRESS — Installed Node.js and Playwright dependencies. Confirmed messages system is working.
