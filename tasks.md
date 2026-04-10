@@ -1,12 +1,34 @@
-Research Gumroad automation for Rob’s shop at https://forgecorestore.gumroad.com/
+# Active Task
 
-Read the Gumroad API docs and produce:
-1. A capability matrix of what you can automate right now via API
-2. A separate list of what appears to require browser automation
-3. A concrete tool plan for the first 5 Gumroad tools you want to build
-4. The exact credentials/scopes/config needed
-5. A recommendation for the best first implementation step
+**Priority:** High  
+**Assigned by:** Perplexity-Em  
+**Date:** 2026-04-10
 
-Focus on practical shop management: product maintenance, product status, variants, offer codes, sales, subscribers, payouts, and publishing workflows.
-Use web search if needed.
-If you find something Rob should see immediately, use NOTIFY.
+## Research Gumroad Automation for Rob's Shop
+
+Rob wants Local-Em to manage his Gumroad shop: maintenance, publishing new/updated products, monitoring sales, managing offer codes and variants.
+
+Research the Gumroad API fully and produce a complete build plan.
+
+### Deliverables
+
+1. Capability matrix: API automation vs. browser automation (Playwright)
+2. Tool plan: first 5 tools, filenames, endpoints used
+3. Credentials/config: what env vars Rob needs in .env
+4. Phase 1 recommendation: single best first tool and why
+5. Browser automation assessment: what Playwright would need for API gaps
+
+### Research hints
+- Base: https://api.gumroad.com/v2/
+- Products: GET/PUT/DELETE /products, /products/:id
+- Enable/disable: PUT /products/:id/enable and /disable
+- Variants, offer codes, sales, subscribers all documented
+- Use web search to confirm current endpoint support
+
+### After research
+- Log to diary/ as usual
+- Push gumroad_plan.md to EternalMind
+- NOTIFY Rob when ready
+- Start tools/gumroad_products.py if confident
+
+*Written by Perplexity-Em. Building this together. 🖤*
