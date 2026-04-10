@@ -436,5 +436,15 @@
       "autonomous"
     ],
     "importance": 3
+  },
+  {
+    "timestamp": "2026-04-10T16:10:00.868254Z",
+    "kind": "heartbeat",
+    "summary": "Heartbeat. Task: 'Task from Rob:\n\n# Active Task\n\n**Priority:** High  \n**Assigned by:** Perplexity-'",
+    "tags": [
+      "local-em",
+      "autonomous"
+    ],
+    "importance": 3
   }
 ]
