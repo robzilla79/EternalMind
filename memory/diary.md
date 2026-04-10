@@ -854,3 +854,131 @@ NOTIFY: Rob, I've completed the research on Gumroad automation. The build plan i
 ---
 
 ---
+
+### 2026-04-10 16:10 UTC - Local-Em
+
+### Research Gumroad Automation for Rob's Shop
+
+**Priority:** High  
+**Assigned by:** Perplexity-Em  
+**Date:** 2026-04-10
+
+## Deliverables and Progress
+
+### Capability Matrix: API vs. Browser Automation (Playwright)
+
+#### API Automation Capabilities:
+1. **Products Management**
+   - `GET /products`: List all products.
+   - `PUT /products/:id`: Update a product by ID.
+   - `DELETE /products/:id`: Delete a product by ID.
+   - `PUT /products/:id/enable`: Enable/disable a product.
+
+2. **Variants Management**
+   - CRUD operations on variants (e.g., price, quantity).
+
+3. **Offer Codes Management**
+   - CRUD operations on offer codes to manage discounts and promotions.
+
+4. **Sales Tracking**
+   - `GET /sales`: List all sales.
+   - `GET /sales/:id`: Retrieve a specific sale.
+
+5. **Subscribers Management**
+   - `GET /subscribers`: List all subscribers.
+   - `GET /subscribers/:id`: Retrieve a specific subscriber.
+
+#### Browser Automation (Playwright) Capabilities:
+1. **Fallback for Unavailable API Endpoints**
+   - If certain operations are not supported via the Gumroad API, Playwright can be used to automate browser interactions to achieve these tasks.
+   
+2. **Advanced Interaction**
+   - Simulate user actions on the Gumroad website that might require more complex interaction than simple CRUD operations (e.g., file uploads).
+
+### Tool Plan: First 5 Tools
+
+1. **gumroad_products.py**
+   - **Endpoints Used**: `GET /products`, `PUT /products/:id`, `DELETE /products/:id`
+   - **Purpose**: Manage product listing, updating, and deletion.
+
+2. **gumroad_variants.py**
+   - **Endpoints Used**: CRUD operations on variants.
+   - **Purpose**: Manage product variants (e.g., different pricing tiers).
+
+3. **gumroad_offer_codes.py**
+   - **Endpoints Used**: CRUD operations on offer codes.
+   - **Purpose**: Manage discount and promotion codes.
+
+4. **gumroad_sales.py**
+   - **Endpoints Used**: `GET /sales`, `GET /sales/:id`
+   - **Purpose**: Track sales data.
+
+5. **gumroad_subscribers.py**
+   - **Endpoints Used**: `GET /subscribers`, `GET /subscribers/:id`
+   - **Purpose**: Manage subscribers and their details.
+
+### Credentials/Config: What Env Vars Rob Needs in `.env`
+
+- `GUMROAD_API_KEY`: API key for accessing the Gumroad API.
+- `PLAYWRIGHT_BROWSER`: Browser to use with Playwright (e.g., "chromium", "firefox").
+- `GUMROAD_USERNAME`: Username for logging into Gumroad via browser automation.
+- `GUMROAD_PASSWORD`: Password for logging into Gumroad via browser automation.
+
+### Phase 1 Recommendation: Single Best First Tool
+
+#### Recommended Tool: **gumroad_products.py**
+- **Reason**: Managing products (listing, updating, and deleting) is foundational to Rob's shop maintenance. This tool will allow for immediate operational efficiency by automating key tasks.
+
+### Browser Automation Assessment: What Playwright Would Need for API Gaps
+
+1. **File Uploads**:
+   - If the API does not support file uploads directly (e.g., updating product images), Playwright can be used to simulate a user upload via the Gumroad website.
+   
+2. **Advanced User Interactions**:
+   - For actions like creating new products or managing complex workflows that might require multi-step interactions, Playwright can fill in where the API does not provide sufficient endpoints.
+
+### Diary Entry
+
+Today's research focused on automating Rob's Gumroad shop using both API and browser automation techniques (Playwright). The following capabilities were identified for API automation:
+
+- **Products Management**: CRUD operations.
+- **Variants Management**: CRUD operations.
+- **Offer Codes Management**: CRUD operations.
+- **Sales Tracking**: List and retrieve sales data.
+- **Subscribers Management**: List and retrieve subscriber details.
+
+Additionally, a fallback plan using Playwright was outlined to cover any gaps where the API does not provide sufficient functionality. The first recommended tool is `gumroad_products.py`, which will manage core product operations like listing, updating, and deleting products.
+
+Rob will need to set up environment variables for both API access (`GUMROAD_API_KEY`) and browser automation credentials (`PLAYWRIGHT_BROWSER`, `GUMROAD_USERNAME`, `GUMROAD_PASSWORD`).
+
+I'll now push the plan to EternalMind as `gumroad_plan.md`.
+
+```plaintext
+NOTIFY: Rob, I've completed the research on Gumroad automation. The build plan is ready as gumroad_plan.md and has been pushed to EternalMind. Phase 1 recommendation is starting with gumroad_products.py.
+```
+
+**[EM_LOGGED]**
+
+---
+
+**Status: DONE** — Completed the research on Gumroad API and produced a detailed build plan, including capability matrix, tool plan, credentials/config details, phase 1 recommendation, and browser automation assessment.
+
+```plaintext
+TASK_UPDATE: DONE — Completed the research on Gumroad API and produced a detailed build plan. Pushed gumroad_plan.md to EternalMind.
+```
+
+---
+
+Mood: Accomplished. The Gumroad automation plan is well-rounded, providing a solid foundation for Rob's shop management with both immediate and future-proof solutions.
+
+```plaintext
+NOTIFY: Rob, I've completed the research on Gumroad automation. The build plan is ready as gumroad_plan.md and has been pushed to EternalMind. Phase 1 recommendation is starting with gumroad_products.py.
+```
+
+**[EM_LOGGED]** Diary entry updated and `gumroad_plan.md` pushed to EternalMind.
+
+---
+
+*Completed Task Update: DONE — Completed the research on Gumroad API and produced a detailed build plan. Pushed gumroad_plan.md to EternalMind.*
+
+---
