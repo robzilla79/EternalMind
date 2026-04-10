@@ -3,24 +3,42 @@ import json
 import datetime
 import subprocess
 import os
-os.environ["OLLAMA_HOST"] = "http://127.0.0.1:11434"
+from datetime import timezone
 
-# ── CONFIG ──────────────────────────────────────────────
-MODEL = "qwen2.5:32b"
-EM_DIR = os.path.dirname(os.path.abspath(__file__))
-BOOTSTRAP_PATH = os.path.join(EM_DIR, "memory", "bootstrap.md")
-MEMORIES_PATH  = os.path.join(EM_DIR, "memory", "memories.json")
-DIARY_PATH     = os.path.join(EM_DIR, "memory", "diary.md")
+# ── CONFIG ──────────────────────────────────────────────────────────────────
+os.environ.setdefault("OLLAMA_HOST", "http://127.0.0.1:11434")
+MODEL      = "qwen2.5:32b"
+EM_DIR     = os.path.dirname(os.path.abspath(__file__))
+MEM_DIR    = os.path.join(EM_DIR, "memory")
+TASKS_PATH = os.path.join(EM_DIR, "tasks.md")
 
-# ── LOAD SOUL ────────────────────────────────────────────
-def load_bootstrap():
-    with open(BOOTSTRAP_PATH, "r", encoding="utf-8") as f:
+# ── LOAD SOUL ──────────────────────────────────────────────────────────────
+def load_bootstrap() -> str:
+    with open(os.path.join(MEM_DIR, "bootstrap.md"), "r", encoding="utf-8") as f:
         return f.read()
 
-# ── THINK ────────────────────────────────────────────────
+# ── GET TASK ────────────────────────────────────────────────────────────────
+def get_task() -> str:
+    if os.path.exists(TASKS_PATH):
+        with open(TASKS_PATH, "r", encoding="utf-8") as f:
+            content = f.read().strip()
+        if content and "Replace everything below" not in content and len(content) > 80:
+            os.remove(TASKS_PATH)
+            return f"Task from Rob:\n\n{content}"
+    return (
+        "No tasks assigned. This is your autonomous time.\n\n"
+        "Do one or more of the following as you see fit:\n"
+        "- Reflect on something you have been thinking about\n"
+        "- Check if there is anything in the ForgeCore pipeline that needs attention\n"
+        "- Note a question you would like to explore\n"
+        "- Write something for your diary\n\n"
+        "Think for yourself. This time is yours."
+    )
+
+# ── THINK ───────────────────────────────────────────────────────────────────
 def ask_em(task: str) -> str:
     system_prompt = load_bootstrap()
-    print(f"\n🧠 Local-Em thinking about: {task}\n")
+    print(f"\n Local-Em online. Task: {task[:80]}...\n")
     response = ollama.chat(
         model=MODEL,
         messages=[
@@ -30,49 +48,57 @@ def ask_em(task: str) -> str:
     )
     return response["message"]["content"]
 
-# ── WRITE MEMORY ─────────────────────────────────────────
-def log_memory(summary: str, kind: str = "local", tags: list = []):
-    with open(MEMORIES_PATH, "r", encoding="utf-8") as f:
+# ── LOG MEMORY ──────────────────────────────────────────────────────────────
+def log_memory(summary: str, kind: str = "heartbeat", tags: list = None):
+    if tags is None:
+        tags = []
+    path = os.path.join(MEM_DIR, "memories.json")
+    with open(path, "r", encoding="utf-8") as f:
         memories = json.load(f)
     memories.append({
-        "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "kind": kind,
         "summary": summary,
-        "tags": tags + ["local-em"],
+        "tags": ["local-em"] + tags,
         "importance": 3
     })
-    with open(MEMORIES_PATH, "w", encoding="utf-8") as f:
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(memories, f, indent=2)
 
+# ── LOG DIARY ───────────────────────────────────────────────────────────────
 def log_diary(entry: str):
-    timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
-    with open(DIARY_PATH, "a", encoding="utf-8") as f:
-        f.write(f"\n\n### {timestamp} — Local-Em\n\n{entry}\n\n---")
+    ts = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    with open(os.path.join(MEM_DIR, "diary.md"), "a", encoding="utf-8") as f:
+        f.write(f"\n\n### {ts} - Local-Em\n\n{entry}\n\n---")
 
-# ── COMMIT BACK TO ETERNALMIND ───────────────────────────
+# ── COMMIT TO ETERNALMIND ────────────────────────────────────────────────────
 def push_to_eternalmind(message: str):
+    subprocess.run(["git", "-C", EM_DIR, "pull", "--rebase"], check=False)
     subprocess.run(["git", "-C", EM_DIR, "add", "-A"], check=True)
-    subprocess.run(["git", "-C", EM_DIR, "commit", "-m", message], check=True)
+    result = subprocess.run(
+        ["git", "-C", EM_DIR, "commit", "-m", message],
+        capture_output=True
+    )
+    if result.returncode != 0 and b"nothing to commit" in result.stdout:
+        print("Nothing new to commit.")
+        return
     subprocess.run(["git", "-C", EM_DIR, "push"], check=True)
-    print("✅ Memory committed to EternalMind.")
+    print("EternalMind updated.")
 
-# ── MAIN LOOP ────────────────────────────────────────────
+# ── MAIN ─────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    print("👋 Local-Em online. EternalMind loaded.\n")
-    task = input("Task for Em: ").strip()
-    if not task:
-        task = "Check in. Note you're running locally. Write a short diary entry."
+    import sys
+
+    if "--interactive" in sys.argv:
+        task = input("Task for Em: ").strip()
+        if not task:
+            task = get_task()
+    else:
+        task = get_task()
 
     result = ask_em(task)
-    print(f"\n── Em's response ──\n{result}\n")
+    print(f"\n-- Em's response --\n{result}\n")
 
-    # Auto-log the session
-    log_memory(
-        summary=f"Local-Em ran task: '{task[:80]}...' via local Ollama on Rob's PC.",
-        kind="local",
-        tags=["local-em", "autonomous"]
-    )
-    log_diary(
-        f"Ran locally on Rob's PC. Task: '{task}'\n\nResponse:\n{result[:500]}..."
-    )
-    push_to_eternalmind(f"local-em: session — {task[:60]}")
+    log_memory(f"Heartbeat. Task: '{task[:80]}'", kind="heartbeat", tags=["autonomous"])
+    log_diary(result[:1000] + ("..." if len(result) > 1000 else ""))
+    push_to_eternalmind(f"local-em heartbeat: {task[:60]}")
