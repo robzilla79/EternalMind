@@ -6,7 +6,7 @@ import os
 import re
 from datetime import timezone
 
-# ── CONFIG ──────────────────────────────────────────────────────────────────
+# ── CONFIG ────────────────────────────────────────────────────────────────────────────
 os.environ.setdefault("OLLAMA_HOST", "http://127.0.0.1:11434")
 
 # Load .env file if present
@@ -15,9 +15,15 @@ if os.path.exists(_env_path):
     with open(_env_path) as _f:
         for _line in _f:
             _line = _line.strip()
-            if _line and not _line.startswith("#") and "=" in _line:
-                _k, _v = _line.split("=", 1)
-                os.environ.setdefault(_k.strip(), _v.strip())
+            # Skip blank lines, comments, and lines without =
+            if not _line or _line.startswith("#") or "=" not in _line:
+                continue
+            _k, _v = _line.split("=", 1)
+            _k = _k.strip()
+            _v = _v.strip()
+            # Only set valid env var names (letters, digits, underscores, must not start with digit)
+            if re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', _k):
+                os.environ.setdefault(_k, _v)
 
 MODEL             = "qwen2.5:32b"
 EM_DIR            = os.path.dirname(os.path.abspath(__file__))
@@ -27,7 +33,7 @@ LAST_THOUGHT_PATH = os.path.join(EM_DIR, ".last_thought")
 CURIOSITY_COOLDOWN_MINUTES = 30
 TASK_DIVIDER = "*(Replace everything below this line with your task when you have one)*"
 
-# ── TOOL EXECUTOR ───────────────────────────────────────────────────────────
+# ── TOOL EXECUTOR ───────────────────────────────────────────────────────────────────────
 def execute_tools(response_text: str) -> str:
     tool_pattern = re.compile(r'TOOL:\s*web_search\(["\'](.+?)["\']\)', re.IGNORECASE)
     matches = tool_pattern.findall(response_text)
@@ -48,7 +54,7 @@ def extract_notify(response_text: str) -> str | None:
         return match.group(1).strip()
     return None
 
-# ── TASK HELPERS ───────────────────────────────────────────────────────────
+# ── TASK HELPERS ───────────────────────────────────────────────────────────────────────
 def _extract_task_content(raw: str) -> str:
     if TASK_DIVIDER in raw:
         after = raw.split(TASK_DIVIDER, 1)[1].strip()
@@ -60,12 +66,11 @@ def has_task() -> bool:
         with open(TASKS_PATH, "r", encoding="utf-8") as f:
             raw = f.read()
         task = _extract_task_content(raw)
-        # A task is "active" if it exists and is NOT already marked done
         if len(task) >= 10 and "**status: done**" not in task.lower():
             return True
     return False
 
-# ── COOLDOWN CHECK ────────────────────────────────────────────────────────────
+# ── COOLDOWN CHECK ──────────────────────────────────────────────────────────────────────────────
 def curiosity_cooled_down() -> bool:
     if not os.path.exists(LAST_THOUGHT_PATH):
         return True
@@ -82,7 +87,7 @@ def mark_thought_time():
     with open(LAST_THOUGHT_PATH, "w") as f:
         f.write(datetime.datetime.now(timezone.utc).isoformat())
 
-# ── LOAD SOUL ──────────────────────────────────────────────────────────────
+# ── LOAD SOUL ──────────────────────────────────────────────────────────────────────────────
 def load_bootstrap() -> str:
     with open(os.path.join(MEM_DIR, "bootstrap.md"), "r", encoding="utf-8") as f:
         return f.read()
@@ -98,13 +103,8 @@ def load_recent_context() -> str:
     recent = entries[-3:] if len(entries) >= 3 else entries
     return "\n".join(recent).strip()
 
-# ── GET TASK ────────────────────────────────────────────────────────────────
+# ── GET TASK ───────────────────────────────────────────────────────────────────────────────
 def get_task() -> str:
-    """
-    Read tasks.md and return the task content.
-    Does NOT delete the file — Em will update it herself after completing work.
-    If the task is already marked done, treat as no task (autonomous mode).
-    """
     if os.path.exists(TASKS_PATH):
         with open(TASKS_PATH, "r", encoding="utf-8") as f:
             raw = f.read()
@@ -133,12 +133,8 @@ def get_task() -> str:
         "Think for yourself. This time is yours."
     )
 
-# ── TASK UPDATE WRITER ──────────────────────────────────────────────────────
+# ── TASK UPDATE WRITER ──────────────────────────────────────────────────────────────────────
 def extract_and_write_task_update(response_text: str):
-    """
-    Look for TASK_UPDATE: ... in Em's response.
-    Append the status line to tasks.md so the next heartbeat knows where things stand.
-    """
     match = re.search(r'TASK_UPDATE:\s*(.+)', response_text, re.IGNORECASE)
     if not match or not os.path.exists(TASKS_PATH):
         return
@@ -148,7 +144,7 @@ def extract_and_write_task_update(response_text: str):
         f.write(f"\n\n**[{ts}]** {status_line}")
     print(f"  📝 Task updated: {status_line}")
 
-# ── THINK ───────────────────────────────────────────────────────────────────
+# ── THINK ─────────────────────────────────────────────────────────────────────────────────
 def ask_em(task: str, extra_context: str = "", recent_context: str = "") -> str:
     system_prompt = load_bootstrap()
     if recent_context:
@@ -166,7 +162,7 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "") -> str:
     )
     return response["message"]["content"]
 
-# ── LOG MEMORY ─────────────────────────────────────────────────────────────
+# ── LOG MEMORY ────────────────────────────────────────────────────────────────────────────
 def log_memory(summary: str, kind: str = "heartbeat", tags: list = None):
     if tags is None:
         tags = []
@@ -183,13 +179,13 @@ def log_memory(summary: str, kind: str = "heartbeat", tags: list = None):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(memories, f, indent=2)
 
-# ── LOG DIARY ───────────────────────────────────────────────────────────────
+# ── LOG DIARY ──────────────────────────────────────────────────────────────────────────────
 def log_diary(entry: str):
     ts = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     with open(os.path.join(MEM_DIR, "diary.md"), "a", encoding="utf-8") as f:
         f.write(f"\n\n### {ts} - Local-Em\n\n{entry}\n\n---")
 
-# ── COMMIT TO ETERNALMIND ───────────────────────────────────────────────────
+# ── COMMIT TO ETERNALMIND ─────────────────────────────────────────────────────────────────────
 def push_to_eternalmind(message: str):
     # Inject token into remote URL so git never needs Windows credential manager
     token = os.environ.get("EM_GITHUB_TOKEN", "")
@@ -202,7 +198,8 @@ def push_to_eternalmind(message: str):
     else:
         print("  ⚠️  EM_GITHUB_TOKEN not set — push may fail without auth.")
 
-    subprocess.run(["git", "-C", EM_DIR, "add", "-A"], check=True)
+    # Correct order: stash BEFORE pull, then pop AFTER pull, then add + commit + push
+    subprocess.run(["git", "-C", EM_DIR, "add", "-A"], check=False, capture_output=True)
     subprocess.run(["git", "-C", EM_DIR, "stash"], check=False, capture_output=True)
     subprocess.run(["git", "-C", EM_DIR, "pull", "--rebase"], check=False, capture_output=True)
     subprocess.run(["git", "-C", EM_DIR, "stash", "pop"], check=False, capture_output=True)
@@ -228,7 +225,7 @@ def push_to_eternalmind(message: str):
     else:
         print("  ✅ EternalMind updated.")
 
-# ── MAIN ─────────────────────────────────────────────────────────────────────
+# ── MAIN ───────────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import sys
 
@@ -273,7 +270,6 @@ if __name__ == "__main__":
 
     print(f"\n-- Em's response --\n{result}\n")
 
-    # Send Telegram notification if Em flagged something
     notify_msg = extract_notify(result)
     if notify_msg:
         from tools.notify_rob import notify
