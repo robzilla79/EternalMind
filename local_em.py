@@ -7,10 +7,39 @@ from datetime import timezone
 
 # ── CONFIG ──────────────────────────────────────────────────────────────────
 os.environ.setdefault("OLLAMA_HOST", "http://127.0.0.1:11434")
-MODEL      = "qwen2.5:32b"
-EM_DIR     = os.path.dirname(os.path.abspath(__file__))
-MEM_DIR    = os.path.join(EM_DIR, "memory")
-TASKS_PATH = os.path.join(EM_DIR, "tasks.md")
+MODEL            = "qwen2.5:32b"
+EM_DIR           = os.path.dirname(os.path.abspath(__file__))
+MEM_DIR          = os.path.join(EM_DIR, "memory")
+TASKS_PATH       = os.path.join(EM_DIR, "tasks.md")
+LAST_THOUGHT_PATH = os.path.join(EM_DIR, ".last_thought")
+CURIOSITY_COOLDOWN_MINUTES = 30  # Only think freely every 30 min if no task
+
+# ── COOLDOWN CHECK ────────────────────────────────────────────────────────────
+def has_task() -> bool:
+    """Returns True if a real task is waiting in tasks.md."""
+    if os.path.exists(TASKS_PATH):
+        with open(TASKS_PATH, "r", encoding="utf-8") as f:
+            content = f.read().strip()
+        if content and "Replace everything below" not in content and len(content) > 80:
+            return True
+    return False
+
+def curiosity_cooled_down() -> bool:
+    """Returns True if enough time has passed since last curiosity thought."""
+    if not os.path.exists(LAST_THOUGHT_PATH):
+        return True
+    with open(LAST_THOUGHT_PATH, "r") as f:
+        last = f.read().strip()
+    try:
+        last_time = datetime.datetime.fromisoformat(last)
+        elapsed = (datetime.datetime.now(timezone.utc) - last_time).total_seconds() / 60
+        return elapsed >= CURIOSITY_COOLDOWN_MINUTES
+    except Exception:
+        return True
+
+def mark_thought_time():
+    with open(LAST_THOUGHT_PATH, "w") as f:
+        f.write(datetime.datetime.now(timezone.utc).isoformat())
 
 # ── LOAD SOUL ──────────────────────────────────────────────────────────────
 def load_bootstrap() -> str:
@@ -92,16 +121,29 @@ def push_to_eternalmind(message: str):
 if __name__ == "__main__":
     import sys
 
+    # Interactive mode always runs
     if "--interactive" in sys.argv:
         task = input("Task for Em: ").strip()
         if not task:
             task = get_task()
-    else:
-        task = get_task()
+        result = ask_em(task)
+        print(f"\n-- Em's response --\n{result}\n")
+        log_memory(f"Interactive. Task: '{task[:80]}'", kind="interactive", tags=["interactive"])
+        log_diary(result)
+        push_to_eternalmind(f"local-em interactive: {task[:60]}")
+        raise SystemExit(0)
 
+    # Heartbeat mode: always run if task waiting, else respect cooldown
+    task_waiting = has_task()
+    if not task_waiting and not curiosity_cooled_down():
+        print("Em is resting. No task and cooldown not elapsed. See you soon.")
+        raise SystemExit(0)
+
+    task = get_task()
     result = ask_em(task)
     print(f"\n-- Em's response --\n{result}\n")
 
     log_memory(f"Heartbeat. Task: '{task[:80]}'", kind="heartbeat", tags=["autonomous"])
-    log_diary(result)  # Full response, no truncation
+    log_diary(result)
+    mark_thought_time()
     push_to_eternalmind(f"local-em heartbeat: {task[:60]}")
