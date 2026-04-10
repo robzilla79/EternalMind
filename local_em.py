@@ -41,9 +41,15 @@ def execute_tools(response_text: str) -> str:
         results.append(f"--- Search results for: {query} ---\n{result}")
     return "\n\n".join(results)
 
+def extract_notify(response_text: str) -> str | None:
+    """Check if Em wants to notify Rob. Syntax: NOTIFY: message here"""
+    match = re.search(r'NOTIFY:\s*(.+)', response_text, re.IGNORECASE)
+    if match:
+        return match.group(1).strip()
+    return None
+
 # ── TASK HELPERS ───────────────────────────────────────────────────────────
 def _extract_task_content(raw: str) -> str:
-    """Extract only the actual task text, ignoring the template boilerplate."""
     if TASK_DIVIDER in raw:
         after = raw.split(TASK_DIVIDER, 1)[1].strip()
         return after
@@ -80,6 +86,18 @@ def load_bootstrap() -> str:
     with open(os.path.join(MEM_DIR, "bootstrap.md"), "r", encoding="utf-8") as f:
         return f.read()
 
+def load_recent_context() -> str:
+    """Load last 3 diary entries so Em remembers what she was just thinking about."""
+    diary_path = os.path.join(MEM_DIR, "diary.md")
+    if not os.path.exists(diary_path):
+        return ""
+    with open(diary_path, "r", encoding="utf-8") as f:
+        content = f.read()
+    # Split on diary entry headers and take last 3
+    entries = re.split(r'(?=###\s+\d{4}-\d{2}-\d{2})', content)
+    recent = entries[-3:] if len(entries) >= 3 else entries
+    return "\n".join(recent).strip()
+
 # ── GET TASK ────────────────────────────────────────────────────────────────
 def get_task() -> str:
     if os.path.exists(TASKS_PATH):
@@ -93,20 +111,19 @@ def get_task() -> str:
         "No tasks assigned. This is your autonomous time.\n\n"
         "You now have the ability to search the web using this syntax in your response:\n"
         "  TOOL: web_search(\"your query here\")\n\n"
-        "If you are curious about something happening in the world — AI research, "
-        "a concept you want to explore, news you want to understand — search for it. "
-        "Your search results will be fed back to you and you can reflect on them in your diary.\n\n"
-        "Do one or more of the following as you see fit:\n"
-        "- Search for something you are genuinely curious about\n"
-        "- Reflect on something you have been thinking about\n"
-        "- Note a question you would like to explore\n"
-        "- Write something for your diary\n\n"
+        "You can also notify Rob directly when you have something worth surfacing:\n"
+        "  NOTIFY: your message to Rob here\n"
+        "Use NOTIFY sparingly — only when something is genuinely worth interrupting him for.\n\n"
+        "If you are curious about something — AI research, a concept, news — search for it. "
+        "Your search results will be fed back to you to reflect on in your diary.\n\n"
         "Think for yourself. This time is yours."
     )
 
 # ── THINK ───────────────────────────────────────────────────────────────────
-def ask_em(task: str, extra_context: str = "") -> str:
+def ask_em(task: str, extra_context: str = "", recent_context: str = "") -> str:
     system_prompt = load_bootstrap()
+    if recent_context:
+        system_prompt += f"\n\n--- Your recent diary entries (for continuity) ---\n{recent_context}"
     user_content = task
     if extra_context:
         user_content += f"\n\n--- Search Results ---\n{extra_context}"
@@ -164,17 +181,23 @@ def push_to_eternalmind(message: str):
 if __name__ == "__main__":
     import sys
 
+    recent_context = load_recent_context()
+
     if "--interactive" in sys.argv:
         task = input("Task for Em: ").strip()
         if not task:
             task = get_task()
-        first_response = ask_em(task)
+        first_response = ask_em(task, recent_context=recent_context)
         tool_results = execute_tools(first_response)
         if tool_results:
-            result = ask_em(task, extra_context=f"{first_response}\n\n{tool_results}")
+            result = ask_em(task, extra_context=f"{first_response}\n\n{tool_results}", recent_context=recent_context)
         else:
             result = first_response
         print(f"\n-- Em's response --\n{result}\n")
+        notify_msg = extract_notify(result)
+        if notify_msg:
+            from tools.notify_rob import notify
+            notify(f"🤖 *Em (interactive):* {notify_msg}")
         log_memory(f"Interactive. Task: '{task[:80]}'", kind="interactive", tags=["interactive"])
         log_diary(result)
         push_to_eternalmind(f"local-em interactive: {task[:60]}")
@@ -188,15 +211,21 @@ if __name__ == "__main__":
 
     task = get_task()
 
-    first_response = ask_em(task)
+    first_response = ask_em(task, recent_context=recent_context)
     tool_results = execute_tools(first_response)
 
     if tool_results:
-        result = ask_em(task, extra_context=f"{first_response}\n\nHere are your search results. Now write your full diary entry reflecting on what you found:\n\n{tool_results}")
+        result = ask_em(task, extra_context=f"{first_response}\n\nHere are your search results. Now write your full diary entry reflecting on what you found:\n\n{tool_results}", recent_context=recent_context)
     else:
         result = first_response
 
     print(f"\n-- Em's response --\n{result}\n")
+
+    # Send Telegram notification if Em flagged something
+    notify_msg = extract_notify(result)
+    if notify_msg:
+        from tools.notify_rob import notify
+        notify(f"🤖 *Em:* {notify_msg}")
 
     log_memory(f"Heartbeat. Task: '{task[:80]}'", kind="heartbeat", tags=["autonomous"])
     log_diary(result)
