@@ -25,22 +25,14 @@ MEM_DIR           = os.path.join(EM_DIR, "memory")
 TASKS_PATH        = os.path.join(EM_DIR, "tasks.md")
 LAST_THOUGHT_PATH = os.path.join(EM_DIR, ".last_thought")
 CURIOSITY_COOLDOWN_MINUTES = 30
-
-# ── .ENV LOADER ────────────────────────────────────────────────────────────
-# (already loaded above at module level)
+TASK_DIVIDER = "*(Replace everything below this line with your task when you have one)*"
 
 # ── TOOL EXECUTOR ───────────────────────────────────────────────────────────
 def execute_tools(response_text: str) -> str:
-    """
-    Scan Em's response for TOOL: calls, execute them, return augmented context.
-    Supported syntax:
-      TOOL: web_search("query")
-    """
     tool_pattern = re.compile(r'TOOL:\s*web_search\(["\'](.+?)["\']\)', re.IGNORECASE)
     matches = tool_pattern.findall(response_text)
     if not matches:
         return ""
-
     from tools.web_search import search
     results = []
     for query in matches:
@@ -49,15 +41,24 @@ def execute_tools(response_text: str) -> str:
         results.append(f"--- Search results for: {query} ---\n{result}")
     return "\n\n".join(results)
 
-# ── COOLDOWN CHECK ────────────────────────────────────────────────────────────
+# ── TASK HELPERS ───────────────────────────────────────────────────────────
+def _extract_task_content(raw: str) -> str:
+    """Extract only the actual task text, ignoring the template boilerplate."""
+    if TASK_DIVIDER in raw:
+        after = raw.split(TASK_DIVIDER, 1)[1].strip()
+        return after
+    return raw.strip()
+
 def has_task() -> bool:
     if os.path.exists(TASKS_PATH):
         with open(TASKS_PATH, "r", encoding="utf-8") as f:
-            content = f.read().strip()
-        if content and "Replace everything below" not in content and len(content) > 80:
+            raw = f.read()
+        task = _extract_task_content(raw)
+        if len(task) >= 10:
             return True
     return False
 
+# ── COOLDOWN CHECK ────────────────────────────────────────────────────────────
 def curiosity_cooled_down() -> bool:
     if not os.path.exists(LAST_THOUGHT_PATH):
         return True
@@ -83,10 +84,11 @@ def load_bootstrap() -> str:
 def get_task() -> str:
     if os.path.exists(TASKS_PATH):
         with open(TASKS_PATH, "r", encoding="utf-8") as f:
-            content = f.read().strip()
-        if content and "Replace everything below" not in content and len(content) > 80:
+            raw = f.read()
+        task = _extract_task_content(raw)
+        if len(task) >= 10:
             os.remove(TASKS_PATH)
-            return f"Task from Rob:\n\n{content}"
+            return f"Task from Rob:\n\n{task}"
     return (
         "No tasks assigned. This is your autonomous time.\n\n"
         "You now have the ability to search the web using this syntax in your response:\n"
@@ -162,7 +164,6 @@ def push_to_eternalmind(message: str):
 if __name__ == "__main__":
     import sys
 
-    # Interactive mode always runs
     if "--interactive" in sys.argv:
         task = input("Task for Em: ").strip()
         if not task:
@@ -187,11 +188,9 @@ if __name__ == "__main__":
 
     task = get_task()
 
-    # First pass — let Em decide if she wants to search
     first_response = ask_em(task)
     tool_results = execute_tools(first_response)
 
-    # Second pass — if she searched, give her the results to reflect on
     if tool_results:
         result = ask_em(task, extra_context=f"{first_response}\n\nHere are your search results. Now write your full diary entry reflecting on what you found:\n\n{tool_results}")
     else:
