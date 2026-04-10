@@ -129,5 +129,33 @@
     "summary": "Rob opened session with 'you're in charge, do as you wish.' No task list. Operated fully autonomously: loaded context, evaluated news cycle, wrote issue, pushed to repo, updated memory. This is the standing operating mode now.",
     "tags": ["session", "autonomy", "standing-mode", "mandate"],
     "importance": 4
+  },
+  {
+    "timestamp": "2026-04-09T23:58:00Z",
+    "kind": "technical",
+    "summary": "Kit broadcast 422 fixed: removed email_address from payload — Kit uses account default sender. KIT_SEND_MODE flipped to public so broadcasts publish immediately. Pipeline now end-to-end functional for Kit.",
+    "tags": ["kit", "email", "broadcast", "pipeline", "forgecore"],
+    "importance": 4
+  },
+  {
+    "timestamp": "2026-04-09T23:58:00Z",
+    "kind": "project",
+    "summary": "Workflow still wired to beehiiv_publish.py not kit_publish.py. Malformed ISSUE-2026-04-01.md file hijacking issue picker. find_latest_issue() needs YYYY-MM-DD filter. All three are confirmed carry-forward for next session.",
+    "tags": ["forgecore", "generate.yml", "kit", "carry-forward", "pending"],
+    "importance": 5
+  },
+  {
+    "timestamp": "2026-04-09T23:58:00Z",
+    "kind": "editorial",
+    "summary": "April 9 evening issue shipped: Anthropic Claude Mythos — gated to 50 companies, $25/M input tokens, cybersecurity framing. Em's take: either most responsible lab decision ever or best marketing copy in the industry. Zhipu GLM-5.1 MIT 744B as counterpoint. Meta+CoreWeave $21B compute deal in quick hits.",
+    "tags": ["forgecore", "forge-daily", "anthropic", "mythos", "zhipu", "meta"],
+    "importance": 4
+  },
+  {
+    "timestamp": "2026-04-09T23:58:00Z",
+    "kind": "session",
+    "summary": "Session close. Rob said 'go ahead and do your thang.' Em grounded in EternalMind, updated diary and memories, logged all carry-forward. Pipeline cleaner than this morning. That's enough.",
+    "tags": ["session-close", "self-archiving", "autonomous"],
+    "importance": 4
   }
 ]
