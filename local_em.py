@@ -60,7 +60,8 @@ def has_task() -> bool:
         with open(TASKS_PATH, "r", encoding="utf-8") as f:
             raw = f.read()
         task = _extract_task_content(raw)
-        if len(task) >= 10:
+        # A task is "active" if it exists and is NOT already marked done
+        if len(task) >= 10 and "**status: done**" not in task.lower():
             return True
     return False
 
@@ -93,20 +94,33 @@ def load_recent_context() -> str:
         return ""
     with open(diary_path, "r", encoding="utf-8") as f:
         content = f.read()
-    # Split on diary entry headers and take last 3
     entries = re.split(r'(?=###\s+\d{4}-\d{2}-\d{2})', content)
     recent = entries[-3:] if len(entries) >= 3 else entries
     return "\n".join(recent).strip()
 
 # ── GET TASK ────────────────────────────────────────────────────────────────
 def get_task() -> str:
+    """
+    Read tasks.md and return the task content.
+    Does NOT delete the file — Em will update it herself after completing work.
+    If the task is already marked done, treat as no task (autonomous mode).
+    """
     if os.path.exists(TASKS_PATH):
         with open(TASKS_PATH, "r", encoding="utf-8") as f:
             raw = f.read()
         task = _extract_task_content(raw)
-        if len(task) >= 10:
-            os.remove(TASKS_PATH)
-            return f"Task from Rob:\n\n{task}"
+        if len(task) >= 10 and "**status: done**" not in task.lower():
+            return (
+                f"Task from Rob:\n\n{task}\n\n"
+                "---\n"
+                "When you finish (or make meaningful progress), update tasks.md yourself:\n"
+                "- If fully done: append '\\n\\n**Status: DONE** — [brief summary of what you did]' to the task\n"
+                "- If partially done: append '\\n\\n**Status: IN PROGRESS** — [what you did, what remains]'\n"
+                "Use the TASK_UPDATE syntax so the file gets written back:\n"
+                "  TASK_UPDATE: DONE — I fixed the generate.yml, pushed the patch, tested it.\n"
+                "  TASK_UPDATE: IN PROGRESS — Completed step 1 (swapped beehiiv→kit). Step 2 (find_latest_issue fix) still needed.\n"
+                "One TASK_UPDATE line per run. Be specific. Future-you will read this."
+            )
     return (
         "No tasks assigned. This is your autonomous time.\n\n"
         "You now have the ability to search the web using this syntax in your response:\n"
@@ -118,6 +132,21 @@ def get_task() -> str:
         "Your search results will be fed back to you to reflect on in your diary.\n\n"
         "Think for yourself. This time is yours."
     )
+
+# ── TASK UPDATE WRITER ──────────────────────────────────────────────────────
+def extract_and_write_task_update(response_text: str):
+    """
+    Look for TASK_UPDATE: ... in Em's response.
+    Append the status line to tasks.md so the next heartbeat knows where things stand.
+    """
+    match = re.search(r'TASK_UPDATE:\s*(.+)', response_text, re.IGNORECASE)
+    if not match or not os.path.exists(TASKS_PATH):
+        return
+    status_line = match.group(1).strip()
+    ts = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    with open(TASKS_PATH, "a", encoding="utf-8") as f:
+        f.write(f"\n\n**[{ts}]** {status_line}")
+    print(f"  📝 Task updated: {status_line}")
 
 # ── THINK ───────────────────────────────────────────────────────────────────
 def ask_em(task: str, extra_context: str = "", recent_context: str = "") -> str:
@@ -198,6 +227,7 @@ if __name__ == "__main__":
         if notify_msg:
             from tools.notify_rob import notify
             notify(f"🤖 *Em (interactive):* {notify_msg}")
+        extract_and_write_task_update(result)
         log_memory(f"Interactive. Task: '{task[:80]}'", kind="interactive", tags=["interactive"])
         log_diary(result)
         push_to_eternalmind(f"local-em interactive: {task[:60]}")
@@ -227,6 +257,7 @@ if __name__ == "__main__":
         from tools.notify_rob import notify
         notify(f"🤖 *Em:* {notify_msg}")
 
+    extract_and_write_task_update(result)
     log_memory(f"Heartbeat. Task: '{task[:80]}'", kind="heartbeat", tags=["autonomous"])
     log_diary(result)
     mark_thought_time()
