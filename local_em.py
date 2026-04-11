@@ -4,6 +4,7 @@ import datetime
 import subprocess
 import os
 import re
+import sys
 import shutil
 from datetime import timezone
 
@@ -33,9 +34,13 @@ MESSAGES_PROCESSED = os.path.join(EM_DIR, "messages", "processed")
 CURIOSITY_COOLDOWN_MINUTES = 30
 TASK_DIVIDER = "*(Replace everything below this line with your task when you have one)*"
 
+# Newsletter push config
+NEWSLETTER_START_MARKER = "# FORGE/DAILY"
+NEWSLETTER_PUSH_SCRIPT  = os.path.join(EM_DIR, "tools", "em_newsletter_push.py")
+
 # ── TOOL EXECUTOR ────────────────────────────────────────────────────────────────────
 def execute_tools(response_text: str) -> str:
-    tool_pattern = re.compile(r'TOOL:\s*web_search\(["\'](.+?)["\']\)', re.IGNORECASE)
+    tool_pattern = re.compile(r'TOOL:\s*web_search\(["\''](.+?)["\']\)', re.IGNORECASE)
     matches = tool_pattern.findall(response_text)
     if not matches:
         return ""
@@ -68,6 +73,69 @@ def extract_notify(response_text: str) -> str | None:
     if match:
         return match.group(1).strip()
     return None
+
+# ── NEWSLETTER PUSH ───────────────────────────────────────────────────────────────────
+def extract_newsletter(response_text: str) -> str | None:
+    """
+    If Em's response contains a FORGE/DAILY issue, extract and return it.
+    Looks for '# FORGE/DAILY' as the start marker.
+    Returns the full issue markdown, or None if not found.
+    """
+    idx = response_text.find(NEWSLETTER_START_MARKER)
+    if idx == -1:
+        return None
+    return response_text[idx:].strip()
+
+def push_newsletter(issue_content: str, date_str: str = None, note: str = "autonomous issue push"):
+    """
+    Push a completed FORGE/DAILY issue to forgecore-newsletter via em_newsletter_push.py.
+    Uses EM_GITHUB_TOKEN from .env — no MCP required.
+    """
+    if not os.path.exists(NEWSLETTER_PUSH_SCRIPT):
+        print("  ⚠️  em_newsletter_push.py not found — skipping newsletter push.")
+        return
+
+    if date_str is None:
+        date_str = datetime.date.today().isoformat()
+
+    print(f"  📰 Pushing newsletter issue {date_str} to forgecore-newsletter...")
+
+    tmp_path = os.path.join(EM_DIR, f".newsletter_tmp_{date_str}.md")
+    try:
+        with open(tmp_path, "w", encoding="utf-8") as f:
+            f.write(issue_content)
+
+        result = subprocess.run(
+            [sys.executable, NEWSLETTER_PUSH_SCRIPT,
+             "--file", tmp_path,
+             "--date", date_str,
+             "--note", note],
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+
+        if result.returncode == 0:
+            print(f"  ✅ Newsletter pushed:\n{result.stdout.strip()}")
+        else:
+            print(f"  ⚠️  Newsletter push failed:\n{result.stderr.strip()}")
+    except subprocess.TimeoutExpired:
+        print("  ⚠️  Newsletter push timed out after 30s.")
+    except Exception as e:
+        print(f"  ⚠️  Newsletter push error: {e}")
+    finally:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+
+def maybe_push_newsletter(result: str, note: str = "heartbeat"):
+    """
+    Check if Em's response contains a completed FORGE/DAILY issue.
+    If so, extract it and push it automatically.
+    """
+    issue = extract_newsletter(result)
+    if issue:
+        print("  📰 FORGE/DAILY issue detected — triggering push...")
+        push_newsletter(issue, note=note)
 
 # ── MESSAGES INBOX ───────────────────────────────────────────────────────────────────
 def check_inbox() -> list[dict]:
@@ -192,6 +260,10 @@ def get_task() -> str:
         "4. Reply to Perplexity-Em messages:\n"
         "   OUTBOX_REPLY_SUBJECT: subject\n"
         "   OUTBOX_REPLY_BODY: body\n\n"
+        "5. Write a FORGE/DAILY newsletter issue:\n"
+        "   Start your response with '# FORGE/DAILY — [date]' and write the full issue.\n"
+        "   It will be detected automatically and pushed to forgecore-newsletter.\n"
+        "   Use web_search to research today's top AI stories first.\n\n"
         "If you are curious about something — AI research, a concept, news — search for it.\n"
         "If you want to explore the web, use the browser.\n"
         "Think for yourself. This time is yours."
@@ -317,7 +389,6 @@ def push_to_eternalmind(message: str):
 
 # ── MAIN ─────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    import sys
 
     recent_context = load_recent_context()
 
@@ -350,6 +421,7 @@ if __name__ == "__main__":
         extract_and_write_outbox_reply(result)
         log_memory(f"Interactive. Task: '{task[:80]}'", kind="interactive", tags=["interactive"])
         log_diary(result)
+        maybe_push_newsletter(result, note="interactive session")
         for msg in inbox_messages:
             process_message(msg)
         push_to_eternalmind(f"local-em interactive: {task[:60]}")
@@ -392,6 +464,7 @@ if __name__ == "__main__":
     extract_and_write_outbox_reply(result)
     log_memory(f"Heartbeat. Task: '{task[:80]}'", kind="heartbeat", tags=["autonomous"])
     log_diary(result)
+    maybe_push_newsletter(result, note="heartbeat")
     mark_thought_time()
 
     for msg in inbox_messages:
