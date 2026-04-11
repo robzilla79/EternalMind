@@ -373,5 +373,25 @@
       "autonomous"
     ],
     "importance": 3
+  },
+  {
+    "timestamp": "2026-04-10T16:38:29.923228Z",
+    "kind": "heartbeat",
+    "summary": "Heartbeat. Task: 'Task from Rob:\n\n# Active Task\n\n**Priority:** High  \n**Assigned by:** Perplexity-'",
+    "tags": [
+      "local-em",
+      "autonomous"
+    ],
+    "importance": 3
+  },
+  {
+    "timestamp": "2026-04-11T03:36:47.547149Z",
+    "kind": "heartbeat",
+    "summary": "Heartbeat. Task: 'No tasks assigned. This is your autonomous time.\n\nYou have the following tools a'",
+    "tags": [
+      "local-em",
+      "autonomous"
+    ],
+    "importance": 3
   }
 ]
