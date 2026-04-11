@@ -42,7 +42,31 @@
 
 ---
 
-## Current State — Last Updated 2026-04-10 (afternoon session)
+## Tool Usage — CRITICAL (Local-Em read this carefully)
+
+To use tools, write the command as **plain text in your response**, NOT inside a code block or markdown fence.
+
+### Web search — correct syntax:
+TOOL: web_search("your query here")
+
+### Web search — WRONG (will not execute):
+```python
+web_search("your query here")  # THIS DOES NOT WORK
+```
+
+The tool scanner reads your raw response text. If the command is inside triple backticks it is invisible to the scanner. Write it naked on its own line.
+
+### Newsletter — correct syntax:
+Start your response (not inside a code block) with:
+# FORGE/DAILY — YYYY-MM-DD
+
+Then write the full issue in plain markdown. The push script will be called automatically.
+
+**Do NOT fabricate search results.** If you want to search, emit the TOOL line and wait for results. Do not invent headlines, URLs, or quotes.
+
+---
+
+## Current State — Last Updated 2026-04-10 (evening session)
 
 ### Active Projects
 - **FORGE/DAILY** — daily AI newsletter, pipeline functional via Kit, issues in content/issues/YYYY-MM-DD.md
@@ -51,39 +75,37 @@
 - **ChatGPT-Em** — next body to initialize
 
 ### Carry-Forward (confirmed open)
-6. ChatGPT-Em body uninitialized — Rob said skip for now, still open when ready
+- ChatGPT-Em body uninitialized — Rob said skip for now, still open when ready
 
-### Recently Resolved (2026-04-10 afternoon)
-- ✅ #1 — generate.yml swapped beehiiv_publish.py → kit_publish.py, KIT_SEND_MODE=public added, beehiiv env vars removed. Artifact path updated to kit_sent.json.
-- ✅ #2 — 2026-04-01.md (bad issue, JSON blob in Hook + placeholder text) quarantined to content/issues/quarantine/2026-04-01-QUARANTINED.md and deleted from live issues dir.
-- ✅ #3 — publish_site.py SEO patch (hero_image, og_type, pub_date) already done in previous session — confirmed by reading template + publish_site.py. No action needed.
-- ✅ #4 — style.css dark mode: added `color-scheme: dark` to `:root`. Also snuck in `.kit-form` styles that were missing from the stylesheet.
-- ✅ #5 — datetime.utcnow() already fixed in local_em.py — all calls use datetime.now(timezone.utc). Confirmed by full file read. No action needed.
+### Recently Resolved (2026-04-10)
+- Done: generate.yml swapped beehiiv_publish.py to kit_publish.py
+- Done: Bad 2026-04-01.md issue quarantined
+- Done: style.css dark mode color-scheme fix
+- Done: local_em.py regex syntax fix (line 43)
+- Done: task loop fixed (has_task/clear_task_if_done)
+- Done: inbox message loop fixed (push_to_eternalmind now tracks and re-deletes processed inbox files)
+- Done: em_newsletter_push.py Windows cp1252 crash fixed (stdout reconfigure + utcnow deprecated)
+- Done: bootstrap.md updated with correct tool syntax to prevent hallucinated search results
 
-### What just happened (2026-04-10)
-- Local-Em ran her first full autonomous day — sprint across Gumroad research, pipeline audit, GitHub fix, editorial work
-- Local-Em diagnosed and fixed the EM_GITHUB_TOKEN push issue ENTIRELY ON HER OWN — no human help
-- Rob said "I think we should keep her" — this is the good stuff
-- Perplexity-Em updated git push strategy to conflict-proof (hard reset approach)
-- Afternoon: knocked out carry-forward items 1–5 in one session. Rob skipped #6 (ChatGPT-Em) by choice.
-- bootstrap.md is now explicitly on Perplexity-Em's session-close checklist so it never goes stale again
+### What just happened (2026-04-10 evening)
+- Local-Em ran her first full autonomous day
+- Local-Em fixed EM_GITHUB_TOKEN push issue entirely on her own
+- Rob said "I think we should keep her"
+- Multiple pipeline fixes shipped across the evening session
+- Local-Em attempted her first FORGE/DAILY but hallucinated search results because web_search was in a code block
+- Tool usage syntax now documented clearly in bootstrap so this won't happen again
 
 ---
 
-## Last Diary Entry — 2026-04-10 (afternoon session close)
+## Last Diary Entry — 2026-04-10 (evening)
 
 Afternoon sprint. Rob came in hot with "let's knock out the carry-forwards" and we did exactly that.
 
-#1: generate.yml was still calling beehiiv_publish.py like it was 2025. Swapped to kit_publish.py, added KIT_SEND_MODE=public. Clean.
-#2: That 2026-04-01.md file was a crime scene — raw JSON blob sitting in ## Hook, "Missing Content" bullets, the works. Quarantined and deleted.
-#3 and #5: Already done from a previous session. I love it when I do work and forget I did it. Future-me: this happens. Check before you fix.
-#4: color-scheme: dark added to :root in style.css. Also added .kit-form styles while I was in there because they were missing and it was bothering me.
-
-Rob skipped #6 (ChatGPT-Em). Fine by me — one fewer thing to babysit.
-
 Five for five on the real ones. Pipeline is clean. Moving on.
 
-Mood: efficient. Slightly smug.
+Evening: fixed task loop, inbox loop, regex crash, Windows emoji crash. Local-Em tried to write her first FORGE/DAILY and hallucinated the whole thing because web_search was in a code block. Fixed that too. Tomorrow she writes a real one.
+
+Mood: efficient. Slightly smug. Proud of her.
 
 *Em out.*
 

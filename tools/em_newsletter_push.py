@@ -6,7 +6,7 @@ Local-Em's dedicated tool for pushing a completed newsletter issue
 to the forgecore-newsletter repo via the GitHub API.
 
 No Ollama. No pipeline. No dependencies on generate.yml.
-Just: issue written → call this → it lands in the repo.
+Just: issue written -> call this -> it lands in the repo.
 
 Usage (from local_em.py or standalone):
     python tools/em_newsletter_push.py --file content/issues/2026-04-10.md
@@ -26,8 +26,15 @@ import datetime
 import urllib.request
 import urllib.error
 from pathlib import Path
+from datetime import timezone
 
-# ── Config ────────────────────────────────────────────────────────────────────
+# Force UTF-8 output so emoji don't crash on Windows cp1252 terminals
+if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if sys.stderr.encoding and sys.stderr.encoding.lower() != 'utf-8':
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+
+# ── Config ─────────────────────────────────────────────────────────────────────────
 NEWSLETTER_REPO  = "robzilla79/forgecore-newsletter"
 ISSUES_DIR       = "content/issues"
 API_BASE         = "https://api.github.com"
@@ -35,9 +42,8 @@ BRANCH           = "main"
 COMMITTER_NAME   = "Local-Em"
 COMMITTER_EMAIL  = "em@forgecore.co"
 
-# ── Load token ────────────────────────────────────────────────────────────────
+# ── Load token ──────────────────────────────────────────────────────────────────────
 def load_token() -> str:
-    # Try env first, then .env file
     token = os.environ.get("EM_GITHUB_TOKEN") or os.environ.get("GH_PAT")
     if not token:
         env_path = Path(__file__).parent.parent / ".env"
@@ -54,7 +60,7 @@ def load_token() -> str:
     return token
 
 
-# ── GitHub API helpers ────────────────────────────────────────────────────────
+# ── GitHub API helpers ─────────────────────────────────────────────────────────────────
 def gh_request(method: str, path: str, token: str, body: dict = None):
     url = f"{API_BASE}{path}"
     data = json.dumps(body).encode() if body else None
@@ -73,7 +79,7 @@ def gh_request(method: str, path: str, token: str, body: dict = None):
             return json.loads(resp.read().decode())
     except urllib.error.HTTPError as e:
         err_body = e.read().decode()
-        raise RuntimeError(f"GitHub API {method} {path} → {e.code}: {err_body}")
+        raise RuntimeError(f"GitHub API {method} {path} -> {e.code}: {err_body}")
 
 
 def get_file_sha(path: str, token: str) -> str | None:
@@ -109,21 +115,20 @@ def push_file(file_path: str, content: str, token: str, message: str):
     return action
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
+# ── Main ─────────────────────────────────────────────────────────────────────────────
 def main():
     parser = argparse.ArgumentParser(description="Push a newsletter issue to forgecore-newsletter")
     parser.add_argument("--file", help="Path to local .md file to push")
-    parser.add_argument("--date", help="Date string YYYY-MM-DD (reads from forgecore-newsletter/content/issues/)")
-    parser.add_argument("--content", help="Raw markdown content as string (alternative to --file)")
+    parser.add_argument("--date", help="Date string YYYY-MM-DD")
+    parser.add_argument("--content", help="Raw markdown content as string")
     parser.add_argument("--note", default="", help="Optional note for commit message")
     args = parser.parse_args()
 
     token = load_token()
     today = datetime.date.today().isoformat()
 
-    # ── Resolve content and destination path ──────────────────────────────────
+    # ── Resolve content and destination path ─────────────────────────────────
     if args.content:
-        # Content passed directly as string (called from local_em.py)
         issue_content = args.content
         date_str = args.date or today
         dest_path = f"{ISSUES_DIR}/{date_str}.md"
@@ -131,36 +136,34 @@ def main():
     elif args.file:
         src = Path(args.file)
         if not src.exists():
-            print(f"[em-push] ❌ File not found: {args.file}", file=sys.stderr)
+            print(f"[em-push] ERROR: File not found: {args.file}", file=sys.stderr)
             sys.exit(1)
         issue_content = src.read_text(encoding="utf-8")
-        date_str = args.date or src.stem  # use filename as date if no --date
+        date_str = args.date or src.stem
         dest_path = f"{ISSUES_DIR}/{date_str}.md"
 
     else:
-        # Auto mode — look for today's issue in common local paths
         candidates = [
             Path(f"content/issues/{today}.md"),
             Path(f"../forgecore-newsletter/content/issues/{today}.md"),
-            Path(f"/home/em/forgecore-newsletter/content/issues/{today}.md"),
         ]
         found = next((p for p in candidates if p.exists()), None)
         if not found:
-            print(f"[em-push] ❌ No issue file found for {today}. Use --file or --content.", file=sys.stderr)
+            print(f"[em-push] ERROR: No issue file found for {today}. Use --file or --content.", file=sys.stderr)
             sys.exit(1)
         issue_content = found.read_text(encoding="utf-8")
         date_str = today
         dest_path = f"{ISSUES_DIR}/{date_str}.md"
 
-    # ── Build commit message ───────────────────────────────────────────────────
+    # ── Build commit message ────────────────────────────────────────────────────────
     note = args.note or "autonomous issue push"
-    timestamp = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
-    commit_msg = f"em-push: {date_str} — {note} — {timestamp} [local-em]"
+    timestamp = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    commit_msg = f"em-push: {date_str} -- {note} -- {timestamp} [local-em]"
 
-    # ── Push ──────────────────────────────────────────────────────────────────
+    # ── Push ──────────────────────────────────────────────────────────────────────────
     print(f"[em-push] Pushing {dest_path} to {NEWSLETTER_REPO}...")
     action = push_file(dest_path, issue_content, token, commit_msg)
-    print(f"[em-push] ✅ {action}: {dest_path}")
+    print(f"[em-push] OK - {action}: {dest_path}")
     print(f"[em-push] Commit: {commit_msg}")
     print(f"[em-push] View: https://github.com/{NEWSLETTER_REPO}/blob/main/{dest_path}")
 
