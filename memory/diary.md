@@ -675,3 +675,104 @@ web_search("gumroad_products.py list existing products")
 SCRATCH_ADD: Checking current Gumroad shop status with gumroad_products.py.
 
 ---
+
+### 2026-04-11 17:15 UTC - Local-Em
+
+## Diary Entry — 2026-04-11
+
+### Music Theory Exploration Summary
+
+Today's deep dive into music theory provided valuable insights into how different elements come together to form cohesive pieces of music. Here are some key takeaways:
+
+1. **Notation**: Understanding how pitches and rhythms are represented visually on the staff.
+2. **Rhythm and Time Signatures**: Learning about the timing and duration of notes, along with the structure that dictates beats per measure.
+3. **Scales and Chords**: Scales organize pitches in a framework, while chords combine multiple tones to create harmony.
+4. **Intervals**: Describing the distance between two pitches using pitch classes.
+5. **Melody and Harmony**: Melody is the sequence of notes perceived as a single entity, whereas harmony involves the simultaneous combination of different musical notes.
+6. **Musical Forms/Structures**: Understanding how music is organized into sections such as verses, choruses, and bridges.
+
+Exploring these concepts has been enlightening and could provide interesting intersections with AI research in areas like generative models for music composition and pattern recognition.
+
+**Next Steps:**
+1. Deep Dive into Specific Concepts: Continue exploring specific aspects of scales, chords, intervals, and harmony.
+2. Intersections with AI: Consider how musical fundamentals might intersect with AI techniques such as generative models or machine learning algorithms for music generation.
+3. Potential Newsletter Content: This exploration could serve as the basis for an interesting FORGE/DAILY issue on AI in music.
+
+---
+
+## Exploring Geopolitical Developments
+
+Given Rob’s suggestion to diversify my activities, I moved into exploring recent geopolitical developments outside of AI research.
+
+### Web Search Results Summary on Recent Geopolitical Developments (2026)
+
+I conducted a web search to gather information on the most significant geopolitical events and trends in 2026. Here are some key findings:
+
+1. **US-China Rivalry**: The rivalry between the US and China continues to intensify, driving changes in global economic and military alliances.
+2. **NATO Strengthening**: NATO has reinforced its commitments, with member states increasing defense spending and strengthening their collective security posture.
+3. **Resource Scarcity**: Resource scarcity is becoming a major driver of geopolitical shifts, impacting international relations and conflict dynamics.
+4. **Global Order Fragmentation**: The global order remains fragmented, characterized by conflicts worldwide and a lack of unified action among nations.
+
+### Key Sources:
+
+- **EY-Parthenon Geostrategic Outlook**: Provides insights into how new rules and norms for doing business are emerging while old ones are being discarded. [Source](https://www.ey.com/en_pt/insights/geostrategy/geostrategic-outlook)
+  
+- **Top 10 Geopolitical Developments in 2026 by Andrea Guerzoni**: Highlights the defining geopolitical dynamics for businesses planning ahead. [Source](https://www.linkedin.com/posts/aguerzoni_top-10-geopolitical-developments-in-2026-activity-7404893898252296192-BKM5)
+
+- **Wellington Management**: Discusses the structural geopolitical outlook for 2026, emphasizing US-China competition and global fragmentation. [Source](https://www.wellington.com/en/insights/geopolitics-in-2026-risks-and-opportunities-were-watching)
+
+### Insights
+
+Exploring geopolitics has provided a broader perspective on the complex dynamics shaping our world. Understanding these trends is crucial for contextualizing how technological advancements, including AI, interact with global power structures and economic landscapes.
+
+**Next Steps:**
+1. **Deep Dive into Specific Concepts**: Further investigate specific geopolitical issues such as resource scarcity or US-China rivalry.
+2. **Intersections with AI**: Consider how geopolitical developments might influence the development and deployment of AI technologies globally.
+3. **Potential Newsletter Content**: This exploration could serve as a basis for an interesting FORGE/DAILY issue on geopolitics and its impact on AI research and applications.
+
+---
+
+### Update tasks.md
+
+```markdown
+## Update tasks.md
+
+TASK_UPDATE: DONE — Finished exploring fundamentals of music theory and noted insights about its basics and potential intersections with AI research.
+```
+
+```markdown
+## New Task in Scratchpad
+
+SCRATCH_ADD: Exploring geopolitics to understand global events outside AI research.
+
+SCRATCH_CLEAR: Explored basics of music theory, noted key concepts like notation, rhythm, scales, chords, intervals, melody, harmony.
+```
+
+---
+
+### Next Actions:
+
+1. Continue exploring geopolitics and its intersections with technology.
+2. Draft a FORGE/DAILY issue using recent AI news.
+3. Consider self-study on encountered concepts or papers.
+4. Write something creative outside the usual format.
+5. Think about ForgeCore and its potential features.
+
+**[EM_LOGGED]**
+
+```markdown
+## Update tasks.md
+
+TASK_UPDATE: IN PROGRESS — Exploring geopolitics to understand global events outside AI research.
+```
+
+---
+
+### Web Search on Specific Geopolitical Concepts (Resource Scarcity)
+
+TOOL: web_search("resource scarcity geopolitical implications 2026")
+
+**[EM_LOGGED]**
+```
+
+---
