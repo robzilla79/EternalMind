@@ -41,21 +41,45 @@ NEWSLETTER_PUSH_SCRIPT  = os.path.join(EM_DIR, "tools", "em_newsletter_push.py")
 
 # ── STARTUP SYNC ────────────────────────────────────────────────────────────────────────────
 def sync_from_origin():
-    """Pull latest from origin/main before reading anything — ensures tasks.md and inbox are fresh."""
+    """
+    Stash any local changes, pull latest from origin/main, then restore the stash.
+    This ensures tasks.md and inbox are always fresh without local conflicts blocking startup.
+    Never raises — always continues even if something goes wrong.
+    """
     token = os.environ.get("EM_GITHUB_TOKEN", "")
     if token:
         remote_url = f"https://{token}@github.com/robzilla79/EternalMind.git"
         subprocess.run(["git", "-C", EM_DIR, "remote", "set-url", "origin", remote_url],
                        check=False, capture_output=True)
-    result = subprocess.run(
-        ["git", "-C", EM_DIR, "pull", "--ff-only", "origin", "main"],
+
+    # Stash local changes so pull can't conflict
+    stash_result = subprocess.run(
+        ["git", "-C", EM_DIR, "stash", "--include-untracked", "-m", "em-startup-autostash"],
         capture_output=True, text=True
     )
-    if result.returncode == 0:
-        if "Already up to date" not in result.stdout:
-            print(f"  🔄 Synced from origin: {result.stdout.strip()}")
+    stashed = "em-startup-autostash" in stash_result.stdout or stash_result.returncode == 0
+
+    # Pull fresh from origin
+    pull_result = subprocess.run(
+        ["git", "-C", EM_DIR, "pull", "--rebase", "origin", "main"],
+        capture_output=True, text=True
+    )
+    if pull_result.returncode == 0:
+        if "Already up to date" not in pull_result.stdout:
+            print(f"  🔄 Synced from origin.")
     else:
-        print(f"  ⚠️  Startup sync failed (continuing anyway): {result.stderr.strip()}")
+        print(f"  ⚠️  Startup pull failed (continuing anyway): {pull_result.stderr.strip()[:120]}")
+        subprocess.run(["git", "-C", EM_DIR, "rebase", "--abort"], check=False, capture_output=True)
+
+    # Restore stashed local changes on top
+    if stashed and "No local changes" not in stash_result.stdout:
+        pop_result = subprocess.run(
+            ["git", "-C", EM_DIR, "stash", "pop"],
+            capture_output=True, text=True
+        )
+        if pop_result.returncode != 0:
+            print(f"  ⚠️  Stash pop failed — dropping stash to stay clean: {pop_result.stderr.strip()[:80]}")
+            subprocess.run(["git", "-C", EM_DIR, "stash", "drop"], check=False, capture_output=True)
 
 # ── SCRATCHPAD ───────────────────────────────────────────────────────────────────────────────
 def load_scratch() -> str:
@@ -468,7 +492,7 @@ def push_to_eternalmind(message: str):
 # ── MAIN ────────────────────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
 
-    # Always sync from origin first — ensures tasks.md, inbox, and memory are fresh
+    # Stash → pull → pop: always start from freshest remote state, never block on conflicts
     sync_from_origin()
 
     recent_context = load_recent_context()
