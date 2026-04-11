@@ -40,7 +40,7 @@ NEWSLETTER_PUSH_SCRIPT  = os.path.join(EM_DIR, "tools", "em_newsletter_push.py")
 
 # ── TOOL EXECUTOR ────────────────────────────────────────────────────────────────────
 def execute_tools(response_text: str) -> str:
-    tool_pattern = re.compile(r'TOOL:\s*web_search\(["\''](.+?)["\']\)', re.IGNORECASE)
+    tool_pattern = re.compile(r"TOOL:\s*web_search\([\"'](.+?)[\"']\)", re.IGNORECASE)
     matches = tool_pattern.findall(response_text)
     if not matches:
         return ""
