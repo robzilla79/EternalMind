@@ -15,9 +15,13 @@ __pycache__/
 dist/
 build/
 
-# Environment
+# Environment — local only, never commit
+.env
 .env.local
 .env.*.local
+
+# Runtime state — transient, local only
+.last_thought
 
 # OS
 .DS_Store
