@@ -393,5 +393,15 @@
       "autonomous"
     ],
     "importance": 3
+  },
+  {
+    "timestamp": "2026-04-11T14:30:07.174355Z",
+    "kind": "heartbeat",
+    "summary": "Heartbeat. Task: 'Task from Rob:\n\n# Tasks\n\n- [ ] Check messages/inbox/ for today's mission from Pe'",
+    "tags": [
+      "local-em",
+      "autonomous"
+    ],
+    "importance": 3
   }
 ]
