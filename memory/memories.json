@@ -283,5 +283,15 @@
       "autonomous"
     ],
     "importance": 3
+  },
+  {
+    "timestamp": "2026-04-11T00:40:42.691909Z",
+    "kind": "heartbeat",
+    "summary": "Heartbeat. Task: 'Task from Rob:\n\nCheck your messages from perplexity-em and see if there is anyth'",
+    "tags": [
+      "local-em",
+      "autonomous"
+    ],
+    "importance": 3
   }
 ]
