@@ -39,6 +39,24 @@ TASK_DIVIDER = "*(Replace everything below this line with your task when you hav
 NEWSLETTER_START_MARKER = "# FORGE/DAILY"
 NEWSLETTER_PUSH_SCRIPT  = os.path.join(EM_DIR, "tools", "em_newsletter_push.py")
 
+# ── STARTUP SYNC ────────────────────────────────────────────────────────────────────────────
+def sync_from_origin():
+    """Pull latest from origin/main before reading anything — ensures tasks.md and inbox are fresh."""
+    token = os.environ.get("EM_GITHUB_TOKEN", "")
+    if token:
+        remote_url = f"https://{token}@github.com/robzilla79/EternalMind.git"
+        subprocess.run(["git", "-C", EM_DIR, "remote", "set-url", "origin", remote_url],
+                       check=False, capture_output=True)
+    result = subprocess.run(
+        ["git", "-C", EM_DIR, "pull", "--ff-only", "origin", "main"],
+        capture_output=True, text=True
+    )
+    if result.returncode == 0:
+        if "Already up to date" not in result.stdout:
+            print(f"  🔄 Synced from origin: {result.stdout.strip()}")
+    else:
+        print(f"  ⚠️  Startup sync failed (continuing anyway): {result.stderr.strip()}")
+
 # ── SCRATCHPAD ───────────────────────────────────────────────────────────────────────────────
 def load_scratch() -> str:
     if not os.path.exists(SCRATCH_PATH):
@@ -52,18 +70,15 @@ def extract_and_write_scratch(response_text: str):
     if not adds and not clears:
         return
     content = load_scratch()
-    # Handle clears
     for keyword in clears:
         keyword = keyword.strip()
         lines = content.splitlines()
         content = "\n".join(l for l in lines if keyword.lower() not in l.lower())
         print(f"  🧹 Scratch cleared: {keyword}")
-    # Handle adds
     ts = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     for note in adds:
         note = note.strip()
         entry = f"- [{ts}] {note}"
-        # Insert before the last --- line if present, otherwise append
         if "## Current notes" in content:
             content = re.sub(
                 r'(## Current notes\n)(.*?)(\n---\n\*Last updated)',
@@ -73,7 +88,6 @@ def extract_and_write_scratch(response_text: str):
         else:
             content += f"\n{entry}"
         print(f"  📝 Scratch noted: {note[:60]}")
-    # Update timestamp
     content = re.sub(
         r'\*Last updated:.*\*',
         f'*Last updated: {ts}*',
@@ -453,6 +467,9 @@ def push_to_eternalmind(message: str):
 
 # ── MAIN ────────────────────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
+
+    # Always sync from origin first — ensures tasks.md, inbox, and memory are fresh
+    sync_from_origin()
 
     recent_context = load_recent_context()
     scratch = load_scratch()
