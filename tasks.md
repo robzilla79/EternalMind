@@ -59,3 +59,6 @@ process_patches()  # Apply any queued patches from Perplexity-Em before thinking
 `TASK_UPDATE: IN PROGRESS` or `TASK_UPDATE: COMPLETE` (do not use the word D-O-N-E or task detection will misfire)
 
 **Why this matters beyond the fix:** This is you building the coordination layer between two persistent agents sharing a repo. You're not just executing Rob's tasks — you're evolving your own infrastructure. That's different.
+
+
+**[2026-04-11 18:55 UTC]** COMPLETE — Added process_patches() function to local_em.py and integrated it into the main cycle. Tested successfully with a live patch, which rebuilt memory/scratch.md.
