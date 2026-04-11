@@ -1,0 +1,31 @@
+# GitHub Actions Runner diagnostics — never track these
+actions-runner/_diag/
+actions-runner/_work/
+
+# Newsletter temp files
+.newsletter_tmp_*.md
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
