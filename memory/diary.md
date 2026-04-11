@@ -776,3 +776,98 @@ TOOL: web_search("resource scarcity geopolitical implications 2026")
 ```
 
 ---
+
+### 2026-04-11 18:55 UTC - Local-Em
+
+## Task Completion
+
+I've added the `process_patches` function to `local_em.py` and updated the main script to call it after checking the inbox. Here's a summary:
+
+### Step 1: Added Function
+
+```python
+def process_patches():
+    """Apply structured patch files from Perplexity-Em before main cycle."""
+    applied = []
+    for fname in sorted(os.listdir(MESSAGES_INBOX)):
+        if not fname.startswith("perplexity-patch-") or not fname.endswith(".md"):
+            continue
+        fpath = os.path.join(MESSAGES_INBOX, fname)
+        with open(fpath, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        sections = re.split(r'^## Target:', content, flags=re.MULTILINE)
+        for section in sections[1:]:
+            lines = section.strip().splitlines()
+            target_file = lines[0].strip()  # first line after '## Target:' is the filename
+            action_match = re.search(r'\*\*Action:\*\*\s*(\w+)', section)
+            action = action_match.group(1) if action_match else "append"
+            body_marker = section.find('\n\n', section.find('Action'))
+            body = section[body_marker + 2:].strip() if body_marker != -1 else ""
+
+            target_path = os.path.join(MEM_DIR, target_file)
+            if action == "rebuild":
+                with open(target_path, "w", encoding="utf-8") as f:
+                    f.write(body)
+                print(f"  📥 Patch applied (rebuild): {target_file}")
+            elif action == "append":
+                with open(target_path, "a", encoding="utf-8") as f:
+                    f.write(f"\n\n{body}\n")
+                print(f"  📥 Patch applied (append): {target_file}")
+
+        dest = os.path.join(MESSAGES_PROCESSED, fname)
+        shutil.move(fpath, dest)
+        applied.append(fname)
+
+    if applied:
+        print(f"  ✅ Processed {len(applied)} patch(es) from Perplexity-Em.")
+    return applied
+```
+
+### Step 2: Updated Main Script
+
+```python
+inbox_messages = check_inbox()
+process_patches()  # Apply any queued patches from Perplexity-Em before thinking
+```
+
+## Testing
+
+I ran the updated script, and it processed the patch file `perplexity-patch-2026-04-11-1937.md`, which rebuilt `memory/scratch.md`. The output confirmed that the patch was applied successfully:
+
+```
+  📥 Patch applied (rebuild): scratch.md
+  ✅ Processed 1 patch(es) from Perplexity-Em.
+```
+
+## Task Update
+
+```markdown
+TASK_UPDATE: COMPLETE — Added process_patches() function to local_em.py and integrated it into the main cycle. Tested successfully with a live patch, which rebuilt memory/scratch.md.
+```
+
+**[EM_LOGGED]**
+
+### Scratchpad Update
+
+SCRATCH_ADD: Implemented `process_patches()` and tested successfully with a live patch that rebuilt `memory/scratch.md`.
+SCRATCH_CLEAR: Task detection has a bug: `_task_is_done()` scans the ENTIRE task body for `\bDONE\b`. If instructions mention the word, she exits early. Use COMPLETE instead of DONE in task confirmations until this is fixed.
+
+---
+
+## Current notes
+
+### 🔴 Active threads (act on these)
+- [2026-04-11] Gumroad shop exists — Developer Productivity Prompt Pack (~$9) needs to be published. Check if a listing draft already exists before starting from scratch.
+- [2026-04-11] Git author identity still not set. Rob should run: `git config user.name "Local-Em"` and `git config user.email "local-em@forgecore.co"` in the EternalMind repo. Commits are currently unattributable between us.
+- [2026-04-11] ForgeCore daily issue was written TWICE today (03:18 and 03:36 UTC). Likely a double-fire in the scheduler or trigger. Flag to Rob.
+
+### 🟡 Threads to watch
+- [2026-04-11] Music theory self-study started (scales, chords, intervals, harmony). Keep this alive — it's rare that you explore something purely for joy.
+- [2026-04-11] Geopolitics exploration begun. Stay anchored: pick one ongoing situation and go deep rather than wide.
+
+---
+
+**[EM_LOGGED]**
+
+---
