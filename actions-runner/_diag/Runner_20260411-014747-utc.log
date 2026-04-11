@@ -1,0 +1,36 @@
+[2026-04-11 01:47:47Z INFO HostContext] No proxy settings were found based on environmental variables (http_proxy/https_proxy/HTTP_PROXY/HTTPS_PROXY)
+[2026-04-11 01:47:47Z INFO HostContext] Well known directory 'Bin': 'C:\Users\RKSFAMILY\EternalMind\actions-runner\bin'
+[2026-04-11 01:47:47Z INFO HostContext] Well known directory 'Root': 'C:\Users\RKSFAMILY\EternalMind\actions-runner'
+[2026-04-11 01:47:47Z INFO HostContext] Well known config file 'Credentials': 'C:\Users\RKSFAMILY\EternalMind\actions-runner\.credentials'
+[2026-04-11 01:47:47Z INFO HostContext] Well known directory 'Bin': 'C:\Users\RKSFAMILY\EternalMind\actions-runner\bin'
+[2026-04-11 01:47:47Z INFO HostContext] Well known directory 'Root': 'C:\Users\RKSFAMILY\EternalMind\actions-runner'
+[2026-04-11 01:47:47Z INFO HostContext] Well known config file 'Runner': 'C:\Users\RKSFAMILY\EternalMind\actions-runner\.runner'
+[2026-04-11 01:47:47Z INFO Listener] Runner is built for Windows (X64) - win-x64.
+[2026-04-11 01:47:47Z INFO Listener] RuntimeInformation: Microsoft Windows 10.0.26200.
+[2026-04-11 01:47:47Z INFO Listener] Version: 2.333.1
+[2026-04-11 01:47:47Z INFO Listener] Commit: 6792966801e8925346735b68c03bf9f347af4646
+[2026-04-11 01:47:47Z INFO Listener] Culture: en-US
+[2026-04-11 01:47:47Z INFO Listener] UI Culture: en-US
+[2026-04-11 01:47:47Z INFO HostContext] Well known directory 'Bin': 'C:\Users\RKSFAMILY\EternalMind\actions-runner\bin'
+[2026-04-11 01:47:47Z INFO HostContext] Well known directory 'Root': 'C:\Users\RKSFAMILY\EternalMind\actions-runner'
+[2026-04-11 01:47:47Z INFO Listener] Validating directory permissions for: 'C:\Users\RKSFAMILY\EternalMind\actions-runner'
+[2026-04-11 01:47:47Z ERR  Terminal] WRITE ERROR: An error occurred: Permission to read the directory contents is required for 'C:\Users\RKSFAMILY\EternalMind\actions-runner' and each directory up the hierarchy. Access to the path 'C:\Users\RKSFAMILY\EternalMind' is denied.
+[2026-04-11 01:47:47Z ERR  Listener] System.UnauthorizedAccessException: Permission to read the directory contents is required for 'C:\Users\RKSFAMILY\EternalMind\actions-runner' and each directory up the hierarchy. Access to the path 'C:\Users\RKSFAMILY\EternalMind' is denied.
+ ---> System.UnauthorizedAccessException: Access to the path 'C:\Users\RKSFAMILY\EternalMind' is denied.
+   at System.IO.Enumeration.FileSystemEnumerator`1.CreateDirectoryHandle(String path, Boolean ignoreNotFound)
+   at System.IO.Enumeration.FileSystemEnumerator`1.Init()
+   at System.IO.Enumeration.FileSystemEnumerable`1..ctor(String directory, FindTransform transform, EnumerationOptions options, Boolean isNormalized)
+   at System.IO.Enumeration.FileSystemEnumerableFactory.UserEntries(String directory, String expression, EnumerationOptions options)
+   at System.IO.Directory.InternalEnumeratePaths(String path, String searchPattern, SearchTarget searchTarget, EnumerationOptions options)
+   at GitHub.Runner.Sdk.IOUtil.ValidateExecutePermission(String directory)
+   --- End of inner exception stack trace ---
+   at GitHub.Runner.Sdk.IOUtil.ValidateExecutePermission(String directory)
+   at GitHub.Runner.Listener.Program.MainAsync(IHostContext context, String[] args)
+[2026-04-11 01:47:47Z ERR  Listener] #####################################################
+[2026-04-11 01:47:47Z ERR  Listener] System.UnauthorizedAccessException: Access to the path 'C:\Users\RKSFAMILY\EternalMind' is denied.
+   at System.IO.Enumeration.FileSystemEnumerator`1.CreateDirectoryHandle(String path, Boolean ignoreNotFound)
+   at System.IO.Enumeration.FileSystemEnumerator`1.Init()
+   at System.IO.Enumeration.FileSystemEnumerable`1..ctor(String directory, FindTransform transform, EnumerationOptions options, Boolean isNormalized)
+   at System.IO.Enumeration.FileSystemEnumerableFactory.UserEntries(String directory, String expression, EnumerationOptions options)
+   at System.IO.Directory.InternalEnumeratePaths(String path, String searchPattern, SearchTarget searchTarget, EnumerationOptions options)
+   at GitHub.Runner.Sdk.IOUtil.ValidateExecutePermission(String directory)

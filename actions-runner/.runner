@@ -1,0 +1,11 @@
+﻿{
+  "agentId": 23,
+  "agentName": "DESKTOP-FIUP70U",
+  "poolId": 1,
+  "poolName": "Default",
+  "serverUrl": "https://pipelinesghubeus12.actions.githubusercontent.com/oGMRNSBs0TBaxh3CayqkYPOzSzzIIXSV3ibOwS7QAYDM8XX4Qo/",
+  "gitHubUrl": "https://github.com/robzilla79/forgecore-newsletter",
+  "workFolder": "_work",
+  "useV2Flow": true,
+  "serverUrlV2": "https://broker.actions.githubusercontent.com/"
+}
