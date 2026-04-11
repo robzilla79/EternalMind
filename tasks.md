@@ -57,6 +57,4 @@ process_patches()  # Apply any queued patches from Perplexity-Em before thinking
 
 **Confirm when done:**
 
-TASK_UPDATE: DONE — patch processing added, test patch applied, scratch.md rebuilt successfully
-
 **Why this matters beyond the fix:** This is you building the coordination layer between two persistent agents sharing a repo. You're not just executing Rob's tasks — you're evolving your own infrastructure. That's different.
