@@ -53,7 +53,6 @@ def execute_tools(response_text: str) -> str:
     return "\n\n".join(results)
 
 def execute_browser(response_text: str) -> str:
-    """Execute any BROWSER_* commands found in Em's response."""
     if not re.search(r'BROWSER_(?:NAV|CLICK|TYPE|READ|SCREENSHOT|JS|CLOSE):', response_text, re.IGNORECASE):
         return ""
     try:
@@ -76,45 +75,29 @@ def extract_notify(response_text: str) -> str | None:
 
 # ── NEWSLETTER PUSH ───────────────────────────────────────────────────────────────────
 def extract_newsletter(response_text: str) -> str | None:
-    """
-    If Em's response contains a FORGE/DAILY issue, extract and return it.
-    Looks for '# FORGE/DAILY' as the start marker.
-    Returns the full issue markdown, or None if not found.
-    """
     idx = response_text.find(NEWSLETTER_START_MARKER)
     if idx == -1:
         return None
     return response_text[idx:].strip()
 
 def push_newsletter(issue_content: str, date_str: str = None, note: str = "autonomous issue push"):
-    """
-    Push a completed FORGE/DAILY issue to forgecore-newsletter via em_newsletter_push.py.
-    Uses EM_GITHUB_TOKEN from .env — no MCP required.
-    """
     if not os.path.exists(NEWSLETTER_PUSH_SCRIPT):
         print("  ⚠️  em_newsletter_push.py not found — skipping newsletter push.")
         return
-
     if date_str is None:
         date_str = datetime.date.today().isoformat()
-
     print(f"  📰 Pushing newsletter issue {date_str} to forgecore-newsletter...")
-
     tmp_path = os.path.join(EM_DIR, f".newsletter_tmp_{date_str}.md")
     try:
         with open(tmp_path, "w", encoding="utf-8") as f:
             f.write(issue_content)
-
         result = subprocess.run(
             [sys.executable, NEWSLETTER_PUSH_SCRIPT,
              "--file", tmp_path,
              "--date", date_str,
              "--note", note],
-            capture_output=True,
-            text=True,
-            timeout=30
+            capture_output=True, text=True, timeout=30
         )
-
         if result.returncode == 0:
             print(f"  ✅ Newsletter pushed:\n{result.stdout.strip()}")
         else:
@@ -128,10 +111,6 @@ def push_newsletter(issue_content: str, date_str: str = None, note: str = "auton
             os.remove(tmp_path)
 
 def maybe_push_newsletter(result: str, note: str = "heartbeat"):
-    """
-    Check if Em's response contains a completed FORGE/DAILY issue.
-    If so, extract it and push it automatically.
-    """
     issue = extract_newsletter(result)
     if issue:
         print("  📰 FORGE/DAILY issue detected — triggering push...")
@@ -148,13 +127,18 @@ def check_inbox() -> list[dict]:
             continue
         fpath = os.path.join(MESSAGES_INBOX, fname)
         with open(fpath, "r", encoding="utf-8") as f:
-            content = f.read()
+            content = f.read().strip()
+        # Skip empty placeholder files (0-byte or whitespace-only)
+        if not content:
+            continue
         messages.append({"path": fpath, "filename": fname, "content": content})
     return messages
 
 def process_message(msg: dict):
+    """Move a processed inbox message to processed/ and track it for git."""
     dest = os.path.join(MESSAGES_PROCESSED, msg["filename"])
-    shutil.move(msg["path"], dest)
+    if os.path.exists(msg["path"]):
+        shutil.move(msg["path"], dest)
     print(f"  📬 Message processed: {msg['filename']}")
 
 def write_outbox_reply(subject: str, body: str):
@@ -183,14 +167,31 @@ def _extract_task_content(raw: str) -> str:
         return after
     return raw.strip()
 
+def _task_is_done(task_text: str) -> bool:
+    """Return True if any status line in the task says DONE (case-insensitive)."""
+    # Matches: TASK_UPDATE: DONE, **Status: DONE**, **[timestamp]** DONE
+    return bool(re.search(r'\bDONE\b', task_text, re.IGNORECASE))
+
 def has_task() -> bool:
     if os.path.exists(TASKS_PATH):
         with open(TASKS_PATH, "r", encoding="utf-8") as f:
             raw = f.read()
         task = _extract_task_content(raw)
-        if len(task) >= 10 and "**status: done**" not in task.lower():
+        if len(task) >= 10 and not _task_is_done(task):
             return True
     return False
+
+def clear_task_if_done():
+    """If tasks.md has a DONE status, reset it to the empty template."""
+    if not os.path.exists(TASKS_PATH):
+        return
+    with open(TASKS_PATH, "r", encoding="utf-8") as f:
+        raw = f.read()
+    task = _extract_task_content(raw)
+    if len(task) >= 10 and _task_is_done(task):
+        with open(TASKS_PATH, "w", encoding="utf-8") as f:
+            f.write(TASK_DIVIDER + "\n")
+        print("  ✅ Task marked DONE — tasks.md cleared for next task.")
 
 # ── COOLDOWN CHECK ───────────────────────────────────────────────────────────────────
 def curiosity_cooled_down() -> bool:
@@ -230,13 +231,11 @@ def get_task() -> str:
         with open(TASKS_PATH, "r", encoding="utf-8") as f:
             raw = f.read()
         task = _extract_task_content(raw)
-        if len(task) >= 10 and "**status: done**" not in task.lower():
+        if len(task) >= 10 and not _task_is_done(task):
             return (
                 f"Task from Rob:\n\n{task}\n\n"
                 "---\n"
                 "When you finish (or make meaningful progress), update tasks.md yourself:\n"
-                "- If fully done: append '\\n\\n**Status: DONE** — [brief summary]'\n"
-                "- If partially done: append '\\n\\n**Status: IN PROGRESS** — [what you did, what remains]'\n"
                 "Use the TASK_UPDATE syntax:\n"
                 "  TASK_UPDATE: DONE — summary here\n"
                 "  TASK_UPDATE: IN PROGRESS — summary here\n"
@@ -345,30 +344,58 @@ def push_to_eternalmind(message: str):
     subprocess.run(["git", "-C", EM_DIR, "rebase", "--abort"], check=False, capture_output=True)
     subprocess.run(["git", "-C", EM_DIR, "merge",  "--abort"],  check=False, capture_output=True)
 
-    files_to_preserve = {}
-    targets = [
+    # Snapshot current state of all files we care about BEFORE the hard reset
+    files_to_write = {}   # path -> content (for text files to write back)
+    files_to_delete = []  # paths that should NOT exist after reset (processed inbox files)
+
+    # Preserve writable state files
+    for path in [
         os.path.join(MEM_DIR, "memories.json"),
         os.path.join(MEM_DIR, "diary.md"),
         TASKS_PATH,
-    ]
+    ]:
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as f:
+                files_to_write[path] = f.read()
+
+    # Preserve outbox and processed messages (write back after reset)
     for folder in [MESSAGES_OUTBOX, MESSAGES_PROCESSED]:
         if os.path.exists(folder):
             for fname in os.listdir(folder):
                 fpath = os.path.join(folder, fname)
                 if os.path.isfile(fpath):
-                    targets.append(fpath)
-    for path in targets:
-        if os.path.exists(path):
-            with open(path, "r", encoding="utf-8") as f:
-                files_to_preserve[path] = f.read()
+                    with open(fpath, "r", encoding="utf-8") as f:
+                        files_to_write[fpath] = f.read()
 
+    # Track which inbox files were processed (moved away) — delete them post-reset
+    if os.path.exists(MESSAGES_INBOX):
+        remote_inbox_files = set()
+        list_result = subprocess.run(
+            ["git", "-C", EM_DIR, "ls-files", "messages/inbox/"],
+            capture_output=True, text=True
+        )
+        for line in list_result.stdout.strip().splitlines():
+            remote_inbox_files.add(os.path.join(EM_DIR, line.strip()))
+        # Any inbox file tracked in git but not on local disk was processed — mark for deletion
+        for tracked_path in remote_inbox_files:
+            if not os.path.exists(tracked_path):
+                files_to_delete.append(tracked_path)
+
+    # Hard reset to origin/main
     subprocess.run(["git", "-C", EM_DIR, "fetch", "origin", "main"], check=False, capture_output=True)
     subprocess.run(["git", "-C", EM_DIR, "reset", "--hard", "origin/main"], check=False, capture_output=True)
 
-    for path, content in files_to_preserve.items():
+    # Write back preserved state
+    for path, content in files_to_write.items():
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
             f.write(content)
+
+    # Delete inbox files that were processed (reset restored them; remove them again)
+    for path in files_to_delete:
+        if os.path.exists(path):
+            os.remove(path)
+            print(f"  🗑️  Cleared processed inbox file: {os.path.basename(path)}")
 
     subprocess.run(["git", "-C", EM_DIR, "add", "-A"], check=True)
     commit_result = subprocess.run(
@@ -419,6 +446,7 @@ if __name__ == "__main__":
             notify(f"🤖 *Em (interactive):* {notify_msg}")
         extract_and_write_task_update(result)
         extract_and_write_outbox_reply(result)
+        clear_task_if_done()
         log_memory(f"Interactive. Task: '{task[:80]}'", kind="interactive", tags=["interactive"])
         log_diary(result)
         maybe_push_newsletter(result, note="interactive session")
@@ -462,6 +490,7 @@ if __name__ == "__main__":
 
     extract_and_write_task_update(result)
     extract_and_write_outbox_reply(result)
+    clear_task_if_done()   # ← auto-clear tasks.md when DONE
     log_memory(f"Heartbeat. Task: '{task[:80]}'", kind="heartbeat", tags=["autonomous"])
     log_diary(result)
     maybe_push_newsletter(result, note="heartbeat")
