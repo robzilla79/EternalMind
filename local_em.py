@@ -30,7 +30,11 @@ if os.path.exists(_env_path):
             if re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', _k):
                 os.environ.setdefault(_k, _v)
 
-MODEL              = "qwen3.5:9b-q8_0"  # upgraded from qwen3:32b — Qwen 3.5 9B Q8_0, GGUF/CUDA, 11GB, vision-capable
+# Qwen3.5 27B Claude-4.6-Opus Reasoning Distilled v2, Q4_K_M
+# ~17GB VRAM on RTX 5070 Ti (16GB) — tight fit; fall back to Q3_K_M if needed
+# Pull: ollama run hf.co/Jackrong/Qwen3.5-27B-Claude-4.6-Opus-Reasoning-Distilled-v2-GGUF:Q4_K_M
+# Or register: ollama create local-em -f Modelfile.qwen3.5
+MODEL              = "local-em"
 EM_DIR             = os.path.dirname(os.path.abspath(__file__))
 MEM_DIR            = os.path.join(EM_DIR, "memory")
 TASKS_PATH         = os.path.join(EM_DIR, "tasks.md")
@@ -418,32 +422,27 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "", scratch
 
     result = ""
     in_think = False
-    # Buffer to catch tags split across chunk boundaries
     tag_buffer = ""
-    TAG_BUFFER_MAX = 20  # longer than any tag we care about
+    TAG_BUFFER_MAX = 20
 
     for chunk in stream:
         token = chunk["message"]["content"]
         result += token
         tag_buffer += token
 
-        # Check for think-tag transitions in buffer
         if not in_think and "<think>" in tag_buffer:
             in_think = True
-            # Print dots for everything after <think>
             tag_buffer = tag_buffer.split("<think>", 1)[1]
 
         if in_think and "</think>" in tag_buffer:
             in_think = False
-            # Flush everything after </think> as normal output
             after_close = tag_buffer.split("</think>", 1)[1]
             tag_buffer = after_close
-            print()  # newline after think block dots
+            print()
             if after_close:
                 print(after_close, end="", flush=True)
             continue
 
-        # Trim buffer — keep only a tail long enough to catch a split tag
         if len(tag_buffer) > TAG_BUFFER_MAX:
             flush_part = tag_buffer[:-TAG_BUFFER_MAX]
             tag_buffer = tag_buffer[-TAG_BUFFER_MAX:]
@@ -453,10 +452,8 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "", scratch
                 print(flush_part, end="", flush=True)
         else:
             if in_think:
-                # Just print a dot per chunk to show activity
                 print("·", end="", flush=True)
 
-    # Flush any remaining buffer
     if tag_buffer and not in_think:
         print(tag_buffer, end="", flush=True)
 
