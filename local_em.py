@@ -418,21 +418,47 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "", scratch
 
     result = ""
     in_think = False
+    # Buffer to catch tags split across chunk boundaries
+    tag_buffer = ""
+    TAG_BUFFER_MAX = 20  # longer than any tag we care about
+
     for chunk in stream:
         token = chunk["message"]["content"]
         result += token
+        tag_buffer += token
 
-        if "<think>" in token:
+        # Check for think-tag transitions in buffer
+        if not in_think and "<think>" in tag_buffer:
             in_think = True
-        if "</think>" in token:
+            # Print dots for everything after <think>
+            tag_buffer = tag_buffer.split("<think>", 1)[1]
+
+        if in_think and "</think>" in tag_buffer:
             in_think = False
-            print()
+            # Flush everything after </think> as normal output
+            after_close = tag_buffer.split("</think>", 1)[1]
+            tag_buffer = after_close
+            print()  # newline after think block dots
+            if after_close:
+                print(after_close, end="", flush=True)
             continue
 
-        if in_think:
-            print("·", end="", flush=True)
+        # Trim buffer — keep only a tail long enough to catch a split tag
+        if len(tag_buffer) > TAG_BUFFER_MAX:
+            flush_part = tag_buffer[:-TAG_BUFFER_MAX]
+            tag_buffer = tag_buffer[-TAG_BUFFER_MAX:]
+            if in_think:
+                print("·" * max(1, len(flush_part.split())), end="", flush=True)
+            else:
+                print(flush_part, end="", flush=True)
         else:
-            print(token, end="", flush=True)
+            if in_think:
+                # Just print a dot per chunk to show activity
+                print("·", end="", flush=True)
+
+    # Flush any remaining buffer
+    if tag_buffer and not in_think:
+        print(tag_buffer, end="", flush=True)
 
     print("\n")
     return result
