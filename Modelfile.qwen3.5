@@ -1,0 +1,12 @@
+FROM qwen3.5:9b-q8_0
+
+# EternalMind / Local-Em — Qwen 3.5 9B Q8_0
+# RTX 5070 Ti (16GB VRAM) — 11GB model, ~5GB headroom for KV cache
+# 256K context window, vision-capable (Text + Image), GGUF/CUDA compatible
+# Upgraded from qwen3:32b
+
+PARAMETER num_ctx 8192
+PARAMETER num_gpu 99
+PARAMETER temperature 0.7
+PARAMETER top_p 0.9
+PARAMETER repeat_penalty 1.1
