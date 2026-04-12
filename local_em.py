@@ -273,11 +273,9 @@ def clear_task_if_done():
 
 def summarize_task_for_commit(task: str) -> str:
     """Generate a clean short commit label from task text, not a raw slice."""
-    # Strip TASK_UPDATE lines and status lines
     lines = [l.strip() for l in task.splitlines()
              if l.strip() and not l.strip().startswith("**[") and not l.lower().startswith("task_update")]
     first_line = lines[0] if lines else "autonomous cycle"
-    # Truncate cleanly at word boundary
     if len(first_line) > 60:
         first_line = first_line[:57].rsplit(' ', 1)[0] + "..."
     return first_line
@@ -405,18 +403,34 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "", scratch
         ],
         stream=True,
         options={
-            "num_ctx": 8192,       # context window — bump to 16384 if VRAM allows
-            "num_gpu": 99,         # all layers on GPU
+            "num_ctx": 8192,
+            "num_gpu": 99,
             "temperature": 0.7,
             "top_p": 0.9,
         }
     )
 
     result = ""
+    in_think = False  # tracks whether we're inside the silent <think> block
     for chunk in stream:
         token = chunk["message"]["content"]
-        print(token, end="", flush=True)
         result += token
+
+        # Detect entry/exit of Qwen3's internal <think> block
+        if "<think>" in token:
+            in_think = True
+        if "</think>" in token:
+            in_think = False
+            print()  # newline to separate think dots from real output
+            continue
+
+        if in_think:
+            # Still in silent reasoning phase — print a dot per token so Rob
+            # knows she's alive without flooding the console with whitespace
+            print("·", end="", flush=True)
+        else:
+            # Real response output — stream tokens as-is
+            print(token, end="", flush=True)
 
     print("\n")  # newline after stream ends
     return result
@@ -523,13 +537,11 @@ def push_to_eternalmind(message: str):
 # ── MAIN ────────────────────────────────────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
 
-    # Stash → pull → pop: always start from freshest remote state, never block on conflicts
     sync_from_origin()
 
     recent_context = load_recent_context()
     scratch = load_scratch()
 
-    # Check inbox
     inbox_messages = check_inbox()
     inbox_context  = build_inbox_context(inbox_messages)
     if inbox_messages:
