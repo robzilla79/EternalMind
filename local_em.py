@@ -8,6 +8,12 @@ import sys
 import shutil
 from datetime import timezone
 
+# Force UTF-8 stdout/stderr on Windows — prevents cp1252 UnicodeEncodeError from emojis
+if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout = open(sys.stdout.fileno(), mode="w", encoding="utf-8", buffering=1)
+if sys.stderr.encoding and sys.stderr.encoding.lower() != "utf-8":
+    sys.stderr = open(sys.stderr.fileno(), mode="w", encoding="utf-8", buffering=1)
+
 # ── CONFIG ────────────────────────────────────────────────────────────────────────────────────
 os.environ.setdefault("OLLAMA_HOST", "http://127.0.0.1:11434")
 os.environ.setdefault("OLLAMA_NUM_GPU", "99")  # offload all layers to GPU
@@ -393,7 +399,7 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "", scratch
     if extra_context:
         user_content += f"\n\n--- Tool Results ---\n{extra_context}"
 
-    print(f"\n💭 Em is thinking...\n")
+    print("\n💭 Em is thinking...\n")
 
     stream = ollama.chat(
         model=MODEL,
@@ -411,28 +417,24 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "", scratch
     )
 
     result = ""
-    in_think = False  # tracks whether we're inside the silent <think> block
+    in_think = False
     for chunk in stream:
         token = chunk["message"]["content"]
         result += token
 
-        # Detect entry/exit of Qwen3's internal <think> block
         if "<think>" in token:
             in_think = True
         if "</think>" in token:
             in_think = False
-            print()  # newline to separate think dots from real output
+            print()
             continue
 
         if in_think:
-            # Still in silent reasoning phase — print a dot per token so Rob
-            # knows she's alive without flooding the console with whitespace
             print("·", end="", flush=True)
         else:
-            # Real response output — stream tokens as-is
             print(token, end="", flush=True)
 
-    print("\n")  # newline after stream ends
+    print("\n")
     return result
 
 # ── LOG MEMORY ─────────────────────────────────────────────────────────────────────────────────────────────────────
