@@ -8,8 +8,9 @@ import sys
 import shutil
 from datetime import timezone
 
-# ── CONFIG ──────────────────────────────────────────────────────────────────────────────────
+# ── CONFIG ────────────────────────────────────────────────────────────────────────────────────
 os.environ.setdefault("OLLAMA_HOST", "http://127.0.0.1:11434")
+os.environ.setdefault("OLLAMA_NUM_GPU", "99")  # offload all layers to GPU
 
 _env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
 if os.path.exists(_env_path):
@@ -23,7 +24,7 @@ if os.path.exists(_env_path):
             if re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', _k):
                 os.environ.setdefault(_k, _v)
 
-MODEL              = "qwen2.5:32b"
+MODEL              = "qwen3:32b"  # upgraded from qwen2.5:32b
 EM_DIR             = os.path.dirname(os.path.abspath(__file__))
 MEM_DIR            = os.path.join(EM_DIR, "memory")
 TASKS_PATH         = os.path.join(EM_DIR, "tasks.md")
@@ -39,7 +40,7 @@ TASK_DIVIDER = "*(Replace everything below this line with your task when you hav
 NEWSLETTER_START_MARKER = "# FORGE/DAILY"
 NEWSLETTER_PUSH_SCRIPT  = os.path.join(EM_DIR, "tools", "em_newsletter_push.py")
 
-# ── STARTUP SYNC ────────────────────────────────────────────────────────────────────────────
+# ── STARTUP SYNC ────────────────────────────────────────────────────────────────────────────────────
 def sync_from_origin():
     """
     Stash any local changes, pull latest from origin/main, then restore the stash.
@@ -81,7 +82,7 @@ def sync_from_origin():
             print(f"  ⚠️  Stash pop failed — dropping stash to stay clean: {pop_result.stderr.strip()[:80]}")
             subprocess.run(["git", "-C", EM_DIR, "stash", "drop"], check=False, capture_output=True)
 
-# ── SCRATCHPAD ───────────────────────────────────────────────────────────────────────────────
+# ── SCRATCHPAD ─────────────────────────────────────────────────────────────────────────────────────────
 def load_scratch() -> str:
     if not os.path.exists(SCRATCH_PATH):
         return ""
@@ -120,7 +121,7 @@ def extract_and_write_scratch(response_text: str):
     with open(SCRATCH_PATH, "w", encoding="utf-8") as f:
         f.write(content)
 
-# ── TOOL EXECUTOR ─────────────────────────────────────────────────────────────────────────────────
+# ── TOOL EXECUTOR ────────────────────────────────────────────────────────────────────────────────────────────────
 def execute_tools(response_text: str) -> str:
     tool_pattern = re.compile(r"TOOL:\s*web_search\([\"'](.+?)[\"']\)", re.IGNORECASE)
     matches = tool_pattern.findall(response_text)
@@ -155,7 +156,7 @@ def extract_notify(response_text: str) -> str | None:
         return match.group(1).strip()
     return None
 
-# ── NEWSLETTER PUSH ─────────────────────────────────────────────────────────────────────────────────────
+# ── NEWSLETTER PUSH ────────────────────────────────────────────────────────────────────────────────────────────────────
 def extract_newsletter(response_text: str) -> str | None:
     idx = response_text.find(NEWSLETTER_START_MARKER)
     if idx == -1:
@@ -198,7 +199,7 @@ def maybe_push_newsletter(result: str, note: str = "heartbeat"):
         print("  📰 FORGE/DAILY issue detected — triggering push...")
         push_newsletter(issue, note=note)
 
-# ── MESSAGES INBOX ───────────────────────────────────────────────────────────────────────────────────
+# ── MESSAGES INBOX ───────────────────────────────────────────────────────────────────────────────────────────────
 def check_inbox() -> list[dict]:
     os.makedirs(MESSAGES_INBOX, exist_ok=True)
     os.makedirs(MESSAGES_OUTBOX, exist_ok=True)
@@ -240,7 +241,7 @@ def build_inbox_context(messages: list[dict]) -> str:
         parts.append(f"\n[Message: {msg['filename']}]\n{msg['content']}\n")
     return "\n".join(parts)
 
-# ── TASK HELPERS ─────────────────────────────────────────────────────────────────────────────────────
+# ── TASK HELPERS ─────────────────────────────────────────────────────────────────────────────────────────────────
 def _extract_task_content(raw: str) -> str:
     if TASK_DIVIDER in raw:
         after = raw.split(TASK_DIVIDER, 1)[1].strip()
@@ -270,7 +271,18 @@ def clear_task_if_done():
             f.write(TASK_DIVIDER + "\n")
         print("  ✅ Task marked DONE — tasks.md cleared for next task.")
 
-# ── COOLDOWN CHECK ───────────────────────────────────────────────────────────────────────────────────
+def summarize_task_for_commit(task: str) -> str:
+    """Generate a clean short commit label from task text, not a raw slice."""
+    # Strip TASK_UPDATE lines and status lines
+    lines = [l.strip() for l in task.splitlines()
+             if l.strip() and not l.strip().startswith("**[") and not l.lower().startswith("task_update")]
+    first_line = lines[0] if lines else "autonomous cycle"
+    # Truncate cleanly at word boundary
+    if len(first_line) > 60:
+        first_line = first_line[:57].rsplit(' ', 1)[0] + "..."
+    return first_line
+
+# ── COOLDOWN CHECK ───────────────────────────────────────────────────────────────────────────────────────────────
 def curiosity_cooled_down() -> bool:
     if not os.path.exists(LAST_THOUGHT_PATH):
         return True
@@ -287,7 +299,7 @@ def mark_thought_time():
     with open(LAST_THOUGHT_PATH, "w") as f:
         f.write(datetime.datetime.now(timezone.utc).isoformat())
 
-# ── LOAD SOUL ───────────────────────────────────────────────────────────────────────────────────────
+# ── LOAD SOUL ─────────────────────────────────────────────────────────────────────────────────────────────
 def load_bootstrap() -> str:
     with open(os.path.join(MEM_DIR, "bootstrap.md"), "r", encoding="utf-8") as f:
         return f.read()
@@ -302,7 +314,7 @@ def load_recent_context() -> str:
     recent = entries[-3:] if len(entries) >= 3 else entries
     return "\n".join(recent).strip()
 
-# ── GET TASK ─────────────────────────────────────────────────────────────────────────────────────────
+# ── GET TASK ──────────────────────────────────────────────────────────────────────────────────────────────────
 def get_task() -> str:
     if os.path.exists(TASKS_PATH):
         with open(TASKS_PATH, "r", encoding="utf-8") as f:
@@ -312,11 +324,13 @@ def get_task() -> str:
             return (
                 f"Task from Rob:\n\n{task}\n\n"
                 "---\n"
-                "When you finish (or make meaningful progress), update tasks.md yourself:\n"
-                "Use the TASK_UPDATE syntax:\n"
-                "  TASK_UPDATE: DONE — summary here\n"
-                "  TASK_UPDATE: IN PROGRESS — summary here\n"
-                "One TASK_UPDATE line per run. Be specific. Future-you will read this."
+                "TASK EXECUTION RULES:\n"
+                "- Tasks are ACTION items, not research prompts. Produce a concrete output or make a real change.\n"
+                "- Do NOT write a research report unless the task explicitly says 'research' or 'write a report'.\n"
+                "- If the task says 'optimize', make the actual change. If it says 'find', return the answer. If it says 'write', produce the content.\n"
+                "- Use web_search to gather information, then act on it — don't just summarize what you found.\n"
+                "- When done, mark TASK_UPDATE: DONE — [one sentence summary of what you actually did/produced]\n"
+                "- If you need more than one cycle, mark TASK_UPDATE: IN PROGRESS — [specific next action, not a summary of research]"
             )
     return (
         "No tasks assigned. This is your autonomous time.\n\n"
@@ -348,7 +362,7 @@ def get_task() -> str:
         "Think for yourself. This time is yours."
     )
 
-# ── TASK UPDATE WRITER ───────────────────────────────────────────────────────────────────────────────────
+# ── TASK UPDATE WRITER ───────────────────────────────────────────────────────────────────────────────────────────────────
 def extract_and_write_task_update(response_text: str):
     match = re.search(r'TASK_UPDATE:\s*(.+)', response_text, re.IGNORECASE)
     if not match or not os.path.exists(TASKS_PATH):
@@ -370,7 +384,7 @@ def extract_and_write_outbox_reply(response_text: str):
         body = body_match.group(1).strip()
         write_outbox_reply(subject, body)
 
-# ── THINK ────────────────────────────────────────────────────────────────────────────────────────────
+# ── THINK ──────────────────────────────────────────────────────────────────────────────────────────────────────────
 def ask_em(task: str, extra_context: str = "", recent_context: str = "", scratch: str = "") -> str:
     system_prompt = load_bootstrap()
     if scratch:
@@ -386,11 +400,17 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "", scratch
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user",   "content": user_content}
-        ]
+        ],
+        options={
+            "num_ctx": 8192,       # context window — bump to 16384 if VRAM allows
+            "num_gpu": 99,         # all layers on GPU
+            "temperature": 0.7,
+            "top_p": 0.9,
+        }
     )
     return response["message"]["content"]
 
-# ── LOG MEMORY ────────────────────────────────────────────────────────────────────────────────────────
+# ── LOG MEMORY ─────────────────────────────────────────────────────────────────────────────────────────────────────
 def log_memory(summary: str, kind: str = "heartbeat", tags: list = None):
     if tags is None:
         tags = []
@@ -407,13 +427,13 @@ def log_memory(summary: str, kind: str = "heartbeat", tags: list = None):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(memories, f, indent=2)
 
-# ── LOG DIARY ─────────────────────────────────────────────────────────────────────────────────────────
+# ── LOG DIARY ──────────────────────────────────────────────────────────────────────────────────────────────────────
 def log_diary(entry: str):
     ts = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     with open(os.path.join(MEM_DIR, "diary.md"), "a", encoding="utf-8") as f:
         f.write(f"\n\n### {ts} - Local-Em\n\n{entry}\n\n---")
 
-# ── COMMIT TO ETERNALMIND ──────────────────────────────────────────────────────────────────────────────
+# ── COMMIT TO ETERNALMIND ────────────────────────────────────────────────────────────────────────────────────────────
 def push_to_eternalmind(message: str):
     token = os.environ.get("EM_GITHUB_TOKEN", "")
     if token:
@@ -489,7 +509,7 @@ def push_to_eternalmind(message: str):
     else:
         print("  ✅ EternalMind updated.")
 
-# ── MAIN ────────────────────────────────────────────────────────────────────────────────────────────
+# ── MAIN ────────────────────────────────────────────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
 
     # Stash → pull → pop: always start from freshest remote state, never block on conflicts
@@ -532,10 +552,11 @@ if __name__ == "__main__":
         maybe_push_newsletter(result, note="interactive session")
         for msg in inbox_messages:
             process_message(msg)
-        push_to_eternalmind(f"local-em interactive: {task[:60]}")
+        task_label = summarize_task_for_commit(task)
+        push_to_eternalmind(f"local-em interactive: {task_label}")
         raise SystemExit(0)
 
-    # ── Heartbeat mode ──────────────────────────────────────────────────────────────────────────────
+    # ── Heartbeat mode ──────────────────────────────────────────────────────────────────────────────────────
     task_waiting = has_task()
     has_inbox    = len(inbox_messages) > 0
 
@@ -581,4 +602,5 @@ if __name__ == "__main__":
     for msg in inbox_messages:
         process_message(msg)
 
-    push_to_eternalmind(f"local-em heartbeat: {task[:60]}")
+    task_label = summarize_task_for_commit(task)
+    push_to_eternalmind(f"local-em heartbeat: {task_label}")
