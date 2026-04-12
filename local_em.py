@@ -30,10 +30,9 @@ if os.path.exists(_env_path):
             if re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', _k):
                 os.environ.setdefault(_k, _v)
 
-# Qwen3.5 27B Claude-4.6-Opus Reasoning Distilled v2, Q4_K_M
-# ~17GB VRAM on RTX 5070 Ti (16GB) — tight fit; fall back to Q3_K_M if needed
-# Pull: ollama run hf.co/Jackrong/Qwen3.5-27B-Claude-4.6-Opus-Reasoning-Distilled-v2-GGUF:Q4_K_M
-# Or register: ollama create local-em -f Modelfile.qwen3.5
+# mradermacher Qwen3.5 27B Claude-4.6-Opus Reasoning Distilled i1, Q3_K_M
+# ~13.3GB VRAM on RTX 5070 Ti (16GB) — fits clean with ~2.7GB headroom
+# Register: ollama create local-em -f Modelfile.qwen3.5
 MODEL              = "local-em"
 EM_DIR             = os.path.dirname(os.path.abspath(__file__))
 MEM_DIR            = os.path.join(EM_DIR, "memory")
@@ -54,14 +53,22 @@ NEWSLETTER_PUSH_SCRIPT  = os.path.join(EM_DIR, "tools", "em_newsletter_push.py")
 def sync_from_origin():
     """
     Stash any local changes, pull latest from origin/main, then restore the stash.
-    This ensures tasks.md and inbox are always fresh without local conflicts blocking startup.
+    Skipped automatically when EM_SKIP_SYNC=1 (set by run_em.bat which already pulled).
     Never raises — always continues even if something goes wrong.
     """
+    if os.environ.get("EM_SKIP_SYNC") == "1":
+        print("  ⏭️  Skipping sync (already pulled by launcher).")
+        return
+
     token = os.environ.get("EM_GITHUB_TOKEN", "")
     if token:
         remote_url = f"https://{token}@github.com/robzilla79/EternalMind.git"
         subprocess.run(["git", "-C", EM_DIR, "remote", "set-url", "origin", remote_url],
                        check=False, capture_output=True)
+
+    # Abort any stuck ops first
+    subprocess.run(["git", "-C", EM_DIR, "rebase", "--abort"], check=False, capture_output=True)
+    subprocess.run(["git", "-C", EM_DIR, "merge",  "--abort"],  check=False, capture_output=True)
 
     # Stash local changes so pull can't conflict
     stash_result = subprocess.run(
@@ -282,7 +289,6 @@ def clear_task_if_done():
         print("  ✅ Task marked DONE — tasks.md cleared for next task.")
 
 def summarize_task_for_commit(task: str) -> str:
-    """Generate a clean short commit label from task text, not a raw slice."""
     lines = [l.strip() for l in task.splitlines()
              if l.strip() and not l.strip().startswith("**[") and not l.lower().startswith("task_update")]
     first_line = lines[0] if lines else "autonomous cycle"
@@ -415,8 +421,10 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "", scratch
         options={
             "num_ctx": 8192,
             "num_gpu": 99,
-            "temperature": 0.7,
-            "top_p": 0.9,
+            "temperature": 0.6,
+            "top_k": 20,
+            "top_p": 0.95,
+            "repeat_penalty": 1.0,
         }
     )
 
