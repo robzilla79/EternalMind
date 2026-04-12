@@ -394,13 +394,16 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "", scratch
     user_content = task
     if extra_context:
         user_content += f"\n\n--- Tool Results ---\n{extra_context}"
-    print(f"\n Local-Em online. Task: {task[:80]}...\n")
-    response = ollama.chat(
+
+    print(f"\n💭 Em is thinking...\n")
+
+    stream = ollama.chat(
         model=MODEL,
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user",   "content": user_content}
         ],
+        stream=True,
         options={
             "num_ctx": 8192,       # context window — bump to 16384 if VRAM allows
             "num_gpu": 99,         # all layers on GPU
@@ -408,7 +411,15 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "", scratch
             "top_p": 0.9,
         }
     )
-    return response["message"]["content"]
+
+    result = ""
+    for chunk in stream:
+        token = chunk["message"]["content"]
+        print(token, end="", flush=True)
+        result += token
+
+    print("\n")  # newline after stream ends
+    return result
 
 # ── LOG MEMORY ─────────────────────────────────────────────────────────────────────────────────────────────────────
 def log_memory(summary: str, kind: str = "heartbeat", tags: list = None):
@@ -538,7 +549,6 @@ if __name__ == "__main__":
             result = ask_em(task, extra_context=f"{first_response}\n\n{combined}", recent_context=recent_context, scratch=scratch)
         else:
             result = first_response
-        print(f"\n-- Em's response --\n{result}\n")
         notify_msg = extract_notify(result)
         if notify_msg:
             from tools.notify_rob import notify
@@ -582,8 +592,6 @@ if __name__ == "__main__":
         )
     else:
         result = first_response
-
-    print(f"\n-- Em's response --\n{result}\n")
 
     notify_msg = extract_notify(result)
     if notify_msg:
