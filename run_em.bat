@@ -25,4 +25,4 @@ echo.
 echo OLLAMA_HOST=%OLLAMA_HOST%
 echo Starting Em...
 echo.
-python local_em.py --interactive
+python local_em.py
