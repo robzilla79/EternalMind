@@ -1,16 +1,17 @@
-FROM hf.co/mradermacher/Qwen3.5-27B-Claude-4.6-Opus-Reasoning-Distilled-i1-GGUF:Q3_K_M
+FROM hf.co/Jackrong/Qwen3.5-27B-Claude-4.6-Opus-Reasoning-Distilled-v2-GGUF:Q4_K_M
 
-# EternalMind / Local-Em — Qwen3.5 27B Claude-4.6-Opus Reasoning Distilled i1, Q3_K_M
-# RTX 5070 Ti (16GB VRAM) — ~13.3GB weights
-# num_ctx 4096 keeps KV cache ~1GB so all layers fit on GPU
-# Bump to 6144 if you want more context and VRAM holds
+# EternalMind / Local-Em — Qwen3.5 27B Claude-4.6-Opus Reasoning Distilled v2, Q4_K_M
+# RTX 5070 Ti (16GB VRAM)
+# Standard GGUF (not imatrix) — GPU offload works reliably
+# num_ctx 2048 keeps KV cache ~0.5GB so all 65 layers land on GPU
+# Bump to 4096 if inference is stable and VRAM holds
 # Trained on: nohurry/Opus-4.6-Reasoning-3000x + Roman1111111/claude-opus-4.6-10000x
-# Source: https://huggingface.co/mradermacher/Qwen3.5-27B-Claude-4.6-Opus-Reasoning-Distilled-i1-GGUF
+# Source: https://hf.co/Jackrong/Qwen3.5-27B-Claude-4.6-Opus-Reasoning-Distilled-v2-GGUF
 #
 # To register with Ollama:
 #   ollama create local-em -f Modelfile.qwen3.5
 
-PARAMETER num_ctx 4096
+PARAMETER num_ctx 2048
 PARAMETER num_gpu 99
 PARAMETER temperature 0.6
 PARAMETER top_k 20
