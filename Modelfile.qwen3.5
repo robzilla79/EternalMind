@@ -4,12 +4,13 @@ FROM Z:\ollama_models\blobs\sha256-51ce67b6936e98b60abc4f61af79c3f5edd1610871818
 # RTX 5070 Ti (16GB VRAM)
 # Standard GGUF (not imatrix) — GPU offload works reliably
 # num_ctx 2048 keeps KV cache ~0.5GB so all 65 layers land on GPU
-# Bump to 4096 if inference is stable and VRAM holds
-# Trained on: nohurry/Opus-4.6-Reasoning-3000x + Roman1111111/claude-opus-4.6-10000x
 # Source: https://hf.co/Jackrong/Qwen3.5-27B-Claude-4.6-Opus-Reasoning-Distilled-v2-GGUF
 #
 # To register with Ollama:
 #   ollama create local-em -f Modelfile.qwen3.5
+
+# Override Qwen3.5's built-in system prompt to prevent identity hijack
+SYSTEM ""
 
 PARAMETER num_ctx 2048
 PARAMETER num_gpu 99
