@@ -1,5 +1,6 @@
 @echo off
 SET OLLAMA_HOST=http://127.0.0.1:11434
+SET EM_SKIP_SYNC=1
 SET PATH=C:\Program Files\Python312;C:\Program Files\Python312\Scripts;%PATH%
 cd C:\Users\RKSFAMILY\EternalMind
 
@@ -24,4 +25,4 @@ echo.
 echo OLLAMA_HOST=%OLLAMA_HOST%
 echo Starting Em...
 echo.
-python local_em.py
+python local_em.py --interactive
