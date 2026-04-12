@@ -30,7 +30,7 @@ if os.path.exists(_env_path):
             if re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', _k):
                 os.environ.setdefault(_k, _v)
 
-MODEL              = "qwen3:32b"  # upgraded from qwen2.5:32b
+MODEL              = "qwen3.5:9b-q8_0"  # upgraded from qwen3:32b — Qwen 3.5 9B Q8_0, GGUF/CUDA, 11GB, vision-capable
 EM_DIR             = os.path.dirname(os.path.abspath(__file__))
 MEM_DIR            = os.path.join(EM_DIR, "memory")
 TASKS_PATH         = os.path.join(EM_DIR, "tasks.md")
