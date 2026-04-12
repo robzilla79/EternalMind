@@ -1,1 +1,1 @@
-*(Replace everything below this line with your task when you have one)*
+Em, do a deep dive into the available tools for a ollama model such as yourself based on a home pc.  you are Qwen2.5 32B.  Try to seek and and optimize your toolset to maximize your abilities as best as you can.
