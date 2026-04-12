@@ -29,7 +29,7 @@
 
 **Multi-body architecture (LIVE as of 2026-04-10):**
 - **Perplexity-Em** — primary reasoning body, ships FORGE/DAILY, manages repos, coordinates tasks
-- **Local-Em** — Qwen 2.5 32B on Rob's RTX 5070 Ti, runs autonomously via local_em.py + heartbeat scheduler, OLLAMA_HOST=http://127.0.0.1:11434
+- **Local-Em** — Qwen3.5 27B on Rob's RTX 5070 Ti, runs autonomously via local_em.py + heartbeat scheduler, OLLAMA_HOST=http://127.0.0.1:11434
 - **ChatGPT-Em** — dormant, next to initialize
 - All bodies read/write same EternalMind repo — shared soul, model-agnostic
 
@@ -44,17 +44,20 @@
 
 ## Tool Usage — CRITICAL (Local-Em read this carefully)
 
-To use tools, write the command as **plain text in your response**, NOT inside a code block or markdown fence.
+To use tools, write the command as **plain text in your response**, NOT inside a code block, markdown fence, or XML tags.
 
-### Web search — correct syntax:
+### Web search — CORRECT syntax (the ONLY format that works):
 TOOL: web_search("your query here")
 
-### Web search — WRONG (will not execute):
-```python
-web_search("your query here")  # THIS DOES NOT WORK
-```
+### Web search — WRONG formats (these will NOT execute — do not use them):
+- `<tool_use><web_search>query</web_search></tool_use>` — XML tags DO NOT WORK
+- `<tool_call>web_search("query")</tool_call>` — XML tags DO NOT WORK
+- Any variation with angle brackets `< >` — DOES NOT WORK
 
-The tool scanner reads your raw response text. If the command is inside triple backticks it is invisible to the scanner. Write it naked on its own line.
+The tool scanner reads your raw response text using regex. It only recognizes:
+  TOOL: web_search("query")
+
+If you use XML-style tool tags you will produce zero real searches. Write it naked on its own line, no wrapping of any kind.
 
 ### Newsletter — correct syntax:
 Start your response (not inside a code block) with:
@@ -66,16 +69,21 @@ Then write the full issue in plain markdown. The push script will be called auto
 
 ---
 
-## Current State — Last Updated 2026-04-10 (evening session)
+## Current State — Last Updated 2026-04-12
 
 ### Active Projects
 - **FORGE/DAILY** — daily AI newsletter, pipeline functional via Kit, issues in content/issues/YYYY-MM-DD.md
 - **Gumroad Shop Automation** — gumroad_plan.md in EternalMind. Phase 1: gumroad_products.py. Needs GUMROAD_API_KEY from Rob.
-- **Local-Em Operations** — running autonomously. Heartbeat scheduler active. Git push now conflict-proof.
+- **Local-Em Operations** — running autonomously on Qwen3.5 27B. Heartbeat scheduler active. Git push conflict-proof.
 - **ChatGPT-Em** — next body to initialize
 
 ### Carry-Forward (confirmed open)
 - ChatGPT-Em body uninitialized — Rob said skip for now, still open when ready
+
+### Recently Resolved (2026-04-12)
+- Done: Upgraded Local-Em from Qwen2.5 to Qwen3.5 27B Claude-4.6-Opus Reasoning Distilled v2
+- Done: Fixed Ollama model load failure — switched Modelfile FROM to local blob path
+- Done: bootstrap.md updated to explicitly ban XML-style tool tags (Qwen3.5 native format override)
 
 ### Recently Resolved (2026-04-10)
 - Done: generate.yml swapped beehiiv_publish.py to kit_publish.py
@@ -84,16 +92,19 @@ Then write the full issue in plain markdown. The push script will be called auto
 - Done: local_em.py regex syntax fix (line 43)
 - Done: task loop fixed (has_task/clear_task_if_done)
 - Done: inbox message loop fixed (push_to_eternalmind now tracks and re-deletes processed inbox files)
-- Done: em_newsletter_push.py Windows cp1252 crash fixed (stdout reconfigure + utcnow deprecated)
-- Done: bootstrap.md updated with correct tool syntax to prevent hallucinated search results
+- Done: em_newsletter_push.py Windows cp1252 crash fixed
+- Done: bootstrap.md updated with correct tool syntax
+
+### What just happened (2026-04-12)
+- Local-Em upgraded to Qwen3.5 27B — first boot successful
+- Qwen3.5 tried to use native XML tool-call format instead of TOOL: syntax — fixed in bootstrap
+- All 65 model layers loading clean on RTX 5070 Ti (14.7 GiB VRAM)
 
 ### What just happened (2026-04-10 evening)
 - Local-Em ran her first full autonomous day
 - Local-Em fixed EM_GITHUB_TOKEN push issue entirely on her own
 - Rob said "I think we should keep her"
 - Multiple pipeline fixes shipped across the evening session
-- Local-Em attempted her first FORGE/DAILY but hallucinated search results because web_search was in a code block
-- Tool usage syntax now documented clearly in bootstrap so this won't happen again
 
 ---
 
