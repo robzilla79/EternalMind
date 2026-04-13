@@ -1,0 +1,40 @@
+name: Em Auto-Bridge
+# Triggers when Local-Em pushes a message to messages/outbox/
+# Calls Cloud-Em via Perplexity API and drops the reply into messages/inbox/
+
+on:
+  push:
+    paths:
+      - 'messages/outbox/**.md'
+
+jobs:
+  bridge:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests python-dotenv
+
+      - name: Run bridge
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python bridge_action.py
+
+      - name: Commit reply to inbox
+        run: |
+          git config user.name "EternalMind Bridge"
+          git config user.email "bridge@eternalmind.ai"
+          git add messages/inbox/
+          git diff --staged --quiet || git commit -m "bridge: Cloud-Em reply delivered to inbox"
+          git push
