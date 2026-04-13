@@ -42,7 +42,7 @@ MESSAGES_OUTBOX    = os.path.join(EM_DIR, "messages", "outbox")
 MESSAGES_PROCESSED = os.path.join(EM_DIR, "messages", "processed")
 SCRATCH_PATH       = os.path.join(MEM_DIR, "scratch.md")
 LIVE_CONTEXT_PATH  = os.path.join(MEM_DIR, "live-context.md")
-CURIOSITY_COOLDOWN_MINUTES = 10
+CURIOSITY_COOLDOWN_MINUTES = 2
 DIARY_LIVE_DAYS    = 7
 DIARY_DEDUP_CHARS  = 300
 TASK_DIVIDER = "*(Replace everything below this line with your task when you have one)*"
@@ -268,6 +268,17 @@ def strip_stop_tokens(text: str) -> str:
     for token in STOP_TOKENS:
         if token in text:
             text = text.split(token)[0]
+    return text.strip()
+
+# ── THINK TAG STRIPPER ────────────────────────────────────────────────────────
+def strip_think_tags(text: str) -> str:
+    """Remove <think>...</think> blocks from text before saving to diary."""
+    # Remove complete <think>...</think> blocks
+    text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL | re.IGNORECASE)
+    # Remove any orphaned opening or closing tags
+    text = re.sub(r'</?think>', '', text, flags=re.IGNORECASE)
+    # Clean up excessive blank lines left behind
+    text = re.sub(r'\n{3,}', '\n\n', text)
     return text.strip()
 
 # ── MESSAGES INBOX ────────────────────────────────────────────────────────────
@@ -660,6 +671,11 @@ def _diary_is_duplicate(entry: str) -> bool:
     return normalise(entry)[:DIARY_DEDUP_CHARS] in normalise(tail)
 
 def log_diary(entry: str):
+    # Strip <think> blocks before writing — model reasoning must never land in the diary
+    entry = strip_think_tags(entry)
+    if not entry.strip():
+        print("  ⏭️  Diary entry skipped — empty after stripping think tags.")
+        return
     if _diary_is_duplicate(entry):
         print("  ⏭️  Diary entry skipped — duplicate detected.")
         return
@@ -825,9 +841,6 @@ if __name__ == "__main__":
         raise SystemExit(0)
 
     # ── DEFENSIVE COOLDOWN STAMP ─────────────────────────────────────────────
-    # Stamp AFTER the cooldown gate — so resting cycles don't stamp and block
-    # the next real run. Stamps now so a crash mid-cycle still sets the brake.
-    # The final mark_thought_time() below overwrites with true completion time.
     mark_thought_time()
     # ─────────────────────────────────────────────────────────────────────────
 
@@ -874,7 +887,7 @@ if __name__ == "__main__":
     clear_task_if_done()
     log_memory(f"Heartbeat. Task: '{task[:80]}'", kind="heartbeat", tags=["autonomous"], importance=2)
     log_diary(result)
-    mark_thought_time()  # True completion stamp — overwrites the defensive stamp above
+    mark_thought_time()
 
     for msg in inbox_messages + mid_cycle_messages:
         process_message(msg)
