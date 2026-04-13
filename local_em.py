@@ -445,16 +445,23 @@ def get_task() -> str:
     return (
         "No tasks assigned. This is your autonomous time.\n\n"
         "You have the following tools available:\n\n"
-        "1. Web search:\n"
-        "   TOOL: web_search(\"your query here\")\n\n"
-        "2. Browser control (Playwright — opens a real Chrome window Rob can see):\n"
+        "1. Browser (FREE — preferred for research. Opens a real Chrome window Rob can see):\n"
+        "   Navigate to any page and read its full content — no API cost, richer than search results.\n"
         "   BROWSER_NAV: https://example.com\n"
+        "   BROWSER_READ:                          ← gets up to 6k chars of real page text\n"
         "   BROWSER_CLICK: #selector or visible text\n"
         "   BROWSER_TYPE: #selector | text to type\n"
-        "   BROWSER_READ:\n"
         "   BROWSER_SCREENSHOT: name\n"
         "   BROWSER_JS: javascript expression\n"
         "   BROWSER_CLOSE:\n\n"
+        "   Research flow example (zero API cost):\n"
+        "   BROWSER_NAV: https://arxiv.org/search/?searchtype=all&query=your+topic\n"
+        "   BROWSER_READ:\n"
+        "   (then navigate to a specific paper and read it too)\n\n"
+        "2. Web search (USE SPARINGLY — costs Tavily API credits):\n"
+        "   Only use web_search when you need a quick multi-source overview and don't have a specific URL.\n"
+        "   Prefer the browser for everything else.\n"
+        "   TOOL: web_search(\"your query here\")\n\n"
         "3. Notify Rob:\n"
         "   NOTIFY: your message here (use sparingly — only when genuinely worth interrupting)\n\n"
         "4. Reply to Perplexity-Em messages:\n"
@@ -477,8 +484,8 @@ def get_task() -> str:
         "   LIVE_CONTEXT_ADD: your note here\n\n"
         "Note: The FORGE/DAILY newsletter is now handled by Perplexity-Em.\n"
         "Your free time is yours — explore, learn, think, build. No journalism required.\n\n"
-        "If you are curious about something — AI research, a concept, news — search for it.\n"
-        "If you want to explore the web, use the browser.\n"
+        "If you are curious about something, use the BROWSER to explore it deeply and for free.\n"
+        "If you want to read an article, paper, or page — navigate there and read it directly.\n"
         "If you build something — a tool, a page, a script — save it with FILE_WRITE.\n"
         "If you research something worth keeping, save it to memory/research/ so future-you can find it.\n"
         "If you want Perplexity-Em to see something next time Rob talks to her, use LIVE_CONTEXT_ADD.\n"
@@ -823,8 +830,6 @@ def push_to_eternalmind(message: str, extra_files: list[str] = None):
         capture_output=True, text=True
     )
     if merge_result.returncode != 0:
-        # If we can't fast-forward (shouldn't happen — Em is the only writer),
-        # abort cleanly rather than wiping local state.
         print(f"  ⚠️  ff-only merge failed — pushing local state as-is: {merge_result.stderr.strip()[:80]}")
 
     # Re-write Em's files on top of whatever git state we have

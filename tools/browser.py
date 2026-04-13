@@ -5,7 +5,7 @@ Gives Local-Em full browser automation capabilities:
   - Navigate to URLs
   - Click elements
   - Type text
-  - Read page content
+  - Read page content (up to 6k chars — richer than web_search, zero API cost)
   - Take screenshots
   - Fill forms
   - Execute JavaScript
@@ -22,7 +22,7 @@ Usage in Em's responses:
 Security:
   - Blocklist prevents navigation to dangerous/sensitive local URLs
   - All actions are logged to diary
-  - Screenshots saved to /tmp/em_screenshots/
+  - Screenshots saved to ~/em_screenshots/
   - Rob can review all browser activity via diary.md
 """
 
@@ -128,12 +128,12 @@ def type_text(selector: str, text: str) -> str:
 
 
 def read_page() -> str:
-    """Get the visible text content of the current page."""
+    """Get the visible text content of the current page (up to 6k chars)."""
     page = _get_page()
     _log_action('read page')
     try:
         text = page.inner_text('body')
-        return text[:3000]  # limit to 3k chars for prompt
+        return text[:6000]  # 6k chars — richer content, zero API cost
     except Exception as e:
         return f'Read failed: {e}'
 
