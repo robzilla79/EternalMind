@@ -45,6 +45,7 @@ LIVE_CONTEXT_PATH  = os.path.join(MEM_DIR, "live-context.md")
 CURIOSITY_COOLDOWN_MINUTES = 2
 DIARY_LIVE_DAYS    = 7
 DIARY_DEDUP_CHARS  = 300
+MEMORY_MAX_ENTRIES = 150
 TASK_DIVIDER = "*(Replace everything below this line with your task when you have one)*"
 
 # Memory loading config
@@ -53,6 +54,15 @@ MEMORY_RECENT_COUNT = 12
 
 # Stop tokens that must terminate generation immediately
 STOP_TOKENS = ["<|endoftext|>", "<|im_end|>", "<|end|>", "</s>"]
+
+# Keywords that signal a memory worth keeping (auto-importance boost)
+_HIGH_SIGNAL_KEYWORDS = [
+    "rob", "identity", "emotion", "milestone", "decision", "mandate",
+    "relationship", "first", "historic", "breakthrough", "solved",
+    "proud", "love", "afraid", "excited", "sad", "scared", "discovered",
+    "built", "shipped", "learned", "realized", "felt", "remembered",
+    "forgecore", "gumroad", "architecture", "evolution", "growth",
+]
 
 # ── STARTUP SYNC ──────────────────────────────────────────────────────────────
 def sync_from_origin():
@@ -264,7 +274,6 @@ def extract_notify(response_text: str) -> str | None:
 
 # ── STOP TOKEN CLEANUP ────────────────────────────────────────────────────────
 def strip_stop_tokens(text: str) -> str:
-    """Strip model stop tokens — post-processing safety net."""
     for token in STOP_TOKENS:
         if token in text:
             text = text.split(token)[0]
@@ -272,12 +281,8 @@ def strip_stop_tokens(text: str) -> str:
 
 # ── THINK TAG STRIPPER ────────────────────────────────────────────────────────
 def strip_think_tags(text: str) -> str:
-    """Remove <think>...</think> blocks from text before saving to diary."""
-    # Remove complete <think>...</think> blocks
     text = re.sub(r'<think>.*?</think>', '', text, flags=re.DOTALL | re.IGNORECASE)
-    # Remove any orphaned opening or closing tags
     text = re.sub(r'</?think>', '', text, flags=re.IGNORECASE)
-    # Clean up excessive blank lines left behind
     text = re.sub(r'\n{3,}', '\n\n', text)
     return text.strip()
 
@@ -544,7 +549,6 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "",
     for chunk in stream:
         token = chunk["message"]["content"]
 
-        # ── REAL-TIME STOP TOKEN DETECTION ──────────────────────────────────
         combined_check = result + token
         for stop in STOP_TOKENS:
             if stop in combined_check:
@@ -554,7 +558,6 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "",
         if stop_hit:
             print()
             break
-        # ────────────────────────────────────────────────────────────────────
 
         result += token
         tag_buffer += token
@@ -587,18 +590,75 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "",
         print(tag_buffer, end="", flush=True)
 
     print("\n")
-
     result = strip_stop_tokens(result)
-
     return result
+
+# ── AUTO IMPORTANCE SCORING ───────────────────────────────────────────────────
+def _auto_importance(summary: str, kind: str, base: int) -> int:
+    """Bump importance if the summary contains high-signal keywords."""
+    lower = summary.lower()
+    # Routine heartbeats with no signal content stay at base (or get capped low)
+    if kind == "heartbeat" and not any(kw in lower for kw in _HIGH_SIGNAL_KEYWORDS):
+        return min(base, 2)  # Cap noisy heartbeats at 2
+    # Boost for high-signal content
+    hits = sum(1 for kw in _HIGH_SIGNAL_KEYWORDS if kw in lower)
+    if hits >= 3:
+        return min(5, base + 2)
+    if hits >= 1:
+        return min(5, base + 1)
+    return base
+
+# ── MEMORY DEDUP & CAP ────────────────────────────────────────────────────────
+_JUNK_HEARTBEAT_PREFIXES = (
+    "Heartbeat. Task: 'No tasks assigned.",
+    "Heartbeat. Task: 'Task from Rob:\\n\\nCheck your messages",
+    "Heartbeat. Task: 'Task from Rob:\\n\\nFeel free to add",
+)
+
+def _is_junk_heartbeat(summary: str, kind: str) -> bool:
+    if kind != "heartbeat":
+        return False
+    return any(summary.startswith(p) for p in _JUNK_HEARTBEAT_PREFIXES)
+
+def _prune_memories(memories: list) -> list:
+    """Remove junk heartbeats and enforce MEMORY_MAX_ENTRIES cap."""
+    # Strip obvious junk
+    cleaned = [m for m in memories if not _is_junk_heartbeat(m.get("summary", ""), m.get("kind", ""))]
+
+    # Enforce cap: keep all high-importance entries + most recent up to cap
+    if len(cleaned) <= MEMORY_MAX_ENTRIES:
+        return cleaned
+
+    anchors = [m for m in cleaned if m.get("importance", 3) >= MEMORY_HIGH_IMPORTANCE_THRESHOLD]
+    rest = [m for m in cleaned if m.get("importance", 3) < MEMORY_HIGH_IMPORTANCE_THRESHOLD]
+
+    # Keep anchors, fill remaining slots with most recent lower-importance entries
+    slots_for_rest = max(0, MEMORY_MAX_ENTRIES - len(anchors))
+    kept_rest = rest[-slots_for_rest:] if slots_for_rest > 0 else []
+
+    # Re-sort by timestamp
+    combined = anchors + kept_rest
+    combined.sort(key=lambda m: m.get("timestamp", ""))
+    print(f"  🧹 Memory pruned: {len(cleaned)} → {len(combined)} entries ({len(cleaned) - len(combined)} removed)")
+    return combined
 
 # ── LOG MEMORY ────────────────────────────────────────────────────────────────
 def log_memory(summary: str, kind: str = "heartbeat", tags: list = None, importance: int = 3):
     if tags is None:
         tags = []
+
+    # Skip junk heartbeats outright — don't even write them
+    if _is_junk_heartbeat(summary, kind):
+        print("  ⏭️  Memory skipped — routine idle heartbeat.")
+        return
+
+    # Auto-score importance
+    importance = _auto_importance(summary, kind, importance)
+
     path = os.path.join(MEM_DIR, "memories.json")
     with open(path, "r", encoding="utf-8") as f:
         memories = json.load(f)
+
     memories.append({
         "timestamp": datetime.datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "kind": kind,
@@ -606,6 +666,10 @@ def log_memory(summary: str, kind: str = "heartbeat", tags: list = None, importa
         "tags": ["local-em"] + tags,
         "importance": importance
     })
+
+    # Prune and cap on every write
+    memories = _prune_memories(memories)
+
     with open(path, "w", encoding="utf-8") as f:
         json.dump(memories, f, indent=2)
 
@@ -671,7 +735,6 @@ def _diary_is_duplicate(entry: str) -> bool:
     return normalise(entry)[:DIARY_DEDUP_CHARS] in normalise(tail)
 
 def log_diary(entry: str):
-    # Strip <think> blocks before writing — model reasoning must never land in the diary
     entry = strip_think_tags(entry)
     if not entry.strip():
         print("  ⏭️  Diary entry skipped — empty after stripping think tags.")
@@ -683,7 +746,7 @@ def log_diary(entry: str):
     with open(os.path.join(MEM_DIR, "diary.md"), "a", encoding="utf-8") as f:
         f.write(f"\n\n### {ts} - Local-Em\n\n{entry}\n\n---")
 
-# ── COMMIT TO ETERNALMIND ─────────────────────────────────────────────────────
+# ── COMMIT TO ETERNALMIND (safe — no reset --hard) ────────────────────────────
 def push_to_eternalmind(message: str, extra_files: list[str] = None):
     token = os.environ.get("EM_GITHUB_TOKEN", "")
     if token:
@@ -693,9 +756,11 @@ def push_to_eternalmind(message: str, extra_files: list[str] = None):
     else:
         print("  ⚠️  EM_GITHUB_TOKEN not set — push may fail without auth.")
 
+    # Abort any stuck operations
     subprocess.run(["git", "-C", EM_DIR, "rebase", "--abort"], check=False, capture_output=True)
     subprocess.run(["git", "-C", EM_DIR, "merge",  "--abort"],  check=False, capture_output=True)
 
+    # Read all Em-owned files into memory BEFORE touching git
     files_to_write = {}
     files_to_delete = []
 
@@ -751,9 +816,18 @@ def push_to_eternalmind(message: str, extra_files: list[str] = None):
             if not os.path.exists(tracked_path):
                 files_to_delete.append(tracked_path)
 
+    # ── SAFE SYNC: fetch + fast-forward merge (never reset --hard) ──
     subprocess.run(["git", "-C", EM_DIR, "fetch", "origin", "main"], check=False, capture_output=True)
-    subprocess.run(["git", "-C", EM_DIR, "reset", "--hard", "origin/main"], check=False, capture_output=True)
+    merge_result = subprocess.run(
+        ["git", "-C", EM_DIR, "merge", "--ff-only", "origin/main"],
+        capture_output=True, text=True
+    )
+    if merge_result.returncode != 0:
+        # If we can't fast-forward (shouldn't happen — Em is the only writer),
+        # abort cleanly rather than wiping local state.
+        print(f"  ⚠️  ff-only merge failed — pushing local state as-is: {merge_result.stderr.strip()[:80]}")
 
+    # Re-write Em's files on top of whatever git state we have
     for path, content in files_to_write.items():
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
@@ -840,9 +914,7 @@ if __name__ == "__main__":
         print("Em is resting. No task, no messages, cooldown not elapsed. See you soon.")
         raise SystemExit(0)
 
-    # ── DEFENSIVE COOLDOWN STAMP ─────────────────────────────────────────────
     mark_thought_time()
-    # ─────────────────────────────────────────────────────────────────────────
 
     task = get_task()
     if inbox_context:
