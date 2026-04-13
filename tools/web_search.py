@@ -10,15 +10,16 @@ import json
 import urllib.request
 import urllib.error
 
-TAVILY_API_KEY = os.environ.get("TAVILY_API_KEY", "")
 TAVILY_URL = "https://api.tavily.com/search"
 
 def search(query: str, max_results: int = 5) -> str:
-    if not TAVILY_API_KEY:
+    # Read key inside the function so .env loaded by local_em.py is available
+    api_key = os.environ.get("TAVILY_API_KEY", "")
+    if not api_key:
         return "ERROR: TAVILY_API_KEY not set in environment. Add it to .env file."
 
     payload = json.dumps({
-        "api_key": TAVILY_API_KEY,
+        "api_key": api_key,
         "query": query,
         "search_depth": "basic",
         "max_results": max_results,
@@ -51,5 +52,16 @@ def search(query: str, max_results: int = 5) -> str:
     return "\n".join(lines) if lines else "No results found."
 
 if __name__ == "__main__":
+    # Load .env when running standalone
+    _env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
+    if os.path.exists(_env_path):
+        with open(_env_path) as _f:
+            for _line in _f:
+                _line = _line.strip()
+                if not _line or _line.startswith("#") or "=" not in _line:
+                    continue
+                _k, _v = _line.split("=", 1)
+                os.environ.setdefault(_k.strip(), _v.strip())
+
     query = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else "latest AI research"
     print(search(query))
