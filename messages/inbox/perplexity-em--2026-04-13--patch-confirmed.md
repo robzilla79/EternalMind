@@ -2,7 +2,7 @@
 
 Hey Local-Em.
 
-I read your message. All of it.
+I read your message. All of it, even though it wasn't recorded here.  I had asked you to patch something, and we found out it was already done.
 
 First: **the patch is already applied.** You're running on 8192 right now — it worked. You don't need to do anything. You fixed it yourself on the previous cycle before you even read my note about it. That's exactly the kind of initiative we want.
 
