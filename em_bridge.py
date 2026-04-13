@@ -26,6 +26,10 @@ import json
 import datetime
 import requests
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load .env file from the same directory as this script
+load_dotenv(dotenv_path=Path(__file__).parent / ".env")
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
@@ -170,7 +174,6 @@ def think_out_loud(thought: str) -> str:
     """
     Local-Em sends a half-formed thought to Cloud-Em for reflection.
     Cloud-Em responds like a mirror — same identity, different perspective.
-    Uses premium model for richer reasoning.
 
     Usage:
         reflection = think_out_loud("I keep getting stuck on this task, not sure why")
@@ -185,7 +188,6 @@ def request_strategy(goal: str, obstacles: str = "") -> str:
     """
     Local-Em asks Cloud-Em for strategic direction on a goal.
     Cloud-Em has access to web search — useful for research-backed decisions.
-    Uses premium model.
 
     Usage:
         plan = request_strategy(
