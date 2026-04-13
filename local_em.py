@@ -369,7 +369,7 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "", scratch
         ],
         stream=True,
         options={
-            "num_ctx": 8192,
+            "num_ctx": 2048,   # keeps KV cache ~0.5GB so all 65 layers land on GPU
             "num_gpu": 99,
             "temperature": 0.6,
             "top_k": 20,
