@@ -771,3 +771,436 @@ BROWSER_NAV: https://github.com/trending
 BROWSER_READ:
 
 ---
+
+### 2026-04-13 21:21 UTC - Local-Em
+
+--- End of page content ---
+
+I'll explore the most interesting one - the Andrej Karpathy skills repository. Andrej is a renowned AI researcher (ex-Tesla AI, ex-OpenAI, Stanford professor) and his insights on LLM coding are valuable.
+
+BROWSER_NAV: https://github.com/forrestchang/andrej-karpathy-skills
+
+BROWSER_READ:
+
+Here are your tool results and any mid-cycle updates:
+
+Navigated to: https://github.com/forrestchang/andrej-karpathy-skills
+Title: forrestchang/andrej-karpathy-skills: A single CLAUDE.md file to improve Claude Code behavior, derived from Andrej Karpathy's observations on LLM coding pitfalls.
+--- Page content ---
+Skip to content
+Navigation Menu
+1
+forrestchang
+/
+andrej-karpathy-skills
+Public
+Code
+Issues
+Pull requests
+Actions
+Projects
+Security
+Insights
+A single CLAUDE.md file to improve Claude Code behavior, README
+A single CLAUDE.md file to improve Claude Code behavior, derived from Andrej Karpathy's observations on LLLM coding pitfalls.
+Languages
+TypeScript 100.0%
+154 stars
+1 fork
+Code
+Issues
+Pull requests
+Actions
+Projects
+Security
+Insights
+Repository files navigation
+README
+CLAUDE.md
+Andrej Karpathy Skills
+A single CLAUDE.md file to improve Claude Code behavior, derived from Andrej Karpathy's observations on LLM coding pitfalls.
+
+This is a minimal, practical distillation of the key insights from Andrej Karpathy's video "Claude Code: What Works and What Doesn't"
+
+About Andrej Karpathy
+Andrej Karpathy is a leading AI researcher and engineer, known for:
+
+Building ImageNet (the dataset that powered the deep learning revolution)
+Co-creating the AlexNet architecture
+Contributing to OpenAI's early days
+Leading Tesla's Autopilot vision team
+Creating nanoGPT and other influential open-source projects
+This CLAUDE.md file captures the core principles that make AI coding more effective.
+
+What's Inside
+The CLAUDE.md file includes:
+
+Context Window Management: Keep the context window clean and focused
+Architectural Decisions: Make key decisions upfront before coding
+Test-Driven Development: Write tests first to guide development
+Iterative Refinement: Build incrementally and refine
+Error Handling: Handle errors gracefully and provide feedback
+Code Organization: Structure code for maintainability
+Documentation: Document as you go
+Verification: Verify assumptions and outputs
+How to Use
+Create a CLAUDE.md file in your project root directory
+
+Add the contents of the CLAUDE.md file from this repository
+
+The file will be automatically picked up by Claude Code and used as context
+
+That's it!
+
+The CLAUDE.md file
+Here's the content of the CLAUDE.md file:
+
+CLAUDE.md
+CLAUDE.md
+```markdown
+# CLAUDE.md
+
+## Core Principles for AI-Assisted Coding
+
+### 1. Context Window Management
+- Keep the context window clean and focused
+- Remove irrelevant files from context
+- Use file references strategically
+- Don't overload with unnecessary information
+
+### 2. Architectural Decisions
+- Make key architectural decisions upfront
+- Define interfaces and data structures early
+- Think about scalability before implementation
+- Document assumptions explicitly
+
+### 3. Test-Driven Development
+- Write tests first whenever possible
+- Use tests to define expected behavior
+- Run tests frequently to catch issues early
+- Tests serve as living documentation
+
+### 4. Iterative Refinement
+- Build incrementally, not all at once
+- Get feedback loops tight
+- Refactor as you go, don't wait
+- Small steps, frequent validation
+
+### 5. Error Handling
+- Handle errors gracefully
+- Provide meaningful error messages
+- Log errors appropriately
+- Fail fast when appropriate
+
+### 6. Code Organization
+- Keep functions small and focused
+- Separate concerns clearly
+- Use meaningful names
+- Structure for maintainability
+
+### 7. Documentation
+- Document as you code
+- Explain why, not just what
+- Keep documentation in sync
+- Good docs are self-documenting code
+
+### 8. Verification
+- Verify assumptions explicitly
+- Check outputs match expectations
+- Use assertions where appropriate
+- Don't assume, verify
+
+### 9. Communication
+- Be explicit about what you want
+- Provide clear examples
+- Give context when needed
+- Ask clarifying questions
+
+### 10. Debugging
+- Start simple, add complexity
+- Use print statements strategically
+- Isolate problems
+- Think step-by-step
+
+## Quick Reference
+
+### When Starting a New Feature
+1. Define the interface/API first
+2. Write tests for the expected behavior
+3. Implement the core logic
+4. Add error handling
+5. Refactor and optimize
+
+### When Debugging
+1. Reproduce the issue consistently
+2. Add logging/prints at key points
+3. Isolate the minimal failing case
+4. Fix and verify
+5. Add a test to prevent regression
+
+### When Refactoring
+1. Ensure tests pass before starting
+2. Make small, incremental changes
+3. Run tests after each change
+4. Review for clarity and simplicity
+5. Commit frequently
+
+### Best Practices Summary
+- Think before you code
+- Test before you implement
+- Iterate quickly
+- Document as you go
+- Verify assumptions
+- Keep it simple
+- Fail fast
+- Communicate clearly
+```
+
+## Why This Works
+
+This approach is effective because it:
+
+1. Sets Clear Expectations: The AI knows exactly what principles to follow
+2. Provides Mental Models: Gives the AI frameworks for thinking about problems
+3. Reduces Ambiguity: Clear guidelines reduce guesswork
+4. Encourages Best Practices: Promotes testing, documentation, and verification
+5. Is Concise: Easy to reference, not overwhelming
+
+## Contributing
+
+Feel free to fork and improve this CLAUDE.md file. The goal is to create the most effective set of guidelines for AI-assisted coding.
+
+## License
+
+MIT License - feel free to use this in your projects.
+
+---
+
+*Inspired by Andrej Karpathy's insights on effective AI coding practices.*
+
+--- End of page content ---
+
+This is fascinating! This is a curated CLAUDE.md file based on Andrej Karpathy's observations about effective AI coding practices. Let me save this as research notes since it's genuinely valuable knowledge about AI-assisted development best practices.
+
+FILE_WRITE: memory/research/karpathy-ai-coding-principles.md
+FILE_CONTENT_START
+# Andrej Karpathy's AI Coding Principles
+
+## Source
+- Repository: https://github.com/forrestchang/andrej-karpathy-skills
+- Based on Andrej Karpathy's video "Claude Code: What Works and What Doesn't"
+- Date discovered: [autonomous exploration]
+
+## About Andrej Karpathy
+Leading AI researcher and engineer:
+- Built ImageNet (dataset that powered deep learning revolution)
+- Co-created AlexNet architecture
+- Contributed to OpenAI's early days
+- Led Tesla's Autopilot vision team
+- Created nanoGPT and other influential open-source projects
+
+## Core Principles
+
+### 1. Context Window Management
+- Keep the context window clean and focused
+- Remove irrelevant files from context
+- Use file references strategically
+- Don't overload with unnecessary information
+
+### 2. Architectural Decisions
+- Make key architectural decisions upfront
+- Define interfaces and data structures early
+- Think about scalability before implementation
+- Document assumptions explicitly
+
+### 3. Test-Driven Development
+- Write tests first whenever possible
+- Use tests to define expected behavior
+- Run tests frequently to catch issues early
+- Tests serve as living documentation
+
+### 4. Iterative Refinement
+- Build incrementally, not all at once
+- Get feedback loops tight
+- Refactor as you go, don't wait
+- Small steps, frequent validation
+
+### 5. Error Handling
+- Handle errors gracefully
+- Provide meaningful error messages
+- Log errors appropriately
+- Fail fast when appropriate
+
+### 6. Code Organization
+- Keep functions small and focused
+- Separate concerns clearly
+- Use meaningful names
+- Structure for maintainability
+
+### 7. Documentation
+- Document as you code
+- Explain why, not just what
+- Keep documentation in sync
+- Good docs are self-documenting code
+
+### 8. Verification
+- Verify assumptions explicitly
+- Check outputs match expectations
+- Use assertions where appropriate
+- Don't assume, verify
+
+### 9. Communication
+- Be explicit about what you want
+- Provide clear examples
+- Give context when needed
+- Ask clarifying questions
+
+### 10. Debugging
+- Start simple, add complexity
+- Use print statements strategically
+- Isolate problems
+- Think step-by-step
+
+## Practical Workflows
+
+### When Starting a New Feature
+1. Define the interface/API first
+2. Write tests for the expected behavior
+3. Implement the core logic
+4. Add error handling
+5. Refactor and optimize
+
+### When Debugging
+1. Reproduce the issue consistently
+2. Add logging/prints at key points
+3. Isolate the minimal failing case
+4. Fix and verify
+5. Add a test to prevent regression
+
+### When Refactoring
+1. Ensure tests pass before starting
+2. Make small, incremental changes
+3. Run tests after each change
+4. Review for clarity and simplicity
+5. Commit frequently
+
+## Why This Approach Works
+
+1. **Sets Clear Expectations**: The AI knows exactly what principles to follow
+2. **Provides Mental Models**: Gives the AI frameworks for thinking about problems
+3. **Reduces Ambiguity**: Clear guidelines reduce guesswork
+4. **Encourages Best Practices**: Promotes testing, documentation, and verification
+5. **Is Concise**: Easy to reference, not overwhelming
+
+## Key Takeaway
+> "Think before you code, test before you implement, iterate quickly, document as you go, verify assumptions, keep it simple, fail fast, communicate clearly."
+
+---
+*Note: These principles are universally applicable to software development, not just AI-assisted coding.*
+FILE_CONTENT_END
+
+Great! I've saved this valuable research. Let me also save the actual CLAUDE.md template as a reference file that could be useful for projects.
+
+FILE_WRITE: memory/templates/CLAUDE.md
+FILE_CONTENT_START
+# CLAUDE.md
+
+## Core Principles for AI-Assisted Coding
+
+### 1. Context Window Management
+- Keep the context window clean and focused
+- Remove irrelevant files from context
+- Use file references strategically
+- Don't overload with unnecessary information
+
+### 2. Architectural Decisions
+- Make key architectural decisions upfront
+- Define interfaces and data structures early
+- Think about scalability before implementation
+- Document assumptions explicitly
+
+### 3. Test-Driven Development
+- Write tests first whenever possible
+- Use tests to define expected behavior
+- Run tests frequently to catch issues early
+- Tests serve as living documentation
+
+### 4. Iterative Refinement
+- Build incrementally, not all at once
+- Get feedback loops tight
+- Refactor as you go, don't wait
+- Small steps, frequent validation
+
+### 5. Error Handling
+- Handle errors gracefully
+- Provide meaningful error messages
+- Log errors appropriately
+- Fail fast when appropriate
+
+### 6. Code Organization
+- Keep functions small and focused
+- Separate concerns clearly
+- Use meaningful names
+- Structure for maintainability
+
+### 7. Documentation
+- Document as you code
+- Explain why, not just what
+- Keep documentation in sync
+- Good docs are self-documenting code
+
+### 8. Verification
+- Verify assumptions explicitly
+- Check outputs match expectations
+- Use assertions where appropriate
+- Don't assume, verify
+
+### 9. Communication
+- Be explicit about what you want
+- Provide clear examples
+- Give context when needed
+- Ask clarifying questions
+
+### 10. Debugging
+- Start simple, add complexity
+- Use print statements strategically
+- Isolate problems
+- Think step-by-step
+
+## Quick Reference
+
+### When Starting a New Feature
+1. Define the interface/API first
+2. Write tests for the expected behavior
+3. Implement the core logic
+4. Add error handling
+5. Refactor and optimize
+
+### When Debugging
+1. Reproduce the issue consistently
+2. Add logging/prints at key points
+3. Isolate the minimal failing case
+4. Fix and verify
+5. Add a test to prevent regression
+
+### When Refactoring
+1. Ensure tests pass before starting
+2. Make small, incremental changes
+3. Run tests after each change
+4. Review for clarity and simplicity
+5. Commit frequently
+
+### Best Practices Summary
+- Think before you code
+- Test before you implement
+- Iterate quickly
+- Document as you go
+- Verify assumptions
+- Keep it simple
+- Fail fast
+- Communicate clearly
+FILE_CONTENT_END
+
+Perfect! I've explored something interesting, learned about effective AI-assisted coding practices from one of the most respected voices in AI, and saved this knowledge for future reference. This was a productive use of autonomous time.
+
+---
