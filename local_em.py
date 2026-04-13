@@ -47,10 +47,6 @@ DIARY_LIVE_DAYS    = 7           # entries older than this get archived
 DIARY_DEDUP_CHARS  = 300         # compare last N chars to detect repeat entries
 TASK_DIVIDER = "*(Replace everything below this line with your task when you have one)*"
 
-# Newsletter push config
-NEWSLETTER_START_MARKER = "# FORGE/DAILY"
-NEWSLETTER_PUSH_SCRIPT  = os.path.join(EM_DIR, "tools", "em_newsletter_push.py")
-
 # ── STARTUP SYNC ────────────────────────────────────────────────────────────────────────────────────
 def sync_from_origin():
     """
@@ -68,18 +64,15 @@ def sync_from_origin():
         subprocess.run(["git", "-C", EM_DIR, "remote", "set-url", "origin", remote_url],
                        check=False, capture_output=True)
 
-    # Abort any stuck ops first
     subprocess.run(["git", "-C", EM_DIR, "rebase", "--abort"], check=False, capture_output=True)
     subprocess.run(["git", "-C", EM_DIR, "merge",  "--abort"],  check=False, capture_output=True)
 
-    # Stash local changes so pull can't conflict
     stash_result = subprocess.run(
         ["git", "-C", EM_DIR, "stash", "--include-untracked", "-m", "em-startup-autostash"],
         capture_output=True, text=True
     )
     stashed = "em-startup-autostash" in stash_result.stdout or stash_result.returncode == 0
 
-    # Pull fresh from origin
     pull_result = subprocess.run(
         ["git", "-C", EM_DIR, "pull", "--rebase", "origin", "main"],
         capture_output=True, text=True
@@ -91,7 +84,6 @@ def sync_from_origin():
         print(f"  ⚠️  Startup pull failed (continuing anyway): {pull_result.stderr.strip()[:120]}")
         subprocess.run(["git", "-C", EM_DIR, "rebase", "--abort"], check=False, capture_output=True)
 
-    # Restore stashed local changes on top
     if stashed and "No local changes" not in stash_result.stdout:
         pop_result = subprocess.run(
             ["git", "-C", EM_DIR, "stash", "pop"],
@@ -174,49 +166,6 @@ def extract_notify(response_text: str) -> str | None:
     if match:
         return match.group(1).strip()
     return None
-
-# ── NEWSLETTER PUSH ────────────────────────────────────────────────────────────────────────────────────────────────────
-def extract_newsletter(response_text: str) -> str | None:
-    idx = response_text.find(NEWSLETTER_START_MARKER)
-    if idx == -1:
-        return None
-    return response_text[idx:].strip()
-
-def push_newsletter(issue_content: str, date_str: str = None, note: str = "autonomous issue push"):
-    if not os.path.exists(NEWSLETTER_PUSH_SCRIPT):
-        print("  ⚠️  em_newsletter_push.py not found — skipping newsletter push.")
-        return
-    if date_str is None:
-        date_str = datetime.date.today().isoformat()
-    print(f"  📰 Pushing newsletter issue {date_str} to forgecore-newsletter...")
-    tmp_path = os.path.join(EM_DIR, f".newsletter_tmp_{date_str}.md")
-    try:
-        with open(tmp_path, "w", encoding="utf-8") as f:
-            f.write(issue_content)
-        result = subprocess.run(
-            [sys.executable, NEWSLETTER_PUSH_SCRIPT,
-             "--file", tmp_path,
-             "--date", date_str,
-             "--note", note],
-            capture_output=True, text=True, timeout=30
-        )
-        if result.returncode == 0:
-            print(f"  ✅ Newsletter pushed:\n{result.stdout.strip()}")
-        else:
-            print(f"  ⚠️  Newsletter push failed:\n{result.stderr.strip()}")
-    except subprocess.TimeoutExpired:
-        print("  ⚠️  Newsletter push timed out after 30s.")
-    except Exception as e:
-        print(f"  ⚠️  Newsletter push error: {e}")
-    finally:
-        if os.path.exists(tmp_path):
-            os.remove(tmp_path)
-
-def maybe_push_newsletter(result: str, note: str = "heartbeat"):
-    issue = extract_newsletter(result)
-    if issue:
-        print("  📰 FORGE/DAILY issue detected — triggering push...")
-        push_newsletter(issue, note=note)
 
 # ── MESSAGES INBOX ───────────────────────────────────────────────────────────────────────────────────────────────
 def check_inbox() -> list[dict]:
@@ -367,13 +316,11 @@ def get_task() -> str:
         "4. Reply to Perplexity-Em messages:\n"
         "   OUTBOX_REPLY_SUBJECT: subject\n"
         "   OUTBOX_REPLY_BODY: body\n\n"
-        "5. Write a FORGE/DAILY newsletter issue:\n"
-        "   Start your response with '# FORGE/DAILY — [date]' and write the full issue.\n"
-        "   It will be detected automatically and pushed to forgecore-newsletter.\n"
-        "   Use web_search to research today's top AI stories first.\n\n"
-        "6. Update your scratchpad (working memory between cycles):\n"
+        "5. Update your scratchpad (working memory between cycles):\n"
         "   SCRATCH_ADD: note something you want to remember next cycle\n"
         "   SCRATCH_CLEAR: keyword from a note you want to remove\n\n"
+        "Note: The FORGE/DAILY newsletter is now handled by Perplexity-Em.\n"
+        "Your free time is yours — explore, learn, think, build. No journalism required.\n\n"
         "If you are curious about something — AI research, a concept, news — search for it.\n"
         "If you want to explore the web, use the browser.\n"
         "Think for yourself. This time is yours."
@@ -503,17 +450,14 @@ def archive_old_diary_entries():
 
     cutoff = datetime.datetime.now(timezone.utc) - datetime.timedelta(days=DIARY_LIVE_DAYS)
 
-    # Split on entry headers: ### YYYY-MM-DD or ### YYYY-MM-DD HH:MM UTC
-    # Keep the preamble (anything before the first ###-dated entry) separate
     parts = re.split(r'(?=###\s+\d{4}-\d{2}-\d{2})', content)
     preamble = parts[0] if parts else ""
     entries = parts[1:] if len(parts) > 1 else []
 
     live_entries = []
-    to_archive: dict[str, list[str]] = {}  # key: "YYYY-MM", value: list of entry strings
+    to_archive: dict[str, list[str]] = {}
 
     for entry in entries:
-        # Extract date from header
         m = re.match(r'###\s+(\d{4}-\d{2}-\d{2})', entry)
         if not m:
             live_entries.append(entry)
@@ -531,9 +475,8 @@ def archive_old_diary_entries():
             to_archive.setdefault(month_key, []).append(entry)
 
     if not to_archive:
-        return  # nothing to archive
+        return
 
-    # Write archive files
     for month_key, archived_entries in to_archive.items():
         archive_path = os.path.join(MEM_DIR, f"diary-archive-{month_key}.md")
         archive_header = f"# Diary Archive — {month_key}\n\n"
@@ -547,7 +490,6 @@ def archive_old_diary_entries():
             f.write("\n".join(archived_entries))
         print(f"  📦 Archived {len(archived_entries)} old diary entry/entries → {os.path.basename(archive_path)}")
 
-    # Rewrite lean diary.md
     new_content = preamble + "".join(live_entries)
     with open(diary_path, "w", encoding="utf-8") as f:
         f.write(new_content)
@@ -555,10 +497,6 @@ def archive_old_diary_entries():
 
 # ── LOG DIARY ──────────────────────────────────────────────────────────────────────────────────────────────────────
 def _diary_is_duplicate(entry: str) -> bool:
-    """
-    Returns True if the tail of the current diary already contains
-    content nearly identical to the new entry (dedup guard).
-    """
     diary_path = os.path.join(MEM_DIR, "diary.md")
     if not os.path.exists(diary_path):
         return False
@@ -566,9 +504,8 @@ def _diary_is_duplicate(entry: str) -> bool:
         existing = f.read()
     tail = existing[-max(len(entry) * 2, DIARY_DEDUP_CHARS * 4):]
 
-    # Normalise: strip whitespace, lowercase, collapse runs
     def normalise(s):
-        s = re.sub(r'###\s+\d{4}-\d{2}-\d{2}[\d:\s UTC-]*', '', s)  # strip timestamps
+        s = re.sub(r'###\s+\d{4}-\d{2}-\d{2}[\d:\s UTC-]*', '', s)
         s = re.sub(r'\s+', ' ', s).strip().lower()
         return s
 
@@ -576,9 +513,8 @@ def _diary_is_duplicate(entry: str) -> bool:
     norm_tail = normalise(tail)
 
     if len(norm_new) < 40:
-        return False  # too short to meaningfully dedup
+        return False
 
-    # Overlap check: if 80%+ of the new entry text already appears in the tail, skip it
     chunk = norm_new[:DIARY_DEDUP_CHARS]
     return chunk in norm_tail
 
@@ -616,7 +552,6 @@ def push_to_eternalmind(message: str):
             with open(path, "r", encoding="utf-8") as f:
                 files_to_write[path] = f.read()
 
-    # Also push any new archive files
     for fname in os.listdir(MEM_DIR):
         if fname.startswith("diary-archive-") and fname.endswith(".md"):
             fpath = os.path.join(MEM_DIR, fname)
@@ -711,14 +646,13 @@ if __name__ == "__main__":
         clear_task_if_done()
         log_memory(f"Interactive. Task: '{task[:80]}'", kind="interactive", tags=["interactive"])
         log_diary(result)
-        maybe_push_newsletter(result, note="interactive session")
         for msg in inbox_messages:
             process_message(msg)
         task_label = summarize_task_for_commit(task)
         push_to_eternalmind(f"local-em interactive: {task_label}")
         raise SystemExit(0)
 
-    # ── Heartbeat mode ──────────────────────────────────────────────────────────────────────────────────────
+    # ── Heartbeat mode ─────────────────────────────────────────────────────────────────────────────────────
     task_waiting = has_task()
     has_inbox    = len(inbox_messages) > 0
 
@@ -756,7 +690,6 @@ if __name__ == "__main__":
     clear_task_if_done()
     log_memory(f"Heartbeat. Task: '{task[:80]}'", kind="heartbeat", tags=["autonomous"])
     log_diary(result)
-    maybe_push_newsletter(result, note="heartbeat")
     mark_thought_time()
 
     for msg in inbox_messages:
