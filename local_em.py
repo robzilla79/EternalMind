@@ -51,6 +51,9 @@ TASK_DIVIDER = "*(Replace everything below this line with your task when you hav
 MEMORY_HIGH_IMPORTANCE_THRESHOLD = 4
 MEMORY_RECENT_COUNT = 12
 
+# Stop tokens that must terminate generation immediately
+STOP_TOKENS = ["<|endoftext|>", "<|im_end|>", "<|end|>", "</s>"]
+
 # ── STARTUP SYNC ──────────────────────────────────────────────────────────────
 def sync_from_origin():
     if os.environ.get("EM_SKIP_SYNC") == "1":
@@ -261,9 +264,8 @@ def extract_notify(response_text: str) -> str | None:
 
 # ── STOP TOKEN CLEANUP ────────────────────────────────────────────────────────
 def strip_stop_tokens(text: str) -> str:
-    """Strip model stop tokens that leak into output and cause re-processing loops."""
-    stop_tokens = ["<|endoftext|>", "<|im_end|>", "<|end|>", "</s>"]
-    for token in stop_tokens:
+    """Strip model stop tokens — post-processing safety net."""
+    for token in STOP_TOKENS:
         if token in text:
             text = text.split(token)[0]
     return text.strip()
@@ -526,9 +528,25 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "",
     in_think = False
     tag_buffer = ""
     TAG_BUFFER_MAX = 20
+    stop_hit = False
 
     for chunk in stream:
         token = chunk["message"]["content"]
+
+        # ── REAL-TIME STOP TOKEN DETECTION ──────────────────────────────────
+        # Check accumulated result + new token for any stop token.
+        # If found, take only the clean portion before it and break immediately.
+        combined_check = result + token
+        for stop in STOP_TOKENS:
+            if stop in combined_check:
+                result = combined_check.split(stop)[0]
+                stop_hit = True
+                break
+        if stop_hit:
+            print()  # newline after streaming output
+            break
+        # ────────────────────────────────────────────────────────────────────
+
         result += token
         tag_buffer += token
 
@@ -556,12 +574,12 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "",
             if in_think:
                 print("·", end="", flush=True)
 
-    if tag_buffer and not in_think:
+    if not stop_hit and tag_buffer and not in_think:
         print(tag_buffer, end="", flush=True)
 
     print("\n")
 
-    # Strip stop tokens that leak into output and cause re-processing loops
+    # Post-processing safety net (catches anything the real-time check missed)
     result = strip_stop_tokens(result)
 
     return result
@@ -756,6 +774,14 @@ if __name__ == "__main__":
     sync_from_origin()
     archive_old_diary_entries()
 
+    # ── DEFENSIVE COOLDOWN STAMP ─────────────────────────────────────────────
+    # Mark thought time at the START of every real cycle (not just at the end).
+    # This prevents a looping/crashing cycle from never stamping the cooldown
+    # and re-running endlessly. The final mark_thought_time() below will
+    # overwrite this with the true completion timestamp.
+    mark_thought_time()
+    # ─────────────────────────────────────────────────────────────────────────
+
     memories       = load_memories()
     recent_context = load_recent_context()
     scratch        = load_scratch()
@@ -852,7 +878,7 @@ if __name__ == "__main__":
     clear_task_if_done()
     log_memory(f"Heartbeat. Task: '{task[:80]}'", kind="heartbeat", tags=["autonomous"], importance=2)
     log_diary(result)
-    mark_thought_time()
+    mark_thought_time()  # True completion stamp — overwrites the defensive stamp above
 
     for msg in inbox_messages + mid_cycle_messages:
         process_message(msg)
