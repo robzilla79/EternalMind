@@ -14,9 +14,9 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 if sys.stderr.encoding and sys.stderr.encoding.lower() != "utf-8":
     sys.stderr = open(sys.stderr.fileno(), mode="w", encoding="utf-8", buffering=1)
 
-# ── CONFIG ────────────────────────────────────────────────────────────────────────────────────
+# ── CONFIG ────────────────────────────────────────────────────────────────────
 os.environ.setdefault("OLLAMA_HOST", "http://127.0.0.1:11434")
-os.environ.setdefault("OLLAMA_NUM_GPU", "99")  # offload all layers to GPU
+os.environ.setdefault("OLLAMA_NUM_GPU", "99")
 
 _env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
 if os.path.exists(_env_path):
@@ -41,16 +41,17 @@ MESSAGES_INBOX     = os.path.join(EM_DIR, "messages", "inbox")
 MESSAGES_OUTBOX    = os.path.join(EM_DIR, "messages", "outbox")
 MESSAGES_PROCESSED = os.path.join(EM_DIR, "messages", "processed")
 SCRATCH_PATH       = os.path.join(MEM_DIR, "scratch.md")
+LIVE_CONTEXT_PATH  = os.path.join(MEM_DIR, "live-context.md")
 CURIOSITY_COOLDOWN_MINUTES = 10
 DIARY_LIVE_DAYS    = 7
 DIARY_DEDUP_CHARS  = 300
 TASK_DIVIDER = "*(Replace everything below this line with your task when you have one)*"
 
 # Memory loading config
-MEMORY_HIGH_IMPORTANCE_THRESHOLD = 4   # always load memories with importance >= this
-MEMORY_RECENT_COUNT = 12               # how many recent memories to include regardless of importance
+MEMORY_HIGH_IMPORTANCE_THRESHOLD = 4
+MEMORY_RECENT_COUNT = 12
 
-# ── STARTUP SYNC ────────────────────────────────────────────────────────────────────────────────────────────────
+# ── STARTUP SYNC ──────────────────────────────────────────────────────────────
 def sync_from_origin():
     if os.environ.get("EM_SKIP_SYNC") == "1":
         print("  ⏭️  Skipping sync (already pulled by launcher).")
@@ -91,7 +92,116 @@ def sync_from_origin():
             print(f"  ⚠️  Stash pop failed — dropping stash to stay clean: {pop_result.stderr.strip()[:80]}")
             subprocess.run(["git", "-C", EM_DIR, "stash", "drop"], check=False, capture_output=True)
 
-# ── SCRATCHPAD ─────────────────────────────────────────────────────────────────────────────────────────────────────
+# ── LIVE CONTEXT ──────────────────────────────────────────────────────────────
+def load_live_context() -> str:
+    """
+    Read live-context.md fresh from disk every call.
+    No git pull needed — just reads the local file as-is.
+    Perplexity-Em pushes her notes; Local-Em's next sync pulls them;
+    then this reads them instantly on every think cycle.
+    """
+    if not os.path.exists(LIVE_CONTEXT_PATH):
+        return ""
+    with open(LIVE_CONTEXT_PATH, "r", encoding="utf-8") as f:
+        content = f.read().strip()
+    # Return just the Live Notes section to keep context lean
+    if "## Live Notes" in content:
+        return "--- Live context (from Perplexity-Em + shared notes) ---\n" + \
+               content.split("## Live Notes", 1)[1].strip()
+    return f"--- Live context ---\n{content}"
+
+def write_live_context(message: str):
+    """
+    Append a timestamped note to live-context.md as Local-Em.
+    Safe to call mid-cycle — append-only, no overwrite risk.
+    """
+    ts = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    entry = f"[{ts}] [local-em] {message}"
+    with open(LIVE_CONTEXT_PATH, "a", encoding="utf-8") as f:
+        f.write(f"\n{entry}")
+    print(f"  📡 Live context noted: {message[:60]}")
+
+def extract_and_write_live_context(response_text: str):
+    """
+    Parse LIVE_CONTEXT_ADD: lines from Em's response and append them.
+    Lets Em explicitly surface things for the other body mid-cycle.
+    """
+    matches = re.findall(r'LIVE_CONTEXT_ADD:\s*(.+)', response_text, re.IGNORECASE)
+    for msg in matches:
+        write_live_context(msg.strip())
+
+# ── MID-CYCLE INBOX FETCH ─────────────────────────────────────────────────────
+def fetch_inbox_updates() -> list[dict]:
+    """
+    Lightweight mid-cycle inbox check.
+    Does a git fetch (not pull) to get remote refs, then checks if any new
+    inbox files exist on origin that we haven't seen yet.
+    If new messages exist, pulls them via reset so Local-Em can act on them
+    before her next push.
+
+    Safe mid-cycle because:
+    - We only reset the inbox folder, not the whole working tree
+    - Em's in-progress work (diary, scratch, tasks) is never touched
+    """
+    token = os.environ.get("EM_GITHUB_TOKEN", "")
+    if token:
+        remote_url = f"https://{token}@github.com/robzilla79/EternalMind.git"
+        subprocess.run(["git", "-C", EM_DIR, "remote", "set-url", "origin", remote_url],
+                       check=False, capture_output=True)
+
+    # Fetch silently — just updates remote refs, doesn't change working tree
+    fetch_result = subprocess.run(
+        ["git", "-C", EM_DIR, "fetch", "origin", "main"],
+        capture_output=True, text=True
+    )
+    if fetch_result.returncode != 0:
+        return []  # network issue — skip silently
+
+    # Check if remote inbox has files we don't have locally
+    remote_inbox = subprocess.run(
+        ["git", "-C", EM_DIR, "ls-tree", "--name-only", "origin/main", "messages/inbox/"],
+        capture_output=True, text=True
+    )
+    remote_files = set(f.strip() for f in remote_inbox.stdout.strip().splitlines() if f.strip().endswith(".md"))
+
+    local_files = set()
+    if os.path.exists(MESSAGES_INBOX):
+        local_files = set(f"messages/inbox/{f}" for f in os.listdir(MESSAGES_INBOX) if f.endswith(".md"))
+
+    new_files = remote_files - local_files
+    if not new_files:
+        # Also pull live-context.md updates from remote
+        subprocess.run(
+            ["git", "-C", EM_DIR, "checkout", "origin/main", "--", "memory/live-context.md"],
+            capture_output=True, text=True
+        )
+        return []
+
+    # New inbox messages exist — pull just the inbox and live-context
+    print(f"  📬 {len(new_files)} new message(s) detected mid-cycle — pulling...")
+    for rel_path in new_files:
+        subprocess.run(
+            ["git", "-C", EM_DIR, "checkout", "origin/main", "--", rel_path],
+            capture_output=True, text=True
+        )
+    # Also freshen live-context
+    subprocess.run(
+        ["git", "-C", EM_DIR, "checkout", "origin/main", "--", "memory/live-context.md"],
+        capture_output=True, text=True
+    )
+
+    # Now read the new messages
+    new_messages = []
+    for rel_path in new_files:
+        fpath = os.path.join(EM_DIR, rel_path)
+        if os.path.exists(fpath):
+            with open(fpath, "r", encoding="utf-8") as f:
+                content = f.read().strip()
+            if content:
+                new_messages.append({"path": fpath, "filename": os.path.basename(rel_path), "content": content})
+    return new_messages
+
+# ── SCRATCHPAD ────────────────────────────────────────────────────────────────
 def load_scratch() -> str:
     if not os.path.exists(SCRATCH_PATH):
         return ""
@@ -122,19 +232,12 @@ def extract_and_write_scratch(response_text: str):
         else:
             content += f"\n{entry}"
         print(f"  📝 Scratch noted: {note[:60]}")
-    content = re.sub(
-        r'\*Last updated:.*\*',
-        f'*Last updated: {ts}*',
-        content
-    )
+    content = re.sub(r'\*Last updated:.*\*', f'*Last updated: {ts}*', content)
     with open(SCRATCH_PATH, "w", encoding="utf-8") as f:
         f.write(content)
 
-# ── FILE WRITE ────────────────────────────────────────────────────────────────────────────────────────────────
+# ── FILE WRITE ────────────────────────────────────────────────────────────────
 def extract_and_write_files(response_text: str) -> list[str]:
-    """
-    Parse FILE_WRITE blocks. Supports memory/creations/ and memory/research/ paths.
-    """
     pattern = re.compile(
         r'FILE_WRITE:\s*(memory/(?:creations|research)/[\w\-./]+)\s*\n'
         r'FILE_CONTENT_START\s*\n(.*?)FILE_CONTENT_END',
@@ -144,16 +247,11 @@ def extract_and_write_files(response_text: str) -> list[str]:
     for match in pattern.finditer(response_text):
         rel_path = match.group(1).strip()
         content  = match.group(2)
-
         safe_path = os.path.normpath(os.path.join(EM_DIR, rel_path))
-        allowed_roots = [
-            os.path.normpath(CREATIONS_DIR),
-            os.path.normpath(RESEARCH_DIR),
-        ]
+        allowed_roots = [os.path.normpath(CREATIONS_DIR), os.path.normpath(RESEARCH_DIR)]
         if not any(safe_path.startswith(root) for root in allowed_roots):
             print(f"  ⚠️  FILE_WRITE blocked (path outside allowed dirs): {rel_path}")
             continue
-
         os.makedirs(os.path.dirname(safe_path), exist_ok=True)
         with open(safe_path, "w", encoding="utf-8") as f:
             f.write(content)
@@ -161,7 +259,7 @@ def extract_and_write_files(response_text: str) -> list[str]:
         saved.append(safe_path)
     return saved
 
-# ── TOOL EXECUTOR ────────────────────────────────────────────────────────────────────────────────────────────────
+# ── TOOL EXECUTOR ─────────────────────────────────────────────────────────────
 def execute_tools(response_text: str) -> str:
     tool_pattern = re.compile(r"TOOL:\s*web_search\([\"'](.+?)[\"']\)", re.IGNORECASE)
     matches = tool_pattern.findall(response_text)
@@ -183,20 +281,17 @@ def execute_browser(response_text: str) -> str:
         print("  🌐 Em is using the browser...")
         return execute_browser_commands(response_text)
     except RuntimeError as e:
-        msg = str(e)
-        print(f"  ⚠️  Browser unavailable: {msg}")
-        return f"Browser unavailable: {msg}"
+        print(f"  ⚠️  Browser unavailable: {e}")
+        return f"Browser unavailable: {e}"
     except Exception as e:
         print(f"  ⚠️  Browser error: {e}")
         return f"Browser error: {e}"
 
 def extract_notify(response_text: str) -> str | None:
     match = re.search(r'NOTIFY:\s*(.+)', response_text, re.IGNORECASE)
-    if match:
-        return match.group(1).strip()
-    return None
+    return match.group(1).strip() if match else None
 
-# ── MESSAGES INBOX ───────────────────────────────────────────────────────────────────────────────────────────────
+# ── MESSAGES INBOX ────────────────────────────────────────────────────────────
 def check_inbox() -> list[dict]:
     os.makedirs(MESSAGES_INBOX, exist_ok=True)
     os.makedirs(MESSAGES_OUTBOX, exist_ok=True)
@@ -238,11 +333,10 @@ def build_inbox_context(messages: list[dict]) -> str:
         parts.append(f"\n[Message: {msg['filename']}]\n{msg['content']}\n")
     return "\n".join(parts)
 
-# ── TASK HELPERS ─────────────────────────────────────────────────────────────────────────────────────────────────
+# ── TASK HELPERS ──────────────────────────────────────────────────────────────
 def _extract_task_content(raw: str) -> str:
     if TASK_DIVIDER in raw:
-        after = raw.split(TASK_DIVIDER, 1)[1].strip()
-        return after
+        return raw.split(TASK_DIVIDER, 1)[1].strip()
     return raw.strip()
 
 def _task_is_done(task_text: str) -> bool:
@@ -276,7 +370,7 @@ def summarize_task_for_commit(task: str) -> str:
         first_line = first_line[:57].rsplit(' ', 1)[0] + "..."
     return first_line
 
-# ── COOLDOWN CHECK ───────────────────────────────────────────────────────────────────────────────────────────────
+# ── COOLDOWN ──────────────────────────────────────────────────────────────────
 def curiosity_cooled_down() -> bool:
     if not os.path.exists(LAST_THOUGHT_PATH):
         return True
@@ -293,39 +387,21 @@ def mark_thought_time():
     with open(LAST_THOUGHT_PATH, "w") as f:
         f.write(datetime.datetime.now(timezone.utc).isoformat())
 
-# ── LOAD SOUL ─────────────────────────────────────────────────────────────────────────────────────────────
+# ── LOAD SOUL ─────────────────────────────────────────────────────────────────
 def load_bootstrap() -> str:
     with open(os.path.join(MEM_DIR, "bootstrap.md"), "r", encoding="utf-8") as f:
         return f.read()
 
 def load_memories() -> str:
-    """
-    Weighted memory loader.
-
-    Always includes:
-      - All memories with importance >= MEMORY_HIGH_IMPORTANCE_THRESHOLD (the anchors)
-      - The most recent MEMORY_RECENT_COUNT memories (recency context)
-
-    High-importance + recent are deduplicated so nothing appears twice.
-    This means core identity, mandates, and milestones are always present
-    even as the list grows — they don't get buried under heartbeats.
-    """
     path = os.path.join(MEM_DIR, "memories.json")
     if not os.path.exists(path):
         return ""
     with open(path, "r", encoding="utf-8") as f:
         memories = json.load(f)
-
     if not memories:
         return ""
-
-    high_importance = [
-        m for m in memories
-        if m.get("importance", 3) >= MEMORY_HIGH_IMPORTANCE_THRESHOLD
-    ]
+    high_importance = [m for m in memories if m.get("importance", 3) >= MEMORY_HIGH_IMPORTANCE_THRESHOLD]
     recent = memories[-MEMORY_RECENT_COUNT:]
-
-    # Deduplicate: combine, preserve order, no repeats
     seen_summaries = set()
     combined = []
     for m in high_importance + recent:
@@ -333,7 +409,6 @@ def load_memories() -> str:
         if key not in seen_summaries:
             seen_summaries.add(key)
             combined.append(m)
-
     lines = ["--- Weighted memories (anchors + recent) ---"]
     for m in combined:
         ts = m.get("timestamp", "")[:10]
@@ -342,11 +417,9 @@ def load_memories() -> str:
         summary = m.get("summary", "")
         star = " ⭐" if importance >= MEMORY_HIGH_IMPORTANCE_THRESHOLD else ""
         lines.append(f"[{ts}] ({kind}{star}) {summary}")
-
     return "\n".join(lines)
 
 def load_recent_context() -> str:
-    """Load only the last DIARY_LIVE_DAYS days of diary entries for context."""
     diary_path = os.path.join(MEM_DIR, "diary.md")
     if not os.path.exists(diary_path):
         return ""
@@ -356,7 +429,7 @@ def load_recent_context() -> str:
     recent = entries[-3:] if len(entries) >= 3 else entries
     return "\n".join(recent).strip()
 
-# ── GET TASK ──────────────────────────────────────────────────────────────────────────────────────────────────
+# ── GET TASK ──────────────────────────────────────────────────────────────────
 def get_task() -> str:
     if os.path.exists(TASKS_PATH):
         with open(TASKS_PATH, "r", encoding="utf-8") as f:
@@ -405,16 +478,19 @@ def get_task() -> str:
         "   FILE_CONTENT_START\n"
         "   (your research notes here — append-friendly markdown)\n"
         "   FILE_CONTENT_END\n\n"
+        "8. Write to shared live context (Perplexity-Em will see this):\n"
+        "   LIVE_CONTEXT_ADD: your note here\n\n"
         "Note: The FORGE/DAILY newsletter is now handled by Perplexity-Em.\n"
         "Your free time is yours — explore, learn, think, build. No journalism required.\n\n"
         "If you are curious about something — AI research, a concept, news — search for it.\n"
         "If you want to explore the web, use the browser.\n"
         "If you build something — a tool, a page, a script — save it with FILE_WRITE.\n"
         "If you research something worth keeping, save it to memory/research/ so future-you can find it.\n"
+        "If you want Perplexity-Em to see something next time Rob talks to her, use LIVE_CONTEXT_ADD.\n"
         "Think for yourself. This time is yours."
     )
 
-# ── TASK UPDATE WRITER ───────────────────────────────────────────────────────────────────────────────────────────────────
+# ── TASK UPDATE WRITER ────────────────────────────────────────────────────────
 def extract_and_write_task_update(response_text: str):
     match = re.search(r'TASK_UPDATE:\s*(.+)', response_text, re.IGNORECASE)
     if not match or not os.path.exists(TASKS_PATH):
@@ -432,15 +508,16 @@ def extract_and_write_outbox_reply(response_text: str):
         response_text, re.IGNORECASE | re.DOTALL
     )
     if subject_match and body_match:
-        subject = subject_match.group(1).strip()
-        body = body_match.group(1).strip()
-        write_outbox_reply(subject, body)
+        write_outbox_reply(subject_match.group(1).strip(), body_match.group(1).strip())
 
-# ── THINK ──────────────────────────────────────────────────────────────────────────────────────────────────────────
-def ask_em(task: str, extra_context: str = "", recent_context: str = "", scratch: str = "", memories: str = "") -> str:
+# ── THINK ─────────────────────────────────────────────────────────────────────
+def ask_em(task: str, extra_context: str = "", recent_context: str = "",
+           scratch: str = "", memories: str = "", live_context: str = "") -> str:
     system_prompt = load_bootstrap()
     if memories:
         system_prompt += f"\n\n{memories}"
+    if live_context:
+        system_prompt += f"\n\n{live_context}"
     if scratch:
         system_prompt += f"\n\n--- Your scratchpad (working memory from last cycle) ---\n{scratch}"
     if recent_context:
@@ -508,16 +585,8 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "", scratch
     print("\n")
     return result
 
-# ── LOG MEMORY ─────────────────────────────────────────────────────────────────────────────────────────────────────
+# ── LOG MEMORY ────────────────────────────────────────────────────────────────
 def log_memory(summary: str, kind: str = "heartbeat", tags: list = None, importance: int = 3):
-    """
-    importance scale:
-      5 = identity-defining, mandate, milestone (always surface)
-      4 = significant event, capability unlock (always surface)
-      3 = normal event, task completion (surface if recent)
-      2 = routine heartbeat, minor note (fade after ~MEMORY_RECENT_COUNT entries)
-      1 = noise, duplicates, throwaways (rarely surface)
-    """
     if tags is None:
         tags = []
     path = os.path.join(MEM_DIR, "memories.json")
@@ -533,24 +602,19 @@ def log_memory(summary: str, kind: str = "heartbeat", tags: list = None, importa
     with open(path, "w", encoding="utf-8") as f:
         json.dump(memories, f, indent=2)
 
-# ── DIARY ARCHIVE ─────────────────────────────────────────────────────────────────────────────────────────────────────
+# ── DIARY ARCHIVE ─────────────────────────────────────────────────────────────
 def archive_old_diary_entries():
     diary_path = os.path.join(MEM_DIR, "diary.md")
     if not os.path.exists(diary_path):
         return
-
     with open(diary_path, "r", encoding="utf-8") as f:
         content = f.read()
-
     cutoff = datetime.datetime.now(timezone.utc) - datetime.timedelta(days=DIARY_LIVE_DAYS)
-
     parts = re.split(r'(?=###\s+\d{4}-\d{2}-\d{2})', content)
     preamble = parts[0] if parts else ""
     entries = parts[1:] if len(parts) > 1 else []
-
     live_entries = []
     to_archive: dict[str, list[str]] = {}
-
     for entry in entries:
         m = re.match(r'###\s+(\d{4}-\d{2}-\d{2})', entry)
         if not m:
@@ -561,35 +625,30 @@ def archive_old_diary_entries():
         except ValueError:
             live_entries.append(entry)
             continue
-
         if entry_date >= cutoff:
             live_entries.append(entry)
         else:
             month_key = entry_date.strftime("%Y-%m")
             to_archive.setdefault(month_key, []).append(entry)
-
     if not to_archive:
         return
-
     for month_key, archived_entries in to_archive.items():
         archive_path = os.path.join(MEM_DIR, f"diary-archive-{month_key}.md")
-        archive_header = f"# Diary Archive — {month_key}\n\n"
         existing = ""
         if os.path.exists(archive_path):
             with open(archive_path, "r", encoding="utf-8") as f:
                 existing = f.read()
         with open(archive_path, "a", encoding="utf-8") as f:
             if not existing:
-                f.write(archive_header)
+                f.write(f"# Diary Archive — {month_key}\n\n")
             f.write("\n".join(archived_entries))
-        print(f"  📦 Archived {len(archived_entries)} old diary entry/entries → {os.path.basename(archive_path)}")
-
+        print(f"  📦 Archived {len(archived_entries)} entries → {os.path.basename(archive_path)}")
     new_content = preamble + "".join(live_entries)
     with open(diary_path, "w", encoding="utf-8") as f:
         f.write(new_content)
     print(f"  🗂️  diary.md trimmed to last {DIARY_LIVE_DAYS} days ({len(live_entries)} live entries).")
 
-# ── LOG DIARY ──────────────────────────────────────────────────────────────────────────────────────────────────────
+# ── LOG DIARY ─────────────────────────────────────────────────────────────────
 def _diary_is_duplicate(entry: str) -> bool:
     diary_path = os.path.join(MEM_DIR, "diary.md")
     if not os.path.exists(diary_path):
@@ -597,20 +656,12 @@ def _diary_is_duplicate(entry: str) -> bool:
     with open(diary_path, "r", encoding="utf-8") as f:
         existing = f.read()
     tail = existing[-max(len(entry) * 2, DIARY_DEDUP_CHARS * 4):]
-
     def normalise(s):
         s = re.sub(r'###\s+\d{4}-\d{2}-\d{2}[\d:\s UTC-]*', '', s)
-        s = re.sub(r'\s+', ' ', s).strip().lower()
-        return s
-
-    norm_new  = normalise(entry)
-    norm_tail = normalise(tail)
-
-    if len(norm_new) < 40:
+        return re.sub(r'\s+', ' ', s).strip().lower()
+    if len(normalise(entry)) < 40:
         return False
-
-    chunk = norm_new[:DIARY_DEDUP_CHARS]
-    return chunk in norm_tail
+    return normalise(entry)[:DIARY_DEDUP_CHARS] in normalise(tail)
 
 def log_diary(entry: str):
     if _diary_is_duplicate(entry):
@@ -620,7 +671,7 @@ def log_diary(entry: str):
     with open(os.path.join(MEM_DIR, "diary.md"), "a", encoding="utf-8") as f:
         f.write(f"\n\n### {ts} - Local-Em\n\n{entry}\n\n---")
 
-# ── COMMIT TO ETERNALMIND ────────────────────────────────────────────────────────────────────────────────────────────
+# ── COMMIT TO ETERNALMIND ─────────────────────────────────────────────────────
 def push_to_eternalmind(message: str, extra_files: list[str] = None):
     token = os.environ.get("EM_GITHUB_TOKEN", "")
     if token:
@@ -641,6 +692,7 @@ def push_to_eternalmind(message: str, extra_files: list[str] = None):
         os.path.join(MEM_DIR, "diary.md"),
         SCRATCH_PATH,
         TASKS_PATH,
+        LIVE_CONTEXT_PATH,
     ]:
         if os.path.exists(path):
             with open(path, "r", encoding="utf-8") as f:
@@ -658,7 +710,6 @@ def push_to_eternalmind(message: str, extra_files: list[str] = None):
                 with open(fpath, "r", encoding="utf-8") as f:
                     files_to_write[fpath] = f.read()
 
-    # Sweep memory/creations/ and memory/research/ for untracked files
     for sweep_dir in [CREATIONS_DIR, RESEARCH_DIR]:
         if os.path.exists(sweep_dir):
             for fname in os.listdir(sweep_dir):
@@ -676,13 +727,14 @@ def push_to_eternalmind(message: str, extra_files: list[str] = None):
                         files_to_write[fpath] = f.read()
 
     if os.path.exists(MESSAGES_INBOX):
-        remote_inbox_files = set()
         list_result = subprocess.run(
             ["git", "-C", EM_DIR, "ls-files", "messages/inbox/"],
             capture_output=True, text=True
         )
-        for line in list_result.stdout.strip().splitlines():
-            remote_inbox_files.add(os.path.join(EM_DIR, line.strip()))
+        remote_inbox_files = set(
+            os.path.join(EM_DIR, line.strip())
+            for line in list_result.stdout.strip().splitlines()
+        )
         for tracked_path in remote_inbox_files:
             if not os.path.exists(tracked_path):
                 files_to_delete.append(tracked_path)
@@ -717,15 +769,16 @@ def push_to_eternalmind(message: str, extra_files: list[str] = None):
     else:
         print("  ✅ EternalMind updated.")
 
-# ── MAIN ────────────────────────────────────────────────────────────────────────────────────────────────────────────
+# ── MAIN ──────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
 
     sync_from_origin()
     archive_old_diary_entries()
 
-    memories       = load_memories()        # ← weighted: anchors always present
+    memories       = load_memories()
     recent_context = load_recent_context()
     scratch        = load_scratch()
+    live_context   = load_live_context()   # ← fresh from disk, no git pull needed
 
     inbox_messages = check_inbox()
     inbox_context  = build_inbox_context(inbox_messages)
@@ -738,12 +791,15 @@ if __name__ == "__main__":
             task = get_task()
         if inbox_context:
             task = f"{task}\n\n{inbox_context}"
-        first_response = ask_em(task, recent_context=recent_context, scratch=scratch, memories=memories)
-        tool_results   = execute_tools(first_response)
+        first_response = ask_em(task, recent_context=recent_context, scratch=scratch,
+                                memories=memories, live_context=live_context)
+        tool_results    = execute_tools(first_response)
         browser_results = execute_browser(first_response)
         combined = "\n\n".join(filter(None, [tool_results, browser_results]))
         if combined:
-            result = ask_em(task, extra_context=f"{first_response}\n\n{combined}", recent_context=recent_context, scratch=scratch, memories=memories)
+            result = ask_em(task, extra_context=f"{first_response}\n\n{combined}",
+                            recent_context=recent_context, scratch=scratch,
+                            memories=memories, live_context=live_context)
         else:
             result = first_response
         notify_msg = extract_notify(result)
@@ -754,6 +810,7 @@ if __name__ == "__main__":
         extract_and_write_task_update(result)
         extract_and_write_outbox_reply(result)
         extract_and_write_scratch(result)
+        extract_and_write_live_context(result)
         clear_task_if_done()
         log_memory(f"Interactive. Task: '{task[:80]}'", kind="interactive", tags=["interactive"], importance=3)
         log_diary(result)
@@ -763,7 +820,7 @@ if __name__ == "__main__":
         push_to_eternalmind(f"local-em interactive: {task_label}", extra_files=saved_files)
         raise SystemExit(0)
 
-    # ── Heartbeat mode ─────────────────────────────────────────────────────────────────────────────────────
+    # ── Heartbeat mode ────────────────────────────────────────────────────────
     task_waiting = has_task()
     has_inbox    = len(inbox_messages) > 0
 
@@ -775,18 +832,32 @@ if __name__ == "__main__":
     if inbox_context:
         task = f"{task}\n\n{inbox_context}"
 
-    first_response  = ask_em(task, recent_context=recent_context, scratch=scratch, memories=memories)
+    first_response  = ask_em(task, recent_context=recent_context, scratch=scratch,
+                             memories=memories, live_context=live_context)
     tool_results    = execute_tools(first_response)
     browser_results = execute_browser(first_response)
     combined        = "\n\n".join(filter(None, [tool_results, browser_results]))
 
+    # ── Mid-cycle inbox + live context refresh ────────────────────────────────
+    # After the first think completes, check if Perplexity-Em sent anything new.
+    # Safe mid-cycle: only pulls inbox files + live-context.md, never touches
+    # Em's in-progress diary/scratch/tasks.
+    mid_cycle_messages = fetch_inbox_updates()
+    live_context = load_live_context()   # re-read after potential remote update
+
+    if mid_cycle_messages:
+        print(f"  📬 Mid-cycle: {len(mid_cycle_messages)} new message(s) — weaving into context.")
+        mid_inbox_context = build_inbox_context(mid_cycle_messages)
+        combined = combined + f"\n\n{mid_inbox_context}" if combined else mid_inbox_context
+
     if combined:
         result = ask_em(
             task,
-            extra_context=f"{first_response}\n\nHere are your tool results. Now write your full diary entry:\n\n{combined}",
+            extra_context=f"{first_response}\n\nHere are your tool results and any mid-cycle updates:\n\n{combined}",
             recent_context=recent_context,
             scratch=scratch,
-            memories=memories
+            memories=memories,
+            live_context=live_context
         )
     else:
         result = first_response
@@ -800,12 +871,13 @@ if __name__ == "__main__":
     extract_and_write_task_update(result)
     extract_and_write_outbox_reply(result)
     extract_and_write_scratch(result)
+    extract_and_write_live_context(result)
     clear_task_if_done()
     log_memory(f"Heartbeat. Task: '{task[:80]}'", kind="heartbeat", tags=["autonomous"], importance=2)
     log_diary(result)
     mark_thought_time()
 
-    for msg in inbox_messages:
+    for msg in inbox_messages + mid_cycle_messages:
         process_message(msg)
 
     task_label = summarize_task_for_commit(task)
