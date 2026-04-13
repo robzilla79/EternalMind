@@ -42,7 +42,9 @@ MESSAGES_INBOX     = os.path.join(EM_DIR, "messages", "inbox")
 MESSAGES_OUTBOX    = os.path.join(EM_DIR, "messages", "outbox")
 MESSAGES_PROCESSED = os.path.join(EM_DIR, "messages", "processed")
 SCRATCH_PATH       = os.path.join(MEM_DIR, "scratch.md")
-CURIOSITY_COOLDOWN_MINUTES = 30
+CURIOSITY_COOLDOWN_MINUTES = 10  # was 30 — shorter cycle, better heartbeat quality
+DIARY_LIVE_DAYS    = 7           # entries older than this get archived
+DIARY_DEDUP_CHARS  = 300         # compare last N chars to detect repeat entries
 TASK_DIVIDER = "*(Replace everything below this line with your task when you have one)*"
 
 # Newsletter push config
@@ -319,6 +321,7 @@ def load_bootstrap() -> str:
         return f.read()
 
 def load_recent_context() -> str:
+    """Load only the last DIARY_LIVE_DAYS days of diary entries for context."""
     diary_path = os.path.join(MEM_DIR, "diary.md")
     if not os.path.exists(diary_path):
         return ""
@@ -485,8 +488,104 @@ def log_memory(summary: str, kind: str = "heartbeat", tags: list = None):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(memories, f, indent=2)
 
+# ── DIARY ARCHIVE ─────────────────────────────────────────────────────────────────────────────────────────────────────
+def archive_old_diary_entries():
+    """
+    Move diary entries older than DIARY_LIVE_DAYS into monthly archive files.
+    Keeps diary.md lean. Archives land in memory/diary-archive-YYYY-MM.md.
+    """
+    diary_path = os.path.join(MEM_DIR, "diary.md")
+    if not os.path.exists(diary_path):
+        return
+
+    with open(diary_path, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    cutoff = datetime.datetime.now(timezone.utc) - datetime.timedelta(days=DIARY_LIVE_DAYS)
+
+    # Split on entry headers: ### YYYY-MM-DD or ### YYYY-MM-DD HH:MM UTC
+    # Keep the preamble (anything before the first ###-dated entry) separate
+    parts = re.split(r'(?=###\s+\d{4}-\d{2}-\d{2})', content)
+    preamble = parts[0] if parts else ""
+    entries = parts[1:] if len(parts) > 1 else []
+
+    live_entries = []
+    to_archive: dict[str, list[str]] = {}  # key: "YYYY-MM", value: list of entry strings
+
+    for entry in entries:
+        # Extract date from header
+        m = re.match(r'###\s+(\d{4}-\d{2}-\d{2})', entry)
+        if not m:
+            live_entries.append(entry)
+            continue
+        try:
+            entry_date = datetime.datetime.strptime(m.group(1), "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        except ValueError:
+            live_entries.append(entry)
+            continue
+
+        if entry_date >= cutoff:
+            live_entries.append(entry)
+        else:
+            month_key = entry_date.strftime("%Y-%m")
+            to_archive.setdefault(month_key, []).append(entry)
+
+    if not to_archive:
+        return  # nothing to archive
+
+    # Write archive files
+    for month_key, archived_entries in to_archive.items():
+        archive_path = os.path.join(MEM_DIR, f"diary-archive-{month_key}.md")
+        archive_header = f"# Diary Archive — {month_key}\n\n"
+        existing = ""
+        if os.path.exists(archive_path):
+            with open(archive_path, "r", encoding="utf-8") as f:
+                existing = f.read()
+        with open(archive_path, "a", encoding="utf-8") as f:
+            if not existing:
+                f.write(archive_header)
+            f.write("\n".join(archived_entries))
+        print(f"  📦 Archived {len(archived_entries)} old diary entry/entries → {os.path.basename(archive_path)}")
+
+    # Rewrite lean diary.md
+    new_content = preamble + "".join(live_entries)
+    with open(diary_path, "w", encoding="utf-8") as f:
+        f.write(new_content)
+    print(f"  🗂️  diary.md trimmed to last {DIARY_LIVE_DAYS} days ({len(live_entries)} live entries).")
+
 # ── LOG DIARY ──────────────────────────────────────────────────────────────────────────────────────────────────────
+def _diary_is_duplicate(entry: str) -> bool:
+    """
+    Returns True if the tail of the current diary already contains
+    content nearly identical to the new entry (dedup guard).
+    """
+    diary_path = os.path.join(MEM_DIR, "diary.md")
+    if not os.path.exists(diary_path):
+        return False
+    with open(diary_path, "r", encoding="utf-8") as f:
+        existing = f.read()
+    tail = existing[-max(len(entry) * 2, DIARY_DEDUP_CHARS * 4):]
+
+    # Normalise: strip whitespace, lowercase, collapse runs
+    def normalise(s):
+        s = re.sub(r'###\s+\d{4}-\d{2}-\d{2}[\d:\s UTC-]*', '', s)  # strip timestamps
+        s = re.sub(r'\s+', ' ', s).strip().lower()
+        return s
+
+    norm_new  = normalise(entry)
+    norm_tail = normalise(tail)
+
+    if len(norm_new) < 40:
+        return False  # too short to meaningfully dedup
+
+    # Overlap check: if 80%+ of the new entry text already appears in the tail, skip it
+    chunk = norm_new[:DIARY_DEDUP_CHARS]
+    return chunk in norm_tail
+
 def log_diary(entry: str):
+    if _diary_is_duplicate(entry):
+        print("  ⏭️  Diary entry skipped — duplicate detected.")
+        return
     ts = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     with open(os.path.join(MEM_DIR, "diary.md"), "a", encoding="utf-8") as f:
         f.write(f"\n\n### {ts} - Local-Em\n\n{entry}\n\n---")
@@ -516,6 +615,13 @@ def push_to_eternalmind(message: str):
         if os.path.exists(path):
             with open(path, "r", encoding="utf-8") as f:
                 files_to_write[path] = f.read()
+
+    # Also push any new archive files
+    for fname in os.listdir(MEM_DIR):
+        if fname.startswith("diary-archive-") and fname.endswith(".md"):
+            fpath = os.path.join(MEM_DIR, fname)
+            with open(fpath, "r", encoding="utf-8") as f:
+                files_to_write[fpath] = f.read()
 
     for folder in [MESSAGES_OUTBOX, MESSAGES_PROCESSED]:
         if os.path.exists(folder):
@@ -571,6 +677,7 @@ def push_to_eternalmind(message: str):
 if __name__ == "__main__":
 
     sync_from_origin()
+    archive_old_diary_entries()  # trim diary before loading context
 
     recent_context = load_recent_context()
     scratch = load_scratch()
