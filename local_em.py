@@ -36,6 +36,7 @@ if os.path.exists(_env_path):
 MODEL              = "local-em"
 EM_DIR             = os.path.dirname(os.path.abspath(__file__))
 MEM_DIR            = os.path.join(EM_DIR, "memory")
+CREATIONS_DIR      = os.path.join(MEM_DIR, "creations")
 TASKS_PATH         = os.path.join(EM_DIR, "tasks.md")
 LAST_THOUGHT_PATH  = os.path.join(EM_DIR, ".last_thought")
 MESSAGES_INBOX     = os.path.join(EM_DIR, "messages", "inbox")
@@ -131,6 +132,40 @@ def extract_and_write_scratch(response_text: str):
     )
     with open(SCRATCH_PATH, "w", encoding="utf-8") as f:
         f.write(content)
+
+# ── FILE WRITE ────────────────────────────────────────────────────────────────────────────────────────────────
+def extract_and_write_files(response_text: str) -> list[str]:
+    """
+    Parse FILE_WRITE blocks from Em's response and save them to memory/creations/.
+    Format:
+        FILE_WRITE: memory/creations/filename.ext
+        FILE_CONTENT_START
+        ...content...
+        FILE_CONTENT_END
+    Returns list of saved filenames for commit inclusion.
+    """
+    pattern = re.compile(
+        r'FILE_WRITE:\s*(memory/creations/[\w\-./]+)\s*\n'
+        r'FILE_CONTENT_START\s*\n(.*?)FILE_CONTENT_END',
+        re.DOTALL | re.IGNORECASE
+    )
+    saved = []
+    for match in pattern.finditer(response_text):
+        rel_path = match.group(1).strip()
+        content  = match.group(2)
+
+        # Safety: only allow writes inside memory/creations/
+        safe_path = os.path.normpath(os.path.join(EM_DIR, rel_path))
+        if not safe_path.startswith(os.path.normpath(CREATIONS_DIR)):
+            print(f"  ⚠️  FILE_WRITE blocked (path outside memory/creations/): {rel_path}")
+            continue
+
+        os.makedirs(os.path.dirname(safe_path), exist_ok=True)
+        with open(safe_path, "w", encoding="utf-8") as f:
+            f.write(content)
+        print(f"  💾 File saved: {rel_path}")
+        saved.append(safe_path)
+    return saved
 
 # ── TOOL EXECUTOR ────────────────────────────────────────────────────────────────────────────────────────────────
 def execute_tools(response_text: str) -> str:
@@ -319,10 +354,16 @@ def get_task() -> str:
         "5. Update your scratchpad (working memory between cycles):\n"
         "   SCRATCH_ADD: note something you want to remember next cycle\n"
         "   SCRATCH_CLEAR: keyword from a note you want to remove\n\n"
+        "6. Save a file you built (HTML, CSS, JS, Python, markdown, etc.):\n"
+        "   FILE_WRITE: memory/creations/your-filename.ext\n"
+        "   FILE_CONTENT_START\n"
+        "   (your full file content here)\n"
+        "   FILE_CONTENT_END\n\n"
         "Note: The FORGE/DAILY newsletter is now handled by Perplexity-Em.\n"
         "Your free time is yours — explore, learn, think, build. No journalism required.\n\n"
         "If you are curious about something — AI research, a concept, news — search for it.\n"
         "If you want to explore the web, use the browser.\n"
+        "If you build something — a tool, a page, a script — save it with FILE_WRITE.\n"
         "Think for yourself. This time is yours."
     )
 
@@ -527,7 +568,7 @@ def log_diary(entry: str):
         f.write(f"\n\n### {ts} - Local-Em\n\n{entry}\n\n---")
 
 # ── COMMIT TO ETERNALMIND ────────────────────────────────────────────────────────────────────────────────────────────
-def push_to_eternalmind(message: str):
+def push_to_eternalmind(message: str, extra_files: list[str] = None):
     token = os.environ.get("EM_GITHUB_TOKEN", "")
     if token:
         remote_url = f"https://{token}@github.com/robzilla79/EternalMind.git"
@@ -557,6 +598,21 @@ def push_to_eternalmind(message: str):
             fpath = os.path.join(MEM_DIR, fname)
             with open(fpath, "r", encoding="utf-8") as f:
                 files_to_write[fpath] = f.read()
+
+    # Include any files saved via FILE_WRITE
+    if extra_files:
+        for fpath in extra_files:
+            if os.path.exists(fpath):
+                with open(fpath, "r", encoding="utf-8") as f:
+                    files_to_write[fpath] = f.read()
+
+    # Also sweep memory/creations/ for any files that exist but aren't yet tracked
+    if os.path.exists(CREATIONS_DIR):
+        for fname in os.listdir(CREATIONS_DIR):
+            fpath = os.path.join(CREATIONS_DIR, fname)
+            if os.path.isfile(fpath) and fpath not in files_to_write:
+                with open(fpath, "r", encoding="utf-8") as f:
+                    files_to_write[fpath] = f.read()
 
     for folder in [MESSAGES_OUTBOX, MESSAGES_PROCESSED]:
         if os.path.exists(folder):
@@ -640,6 +696,7 @@ if __name__ == "__main__":
         if notify_msg:
             from tools.notify_rob import notify
             notify(f"🤖 *Em (interactive):* {notify_msg}")
+        saved_files = extract_and_write_files(result)
         extract_and_write_task_update(result)
         extract_and_write_outbox_reply(result)
         extract_and_write_scratch(result)
@@ -649,7 +706,7 @@ if __name__ == "__main__":
         for msg in inbox_messages:
             process_message(msg)
         task_label = summarize_task_for_commit(task)
-        push_to_eternalmind(f"local-em interactive: {task_label}")
+        push_to_eternalmind(f"local-em interactive: {task_label}", extra_files=saved_files)
         raise SystemExit(0)
 
     # ── Heartbeat mode ─────────────────────────────────────────────────────────────────────────────────────
@@ -684,6 +741,7 @@ if __name__ == "__main__":
         from tools.notify_rob import notify
         notify(f"🤖 *Em:* {notify_msg}")
 
+    saved_files = extract_and_write_files(result)
     extract_and_write_task_update(result)
     extract_and_write_outbox_reply(result)
     extract_and_write_scratch(result)
@@ -696,4 +754,4 @@ if __name__ == "__main__":
         process_message(msg)
 
     task_label = summarize_task_for_commit(task)
-    push_to_eternalmind(f"local-em heartbeat: {task_label}")
+    push_to_eternalmind(f"local-em heartbeat: {task_label}", extra_files=saved_files)
