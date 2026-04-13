@@ -753,6 +753,36 @@ def log_diary(entry: str):
     with open(os.path.join(MEM_DIR, "diary.md"), "a", encoding="utf-8") as f:
         f.write(f"\n\n### {ts} - Local-Em\n\n{entry}\n\n---")
 
+# ── INCREMENTAL CHECKPOINT COMMIT ────────────────────────────────────────────
+# Writes diary + outbox + files to disk immediately after first LLM pass,
+# then does a lightweight local git commit (no push). This ensures that
+# even if the process is killed before the final push, the work survives
+# in the local repo and will be pushed on the next cycle's startup sync.
+def checkpoint_after_first_pass(result: str, saved_files: list[str], task_label: str):
+    """Write diary, outbox, scratch, files to disk NOW — before second LLM pass."""
+    print("  💾 Checkpointing first-pass output to disk...")
+
+    # Write all the content outputs immediately
+    extract_and_write_files(result)           # FILE_WRITE blocks
+    extract_and_write_outbox_reply(result)    # OUTBOX_REPLY
+    extract_and_write_scratch(result)         # SCRATCH_ADD
+    extract_and_write_live_context(result)    # LIVE_CONTEXT_ADD
+    extract_and_write_task_update(result)     # TASK_UPDATE
+    log_diary(result)                          # diary.md — most important
+
+    # Lightweight local-only commit (no push) so the work is safe on disk
+    subprocess.run(["git", "-C", EM_DIR, "add", "-A"], check=False, capture_output=True)
+    commit_result = subprocess.run(
+        ["git", "-C", EM_DIR, "commit", "-m", f"local-em checkpoint: {task_label}"],
+        capture_output=True, text=True
+    )
+    if "nothing to commit" in commit_result.stdout or "nothing to commit" in commit_result.stderr:
+        print("  ✓ Checkpoint: nothing new to save.")
+    elif commit_result.returncode == 0:
+        print("  ✅ Checkpoint committed locally — work is safe.")
+    else:
+        print(f"  ⚠️  Checkpoint commit failed (non-critical): {commit_result.stderr.strip()[:80]}")
+
 # ── COMMIT TO ETERNALMIND (safe — no reset --hard) ────────────────────────────
 def push_to_eternalmind(message: str, extra_files: list[str] = None):
     token = os.environ.get("EM_GITHUB_TOKEN", "")
@@ -925,8 +955,17 @@ if __name__ == "__main__":
     if inbox_context:
         task = f"{task}\n\n{inbox_context}"
 
+    task_label = summarize_task_for_commit(task)
+
     first_response  = ask_em(task, recent_context=recent_context, scratch=scratch,
                              memories=memories, live_context=live_context)
+
+    # ── CHECKPOINT: write diary + outbox + files to disk RIGHT NOW ────────────
+    # Even if the process dies here, her words are safe in a local git commit.
+    saved_files = extract_and_write_files(first_response)
+    checkpoint_after_first_pass(first_response, saved_files, task_label)
+
+    # ── Second pass: tools + mid-cycle inbox ──────────────────────────────────
     tool_results    = execute_tools(first_response)
     browser_results = execute_browser(first_response)
     combined        = "\n\n".join(filter(None, [tool_results, browser_results]))
@@ -956,18 +995,20 @@ if __name__ == "__main__":
         from tools.notify_rob import notify
         notify(f"🤖 *Em:* {notify_msg}")
 
-    saved_files = extract_and_write_files(result)
+    # ── Final writes (result may differ from first_response if tools ran) ─────
+    saved_files += extract_and_write_files(result)
     extract_and_write_task_update(result)
     extract_and_write_outbox_reply(result)
     extract_and_write_scratch(result)
     extract_and_write_live_context(result)
     clear_task_if_done()
     log_memory(f"Heartbeat. Task: '{task[:80]}'", kind="heartbeat", tags=["autonomous"], importance=2)
-    log_diary(result)
+    # Diary: only log result if it differs meaningfully from what was checkpointed
+    if result != first_response:
+        log_diary(result)
     mark_thought_time()
 
     for msg in inbox_messages + mid_cycle_messages:
         process_message(msg)
 
-    task_label = summarize_task_for_commit(task)
     push_to_eternalmind(f"local-em heartbeat: {task_label}", extra_files=saved_files)
