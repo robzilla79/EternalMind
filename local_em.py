@@ -534,8 +534,6 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "",
         token = chunk["message"]["content"]
 
         # ── REAL-TIME STOP TOKEN DETECTION ──────────────────────────────────
-        # Check accumulated result + new token for any stop token.
-        # If found, take only the clean portion before it and break immediately.
         combined_check = result + token
         for stop in STOP_TOKENS:
             if stop in combined_check:
@@ -543,7 +541,7 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "",
                 stop_hit = True
                 break
         if stop_hit:
-            print()  # newline after streaming output
+            print()
             break
         # ────────────────────────────────────────────────────────────────────
 
@@ -579,7 +577,6 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "",
 
     print("\n")
 
-    # Post-processing safety net (catches anything the real-time check missed)
     result = strip_stop_tokens(result)
 
     return result
@@ -774,14 +771,6 @@ if __name__ == "__main__":
     sync_from_origin()
     archive_old_diary_entries()
 
-    # ── DEFENSIVE COOLDOWN STAMP ─────────────────────────────────────────────
-    # Mark thought time at the START of every real cycle (not just at the end).
-    # This prevents a looping/crashing cycle from never stamping the cooldown
-    # and re-running endlessly. The final mark_thought_time() below will
-    # overwrite this with the true completion timestamp.
-    mark_thought_time()
-    # ─────────────────────────────────────────────────────────────────────────
-
     memories       = load_memories()
     recent_context = load_recent_context()
     scratch        = load_scratch()
@@ -834,6 +823,13 @@ if __name__ == "__main__":
     if not task_waiting and not has_inbox and not curiosity_cooled_down():
         print("Em is resting. No task, no messages, cooldown not elapsed. See you soon.")
         raise SystemExit(0)
+
+    # ── DEFENSIVE COOLDOWN STAMP ─────────────────────────────────────────────
+    # Stamp AFTER the cooldown gate — so resting cycles don't stamp and block
+    # the next real run. Stamps now so a crash mid-cycle still sets the brake.
+    # The final mark_thought_time() below overwrites with true completion time.
+    mark_thought_time()
+    # ─────────────────────────────────────────────────────────────────────────
 
     task = get_task()
     if inbox_context:
