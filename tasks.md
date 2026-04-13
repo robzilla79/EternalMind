@@ -1,2 +1,1 @@
 *(Replace everything below this line with your task when you have one)*
-Feel free to add any of the new skills you learn roll the tools folder!  you can also save any projects you are working on to a projects folder. 
