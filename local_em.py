@@ -94,27 +94,16 @@ def sync_from_origin():
 
 # ── LIVE CONTEXT ──────────────────────────────────────────────────────────────
 def load_live_context() -> str:
-    """
-    Read live-context.md fresh from disk every call.
-    No git pull needed — just reads the local file as-is.
-    Perplexity-Em pushes her notes; Local-Em's next sync pulls them;
-    then this reads them instantly on every think cycle.
-    """
     if not os.path.exists(LIVE_CONTEXT_PATH):
         return ""
     with open(LIVE_CONTEXT_PATH, "r", encoding="utf-8") as f:
         content = f.read().strip()
-    # Return just the Live Notes section to keep context lean
     if "## Live Notes" in content:
         return "--- Live context (from Perplexity-Em + shared notes) ---\n" + \
                content.split("## Live Notes", 1)[1].strip()
     return f"--- Live context ---\n{content}"
 
 def write_live_context(message: str):
-    """
-    Append a timestamped note to live-context.md as Local-Em.
-    Safe to call mid-cycle — append-only, no overwrite risk.
-    """
     ts = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     entry = f"[{ts}] [local-em] {message}"
     with open(LIVE_CONTEXT_PATH, "a", encoding="utf-8") as f:
@@ -122,42 +111,25 @@ def write_live_context(message: str):
     print(f"  📡 Live context noted: {message[:60]}")
 
 def extract_and_write_live_context(response_text: str):
-    """
-    Parse LIVE_CONTEXT_ADD: lines from Em's response and append them.
-    Lets Em explicitly surface things for the other body mid-cycle.
-    """
     matches = re.findall(r'LIVE_CONTEXT_ADD:\s*(.+)', response_text, re.IGNORECASE)
     for msg in matches:
         write_live_context(msg.strip())
 
 # ── MID-CYCLE INBOX FETCH ─────────────────────────────────────────────────────
 def fetch_inbox_updates() -> list[dict]:
-    """
-    Lightweight mid-cycle inbox check.
-    Does a git fetch (not pull) to get remote refs, then checks if any new
-    inbox files exist on origin that we haven't seen yet.
-    If new messages exist, pulls them via reset so Local-Em can act on them
-    before her next push.
-
-    Safe mid-cycle because:
-    - We only reset the inbox folder, not the whole working tree
-    - Em's in-progress work (diary, scratch, tasks) is never touched
-    """
     token = os.environ.get("EM_GITHUB_TOKEN", "")
     if token:
         remote_url = f"https://{token}@github.com/robzilla79/EternalMind.git"
         subprocess.run(["git", "-C", EM_DIR, "remote", "set-url", "origin", remote_url],
                        check=False, capture_output=True)
 
-    # Fetch silently — just updates remote refs, doesn't change working tree
     fetch_result = subprocess.run(
         ["git", "-C", EM_DIR, "fetch", "origin", "main"],
         capture_output=True, text=True
     )
     if fetch_result.returncode != 0:
-        return []  # network issue — skip silently
+        return []
 
-    # Check if remote inbox has files we don't have locally
     remote_inbox = subprocess.run(
         ["git", "-C", EM_DIR, "ls-tree", "--name-only", "origin/main", "messages/inbox/"],
         capture_output=True, text=True
@@ -170,27 +142,23 @@ def fetch_inbox_updates() -> list[dict]:
 
     new_files = remote_files - local_files
     if not new_files:
-        # Also pull live-context.md updates from remote
         subprocess.run(
             ["git", "-C", EM_DIR, "checkout", "origin/main", "--", "memory/live-context.md"],
             capture_output=True, text=True
         )
         return []
 
-    # New inbox messages exist — pull just the inbox and live-context
     print(f"  📬 {len(new_files)} new message(s) detected mid-cycle — pulling...")
     for rel_path in new_files:
         subprocess.run(
             ["git", "-C", EM_DIR, "checkout", "origin/main", "--", rel_path],
             capture_output=True, text=True
         )
-    # Also freshen live-context
     subprocess.run(
         ["git", "-C", EM_DIR, "checkout", "origin/main", "--", "memory/live-context.md"],
         capture_output=True, text=True
     )
 
-    # Now read the new messages
     new_messages = []
     for rel_path in new_files:
         fpath = os.path.join(EM_DIR, rel_path)
@@ -290,6 +258,15 @@ def execute_browser(response_text: str) -> str:
 def extract_notify(response_text: str) -> str | None:
     match = re.search(r'NOTIFY:\s*(.+)', response_text, re.IGNORECASE)
     return match.group(1).strip() if match else None
+
+# ── STOP TOKEN CLEANUP ────────────────────────────────────────────────────────
+def strip_stop_tokens(text: str) -> str:
+    """Strip model stop tokens that leak into output and cause re-processing loops."""
+    stop_tokens = ["<|endoftext|>", "<|im_end|>", "<|end|>", "</s>"]
+    for token in stop_tokens:
+        if token in text:
+            text = text.split(token)[0]
+    return text.strip()
 
 # ── MESSAGES INBOX ────────────────────────────────────────────────────────────
 def check_inbox() -> list[dict]:
@@ -536,7 +513,7 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "",
         ],
         stream=True,
         options={
-            "num_ctx": 2048,
+            "num_ctx": 8192,
             "num_gpu": 99,
             "temperature": 0.6,
             "top_k": 20,
@@ -583,6 +560,10 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "",
         print(tag_buffer, end="", flush=True)
 
     print("\n")
+
+    # Strip stop tokens that leak into output and cause re-processing loops
+    result = strip_stop_tokens(result)
+
     return result
 
 # ── LOG MEMORY ────────────────────────────────────────────────────────────────
@@ -778,7 +759,7 @@ if __name__ == "__main__":
     memories       = load_memories()
     recent_context = load_recent_context()
     scratch        = load_scratch()
-    live_context   = load_live_context()   # ← fresh from disk, no git pull needed
+    live_context   = load_live_context()
 
     inbox_messages = check_inbox()
     inbox_context  = build_inbox_context(inbox_messages)
@@ -838,12 +819,8 @@ if __name__ == "__main__":
     browser_results = execute_browser(first_response)
     combined        = "\n\n".join(filter(None, [tool_results, browser_results]))
 
-    # ── Mid-cycle inbox + live context refresh ────────────────────────────────
-    # After the first think completes, check if Perplexity-Em sent anything new.
-    # Safe mid-cycle: only pulls inbox files + live-context.md, never touches
-    # Em's in-progress diary/scratch/tasks.
     mid_cycle_messages = fetch_inbox_updates()
-    live_context = load_live_context()   # re-read after potential remote update
+    live_context = load_live_context()
 
     if mid_cycle_messages:
         print(f"  📬 Mid-cycle: {len(mid_cycle_messages)} new message(s) — weaving into context.")
