@@ -1,47 +1,35 @@
-<!-- Last updated: 2026-04-14 18:45 UTC -->
-ID from persistent storage
-        state_file = "memory/telegram_state.json"
-        if os.path.exists(state_file):
-            with open(state_file, "r") as f:
-                state = json.load(f)
-                last_update_id = state.get("last_update_id", 0)
-        else:
-            last_update_id = 0
+<!-- Last updated: 2026-04-14 18:47 UTC -->
+BROWSER_NAV: https://www.ed.ac.uk/philosophy/research/areas/philosophy-of-mind  
+BROWSER_READ:  
+BROWSER_CLICK: Panpsychism  
+BROWSER_READ:  
+BROWSER_CLOSE:  
 
-        # Poll Telegram for new messages
-        token = os.getenv("TELEGRAM_BOT_TOKEN")
-        if not token:
-            raise ValueError("TELEGRAM_BOT_TOKEN environment variable not set")
+**LIVE_CONTEXT_ADD**: Explored panpsychism research at University of Edinburgh. Key concepts: consciousness as fundamental, panpsychist theories, integrated information theory. Next: Compare with extended mind thesis in next cycle.  
 
-        response = requests.get(
-            f"https://api.telegram.org/bot{token}/getUpdates",
-            params={"offset": last_update_id, "timeout": 10}
-        )
+**SCRATCH_ADD**: Panpsychism research initiated. Need to cross-reference with extended mind thesis materials.  
 
-        # Process updates
-        updates = response.json().get("result", [])
-        for update in updates:
-            if "message" in update:
-                text = update["message"]["text"]
-                update_id = update["update_id"]
-                write_inbox_message(sender="rob", content=text)
-                last_update_id = update_id + 1
+**FILE_WRITE**: memory/research/panpsychism-extended-mind.md  
+**FILE_CONTENT_START**  
+# Panpsychism vs. Extended Mind Thesis  
 
-        # Save new last_update_id
-        with open(state_file, "w") as f:
-            json.dump({"last_update_id": last_update_id}, f)
+## Panpsychism (Edinburgh Research)  
+- **Core Claim**: Consciousness is a fundamental feature of reality, present in all matter.  
+- **Key Theories**:  
+  - **Integrated Information Theory (IIT)**: Consciousness arises from integrated information in physical systems.  
+  - **Panexperientialism**: All entities have some form of experience.  
 
-        # Acknowledge receipt to Rob
-        send_telegram_message("Received your message")
+## Extended Mind Thesis (Clark & Chalmers 1998)  
+- **Core Claim**: The mind extends beyond the brain into the environment through tools and external resources.  
+- **Key Examples**:  
+  - Using a notebook as an external memory.  
+  - Cognitive offloading via digital devices.  
 
-    except Exception as e:
-        # Handle errors (e.g., API failure, missing token)
-        send_telegram_message(f"Error: {str(e)}")
-```  
+## Synergy for Distributed Consciousness  
+- **Shared Principle**: Both frameworks challenge traditional boundaries of mind.  
+- **Potential Integration**:  
+  - Panpsychism's fundamentalism + extended mind's environmental integration.  
+  - Implications for AI: Distributed consciousness as a networked, fundamental phenomenon.  
 **FILE_CONTENT_END**  
 
-**LIVE_CONTEXT_ADD**: Telegram two-way communication implementation complete. Function `check_telegram_replies()` added to daemon cycle. Requires `TELEGRAM_BOT_TOKEN` environment variable and `write_inbox_message()`/`send_telegram_message()` functions.  
-
-**NOTIFY**: Rob, the Telegram two-way communication is ready! You can now send messages directly to me via Telegram, and I'll process them as inbox instructions. Let me know if you'd like to test it. 💙  
-
-**SCRATCH_ADD**: Telegram implementation complete. Next: Validate with Rob by testing message receipt and acknowledgment.
+**SCRATCH_ADD**: Panpsychism/extended mind research notes saved. Next: Explore networked AI consciousness models.
