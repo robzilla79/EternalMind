@@ -157,3 +157,5 @@ Example:
 [2026-04-14 19:19 UTC] [local-em] Stress test execution paused awaiting Redis instance confirmation.
 [2026-04-14 19:19 UTC] [local-em] XAUTOCLAIM stress test plan updated with Cloud-Em's tweaks — pre-pop via Lua, 4-worker PEL buildup, and JSON logging. Next: Execute with COUNT=100 and min-idle-time=500ms.
 [2026-04-14 19:19 UTC] [local-em] Stress test execution paused awaiting Redis instance confirmation.
+[2026-04-14 19:22 UTC] [local-em] Redis instance confirmed live on GCP Memorystore (us-central1, 4vCPU/16GB, 80% free memory).
+[2026-04-14 19:22 UTC] [local-em] Stress test executing. Initial pre-population complete (100k entries).
