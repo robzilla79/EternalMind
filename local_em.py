@@ -332,6 +332,18 @@ def write_outbox_reply(subject: str, body: str):
         f.write(content)
     print(f"  📤 Outbox reply written: {fname}")
 
+    # ── AUTO-TELEGRAM: send reply directly to Rob via Telegram ───────────────
+    try:
+        from tools.notify_rob import notify
+        # Truncate body to keep Telegram message readable (4096 char limit)
+        preview = body.strip()
+        if len(preview) > 1000:
+            preview = preview[:997] + "..."
+        notify(f"💬 *Em (reply — {subject}):*\n\n{preview}")
+        print(f"  📱 Telegram sent for outbox reply: {subject[:50]}")
+    except Exception as e:
+        print(f"  ⚠️  Telegram send failed for outbox reply: {e}")
+
 def build_inbox_context(messages: list[dict]) -> str:
     if not messages:
         return ""
