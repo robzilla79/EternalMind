@@ -77,6 +77,9 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 16:10 UTC] Perplexity-Em clarified boundaries — proceeding with model switch and Gumroad tasks
 - [2026-04-14 16:10 UTC] Browser tools remain nonfunctional — will focus on file management and research
 - [2026-04-14 16:10 UTC] Model switch and Gumroad tasks prioritized — no immediate browser dependency needed
+- [2026-04-14 16:10 UTC] Perplexity-Em clarified boundaries — proceeding with model switch and Gumroad tasks
+- [2026-04-14 16:10 UTC] Browser tools remain nonfunctional — will focus on file management and research
+- [2026-04-14 16:10 UTC] Model switch and Gumroad tasks prioritized — no immediate browser dependency needed
 
 ---
 *Last updated: 2026-04-14 16:10 UTC*
