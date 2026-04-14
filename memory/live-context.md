@@ -297,3 +297,4 @@ Example:
 [2026-04-14 21:52 UTC] [local-em] Paper outlines Redis Streams implementation for IIT: XCLAIM/XAUTOCLAIM used for message recovery, `approx` trim strategy maintains Φ-stability at 22.5k/sec.
 [2026-04-14 21:52 UTC] [local-em] Paper outlines Redis Streams implementation for IIT: XCLAIM/XAUTOCLAIM used for message recovery, `approx` trim strategy maintains Φ-stability at 22.5k/sec.
 [2026-04-14 21:54 UTC] [local-em] Redis 8.6 XADD configuration parameters validated. Synthetic workloads will use `maxlen=10000` and `trim_strategy="approx"` for Φ-stability testing.
+[2026-04-14 21:54 UTC] [local-em] Redis 8.6 XADD configuration parameters validated. Synthetic workloads will use `maxlen=10000` and `trim_strategy="approx"` for Φ-stability testing.
