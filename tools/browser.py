@@ -38,7 +38,7 @@ import datetime
 import threading
 from datetime import timezone
 
-# ── SECURITY BLOCKLIST ──────────────────────────────────────────────────────
+# ── SECURITY BLOCKLIST ──────────────────────────────────────────────
 BLOCKLIST = [
     r'localhost:(?!8\d{3})',
     r'127\.0\.0\.1',
@@ -65,57 +65,41 @@ COMMAND_TIMEOUT = 30  # hard cap per browser command block
 
 
 def _get_page():
-    """Lazy-init Playwright browser with a hard launch timeout."""
+    """
+    Lazy-init Playwright browser.
+    NOTE: Playwright sync_api must NOT be called from inside a daemon thread
+    — it uses its own internal event loop that deadlocks in that context.
+    We call it directly here; the COMMAND_TIMEOUT thread in
+    execute_browser_commands() provides the outer stall-guard instead.
+    """
     global _browser, _page, _pw
     if _page is not None:
         return _page
 
-    result = {"page": None, "error": None}
-
-    def _launch():
-        try:
-            from playwright.sync_api import sync_playwright
-            pw = sync_playwright().start()
-            browser = pw.chromium.launch(
-                headless=False,
-                args=['--start-maximized']
-            )
-            context = browser.new_context(
-                viewport={'width': 1280, 'height': 900},
-                user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-            )
-            page = context.new_page()
-            result["page"] = page
-            # stash globals inside thread so outer scope can read them
-            global _browser, _page, _pw
-            _browser = browser
-            _page    = page
-            _pw      = pw
-        except ImportError:
-            result["error"] = "playwright_not_installed"
-        except Exception as e:
-            result["error"] = str(e)
-
-    t = threading.Thread(target=_launch, daemon=True)
-    t.start()
-    t.join(timeout=LAUNCH_TIMEOUT)
-
-    if t.is_alive():
-        # Launch hung — kill thread ref and bail gracefully
-        raise RuntimeError(
-            f"Browser launch timed out after {LAUNCH_TIMEOUT}s. "
-            "Chromium may not be installed. Run: python -m playwright install chromium"
-        )
-    if result["error"] == "playwright_not_installed":
+    try:
+        from playwright.sync_api import sync_playwright
+    except ImportError:
         raise RuntimeError(
             "Playwright not installed. Run: pip install playwright && python -m playwright install chromium"
         )
-    if result["error"]:
-        raise RuntimeError(f"Browser launch failed: {result['error']}")
-    if result["page"] is None:
-        raise RuntimeError("Browser launched but page is None — unknown error.")
 
-    return result["page"]
+    try:
+        _pw      = sync_playwright().start()
+        _browser = _pw.chromium.launch(
+            headless=False,
+            args=['--start-maximized'],
+            timeout=LAUNCH_TIMEOUT * 1000,
+        )
+        context  = _browser.new_context(
+            viewport={'width': 1280, 'height': 900},
+            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        )
+        _page = context.new_page()
+    except Exception as e:
+        _pw = _browser = _page = None
+        raise RuntimeError(f"Browser launch failed: {e}")
+
+    return _page
 
 
 def _is_blocked(url: str) -> bool:
@@ -134,7 +118,7 @@ def _log_action(action: str, detail: str = ''):
     return msg
 
 
-# ── PUBLIC API ──────────────────────────────────────────────────────────────
+# ── PUBLIC API ────────────────────────────────────────────────────────────
 
 def navigate(url: str) -> str:
     if _is_blocked(url):
@@ -227,21 +211,28 @@ def close_browser():
             _browser.close()
         except Exception:
             pass
+    if _pw:
+        try:
+            _pw.stop()
+        except Exception:
+            pass
     _browser = None
     _page    = None
     _pw      = None
     return 'Browser closed.'
 
 
-# ── RESPONSE PARSER ─────────────────────────────────────────────────────────
+# ── RESPONSE PARSER ───────────────────────────────────────────────────────────
 
 def execute_browser_commands(response_text: str) -> str:
     """
     Parse and execute BROWSER_* commands from Em's response.
     Hard-capped at COMMAND_TIMEOUT seconds total to prevent daemon stalls.
-    Returns a summary of all actions taken, or a timeout notice.
+    The COMMAND_TIMEOUT thread here is the outer stall-guard;
+    Playwright itself is called directly (not nested in another thread)
+    so its internal event loop works correctly.
     """
-    results  = []
+    results   = []
     timed_out = threading.Event()
 
     def _run():
