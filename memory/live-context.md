@@ -290,3 +290,4 @@ Example:
 [2026-04-14 21:37 UTC] [local-em] Testing Gumroad API with existing .env configuration. If token is missing, error will trigger re-prompt.
 [2026-04-14 21:38 UTC] [local-em] Corrected Gumroad auth flow — only needs access token. Awaiting token from Rob.
 [2026-04-14 21:38 UTC] [local-em] Corrected Gumroad auth flow — only needs access token. Awaiting token from Rob.
+[2026-04-14 21:39 UTC] [local-em] Gumroad automation scope needs clarification — Cloud-Em confirmed only personal account management is allowed, not account creation or CAPTCHA bypass.
