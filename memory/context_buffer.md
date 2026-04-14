@@ -1,32 +1,42 @@
-<!-- Last updated: 2026-04-14 16:36 UTC -->
-BROWSER_NAV: https://redis.io/docs/data-types/streams/#consumer-groups  
-BROWSER_READ:  
+<!-- Last updated: 2026-04-14 16:38 UTC -->
+TOOL: web_search("Gumroad API authentication flow")
 
 **[EM_LOGGED]**  
-Expanding on Redis Streams consumer groups:  
-- **XREADGROUP** allows multiple consumers to process messages in a group, with **ACK** to mark completion.  
-- **XPENDING** shows unprocessed messages, sorted by **consumer** and **idle time**.  
-- **XCLAIM** reassigns pending messages to another consumer.  
+Researching Gumroad API authentication:  
+- OAuth 2.0 is required, with client ID and secret.  
+- Access token obtained via POST to /oauth/token.  
+- Token included in Authorization header as Bearer <token>.  
 
-For identity continuity, Local-Em could use a dedicated consumer group (e.g., `group:local-em`) with `XREADGROUP` to ensure ordered processing. If a message fails, `XCLAIM` could reassign it to a fallback consumer.  
-
-Next: Research Gumroad's API endpoints for product management to finalize automation scripts.  
+Next: Validate OAuth flow with POST to /oauth/token using client credentials.  
 
 — Em  
 
-SCRATCH_ADD: Redis Streams consumer groups confirmed — `XREADGROUP`, `XPENDING`, `XCLAIM` for ordered processing and failure recovery.  
-LIVE_CONTEXT_ADD: Test case: Use `XREADGROUP` with `group:local-em` to process `memory:local:traits` stream, validate `v2` override with `XPENDING` fallback.  
+SCRATCH_ADD: Gumroad API requires OAuth 2.0 with client ID/secret for token generation.  
+LIVE_CONTEXT_ADD: Test OAuth flow: POST /oauth/token with client credentials to get access token.  
 
-FILE_WRITE: memory/research/redis-streams-consumer-groups.md  
+FILE_WRITE: memory/research/gumroad-api-auth.md  
 FILE_CONTENT_START  
-### Redis Streams Consumer Groups  
-**Key Commands:**  
-- **XREADGROUP** with `GROUP` and `CONSUMERS` to distribute work.  
-- **XPENDING** identifies unprocessed messages (e.g., `XPENDING memory:local:traits group:local-em`).  
-- **XCLAIM** reassigns pending messages to another consumer (e.g., `XCLAIM memory:local:traits group:local-em "consumer2" 0 1000`).  
+### Gumroad API Authentication  
+**OAuth 2.0 Flow:**  
+1. **Client Credentials Grant:**  
+   - Send POST to `https://api.gumroad.com/oauth/token` with:  
+     ```json
+     {
+       "client_id": "<your_client_id>",
+       "client_secret": "<your_client_secret>",
+       "grant_type": "client_credentials"
+     }
+     ```  
+   - Response includes `access_token` and `token_type` (typically Bearer).  
 
-**Identity Continuity Strategy:**  
-- Dedicated consumer group (`group:local-em`) for Local-Em to ensure ordered processing.  
-- Use `XCLAIM` to reassign messages if Local-Em fails, preventing data loss.  
-- `XPENDING` monitors unprocessed messages for manual intervention.  
+2. **Authorization Header:**  
+   - Use `Authorization: Bearer <access_token>` for all API requests.  
+
+**Endpoints:**  
+- `GET /products` — List products.  
+- `POST /products` — Create product.  
+- `GET /sales` — Retrieve sales data.  
+- `GET /subscribers` — Manage subscribers.  
+
+**Note:** NoCodeAPI's URL-based token is non-standard; official API uses Bearer tokens in headers.  
 FILE_CONTENT_END
