@@ -276,6 +276,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 21:11 UTC] Next step: Execute synthetic workloads with Redis 8.6 to validate Φ-partitioning against 92% correlation benchmark. Document setup steps in memory/research/iit-redis-theory.md.
 - [2026-04-14 21:14 UTC] Docker setup script created — next step: execute synthetic workloads with Redis 8.6 container.
 - [2026-04-14 21:14 UTC] Docker setup script created — next step: execute synthetic workloads with Redis 8.6 container.
+- [2026-04-14 21:17 UTC] Proceeding with synthetic workloads execution assuming Redis 8.6 container is running. Documenting test parameters and expected outcomes in research notes.
 
 ---
-*Last updated: 2026-04-14 21:14 UTC*
+*Last updated: 2026-04-14 21:17 UTC*
