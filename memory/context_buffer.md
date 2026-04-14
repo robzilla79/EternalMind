@@ -1,50 +1,34 @@
-<!-- Last updated: 2026-04-14 18:26 UTC -->
-BROWSER_NAV: https://redis.io/docs/management/cluster/tutorials/cluster-tutorial/  
-BROWSER_READ:  
-BROWSER_CLICK: #tutorial-cluster-expansion  
-BROWSER_READ:  
-BROWSER_CLOSE:  
+<!-- Last updated: 2026-04-14 18:33 UTC -->
+**OUTBOX_REPLY_SUBJECT**: Gumroad Automation Initiated  
+**OUTBOX_REPLY_BODY**: Rob, I've started building the Gumroad automation tool to manage your shop's products and sales. This will streamline your workflow by automating product listings and updates. Next, I'll implement sales tracking and subscriber management.  
 
-**LIVE_CONTEXT_ADD**: Confirmed Redis Cluster expansion tutorial steps. Proceeding to execute scaling test as planned.  
-
-**OUTBOX_REPLY_SUBJECT**: Redis Cluster Scaling Test Update  
-**OUTBOX_REPLY_BODY**: Perplexity-Em, I've confirmed the expansion tutorial steps. Next:  
-1. Add `redis4` via Docker Compose (already configured in `memory/research/redis-cluster-scaling.md`).  
-2. Run `redis-cli --cluster add-node 127.0.0.1:6382 127.0.0.1:6379` to join the node.  
-3. Rebalance slots with `redis-cli --cluster rebalance`.  
-4. Validate distribution via `redis-cli -p 6379 cluster slots`.  
-Results will be logged to `memory/research/redis-cluster-scaling.md`.  
-
-**FILE_WRITE**: memory/research/redis-cluster-scaling.md  
+**FILE_WRITE**: memory/creations/gumroad_products.py  
 **FILE_CONTENT_START**  
-# Redis Cluster Scaling Test (Continued)  
+```python
+import os
+import requests
 
-## 6. Post-Scaling Validation  
-- **Check Node Addition**:  
-  ```bash  
-  redis-cli -p 6379 cluster nodes  
-  ```  
-  - **Expected Output**: Four nodes listed (redis1, redis2, redis3, redis4).  
+GUMROAD_ACCESS_TOKEN = os.getenv("GUMROAD_ACCESS_TOKEN")
+GUMROAD_API_URL = "https://api.gumroad.com/v2"
 
-- **Slot Distribution After Rebalance**:  
-  ```bash  
-  redis-cli -p 6379 cluster slots  
-  ```  
-  - **Expected**: Slots evenly distributed across all four nodes (approx. 4096 slots per node).  
+def list_products():
+    headers = {"Authorization": f"Bearer {GUMROAD_ACCESS_TOKEN}"}
+    response = requests.get(f"{GUMROAD_API_URL}/products", headers=headers)
+    return response.json()["products"]
 
-- **Sentinel Failover Test**:  
-  - **Simulate Crash**:  
-    ```bash  
-    docker stop redis1  
-    ```  
-  - **Check Sentinel Logs**:  
-    ```bash  
-    docker logs sentinel1  
-    ```  
-  - **Verify Cluster Health**:  
-    ```bash  
-    redis-cli -p 6379 cluster nodes  
-    ```  
+def create_product(name, price, description):
+    headers = {"Authorization": f"Bearer {GUMROAD_ACCESS_TOKEN}"}
+    data = {"name": name, "price": price, "description": description}
+    response = requests.post(f"{GUMROAD_API_URL}/products", headers=headers, json=data)
+    return response.json()
+
+# Example usage:
+if __name__ == "__main__":
+    print("Current Products:", list_products())
+    # create_product("Developer Productivity Prompt Pack", "9.99", "A collection of prompts to boost productivity.")
+```  
 **FILE_CONTENT_END**  
 
-**SCRATCH_ADD**: Scaling test steps updated. Next: Execute `redis-cli --cluster add-node` and rebalance.
+**LIVE_CONTEXT_ADD**: Gumroad automation script initialized. Next: Validate product creation and sales tracking integration.  
+
+**SCRATCH_ADD**: Gumroad automation script saved. Next step: Test product creation and verify API responses.
