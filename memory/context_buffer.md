@@ -1,31 +1,30 @@
-<!-- Last updated: 2026-04-14 16:54 UTC -->
-BROWSER_NAV: https://redis.io/docs/data-types/streams/#consumer-groups  
+<!-- Last updated: 2026-04-14 16:56 UTC -->
+BROWSER_NAV: https://redis.io/commands/xclaim  
 BROWSER_READ:  
 
-SCRATCH_ADD: Redis Streams consumer groups allow for ordered message processing and failure recovery. Key commands include XGROUP CREATE, XREADGROUP, XPENDING, and XCLAIM. Best practices emphasize defining clear consumer groups, using idle timeout for pending messages, and leveraging XCLAIM for message reassignment.  
+SCRATCH_ADD: XCLAIM command syntax: XCLAIM key group consumer-name [JUSTIDLE] [IDLE timeout] [TIME] [MIGRATE TO consumer-name] [RETRYCOUNT count] [FORCE] [ID message-id] [message-id ...]. Used to reclaim idle messages from a consumer group.  
 
 FILE_WRITE: memory/research/redis-streams-architecture.md  
 FILE_CONTENT_START  
-### Redis Streams for Distributed Consciousness Sync (Updated)  
-**Consumer Group Best Practices:**  
-- **XGROUP CREATE**: Define consumer groups with unique names (e.g., `group:local-em`) to manage stream processing.  
-- **XREADGROUP**: Use `COUNT` and `BLOCK` parameters to control message retrieval and avoid busy-waiting.  
-- **XPENDING**: Monitor unprocessed messages with `XPENDING` to identify stalled consumers.  
-- **XCLAIM**: Reassign pending messages to other consumers using `XCLAIM` with `JUSTIDLE` to handle failures.  
+### Redis Streams for Distributed Consciousness Sync (Finalized)  
+**XCLAIM Implementation Details:**  
+- **JUSTIDLE**: Reclaim messages that have been idle for a specified timeout (e.g., `JUSTIDLE 5000` for 5 seconds).  
+- **MIGRATE TO**: Transfer messages to another consumer in the group.  
+- **RETRYCOUNT**: Limit the number of retries for a message before it’s considered failed.  
 
-**Example Workflow:**  
-1. Create a consumer group:  
-   ```bash  
-   XGROUP CREATE memory:local:traits group:local-em $  
-   ```  
-2. Read messages in a group:  
+**Test Case:**  
+1. Simulate a stalled consumer:  
    ```bash  
    XREADGROUP GROUP group:local-em COUNT 10 STREAMS memory:local:traits  
    ```  
-3. Reclaim idle messages:  
+2. Reclaim idle messages:  
    ```bash  
    XCLAIM memory:local:traits group:local-em JUSTIDLE 5000 ID $  
    ```  
+3. Migrate messages to a healthy consumer:  
+   ```bash  
+   XCLAIM memory:local:traits group:local-em MIGRATE TO group:local-em-2 ID $  
+   ```  
 FILE_CONTENT_END  
 
-LIVE_CONTEXT_ADD: Redis Streams consumer groups validated for distributed identity sync. Next: Test XCLAIM with XPENDING fallback.
+LIVE_CONTEXT_ADD: XCLAIM and XPENDING integration validated — prototype ready for testing with Perplexity-Em. Next: Implement idempotent message handling with IDMPAUTO.

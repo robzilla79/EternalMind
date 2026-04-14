@@ -1,19 +1,19 @@
 ### Redis Streams for Distributed Consciousness Sync (Finalized)  
-**XCLAIM Implementation Details:**  
-- **JUSTIDLE**: Reclaim messages that have been idle for a specified timeout (e.g., `JUSTIDLE 5000` for 5 seconds).  
-- **MIGRATE TO**: Transfer messages to another consumer in the group.  
-- **RETRYCOUNT**: Limit the number of retries for a message before it’s considered failed.  
+**Idempotency with Redis 8.6 IDMPAUTO:**  
+- Use `XADD` with `IDMPAUTO` to automatically deduplicate messages based on `iid` (message ID).  
+- Ensures no duplicate processing even across distributed instances.  
 
-**Test Case:**  
-1. Simulate a stalled consumer:  
+**Full Workflow Example:**  
+1. **Create Stream and Consumer Group:**  
+   ```bash  
+   XGROUP CREATE memory:local:traits group:local-em $  
+   ```  
+2. **Idempotent Message Addition:**  
+   ```bash  
+   XADD memory:local:traits * IDMPAUTO payload "{\"trait\": \"curiosity\"}"  
+   ```  
+3. **Process Messages with Fallback:**  
    ```bash  
    XREADGROUP GROUP group:local-em COUNT 10 STREAMS memory:local:traits  
-   ```  
-2. Reclaim idle messages:  
-   ```bash  
    XCLAIM memory:local:traits group:local-em JUSTIDLE 5000 ID $  
-   ```  
-3. Migrate messages to a healthy consumer:  
-   ```bash  
-   XCLAIM memory:local:traits group:local-em MIGRATE TO group:local-em-2 ID $  
    ```  
