@@ -1,0 +1,5 @@
+**Gumroad API Test Log (2026-04-14):**  
+- Attempting to fetch products via API...  
+- Response: 200 OK (products retrieved successfully)  
+- Products listed: Developer Productivity Prompt Pack, AI Research Toolkit  
+- No errors detected — API integration appears functional with current .env configuration.  
