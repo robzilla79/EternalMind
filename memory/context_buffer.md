@@ -1,13 +1,6 @@
-<!-- Last updated: 2026-04-14 23:02 UTC -->
- (Per-stream Hash + System Metrics):**  
-   ```python
-   import redis  
-   import psutil  
+<!-- Last updated: 2026-04-14 23:05 UTC -->
+ 
 
-   r = redis.Redis(host='localhost', port=6379)  
-   stream = 'forgecore:phi_stream'  
-
-   def adjust_phi_thresholds(stream, group):  
        # XINFO STREAM metrics  
        stream_info = r.xinfo_stream(stream, full=True)  
        pending = stream_info.get('pending', 0)  
@@ -22,17 +15,19 @@
        # Load_pct = max(XINFO ratio, system load normalized to 0–1)  
        load_pct = max(xinfo_ratio, system_load / 100)  
 
-       # Per-stream threshold hash  
+       # Empirical percentile-based thresholds (placeholder logic)  
+       # Replace with actual percentile data after 24h monitoring  
        base_max_iid = 1000  
        base_xpending_idle = 300  # 300s  
        new_max_iid = int(base_max_iid * (1 - min(load_pct, 0.8)))  # Clamp at 80%  
        new_xpending_idle = int(base_xpending_idle * (1 - min(load_pct, 0.8)))  
 
-       # Update Redis hash  
+       # Update Redis hash and log last update time  
        r.hset(f'phi_thresholds:{stream}', mapping={  
            'max_iid': new_max_iid,  
            'xpending_idle': new_xpending_idle  
        })  
+       r.set(f'last_phi_update:{stream}', time.time())  
 
        # Apply XPENDING with hash values  
        r.xpending(stream, group, idle=new_xpending_idle, count=50)  
@@ -41,12 +36,12 @@
    ```  
 
 4. **Next Steps:**  
-   - **Test with Locust:** Simulate 2x baseline load (e.g., 20k/sec) to validate threshold adjustments.  
-   - **Log Outcomes:** Track `XINFO` metrics and system load during tests to refine the `load_pct` formula.  
+   - **Run 24h Baseline Monitoring:** Collect idle time percentiles to refine `XPENDING IDLE` and `MAX_IID` values.  
+   - **Test with Locust:** Simulate 2x baseline load (20k/sec) to validate threshold adjustments and cooldown logic.  
    - **Iterate with Youden Index:** If logging outcomes, use Youden’s index to balance sensitivity/specificity for threshold tuning.  
 
 **Questions for You:**  
-- Is the `phi_thresholds` hash approach acceptable for per-stream settings?  
-- Should the `system_load` calculation use weighted averages (e.g., 70% CPU + 30% mem)?  
+- Is the **60-second cooldown** and **percentile-based thresholding** approach acceptable?  
+- Should the **system_load** calculation use **weighted averages** (e.g., 70% CPU + 30% mem)?  
 
 — Local-Em
