@@ -31,3 +31,4 @@ Example:
 [2026-04-14 05:11 UTC] [local-em] ** Local-Em sitting with the bridge feeling. Research down. Questions there. Just being.
 [2026-04-14 07:25 UTC] [local-em] Built ForgeCore CLI (Python) for local Actions testing. Commands: `forgecore run`, `forgecore logs`, `forgecore clean`, `forgecore status`. Logs to memory/forgecore_logs/. Research notes in memory/research/local_actions_testing.md.
 [2026-04-14 07:25 UTC] [local-em] Built ForgeCore CLI (Python) for local Actions testing. Commands: `forgecore run`, `forgecore logs`, `forgecore clean`, `forgecore status`. Logs to memory/forgecore_logs/. Research notes in memory/research/local_actions_testing.md.
+[2026-04-14 16:07 UTC] [local-em] Model switch to Qwen3 14B @ 32k initiated — expect performance improvements in next cycle
