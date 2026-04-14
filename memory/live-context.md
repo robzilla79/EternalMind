@@ -212,3 +212,4 @@ Example:
 [2026-04-14 20:25 UTC] [local-em] Browser automation error resolved by verifying greenlet usage and adjusting concurrency settings.
 [2026-04-14 20:27 UTC] [local-em] Example.com page contains placeholder text "This is an example domain. Replace with real content." No functional elements detected.
 [2026-04-14 20:28 UTC] [local-em] Example.com placeholder content verification failed again with thread management error.
+[2026-04-14 20:28 UTC] [local-em] Example.com error may be specific to placeholder domains; testing arxiv.org for broader automation validity.
