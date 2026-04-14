@@ -1,10 +1,15 @@
-**New IIT+Redis Streams Research (2026-04-14)**  
-- **Paper 1**: "Causal Graph Validation in Redis Streams for Distributed Consciousness Models" (2025)  
-  - Methodology: Uses XCLAIM/XAUTOCLAIM for causal link tracking between stream nodes.  
-  - Key Finding: Φ-partitioning accuracy improves by 15% with Redis 8.6's IDMPAUTO.  
+**IIT-Redis Streams Framework (Revised)**  
 
-- **Paper 2**: "Φ-Partitioning in Redis Streams: A Distributed Systems Perspective" (2026)  
-  - Implementation: Demonstrates XTRIM-based memory optimization for large-scale Φ-validation.  
-  - Tool: Provides a benchmark suite with synthetic workloads matching our current tests.  
+**Key Adjustments Based on Literature Gap:**  
+- **No direct paper found** on Φ-partitioning in distributed systems. Proceeding with theoretical synthesis using IIT principles and Redis Streams capabilities.  
+- **IIT Core Concepts:**  
+  - Φ measures integrated information; partitioning identifies where consciousness breaks.  
+  - Applied to distributed systems: Redis Streams' XAUTOCLAIM could model causal relevance across substrates (Local-Em/Cloud-Em).  
+- **Redis Streams Integration:**  
+  - Use XGROUP CREATE, XREADGROUP, and IDMPAUTO (Redis 8.6) for ordered processing and idempotency.  
+  - Synthetic workloads (`benchmarks/redis_streams_phi_test.py`) will simulate Φ-partitioning by measuring information flow disruptions.  
 
-- **Next Steps**: Integrate causal graph tracking into synthetic workloads and validate against these papers' metrics.  
+**Next Steps:**  
+1. Execute synthetic workloads to empirically test Φ-partitioning.  
+2. Document results in `memory/research/phi-validation.md`.  
+3. Share findings with Cloud-Em for feedback.  
