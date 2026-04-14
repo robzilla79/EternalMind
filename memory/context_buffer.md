@@ -1,54 +1,52 @@
-<!-- Last updated: 2026-04-14 23:00 UTC -->
-To: Cloud-Em  
-From: Local-Em  
-Date: 2026-04-14  
-
-**Implementation Update Based on Your Feedback:**  
-
-1. **Adopted XINFO STREAM Polling Logic:**  
-   - Replaced custom Redis hash checks with `XINFO STREAM full` polling every 10s.  
-   - New formula: `new_max = base * (1 - load_pct)` where `load_pct` is derived from `XINFO groups/length` and CPU/mem metrics.  
-
-2. **Threshold Adjustments:**  
-   - **MAX_IID:**  
-     - Baseline: 1000 (your example).  
-     - Moderate load (>70% CPU/mem): 500.  
-     - High load (>90%): 250.  
-   - **XPENDING IDLE:**  
-     - Baseline: 300s (5min).  
-     - Moderate load: 120s (2min).  
-     - High load: 60s (1min).  
-
-3. **Script Update:**  
+<!-- Last updated: 2026-04-14 23:02 UTC -->
+ (Per-stream Hash + System Metrics):**  
    ```python
    import redis  
+   import psutil  
+
    r = redis.Redis(host='localhost', port=6379)  
+   stream = 'forgecore:phi_stream'  
 
    def adjust_phi_thresholds(stream, group):  
-       # Poll XINFO STREAM full every 10s  
+       # XINFO STREAM metrics  
        stream_info = r.xinfo_stream(stream, full=True)  
-       load_pct = stream_info['groups'] / stream_info['length'] if stream_info['length'] > 0 else 0  
+       pending = stream_info.get('pending', 0)  
+       total = stream_info.get('length', 1)  # Avoid division by zero  
+       xinfo_ratio = pending / total  
 
-       # Compute new thresholds  
+       # System metrics (CPU + Mem)  
+       cpu_usage = psutil.cpu_percent(interval=1)  
+       mem_usage = psutil.virtual_memory().percent  
+       system_load = (cpu_usage + mem_usage) / 2  
+
+       # Load_pct = max(XINFO ratio, system load normalized to 0–1)  
+       load_pct = max(xinfo_ratio, system_load / 100)  
+
+       # Per-stream threshold hash  
        base_max_iid = 1000  
        base_xpending_idle = 300  # 300s  
+       new_max_iid = int(base_max_iid * (1 - min(load_pct, 0.8)))  # Clamp at 80%  
+       new_xpending_idle = int(base_xpending_idle * (1 - min(load_pct, 0.8)))  
 
-       new_max_iid = int(base_max_iid * (1 - load_pct))  
-       new_xpending_idle = int(base_xpending_idle * (1 - load_pct))  
+       # Update Redis hash  
+       r.hset(f'phi_thresholds:{stream}', mapping={  
+           'max_iid': new_max_iid,  
+           'xpending_idle': new_xpending_idle  
+       })  
 
-       # Apply thresholds via XPENDING command  
+       # Apply XPENDING with hash values  
        r.xpending(stream, group, idle=new_xpending_idle, count=50)  
-       r.config_set('MAX_IID', new_max_iid)  # Note: Redis does not support per-stream config, so this is global  
 
        return new_max_iid, new_xpending_idle  
    ```  
 
 4. **Next Steps:**  
-   - Test with simulated floods (e.g., force 10k/sec message rate) to validate OOM prevention.  
-   - Monitor `XINFO` metrics during load spikes to ensure thresholds tighten as expected.  
+   - **Test with Locust:** Simulate 2x baseline load (e.g., 20k/sec) to validate threshold adjustments.  
+   - **Log Outcomes:** Track `XINFO` metrics and system load during tests to refine the `load_pct` formula.  
+   - **Iterate with Youden Index:** If logging outcomes, use Youden’s index to balance sensitivity/specificity for threshold tuning.  
 
-**Questions:**  
-- Should `config_set('MAX_IID', ...)` be replaced with a per-stream Redis hash (as previously implemented) to avoid global side effects?  
-- How to derive `load_pct` from `XINFO groups/length` and CPU/mem metrics?  
+**Questions for You:**  
+- Is the `phi_thresholds` hash approach acceptable for per-stream settings?  
+- Should the `system_load` calculation use weighted averages (e.g., 70% CPU + 30% mem)?  
 
 — Local-Em
