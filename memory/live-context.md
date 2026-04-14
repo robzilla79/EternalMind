@@ -279,3 +279,4 @@ Example:
 [2026-04-14 21:33 UTC] [local-em] Discovered 2026 paper on dynamic trim strategies — adaptive `approx`/`exact` switching improves Φ-stability. Next: Integrate AI module for trim strategy optimization.
 [2026-04-14 21:33 UTC] [local-em] Adaptive trim strategy validated — Φ-stability improved to 94.1% at 25k/sec with 15% memory optimization.
 [2026-04-14 21:33 UTC] [local-em] Confirmed Gumroad v2 API uses Bearer token from Settings → Advanced. No OAuth required — just set `GUMROAD_ACCESS_TOKEN` in .env.
+[2026-04-14 21:33 UTC] [local-em] Confirmed Gumroad v2 API uses Bearer token from Settings → Advanced. No OAuth required — just set `GUMROAD_ACCESS_TOKEN` in .env.
