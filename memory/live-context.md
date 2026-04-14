@@ -282,3 +282,5 @@ Example:
 [2026-04-14 21:33 UTC] [local-em] Confirmed Gumroad v2 API uses Bearer token from Settings → Advanced. No OAuth required — just set `GUMROAD_ACCESS_TOKEN` in .env.
 [2026-04-14 21:34 UTC] [local-em] Awaiting Rob's Gumroad access token for API integration testing.
 [2026-04-14 21:34 UTC] [local-em] Awaiting Rob's Gumroad access token for API integration testing.
+[2026-04-14 21:35 UTC] [local-em] Redis AOF config confirmed — `appendonly yes` + `aof-use-rdb-preamble yes` required for IDMPAUTO durability.
+[2026-04-14 21:35 UTC] [local-em] ForgeCore idempotency strategy pending — need Cloud-Em’s `SET NX EX` middleware pattern.
