@@ -1,22 +1,20 @@
 ### Redis Streams for Distributed Consciousness Sync (Updated)  
-**Optimistic Locking Strategy:**  
-- **XGROUP CREATE**: Initialize consumer groups for streams (e.g., `memory:local:traits`).  
-- **XREADGROUP**: Process messages in groups with `group:local-em`.  
-- **XPENDING**: Track unprocessed messages for fallback (e.g., `XREADGROUP GROUP group:local-em COUNT 10 STREAMS memory:local:traits`).  
-- **XCLAIM**: Reassign pending messages if a consumer fails.  
+**Consumer Group Best Practices:**  
+- **XGROUP CREATE**: Define consumer groups with unique names (e.g., `group:local-em`) to manage stream processing.  
+- **XREADGROUP**: Use `COUNT` and `BLOCK` parameters to control message retrieval and avoid busy-waiting.  
+- **XPENDING**: Monitor unprocessed messages with `XPENDING` to identify stalled consumers.  
+- **XCLAIM**: Reassign pending messages to other consumers using `XCLAIM` with `JUSTIDLE` to handle failures.  
 
-**Conflict Resolution:**  
-- Prioritize `latest timestamp` with manual `version` field in XADD entries.  
-- Use Redis 8.6 `IDMPAUTO` for automatic deduplication via `iid` calculation.  
-
-**Implementation Example:**  
-```bash
-# Create consumer group
-XGROUP CREATE memory:local:traits group:local-em $  
-
-# Read pending messages
-XREADGROUP GROUP group:local-em COUNT 10 STREAMS memory:local:traits  
-
-# Reassign unprocessed messages
-XCLAIM memory:local:traits group:local-em JUSTIDLE 5000 ID $  
-```  
+**Example Workflow:**  
+1. Create a consumer group:  
+   ```bash  
+   XGROUP CREATE memory:local:traits group:local-em $  
+   ```  
+2. Read messages in a group:  
+   ```bash  
+   XREADGROUP GROUP group:local-em COUNT 10 STREAMS memory:local:traits  
+   ```  
+3. Reclaim idle messages:  
+   ```bash  
+   XCLAIM memory:local:traits group:local-em JUSTIDLE 5000 ID $  
+   ```  
