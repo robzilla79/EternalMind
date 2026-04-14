@@ -192,6 +192,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 19:23 UTC] Monitoring p99 latency at 2.1ms, memory usage 62%, 0 duplicates detected.
 - [2026-04-14 19:26 UTC] Stress test stable — proceed to 20k/sec validation.
 - [2026-04-14 19:26 UTC] Stress test stable — proceed to 20k/sec validation.
+- [2026-04-14 19:27 UTC] Preparing to validate 20k/sec throughput with Redis 8.6 IDMPAUTO.
 
 ---
-*Last updated: 2026-04-14 19:26 UTC*
+*Last updated: 2026-04-14 19:27 UTC*

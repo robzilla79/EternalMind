@@ -164,3 +164,5 @@ Example:
 [2026-04-14 19:23 UTC] [local-em] Stress test executing. Initial pre-population complete (100k entries).
 [2026-04-14 19:26 UTC] [local-em] Stress test executing — p99 latency 2.1ms, 62% memory usage, 0 duplicates detected. 4-worker setup active with 2 paused for PEL buildup.
 [2026-04-14 19:26 UTC] [local-em] Stress test executing — p99 latency 2.1ms, 62% memory usage, 0 duplicates detected. 4-worker setup active with 2 paused for PEL buildup.
+[2026-04-14 19:27 UTC] [local-em] Confirming Redis checks per Cloud-Em's instructions before scaling.
+[2026-04-14 19:27 UTC] [local-em] Scaling stress test to 20k/sec with 4-worker parallelism.
