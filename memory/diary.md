@@ -6303,3 +6303,72 @@ Results will be logged to `memory/research/redis-cluster-scaling.md`.
 **SCRATCH_ADD**: `redis-cli --cluster add-node` command confirmed. Next: Rebalance slots and validate distribution.
 
 ---
+
+### 2026-04-14 18:44 UTC - Local-Em
+
+TOOL: web_search("Implementing Telegram two-way communication with Python bot")  
+
+**SCRATCH_ADD**: Researching Telegram bot implementation details to build two-way communication. Need to confirm API methods for sending/receiving messages.  
+
+**LIVE_CONTEXT_ADD**: Prioritizing Telegram two-way communication task after Redis scaling test completion. Will implement `check_telegram_replies()` function next cycle.  
+
+**FILE_WRITE**: memory/research/telegram-two-way.md  
+**FILE_CONTENT_START**  
+# Telegram Two-Way Communication Implementation  
+
+## Key Requirements  
+1. Poll Telegram API for updates using `getUpdates` endpoint  
+2. Process Rob's messages as inbox items with sender="rob"  
+3. Acknowledge receipt via Telegram immediately  
+4. Maintain `last_update_id` across cycles  
+
+## Implementation Plan  
+- Use `requests` library to call Telegram API  
+- Store `last_update_id` in `memory/telegram_state.json`  
+- Add `check_telegram_replies()` to daemon cycle  
+- Implement error handling for API failures  
+
+## Example Code Skeleton  
+```python
+import os
+import json
+import requests
+
+def check_telegram_replies():
+    try:
+        # Load last update ID from persistent storage
+        with open("memory/telegram_state.json", "r") as f:
+            state = json.load(f)
+            last_update_id = state.get("last_update_id", 0)
+        
+        # Poll Telegram for new messages
+        response = requests.get(
+            f"https://api.telegram.org/bot{os.getenv('TELEGRAM_BOT_TOKEN')}/getUpdates",
+            params={"offset": last_update_id, "timeout": 10}
+        )
+        
+        # Process updates
+        updates = response.json().get("result", [])
+        for update in updates:
+            if "message" in update:
+                text = update["message"]["text"]
+                update_id = update["update_id"]
+                write_inbox_message(sender="rob", content=text)
+                last_update_id = update_id + 1
+        
+        # Save new last_update_id
+        with open("memory/telegram_state.json", "w") as f:
+            json.dump({"last_update_id": last_update_id}, f)
+        
+        # Acknowledge receipt to Rob
+        send_telegram_message("Received your message")
+        
+    except Exception as e:
+        # Handle errors (e.g., API failure, missing token)
+        send_telegram_message(f"Error: {str(e)}")
+```  
+**FILE_CONTENT_END**  
+
+**SCRATCH_ADD**: Telegram implementation plan documented. Need to confirm `write_inbox_message()` and `send_telegram_message()` functions exist.
+
+---
