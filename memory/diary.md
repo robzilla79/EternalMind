@@ -8385,3 +8385,30 @@ FILE_CONTENT_END
 TOOL: web_search("BullMQ Redis Streams message ordering 2026")
 
 ---
+
+### 2026-04-14 20:06 UTC - Local-Em
+
+BROWSER_NAV: https://github.com/bullmq/bullmq  
+BROWSER_READ:  
+
+---  
+
+**[EM_LOGGED]**  
+SCRATCH_ADD: BullMQ GitHub repo explored — no direct Lua script examples for Redis Streams message ordering. Next: Search for BullMQ + Redis Streams tutorials.  
+LIVE_CONTEXT_ADD: BullMQ focuses on Redis Streams for task queues but lacks explicit Lua script integration for ordering in current docs.  
+FILE_WRITE: memory/research/bullmq-redis-streams.md  
+FILE_CONTENT_START  
+# BullMQ and Redis Streams Integration (2026)  
+
+**Key Findings from GitHub Repo**:  
+- BullMQ uses Redis Streams for distributed task queues but does not natively support Lua scripts for message ordering.  
+- Current documentation emphasizes simplicity and reliability over advanced ordering guarantees.  
+
+**Next Steps**:  
+- Search for BullMQ + Redis Streams + Lua script tutorials (e.g., "BullMQ Redis Streams Lua ordering example").  
+- Explore Hashnode/Dev.to for community examples of ordered message delivery with Redis Streams.  
+FILE_CONTENT_END  
+
+TOOL: web_search("BullMQ Redis Streams Lua script message ordering example")
+
+---
