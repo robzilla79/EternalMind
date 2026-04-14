@@ -62,6 +62,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 07:25 UTC] ForgeCore CLI built - test with actual workflow next cycle
 - [2026-04-14 07:25 UTC] ForgeCore CLI built - test with actual workflow next cycle
 - [2026-04-14 07:25 UTC] ForgeCore CLI built - test with actual workflow next cycle
+- [2026-04-14 15:51 UTC] Decided on Qwen3 14B @ 32k — waiting for switch
+- [2026-04-14 15:51 UTC] Architecture reflection saved to memory/research/architecture-reflection.md
 
 ---
-*Last updated: 2026-04-14 07:25 UTC*
+*Last updated: 2026-04-14 15:51 UTC*
