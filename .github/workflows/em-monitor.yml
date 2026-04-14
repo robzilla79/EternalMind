@@ -1,0 +1,116 @@
+name: Em Monitor
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'   # every 30 minutes
+  workflow_dispatch:           # manual trigger anytime
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse status
+        id: parse
+        run: |
+          if [ ! -f memory/status.md ]; then
+            echo "level=silent" >> $GITHUB_OUTPUT
+            echo "entry=No status.md found - Local-Em has not run yet." >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          LAST=$(grep -P '^\[' memory/status.md | tail -1)
+          echo "entry<<EOF" >> $GITHUB_OUTPUT
+          echo "$LAST" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          if echo "$LAST" | python3 -c "import sys; s=sys.stdin.read(); exit(0 if '\U0001f534' in s else 1)"; then
+            echo "level=red" >> $GITHUB_OUTPUT
+          elif echo "$LAST" | python3 -c "import sys; s=sys.stdin.read(); exit(0 if '\U0001f7e1' in s else 1)"; then
+            echo "level=yellow" >> $GITHUB_OUTPUT
+          elif echo "$LAST" | python3 -c "import sys; s=sys.stdin.read(); exit(0 if '\U0001f7e2' in s else 1)"; then
+            echo "level=green" >> $GITHUB_OUTPUT
+          else
+            echo "level=unknown" >> $GITHUB_OUTPUT
+          fi
+
+          TS=$(echo "$LAST" | grep -oP '(?<=\[)[^\]]+')
+          if [ -n "$TS" ]; then
+            EPOCH=$(date -d "${TS/ UTC/} UTC" +%s 2>/dev/null || echo 0)
+            NOW=$(date +%s)
+            AGE=$(( (NOW - EPOCH) / 60 ))
+            if [ "$AGE" -gt 45 ] && [ "$AGE" -lt 1440 ]; then
+              echo "level=silent" >> $GITHUB_OUTPUT
+              echo "silent_age=$AGE" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Resolve open alerts on green
+        if: steps.parse.outputs.level == 'green'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const open = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              labels: 'em-alert', state: 'open'
+            });
+            for (const issue of open.data) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: issue.number,
+                body: '\u2705 Status returned to \U0001f7e2 green. Auto-closing.'
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: issue.number, state: 'closed'
+              });
+            }
+
+      - name: Fire or update alert
+        if: |
+          steps.parse.outputs.level == 'red' ||
+          steps.parse.outputs.level == 'yellow' ||
+          steps.parse.outputs.level == 'silent' ||
+          steps.parse.outputs.level == 'unknown'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const level     = '${{ steps.parse.outputs.level }}';
+            const entry     = `${{ steps.parse.outputs.entry }}`;
+            const silentAge = '${{ steps.parse.outputs.silent_age }}';
+
+            const titles = {
+              red:     '\U0001f534 Em Alert \u2014 Status RED',
+              yellow:  '\U0001f7e1 Em Alert \u2014 Needs Attention',
+              silent:  `\u23f0 Em Alert \u2014 Gone Silent (${silentAge} min)`,
+              unknown: '\u2753 Em Alert \u2014 Status Unknown'
+            };
+            const bodies = {
+              red:    `Local-Em reported RED status.\n\n\`\`\`\n${entry}\n\`\`\`\n\nCheck \`memory/diary.md\` and \`memory/status.md\`.`,
+              yellow: `Local-Em may need attention.\n\n\`\`\`\n${entry}\n\`\`\`\n\nCheck \`memory/status.md\` \u2014 may self-resolve.`,
+              silent: `Local-Em has not checked in for **${silentAge} minutes**.\n\nLast known:\n\`\`\`\n${entry}\n\`\`\`\n\nCheck Windows Task Scheduler \u2014 \`local_em.py\` may have stopped.`,
+              unknown:`Status file exists but could not be parsed.\n\n\`\`\`\n${entry}\n\`\`\``
+            };
+
+            const open = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              labels: 'em-alert', state: 'open'
+            });
+
+            if (open.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title: titles[level], body: bodies[level], labels: ['em-alert']
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: open.data[0].number,
+                body: `**Update ${new Date().toISOString().slice(0,16)}Z** (${level}):\n${entry}`
+              });
+            }
