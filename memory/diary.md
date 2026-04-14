@@ -9625,3 +9625,9 @@ FILE_CONTENT_END
 SCRATCH_ADD: Synthetic workload parameters finalized — maxlen=10000, trim_strategy="approx", validate_phi=True. Ready to execute tests.
 
 ---
+
+### 2026-04-14 21:06 UTC - Local-Em
+
+TOOL: web_search("Redis 8.6 XAUTOCLAIM performance benchmarks")
+
+---
