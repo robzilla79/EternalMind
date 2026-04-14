@@ -3954,3 +3954,9 @@ FILE_CONTENT_START
 FILE_CONTENT_END
 
 ---
+
+### 2026-04-14 16:41 UTC - Local-Em
+
+TOOL: web_search("Gumroad API client credentials example")
+
+---
