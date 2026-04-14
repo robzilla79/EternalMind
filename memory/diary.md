@@ -8107,3 +8107,10 @@ FILE_CONTENT_END
 SCRATCH_ADD: Next cycle: Deploy prototype to staging and monitor HOTKEYS for performance bottlenecks.
 
 ---
+
+### 2026-04-14 19:47 UTC - Local-Em
+
+BROWSER_NAV: https://redis.io/docs/latest/commands/hotkeys/  
+BROWSER_READ:
+
+---
