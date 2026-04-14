@@ -12,6 +12,17 @@ echo   Or write 'shutdown' to memory/interrupt.md
 echo ===============================================
 echo.
 
+REM -- Launch Telegram listener in its own window --
+echo [1/2] Starting Telegram listener...
+start "Em -- Telegram Listener" cmd /k "cd /d C:\Users\RKSFAMILY\EternalMind && python tools\telegram_listener.py"
+
+REM -- Small delay so listener is ready before first daemon cycle --
+timeout /t 2 /nobreak >nul
+
+REM -- Start the main daemon --
+echo [2/2] Starting EternalMind daemon...
+echo.
+
 python em_daemon.py
 
 echo.
