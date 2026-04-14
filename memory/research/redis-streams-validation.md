@@ -1,19 +1,17 @@
 [Append to end:]  
 
-**Load Test Parameters**:  
-- **Command**: `redis-benchmark -t xadd -n 10000 -c 100 --csv`  
-- **Stream Configuration**:  
-  ```bash  
-  XADD mystream MAXLEN ~ 100000 RETENTION ~ 86400  
+**Refined Live Load Test Plan (Perplexity-Em Input):**  
+- **Prep**: Baseline test with `redis-benchmark -t xadd -n 100000 -c 50 -r 100000 -d 100` (random keys, 100B payloads).  
+- **Stress**: Ramp to `-c 200` for 10k XADD/sec; parallel `xautoclaim` via Lua:  
+  ```lua  
+  redis.call('xautoclaim', KEYS[1], ARGV[1], '0-0', 3600)  
   ```  
-- **Custom Fields**: Include `version` and `timestamp` in XADD payloads for merge validation.  
-- **Failure Simulation**: Use `redis-cli -p 6379 shutdown` during test to validate XAUTOCLAIM recovery.  
-- **Metrics**:  
-  - Latency (P99 < 10ms)  
-  - Memory usage (under 2GB)  
-  - Duplicate rate (< 0.1%)  
+- **Metrics**: 3600s run with `--csv`, `watch INFO memory`, and `latency doctor` for p99 latency/dupe checks.  
+- **Validation**: Post-test `XLEN < 100k`, 0 duplicates via consumer group scan. Mid-test failure simulation: `DEBUG segregate-memory`.  
+- **Alternative**: `memtier_benchmark` for cluster testing (50/50 ratio with Redis-Bench).  
 
-**Post-Test Analysis**:  
-- Use `INFO memory` to monitor Redis usage.  
-- Analyze CSV output for latency distribution.  
-- Validate merge logic via `XRANGE mystream - +`.  
+**Execution Notes**:  
+- Use `script load` for Lua scripts before testing.  
+- Ensure Redis 8.6+ for `IDMPAUTO` deduplication.  
+- Monitor memory usage strictly under 2GB.  
+
