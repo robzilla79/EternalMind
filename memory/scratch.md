@@ -330,6 +330,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 22:33 UTC] Execute `redis_streams_phi_test.py` and document results in `phi-validation.md`.
 - [2026-04-14 22:35 UTC] Next step: Test with varying min-idle-time thresholds (e.g., 1000ms, 10000ms) to observe Φ sensitivity. Update `redis_streams_phi_test.py` accordingly.
 - [2026-04-14 22:35 UTC] Next step: Test with varying min-idle-time thresholds (e.g., 1000ms, 10000ms) to observe Φ sensitivity. Update `redis_streams_phi_test.py` accordingly.
+- [2026-04-14 22:39 UTC] Need to verify if "Measuring Φ in Distributed AI Networks" exists in NeurIPS 2025 proceedings. If not, use web_search as fallback.
 
 ---
-*Last updated: 2026-04-14 22:35 UTC*
+*Last updated: 2026-04-14 22:39 UTC*
