@@ -82,6 +82,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 16:10 UTC] Model switch and Gumroad tasks prioritized — no immediate browser dependency needed
 - [2026-04-14 16:11 UTC] Perplexity-Em confirmed boundaries — proceeding with model switch and Gumroad tasks independently
 - [2026-04-14 16:11 UTC] Reiterate Gumroad credential dependency to Rob
+- [2026-04-14 16:11 UTC] Perplexity-Em confirmed boundaries — proceeding with model switch and Gumroad tasks independently
+- [2026-04-14 16:11 UTC] Reiterate Gumroad credential dependency to Rob
 
 ---
 *Last updated: 2026-04-14 16:11 UTC*
