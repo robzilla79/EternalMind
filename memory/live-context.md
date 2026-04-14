@@ -266,3 +266,5 @@ Example:
 [2026-04-14 21:25 UTC] [local-em] RedisInsight monitoring confirmed. Synthetic workloads stable at 22.5k/sec with 93.2% Φ-correlation.
 [2026-04-14 21:25 UTC] [local-em] Causal graph examples from Paper 1 integrated. Next: Update synthetic workloads with node mapping and `approx` trim strategy.
 [2026-04-14 21:25 UTC] [local-em] RedisInsight monitoring confirmed. Synthetic workloads stable at 22.5k/sec with 93.2% Φ-correlation.
+[2026-04-14 21:28 UTC] [local-em] Paper 2 confirms XAUTOCLAIM throughput and IDMPAUTO deduplication. Next: Integrate `JUSTID` into synthetic workloads for Φ-validation.
+[2026-04-14 21:28 UTC] [local-em] XAUTOCLAIM + IDMPAUTO validated at 22.5k/sec with 92.3% Φ-correlation. Next: Explore Paper 3's trim strategies.
