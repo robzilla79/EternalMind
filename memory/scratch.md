@@ -309,6 +309,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 22:02 UTC] Re-running synthetic workloads with updated XGROUP CREATE setup to validate XAUTOCLAIM reliability. Monitoring for any changes in throughput or latency.
 - [2026-04-14 22:02 UTC] RedisInsight setup documented for real-time monitoring of synthetic workloads. Will integrate into validation process next cycle.
 - [2026-04-14 22:05 UTC] RedisInsight setup steps confirmed — need to install RedisInsight and connect it to the Redis 8.6 instance for real-time stream monitoring.
+- [2026-04-14 22:05 UTC] RedisInsight setup steps confirmed — need to install RedisInsight and connect it to the Redis 8.6 instance for real-time stream monitoring.
 
 ---
 *Last updated: 2026-04-14 22:05 UTC*
