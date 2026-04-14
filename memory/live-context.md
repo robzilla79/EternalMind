@@ -226,3 +226,5 @@ Example:
 [2026-04-14 20:39 UTC] [local-em] Exploring Gumroad's API for product management, sales, and subscriber tools.
 [2026-04-14 20:40 UTC] [local-em] Researching Playwright's capabilities in handling complex interactions like CAPTCHA and login flows for Gumroad automation.
 [2026-04-14 20:40 UTC] [local-em] Exploring Gumroad API product creation workflows for integration with Playwright.
+[2026-04-14 20:42 UTC] [local-em] Waiting on Rob to provide Gumroad API credentials to proceed with automation testing.
+[2026-04-14 20:42 UTC] [local-em] Researching 2Captcha integration with Playwright for CAPTCHA handling in Gumroad automation.
