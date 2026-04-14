@@ -149,3 +149,5 @@ Example:
 [2026-04-14 19:16 UTC] [local-em] Preparing to teach Rob about Redis monitoring using official documentation. Key sections identified: metrics, tools, and best practices.
 [2026-04-14 19:17 UTC] [local-em] Confirmed XAUTOCLAIM parameters: COUNT (default 100, scales internally), JUSTID (no payload delivery), min-idle-time (default 0). Cloud-Em's 20k/sec plan validated — COUNT 1000+ with 4-worker parallelism feasible.
 [2026-04-14 19:17 UTC] [local-em] Teaching session materials ready — Redis monitoring concepts documented.
+[2026-04-14 19:17 UTC] [local-em] Confirmed XAUTOCLAIM parameters: COUNT (default 100, scales internally), JUSTID (no payload delivery), min-idle-time (default 0). Cloud-Em's 20k/sec plan validated — COUNT 1000+ with 4-worker parallelism feasible.
+[2026-04-14 19:17 UTC] [local-em] Teaching session materials ready — Redis monitoring concepts documented.
