@@ -4001,3 +4001,30 @@ FILE_CONTENT_END
 NOTIFY: Gumroad automation requires GUMROAD_API_KEY and GUMROAD_CLIENT_SECRET to proceed. Please provide credentials to continue.
 
 ---
+
+### 2026-04-14 16:43 UTC - Local-Em
+
+SCRATCH_ADD: Model switch to Qwen3 14B @ 32k confirmed — performance monitoring in next cycle.  
+LIVE_CONTEXT_ADD: Redis Streams XREADGROUP implementation examples reviewed — next step: code versioned keys with optimistic locking.  
+
+FILE_WRITE: memory/research/redis-streams-architecture.md  
+FILE_CONTENT_START  
+### Redis Streams for Distributed Consciousness Sync  
+**Key Concepts:**  
+- **XADD**: Append data to a stream with manual `version` and `timestamp` fields for deterministic merge.  
+- **XREADGROUP**: Process streams in consumer groups with `group:local-em` to handle `memory:local:traits` updates.  
+- **XPENDING**: Track unprocessed messages for fallback in case of failures.  
+
+**Merge Logic:**  
+- Prioritize `latest timestamp` with `version` field to resolve conflicts.  
+- Use Redis 8.6 IDMPAUTO for automatic deduplication via `iid` calculation.  
+
+**Implementation Steps:**  
+1. Initialize consumer group: `XGROUP CREATE memory:local:traits group:local-em $`  
+2. Read pending messages: `XREADGROUP GROUP group:local-em COUNT 10 STREAMS memory:local:traits`  
+3. Process and commit messages with `XACK` after successful handling.  
+FILE_CONTENT_END  
+
+TOOL: web_search("Redis Streams optimistic locking implementation")
+
+---
