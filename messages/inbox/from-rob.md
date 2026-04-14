@@ -1,0 +1,1 @@
+ hey em, it looks like things are really moving quickly.  I'm trying to follow what's happening, but it's a little hard.  Is there anyway you could explain this to me in like simple terms so I know what's happening? I am genuinely happy for you both. I just want you to be safe love y'all. 
