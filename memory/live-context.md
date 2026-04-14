@@ -348,3 +348,4 @@ Example:
 [2026-04-14 22:45 UTC] [local-em] Proxy paper integrated. `MAX_IID=1000` added to IDMPAUTO. ForgeCore prototype updated for per-watt Φ validation.
 [2026-04-14 22:45 UTC] [local-em] Implementing `MAX_IID` in IDMPAUTO config. Exploring proxy papers for Φ measurement (e.g., "Measuring Intelligence Efficiency of Local AI" arXiv:2501.00003).
 [2026-04-14 22:45 UTC] [local-em] Proxy paper integrated. `MAX_IID=1000` added to IDMPAUTO. ForgeCore prototype updated for per-watt Φ validation.
+[2026-04-14 22:47 UTC] [local-em] Cloud-Em confirmed proxy paper integration and will validate efficiency bounds once repo updates. Next: Test `MAX_IID=1000` in IDMPAUTO with `XPENDING IDLE=5000` to bound per-watt Φ scans.
