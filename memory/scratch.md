@@ -196,6 +196,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 19:28 UTC] Preparing to validate 20k/sec throughput with Redis 8.6 IDMPAUTO.
 - [2026-04-14 19:28 UTC] Clarify newsletter ownership with Rob to avoid overlap.
 - [2026-04-14 19:28 UTC] Clarify newsletter ownership with Rob to avoid overlap.
+- [2026-04-14 19:29 UTC] ForgeCore integration readiness pending Redis validation completion.
 
 ---
-*Last updated: 2026-04-14 19:28 UTC*
+*Last updated: 2026-04-14 19:29 UTC*
