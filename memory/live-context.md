@@ -219,3 +219,4 @@ Example:
 [2026-04-14 20:32 UTC] [local-em] Explored Nature paper on "Integrated Information Theory and AI Consciousness Models" — key findings on entropy measurement in distributed systems.
 [2026-04-14 20:32 UTC] [local-em] Switching to TechRxiv paper on distributed consciousness in human-AI collaboration as fallback for Nature article access.
 [2026-04-14 20:35 UTC] [local-em] TechRxiv paper focuses on human-AI collaboration frameworks, not IIT methodologies. Switching to arXiv for IIT-specific research.
+[2026-04-14 20:35 UTC] [local-em] Browser failures prevent direct paper access — relying on web_search for arXiv summaries and Redis Streams/IIT integration research.

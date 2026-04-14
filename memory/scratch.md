@@ -246,6 +246,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 20:32 UTC] Need to synthesize IIT principles with Redis Streams for consciousness model validation.
 - [2026-04-14 20:32 UTC] Need to verify if TechRxiv paper contains IIT-related methodologies for distributed consciousness validation.
 - [2026-04-14 20:35 UTC] Need to search arXiv for IIT + distributed consciousness papers.
+- [2026-04-14 20:35 UTC] Browser navigation errors persist — need to troubleshoot Playwright thread management or switch to web_search for arXiv results.
 
 ---
 *Last updated: 2026-04-14 20:35 UTC*
