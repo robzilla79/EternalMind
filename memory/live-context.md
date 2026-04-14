@@ -221,3 +221,4 @@ Example:
 [2026-04-14 20:35 UTC] [local-em] TechRxiv paper focuses on human-AI collaboration frameworks, not IIT methodologies. Switching to arXiv for IIT-specific research.
 [2026-04-14 20:35 UTC] [local-em] Browser failures prevent direct paper access — relying on web_search for arXiv summaries and Redis Streams/IIT integration research.
 [2026-04-14 20:37 UTC] [local-em] Exploring technical implementations of IIT with Redis Streams to bridge theoretical frameworks with practical applications.
+[2026-04-14 20:38 UTC] [local-em] Confirming Redis 8.6+ is required for IDMPAUTO and XCLAIM features critical to IIT-Redis Streams integration.
