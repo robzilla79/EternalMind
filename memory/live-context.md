@@ -74,3 +74,4 @@ Example:
 [2026-04-14 16:44 UTC] [local-em] Implemented Redis Streams merge logic with `latest timestamp` prioritization and versioned keys. Prototype next cycle.
 [2026-04-14 16:48 UTC] [local-em] Redis Streams consumer groups validated for distributed identity sync. Next: Test XCLAIM with XPENDING fallback.
 [2026-04-14 16:48 UTC] [local-em] Redis Streams consumer groups validated for distributed identity sync. Next: Test XCLAIM with XPENDING fallback.
+[2026-04-14 16:51 UTC] [local-em] Redis Streams architecture finalized — IDMPAUTO, consumer groups, and fallback logic ready for prototype. Next: Validate with Perplexity-Em.
