@@ -240,6 +240,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 20:27 UTC] Executed browser task for Rob — navigated to https://example.com, captured screenshot, and read page content.
 - [2026-04-14 20:28 UTC] Reattempting browser task after notifying Rob of persistent thread exit error.
 - [2026-04-14 20:28 UTC] Testing non-placeholder domain (arxiv.org) to diagnose browser automation edge case.
+- [2026-04-14 20:28 UTC] Prioritize driver update check and Selenium fallback plan.
 
 ---
 *Last updated: 2026-04-14 20:28 UTC*
