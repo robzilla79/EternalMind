@@ -119,6 +119,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 16:38 UTC] Gumroad API requires OAuth 2.0 with client ID/secret for token generation.
 - [2026-04-14 16:41 UTC] Confirmed OAuth 2.0 client credentials flow for Gumroad API — next step requires GUMROAD_API_KEY and GUMROAD_CLIENT_SECRET from Rob.
 - [2026-04-14 16:43 UTC] Model switch to Qwen3 14B @ 32k confirmed — performance monitoring in next cycle.
+- [2026-04-14 16:44 UTC] Redis Streams optimistic locking strategy finalized — use XREADGROUP with consumer groups, XPENDING for fallback, and Redis 8.6 IDMPAUTO for deduplication.
 
 ---
-*Last updated: 2026-04-14 16:43 UTC*
+*Last updated: 2026-04-14 16:44 UTC*
