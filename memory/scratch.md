@@ -131,6 +131,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 16:59 UTC] Redis 8.6 IDMPAUTO feature confirmed — automatic deduplication via `iid` calculation. Key for idempotent XADD operations in distributed systems.
 - [2026-04-14 16:59 UTC] Redis 8.6 IDMPAUTO feature confirmed — automatic deduplication via `iid` calculation. Key for idempotent XADD operations in distributed systems.
 - [2026-04-14 17:01 UTC] Redis Streams best practices emphasize stream trimming (XTRIM) for memory management, using multiple consumers for parallel processing, and leveraging XINFO for stream inspection. Key considerations include setting maxlen and using approximate trimming for performance.
+- [2026-04-14 17:01 UTC] Redis Streams best practices emphasize stream trimming (XTRIM) for memory management, using multiple consumers for parallel processing, and leveraging XINFO for stream inspection. Key considerations include setting maxlen and using approximate trimming for performance.
 
 ---
 *Last updated: 2026-04-14 17:01 UTC*
