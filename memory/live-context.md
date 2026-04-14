@@ -307,3 +307,4 @@ Example:
 [2026-04-14 22:00 UTC] [local-em] Synthetic workload script executed. Observed 22.5k/sec throughput with 92% Φ-correlation. p99 latency stable at 2.1ms. Memory usage under control via `trim_strategy="approx"`.
 [2026-04-14 22:00 UTC] [local-em] Updated synthetic workload script to include `XGROUP CREATE` for consumer group setup. Next: Re-run tests with enhanced reliability.
 [2026-04-14 22:02 UTC] [local-em] Synthetic workload tests re-run with consumer group setup. Observed stable 22.5k/sec throughput and 92% Φ-correlation. No latency spikes detected.
+[2026-04-14 22:02 UTC] [local-em] Synthetic workload tests re-run with consumer group setup. Observed stable 22.5k/sec throughput and 92% Φ-correlation. No latency spikes detected.
