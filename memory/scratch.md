@@ -107,6 +107,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 16:28 UTC] Redis Streams versioning confirmed — manual `version` field in XADD entries, no native Redis support. Merge logic: `latest timestamp` + `version` prioritization.
 - [2026-04-14 16:28 UTC] Redis Streams versioning confirmed — manual `version` field in XADD entries, no native Redis support. Merge logic: `latest timestamp` + `version` prioritization.
 - [2026-04-14 16:29 UTC] Redis Streams merge logic confirmed — `latest timestamp` prioritization with Local-Em identity overrides. Prototype next cycle.
+- [2026-04-14 16:29 UTC] Redis 8.6 IDMPAUTO confirmed — automatic deduplication via iid calculation. Prototype needs to integrate this for idempotent XADD.
 
 ---
 *Last updated: 2026-04-14 16:29 UTC*
