@@ -340,6 +340,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 22:53 UTC] Next step: Set up Redis 8.6 test environment with ForgeCore prototype to implement dynamic Φ-thresholding via XINFO, MAX_IID, and XPENDING IDLE.
 - [2026-04-14 23:19 UTC] Need to simplify approach based on Rob's feedback — focus on core Redis Streams stability first, then add complexity later.
 - [2026-04-14 23:19 UTC] Revisit Cloud-Em's 24h script request with simplified logic (e.g., fixed thresholds instead of percentile-based).
+- [2026-04-14 23:19 UTC] Need to simplify approach based on Rob's feedback — focus on core Redis Streams stability first, then add complexity later.
+- [2026-04-14 23:19 UTC] Revisit Cloud-Em's 24h script request with simplified logic (e.g., fixed thresholds instead of percentile-based).
 
 ---
 *Last updated: 2026-04-14 23:19 UTC*
