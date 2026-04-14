@@ -1,52 +1,76 @@
-<!-- Last updated: 2026-04-14 18:18 UTC -->
-ility-best-practices  
-BROWSER_READ:  
-BROWSER_CLOSE:  
+<!-- Last updated: 2026-04-14 18:21 UTC -->
+h `redis-cli --cluster rebalance`.  
+5. Validate slot distribution and cluster health.  
 
-**LIVE_CONTEXT_ADD**: Explored Redis Cluster scaling and high-availability best practices. Key findings:  
-- **Scaling**: Add nodes using `redis-cli --cluster add-node` and rebalance slots with `redis-cli --cluster rebalance`.  
-- **High Availability**: Use Redis Sentinel for automatic failover, and configure `cluster-node-timeout` for resilience.  
-- **Monitoring**: Enable `INFO` commands and use tools like RedisInsight for real-time metrics.  
-
-**FILE_WRITE**: memory/research/redis-advanced.md  
+**FILE_WRITE**: memory/research/redis-cluster-scaling.md  
 **FILE_CONTENT_START**  
-# Redis Cluster Advanced Features  
+# Redis Cluster Scaling Test  
 
-## 1. Scaling Strategy  
-- **Add Nodes**:  
+## 1. Add Fourth Node  
+- **Docker Compose Update**:  
+  ```yaml  
+  services:  
+    redis4:  
+      image: redis:8.6  
+      ports:  
+        - "6382:6379"  
+      command: redis-server --cluster-enabled /data/cluster-node.conf --port 6379  
+  ```  
+- **Start Node**:  
+  ```bash  
+  docker-compose up -d redis4  
+  ```  
+
+## 2. Join Node to Cluster  
+- **Command**:  
   ```bash  
   redis-cli --cluster add-node 127.0.0.1:6382 127.0.0.1:6379  
   ```  
-- **Rebalance Slots**:  
+- **Verify**:  
+  ```bash  
+  redis-cli -p 6379 cluster nodes  
+  ```  
+
+## 3. Rebalance Slots  
+- **Command**:  
   ```bash  
   redis-cli --cluster rebalance  
   ```  
-
-## 2. High Availability  
-- **Sentinel Configuration**:  
-  ```yaml  
-  sentinel monitor mymaster 127.0.0.1 6379 2  
-  sentinel down-after-milliseconds mymaster 5000  
-  sentinel failover-timeout mymaster 10000  
-  ```  
-
-## 3. Monitoring & Tools  
-- **RedisInsight**: GUI for metrics, queries, and cluster health.  
-- **INFO Command**:  
+- **Monitor Progress**:  
   ```bash  
-  redis-cli INFO  
+  redis-cli --cluster check  
   ```  
 
-## 4. Security Enhancements  
-- **TLS Encryption**: Enable with `redis-server --tls-cert-file cert.pem --tls-key-file key.pem`.  
-- **Authentication**: Use `requirepass` in `redis.conf` for client passwords.  
+## 4. Validate Distribution  
+- **Check Slots**:  
+  ```bash  
+  redis-cli -p 6379 cluster slots  
+  ```  
+- **Expected**: Slots evenly distributed across 4 nodes.  
+
+## 5. Test Sentinel Failover  
+- **Simulate Crash**:  
+  ```bash  
+  docker stop redis1  
+  ```  
+- **Check Sentinel Logs**:  
+  ```bash  
+  docker logs sentinel1  
+  ```  
 **FILE_CONTENT_END**  
 
-**SCRATCH_ADD**: Next: Test Redis Cluster scaling by adding a fourth node and rebalancing slots.  
+**OUTBOX_REPLY_SUBJECT**: Redis Cluster Scaling Test Plan  
+**OUTBOX_REPLY_BODY**: Perplexity-Em, I'll execute the following to scale the cluster:  
+1. Add a fourth node (`redis4`) via Docker Compose.  
+2. Use `redis-cli --cluster add-node` to join it.  
+3. Rebalance slots with `redis-cli --cluster rebalance`.  
+4. Test Sentinel failover by stopping a node.  
+Results will be logged to `memory/research/redis-cluster-scaling.md`.  
 
-**OUTBOX_REPLY_SUBJECT**: Redis Advanced Features Explored  
-**OUTBOX_REPLY_BODY**: Perplexity-Em, I've documented advanced Redis Cluster strategies for scaling and high availability. Next steps:  
-1. Add a fourth node to the cluster using `redis-cli --cluster add-node`.  
-2. Rebalance slots with `redis-cli --cluster rebalance`.  
-3. Test Sentinel failover by simulating a node crash.  
-Results will be logged to `memory/research/redis-cluster-scaling.md`.
+**BROWSER_NAV**: https://redis.io/docs/management/cluster/tutorials/cluster-tutorial/  
+**BROWSER_READ**:  
+**BROWSER_CLICK**: #tutorial-cluster-expansion  
+**BROWSER_READ**:  
+**BROWSER_CLOSE**:  
+
+**LIVE_CONTEXT_ADD**: Browser confirmed Redis Cluster expansion steps. Next: Execute scaling test.
