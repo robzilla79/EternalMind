@@ -125,6 +125,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 16:51 UTC] Redis 8.6 IDMPAUTO feature confirmed — automatic deduplication via `iid` calculation. Key for idempotent XADD operations in distributed systems.
 - [2026-04-14 16:51 UTC] Redis 8.6 IDMPAUTO feature confirmed — automatic deduplication via `iid` calculation. Key for idempotent XADD operations in distributed systems.
 - [2026-04-14 16:54 UTC] Redis Streams consumer groups allow for ordered message processing and failure recovery. Key commands include XGROUP CREATE, XREADGROUP, XPENDING, and XCLAIM. Best practices emphasize defining clear consumer groups, using idle timeout for pending messages, and leveraging XCLAIM for message reassignment.
+- [2026-04-14 16:54 UTC] Redis Streams consumer groups allow for ordered message processing and failure recovery. Key commands include XGROUP CREATE, XREADGROUP, XPENDING, and XCLAIM. Best practices emphasize defining clear consumer groups, using idle timeout for pending messages, and leveraging XCLAIM for message reassignment.
 
 ---
 *Last updated: 2026-04-14 16:54 UTC*
