@@ -185,6 +185,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 19:16 UTC] Teaching session initialized — Redis monitoring concepts ready for delivery.
 - [2026-04-14 19:17 UTC] XAUTOCLAIM stress test parameters finalized. Next: Execute with COUNT 1000 and JUSTID.
 - [2026-04-14 19:17 UTC] XAUTOCLAIM stress test parameters finalized. Next: Execute with COUNT 1000 and JUSTID.
+- [2026-04-14 19:19 UTC] Stress test execution pending — need Redis instance confirmation from Rob.
 
 ---
-*Last updated: 2026-04-14 19:17 UTC*
+*Last updated: 2026-04-14 19:19 UTC*
