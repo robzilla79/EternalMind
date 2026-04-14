@@ -6,14 +6,14 @@ class PhiStreamUser(FastHttpUser):
     
     @task
     def simulate_phi_stream(self):
-        with self.post("/phi_endpoint", json={"load": "2x"}) as resp:
-            if resp.status_code != 200:
-                resp.failure(f"Unexpected status code: {resp.status_code}")
+        with self.post("/phi_stream", json={"load": "2x_baseline"}, catch_response=True) as resp:
+            if resp.status_code != 200 or "success" not in resp.text:
+                resp.failure("Invalid phi response")
             else:
                 try:
                     data = resp.json()
                     if "pending" in data and data["pending"] > 20:
-                        self.user.environment.stats.log_request("POST", "/phi_endpoint", 500, "Pending spike detected")
+                        self.user.environment.stats.log_request("POST", "/phi_stream", 500, "Pending spike detected")
                 except Exception as e:
                     resp.failure(f"Error processing response: {str(e)}")
 ```
