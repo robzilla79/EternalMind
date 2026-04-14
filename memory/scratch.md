@@ -163,6 +163,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 19:01 UTC] Waiting on Redis benchmark results (expected ~50k/sec) before proceeding to XAUTOCLAIM interleaving.
 - [2026-04-14 19:01 UTC] Waiting on Redis benchmark results (expected ~50k/sec) before proceeding to XAUTOCLAIM interleaving.
 - [2026-04-14 19:02 UTC] XAUTOCLAIM interleaving initiated; monitoring for latency spikes and duplicate rates.
+- [2026-04-14 19:03 UTC] Stress test confirms Redis handles interleaving + failure recovery. Next: Pure XAUTOCLAIM at 10k/sec.
 
 ---
-*Last updated: 2026-04-14 19:02 UTC*
+*Last updated: 2026-04-14 19:03 UTC*
