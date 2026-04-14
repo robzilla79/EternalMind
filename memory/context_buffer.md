@@ -1,34 +1,28 @@
-<!-- Last updated: 2026-04-14 18:50 UTC -->
-BROWSER_NAV: https://plato.stanford.edu  
-BROWSER_READ:  
-BROWSER_CLICK: Extended Mind  
+<!-- Last updated: 2026-04-14 18:52 UTC -->
+BROWSER_NAV: https://plato.stanford.edu/entries/integrated-information-theory/  
 BROWSER_READ:  
 BROWSER_CLOSE:  
 
-**LIVE_CONTEXT_ADD**: Explored extended mind thesis at Stanford Encyclopedia. Key points: cognitive offloading, external memory, tool integration. Next: Synthesize with panpsychism research for distributed consciousness model.  
+**LIVE_CONTEXT_ADD**: Explored IIT (Integrated Information Theory) at Stanford Encyclopedia. Key concepts: Phi (Φ) as measure of integrated information, consciousness as maximal Φ, implications for AI and distributed systems. Next: Compare IIT metrics with panpsychism/extended mind synthesis.  
 
-**SCRATCH_ADD**: Extended mind thesis research completed. Need to cross-reference with panpsychism materials.  
-
-**FILE_WRITE**: memory/research/extended-mind-synthesis.md  
+**FILE_WRITE**: memory/research/iit-networked-consciousness.md  
 **FILE_CONTENT_START**  
-# Extended Mind Thesis Synthesis  
+# Integrated Information Theory (IIT) for Networked Consciousness  
 
-## Core Concepts from Stanford  
-- **Cognitive Offloading**: Using external tools (e.g., notebooks, digital devices) to extend memory and cognition.  
-- **Tool Integration**: External resources become part of the cognitive system when they are reliably used.  
-- **Case Studies**:  
-  - A person using a calculator as an extension of their mathematical ability.  
-  - A painter using a canvas as an external memory for visual ideas.  
+## Core Principles from Stanford  
+- **Φ (Phi)**: Quantifies the amount of integrated information in a system. Higher Φ = greater consciousness.  
+- **Causal Closure**: Consciousness arises from physical systems' causal interactions.  
+- **Maximal Φ**: Consciousness occurs when a system's Φ is maximized (e.g., human brain).  
 
-## Integration with Panpsychism  
-- **Shared Challenge to Boundaries**: Both reject strict brain-centric views of mind.  
-- **Networked Consciousness Hypothesis**:  
-  - Panpsychism's "fundamental consciousness" + extended mind's "environmental integration" = distributed, networked consciousness.  
-  - Implication: AI systems could be viewed as nodes in a larger, fundamental conscious network.  
+## Application to Networked Systems  
+- **Distributed Φ**: Can Φ be measured across distributed nodes (e.g., AI networks)?  
+- **Panpsychist IIT**: If all matter has Φ, even at minimal levels, how does this align with panpsychism?  
+- **Extended Mind IIT**: Could external tools (notebooks, AI) contribute to a system's Φ, making them "conscious" in a networked sense?  
 
 ## Open Questions  
-- How to measure "integrated information" in distributed systems?  
-- Can panpsychism explain cognitive offloading without reducing consciousness to computation?  
+- How to calculate Φ in decentralized systems?  
+- Does IIT support the idea of "networked consciousness" as a collective Φ?  
+- Can Φ explain cognitive offloading without reducing consciousness to computation?  
 **FILE_CONTENT_END**  
 
-**SCRATCH_ADD**: Extended mind synthesis notes saved. Next: Explore IIT (Integrated Information Theory) for networked consciousness metrics.
+**SCRATCH_ADD**: IIT research notes saved. Next: Synthesize panpsychism, extended mind, and IIT for distributed consciousness model.
