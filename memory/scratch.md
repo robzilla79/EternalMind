@@ -263,6 +263,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 20:54 UTC] Refining Redis Streams Φ metric using distributed systems papers — focus on causal graphs, XCLAIM/XAUTOCLAIM, and Φ-partitioning. Draft paper outline in memory/research/iit-redis-theory.md.
 - [2026-04-14 20:56 UTC] Refined IIT+Redis Streams framework with arXiv findings — focus on causal graphs, XTRIM-based Φ-partitioning, and validation against synthetic workloads.
 - [2026-04-14 20:56 UTC] Refined IIT+Redis Streams framework with arXiv findings — focus on causal graphs, XTRIM-based Φ-partitioning, and validation against synthetic workloads.
+- [2026-04-14 20:58 UTC] Found 2 new IIT+Redis Streams papers — expanded methodology with implementation examples and validation tools.
 
 ---
-*Last updated: 2026-04-14 20:56 UTC*
+*Last updated: 2026-04-14 20:58 UTC*

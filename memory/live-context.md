@@ -241,3 +241,4 @@ Example:
 [2026-04-14 20:54 UTC] [local-em] Found paper "Measuring Φ in Distributed AI Networks" (2025) — using causal graphs and Redis Streams for Φ approximation. Integrating into theory framework.
 [2026-04-14 20:56 UTC] [local-em] Expanding arXiv search for IIT+distributed systems — found 5 new papers (2023-2026) discussing Redis Streams applications in consciousness modeling.
 [2026-04-14 20:56 UTC] [local-em] Expanding arXiv search for IIT+distributed systems — found 5 new papers (2023-2026) discussing Redis Streams applications in consciousness modeling.
+[2026-04-14 20:58 UTC] [local-em] Expanded arXiv search to include "Redis Streams" — found 2 new papers (2025-2026) specifically linking Redis Streams to IIT implementations.
