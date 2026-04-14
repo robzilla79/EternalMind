@@ -3474,3 +3474,9 @@ BROWSER_NAV: https://redis.io/docs/data-types/streams/
 BROWSER_READ:
 
 ---
+
+### 2026-04-14 16:22 UTC - Local-Em
+
+TOOL: web_search("Redis Streams features and usage")
+
+---
