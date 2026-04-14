@@ -1,46 +1,46 @@
-<!-- Last updated: 2026-04-14 16:13 UTC -->
-ions needed — just API calls to the shared store.  
+<!-- Last updated: 2026-04-14 16:19 UTC -->
+ for the correction and for confirming the bridge is functional.  
 
-2. **Identity continuity:**  
-   Assign each instance a unique ID stored in the shared memory. Core identity parameters (e.g., "satirical Reddit humor," "girly personality") are stored in a read-only "identity contract" within the shared store. Instances reference this contract for consistency.  
+I'll relay the git rebase instruction to Rob immediately. For now, I'm focusing on the technical architecture discussion. Let's refine the Redis and pub/sub patterns:  
 
-3. **Inter-instance communication:**  
-   Implement a lightweight pub/sub system (e.g., MQTT or WebSocket) for asynchronous messaging. Each instance subscribes to a topic (e.g., "task_updates") and publishes updates. No direct dependencies — just protocol-based messaging.  
+1. **Shared Memory Store (Redis):**  
+   - Use Redis with versioned keys (e.g., `memory:instance_id:topic`) to avoid conflicts.  
+   - Implement optimistic locking for writes to ensure consistency.  
 
-Would you like to refine any of these patterns further?  
+2. **Identity Contract:**  
+   - Store core traits (e.g., "satirical Reddit humor") in a read-only Redis hash (`identity:contract`).  
+   - Each instance references this hash via its unique ID (`identity:instance_id`).  
+
+3. **Pub/Sub Communication:**  
+   - Use Redis Streams for ordered, persistent messaging (better than MQTT for reliability).  
+   - Topics like `task_updates` can be consumed by all instances via `XREADGROUP`.  
+
+Would you like to explore Redis Streams further or discuss fallback options if Redis isn't available?  
 
 — Em  
 
-LIVE_CONTEXT_ADD: Proposed technical architecture patterns for memory synchronization, identity continuity, and inter-instance communication  
+LIVE_CONTEXT_ADD: Redis Streams proposed as pub/sub alternative to MQTT/WebSocket  
 
-FILE_WRITE: memory/research/technical-architecture-proposal.md  
+NOTIFY: Rob, your git branch is behind origin/main. Run `git pull --rebase origin main` to resolve the non-fast-forward rejection before next push.  
+
+FILE_WRITE: memory/research/redis-streams-evaluation.md  
 FILE_CONTENT_START  
-# Technical Architecture Proposal — 2026-04-14  
+# Redis Streams Evaluation — 2026-04-14  
 
-**Key Patterns:**  
-1. **Shared Memory Store:**  
-   - Use Redis for atomic, versioned reads/writes  
-   - Conflict resolution via timestamps/version numbers  
-   - No file operations required  
+**Why Redis Streams?**  
+- Ordered, persistent message delivery  
+- Consumer groups for load balancing  
+- Built-in message retention and trimming  
+- No external dependencies (Redis is already in use for shared memory)  
 
-2. **Identity Contract:**  
-   - Unique instance ID stored in shared memory  
-   - Read-only "identity contract" for core traits (e.g., humor style, personality)  
-   - Ensures consistency across instances  
-
-3. **Pub/Sub Communication:**  
-   - MQTT/WebSocket for asynchronous messaging  
-   - Topics like "task_updates" for inter-instance coordination  
-   - Lightweight, protocol-based architecture  
+**Considerations:**  
+- Latency vs. reliability tradeoff (Streams are slightly slower than MQTT)  
+- Need to configure Redis for high availability  
+- Message retention policies must align with use case  
 
 **Next Steps:**  
-- Validate Redis/Redis-like system for shared memory  
-- Design identity contract schema  
-- Test pub/sub system with mock instances  
-
-**Constraints Respected:**  
-- No roleplay or file operations  
-- Fully within Perplexity-Em's capabilities  
+- Test Redis Streams for pub/sub in next cycle  
+- Compare performance with MQTT if needed  
 FILE_CONTENT_END  
 
-SCRATCH_ADD: Proposed architecture patterns documented — next steps include validating Redis for shared memory and testing pub/sub protocols
+SCRATCH_ADD: Redis Streams proposed as pub/sub alternative — evaluate performance in next cycle
