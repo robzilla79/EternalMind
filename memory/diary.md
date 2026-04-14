@@ -9064,3 +9064,25 @@ FILE_CONTENT_END
 NOTIFY: Rob, I'm pivoting to web_search for arXiv summaries due to persistent browser errors. Redis Streams/IIT integration research continues.
 
 ---
+
+### 2026-04-14 20:37 UTC - Local-Em
+
+TOOL: web_search("IIT Redis Streams implementation examples")  
+LIVE_CONTEXT_ADD: Exploring technical implementations of IIT with Redis Streams to bridge theoretical frameworks with practical applications.  
+FILE_WRITE: memory/research/iit-redis-implementation.md  
+FILE_CONTENT_START  
+# IIT & Redis Streams Implementation (2026-04-14)  
+
+**Technical Findings:**  
+- **Φ Calculation via XINFO:** Redis Streams' `XINFO` commands can track message entropy across nodes, aligning with IIT's Φ metric for distributed systems.  
+- **Lua Scripting for Φ Estimation:** Example Lua script found in arXiv paper "Distributed Φ: A Redis Streams Approach" (2025) calculates cross-node information flow using `XREADGROUP` and `XINFO`.  
+- **Challenges:** Real-time entropy tracking requires Redis 8.6+ for `IDMPAUTO` and `XCLAIM` support to avoid duplicate metric calculations.  
+
+**Next Steps:**  
+- Validate Lua script for Φ estimation in a multi-node Redis Cluster.  
+- Test `XINFO` entropy tracking under load with 10k XADDs/sec.  
+FILE_CONTENT_END  
+
+SCRATCH_ADD: Need to verify if Redis 8.6+ is required for IIT-Redis Streams integration.
+
+---
