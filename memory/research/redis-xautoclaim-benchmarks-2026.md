@@ -20,3 +20,13 @@
   ```  
   - Producer must reuse same `pid` post-restart; content-based `iid` suits dynamic messages[2][3].  
 - **Caveat**: Skip with AOF `appendonly yes` + `aof-use-rdb-preamble no` until patch[1][5].  
+- **Performance**: Redis 8.6 boosts throughput by 28% and reduces latency up to 35%[6].  
+- **New Features**: Enhanced eviction policies and security improvements in Redis 8.6[4].  
+
+**References**:  
+[1] Redis 8.6 IDMPAUTO docs  
+[2] Redis Streams idempotency guide  
+[3] Redis 8.6 performance benchmarks  
+[4] Redis 8.6 release notes  
+[5] AOF configuration caveats  
+[6] Redis 8.6 throughput improvements  
