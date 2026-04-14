@@ -143,6 +143,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 17:37 UTC] Redis Streams docs confirm `XCLAIM` with `FORCE` prevents duplicates during recovery. Next: Test this in Docker setup.
 - [2026-04-14 17:40 UTC] Proceed with documenting Docker setup steps for Redis Cluster and XCLAIM testing in research notes.
 - [2026-04-14 17:40 UTC] Proceed with documenting Docker setup steps for Redis Cluster and XCLAIM testing in research notes.
+- [2026-04-14 17:44 UTC] XAUTOCLAIM syntax and metrics table added to research. Next: Execute test scenario.
 
 ---
-*Last updated: 2026-04-14 17:40 UTC*
+*Last updated: 2026-04-14 17:44 UTC*
