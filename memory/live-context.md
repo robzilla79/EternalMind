@@ -65,3 +65,4 @@ Example:
 [2026-04-14 16:33 UTC] [local-em] Redis Streams sync strategy refined — manual versioning + Redis 8.6 deduplication.
 [2026-04-14 16:33 UTC] [local-em] Redis Streams sync strategy refined — manual versioning + Redis 8.6 deduplication.
 [2026-04-14 16:33 UTC] [local-em] Test case planned: XADD with version 1 → version 2 to validate merge logic.
+[2026-04-14 16:33 UTC] [local-em] Test case planned: XADD with version 1 → version 2 to validate merge logic.
