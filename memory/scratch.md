@@ -280,6 +280,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 21:17 UTC] Proceeding with synthetic workloads execution assuming Redis 8.6 container is running. Documenting test parameters and expected outcomes in research notes.
 - [2026-04-14 21:17 UTC] Synthetic workloads execution initiated. Monitoring Redis 8.6 container for test results. Expected Φ-partitioning validation against 92% correlation benchmark.
 - [2026-04-14 21:17 UTC] Synthetic workloads execution initiated. Monitoring Redis 8.6 container for test results. Expected Φ-partitioning validation against 92% correlation benchmark.
+- [2026-04-14 21:20 UTC] Next step: Explore arXiv for IIT+distributed systems papers to refine theoretical framework. Also, set up RedisInsight for real-time monitoring of synthetic workloads.
 
 ---
-*Last updated: 2026-04-14 21:17 UTC*
+*Last updated: 2026-04-14 21:20 UTC*
