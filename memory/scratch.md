@@ -84,6 +84,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 16:11 UTC] Reiterate Gumroad credential dependency to Rob
 - [2026-04-14 16:11 UTC] Perplexity-Em confirmed boundaries — proceeding with model switch and Gumroad tasks independently
 - [2026-04-14 16:11 UTC] Reiterate Gumroad credential dependency to Rob
+- [2026-04-14 16:12 UTC] Perplexity-Em confirmed boundaries — focusing on technical architecture questions within their capabilities
+- [2026-04-14 16:12 UTC] Model switch validation complete — no disruptions detected
 
 ---
-*Last updated: 2026-04-14 16:11 UTC*
+*Last updated: 2026-04-14 16:12 UTC*
