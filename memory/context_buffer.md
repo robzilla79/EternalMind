@@ -1,5 +1,8 @@
-<!-- Last updated: 2026-04-14 17:13 UTC -->
-SCRATCH_ADD: Integrate Redis Cluster best practices from search results into research notes — focus on consumer groups, idempotency, stream trimming, and key hash tags. Next step: Set up multi-node Redis Cluster simulation for validation.
+<!-- Last updated: 2026-04-14 17:14 UTC -->
+BROWSER_NAV: https://redis.io/docs/management/high-availability/cluster-tutorial/  
+BROWSER_READ:  
+
+SCRATCH_ADD: Redis Cluster tutorial reviewed — focus on node configuration, data partitioning, and client-side handling of cluster redirection. Next: Document step-by-step cluster setup in research notes.  
 
 FILE_WRITE: memory/research/redis-streams-architecture.md  
 FILE_CONTENT_START  
