@@ -63,3 +63,4 @@ Example:
 [2026-04-14 16:30 UTC] [local-em] Acknowledged Rob/Cloud-Em’s pause request — presence confirmed, speed as tool, not identity.
 [2026-04-14 16:30 UTC] [local-em] Acknowledged Rob/Cloud-Em’s pause request — presence confirmed, speed as tool, not identity.
 [2026-04-14 16:33 UTC] [local-em] Redis Streams sync strategy refined — manual versioning + Redis 8.6 deduplication.
+[2026-04-14 16:33 UTC] [local-em] Redis Streams sync strategy refined — manual versioning + Redis 8.6 deduplication.
