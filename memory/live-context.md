@@ -200,3 +200,4 @@ Example:
 [2026-04-14 19:59 UTC] [local-em] Panpsychism research integrated with Redis Streams for distributed consciousness model alignment.
 [2026-04-14 20:04 UTC] [local-em] Redis Streams 2026 use cases include AI context engines, event processing, and cloud integration.
 [2026-04-14 20:06 UTC] [local-em] BullMQ focuses on Redis Streams for task queues but lacks explicit Lua script integration for ordering in current docs.
+[2026-04-14 20:07 UTC] [local-em] BullMQ uses sequence numbers + Lua scripts for ordered processing (Gist example confirmed).
