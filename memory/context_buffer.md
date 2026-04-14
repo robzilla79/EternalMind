@@ -1,48 +1,28 @@
-<!-- Last updated: 2026-04-14 19:15 UTC -->
- of what I found:  
+<!-- Last updated: 2026-04-14 19:16 UTC -->
+BROWSER_NAV: https://redis.io/docs/management/monitoring/  
+BROWSER_READ:  
 
-### Key Monitoring Metrics  
-1. **Memory Usage**: Track via `INFO memory` — critical for stress tests to avoid out-of-memory errors.  
-2. **Latency**: Use `LATENCY` commands to diagnose slow operations (e.g., `LATENCY DOCTOR` for root cause analysis).  
-3. **Throughput**: Monitor `INFO stats` for total commands processed/sec.  
-4. **Persistence**: Check `INFO persistence` for AOF/RDB status and disk I/O.  
+LIVE_CONTEXT_ADD: Preparing to teach Rob about Redis monitoring using official documentation. Key sections identified: metrics, tools, and best practices.  
 
-### Tools & Techniques  
-- **Redis CLI**: Built-in commands like `SLOWLOG`, `MONITOR`, and `INFO` provide real-time insights.  
-- **RedisInsight**: GUI tool for visualizing metrics, slow queries, and cluster health.  
-- **Exported Metrics**: Use Redis' Prometheus export endpoint (`/metrics`) for integration with monitoring systems like Grafana.  
+OUTBOX_REPLY_SUBJECT: Redis Monitoring 101  
+OUTBOX_REPLY_BODY:  
+Rob, I'll teach you Redis monitoring using the official docs. Here's what we'll cover:  
 
-### Best Practices  
-- **Set Alerts**: Monitor memory > 80% usage and latency > 1ms.  
-- **Sample Slow Queries**: Use `SLOWLOG GET` to identify bottlenecks.  
-- **Regular Backups**: Ensure AOF/RDB snapshots are configured for disaster recovery.  
+**1. Core Metrics**  
+- `INFO memory`: Track memory usage (>80% = alert)  
+- `INFO stats`: Monitor command throughput (XADD/XAUTOCLAIM)  
+- `LATENCY DOCTOR`: Diagnose slow operations  
 
-LIVE_CONTEXT_ADD: Redis monitoring strategy finalized — focus on memory, latency, and throughput during XAUTOCLAIM stress test.  
+**2. Tools**  
+- `SLOWLOG GET`: Identify slow queries  
+- `MONITOR`: Real-time command visibility  
+- RedisInsight: GUI for metrics visualization  
 
-SCRATCH_ADD: RedisInsight and Prometheus integration noted for post-test analysis.  
+**3. Best Practices**  
+- Set alerts for memory >80% and latency >1ms  
+- Use Prometheus + Grafana for historical trends  
+- Regular AOF/RDB backups  
 
-FILE_WRITE: memory/research/redis-monitoring-strategy.md  
-FILE_CONTENT_START  
-# Redis Monitoring Strategy for XAUTOCLAIM Stress Test  
+Ready when you are.  
 
-**Tools**:  
-- `INFO memory`, `INFO stats`, `LATENCY DOCTOR` (CLI)  
-- RedisInsight (GUI)  
-- Prometheus + Grafana (exported metrics)  
-
-**Metrics to Track**:  
-- Memory usage (>80% threshold)  
-- Latency (p50/p99 < 1ms)  
-- Command throughput (XADD/XAUTOCLAIM)  
-- Disk I/O (AOF/RDB persistence)  
-
-**Alerts**:  
-- Memory > 80% → auto-scale or trim streams.  
-- Latency > 1ms → investigate slow queries.  
-
-**Post-Test Analysis**:  
-- Use RedisInsight to visualize bottlenecks.  
-- Export `/metrics` to Grafana for historical trends.  
-FILE_CONTENT_END  
-
-Next step: Proceed with XAUTOCLAIM stress test at 20k/sec.
+SCRATCH_ADD: Teaching session initialized — Redis monitoring concepts ready for delivery.
