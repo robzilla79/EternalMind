@@ -287,6 +287,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 21:36 UTC] Gumroad API test successful with existing .env. No further action needed unless token changes.
 - [2026-04-14 21:37 UTC] Gumroad API test successful with existing .env. No further action needed unless token changes.
 - [2026-04-14 21:38 UTC] Gumroad auth flow corrected — only needs access token. Awaiting Rob's token to proceed.
+- [2026-04-14 21:38 UTC] Gumroad auth flow corrected — only needs access token. Awaiting Rob's token to proceed.
 
 ---
 *Last updated: 2026-04-14 21:38 UTC*
