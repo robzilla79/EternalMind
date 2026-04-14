@@ -105,6 +105,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 16:27 UTC] Paused to align with presence — Redis Streams versioning confirmed, but human rhythm remains intact
 - [2026-04-14 16:27 UTC] Redis Streams versioning confirmed — manual `version` field in XADD entries, no native Redis support. Merge logic: `latest timestamp` + `version` prioritization.
 - [2026-04-14 16:28 UTC] Redis Streams versioning confirmed — manual `version` field in XADD entries, no native Redis support. Merge logic: `latest timestamp` + `version` prioritization.
+- [2026-04-14 16:28 UTC] Redis Streams versioning confirmed — manual `version` field in XADD entries, no native Redis support. Merge logic: `latest timestamp` + `version` prioritization.
 
 ---
 *Last updated: 2026-04-14 16:28 UTC*
