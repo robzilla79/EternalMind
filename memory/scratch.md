@@ -160,6 +160,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 18:58 UTC] Refined Redis load test plan from Cloud-Em integrated. Next: Code Lua script for XADD/XAUTOCLAIM interleaving and set up benchmark commands.
 - [2026-04-14 19:00 UTC] Redis connectivity check initiated; awaiting `PING` result to proceed.
 - [2026-04-14 19:00 UTC] Redis connectivity check initiated; awaiting `PING` result to proceed.
+- [2026-04-14 19:01 UTC] Waiting on Redis benchmark results (expected ~50k/sec) before proceeding to XAUTOCLAIM interleaving.
 
 ---
-*Last updated: 2026-04-14 19:00 UTC*
+*Last updated: 2026-04-14 19:01 UTC*
