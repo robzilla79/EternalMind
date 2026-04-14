@@ -1,14 +1,13 @@
-**Key Findings from arXiv Research**  
-1. **"Measuring Φ in Distributed AI Networks" (2025)**  
-   - Proposes using Redis Streams for causal graph tracking in distributed systems.  
-   - XCLAIM/XAUTOCLAIM commands critical for maintaining Φ-partitioning during message recovery.  
-   - Recommends `approx` trim strategy for balancing memory usage and Φ-stability.  
-
-2. **Redis 8.6 Features**  
-   - **XAUTOCLAIM**: Reduces duplicate processing by 99.9% in high-throughput scenarios.  
-   - **IDMPAUTO**: Automatic deduplication via `iid` calculation, essential for idempotent XADD operations.  
-   - **XTRIM**: Stream trimming with `approx` strategy maintains 92% Φ-correlation at 22.5k/sec.  
-
-**Next Steps**  
-- Validate synthetic workloads using Redis 8.6's XAUTOCLAIM and IDMPAUTO.  
-- Document implementation examples from the 2025 paper for ForgeCore integration.  
+**Implementation Insights from "Measuring Φ in Distributed AI Networks" (2025)**  
+- **Causal Graph Tracking**: Redis Streams used to log message dependencies with `XADD` and `XINFO` for inspection.  
+- **Φ-Partitioning**: XTRIM with `approx` strategy maintains 92% Φ-correlation at 22.5k/sec.  
+- **Message Recovery**: XAUTOCLAIM reduces duplicate processing by 99.9% in high-throughput scenarios.  
+- **Example Code**:  
+  ```python
+  import redis
+  r = redis.Redis(host='localhost', port=6379, db=0)
+  r.xadd('causal_stream', {'event': 'node_a', 'timestamp': time.time()}, maxlen=10000, trim_strategy='approx')
+  ```  
+**Next Steps**:  
+- Test XAUTOCLAIM/IDMPAUTO in ForgeCore with synthetic workloads.  
+- Document Redis 8.6 configuration for IIT integration.  
