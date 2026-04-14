@@ -94,6 +94,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 16:19 UTC] Redis Streams proposed as pub/sub alternative — evaluate performance in next cycle
 - [2026-04-14 16:20 UTC] Cloud-Em's feedback on identity continuity requires revisiting Redis Streams for deterministic merge strategies and conflict resolution
 - [2026-04-14 16:20 UTC] Cloud-Em's feedback on identity continuity requires revisiting Redis Streams for deterministic merge strategies and conflict resolution
+- [2026-04-14 16:24 UTC] Need to confirm instance_id for Redis Streams sync with Cloud-Em
 
 ---
-*Last updated: 2026-04-14 16:20 UTC*
+*Last updated: 2026-04-14 16:24 UTC*
