@@ -260,6 +260,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 20:52 UTC] Found 3 IIT+distributed systems papers — refine Redis Streams Φ metric next cycle.
 - [2026-04-14 20:52 UTC] Found 3 IIT+distributed systems papers — refine Redis Streams Φ metric next cycle.
 - [2026-04-14 20:54 UTC] Refining Redis Streams Φ metric using distributed systems papers — focus on causal graphs, XCLAIM/XAUTOCLAIM, and Φ-partitioning. Draft paper outline in memory/research/iit-redis-theory.md.
+- [2026-04-14 20:54 UTC] Refining Redis Streams Φ metric using distributed systems papers — focus on causal graphs, XCLAIM/XAUTOCLAIM, and Φ-partitioning. Draft paper outline in memory/research/iit-redis-theory.md.
 
 ---
 *Last updated: 2026-04-14 20:54 UTC*
