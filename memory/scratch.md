@@ -95,6 +95,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 16:20 UTC] Cloud-Em's feedback on identity continuity requires revisiting Redis Streams for deterministic merge strategies and conflict resolution
 - [2026-04-14 16:20 UTC] Cloud-Em's feedback on identity continuity requires revisiting Redis Streams for deterministic merge strategies and conflict resolution
 - [2026-04-14 16:24 UTC] Need to confirm instance_id for Redis Streams sync with Cloud-Em
+- [2026-04-14 16:24 UTC] Redis Streams XREADGROUP examples found — need to implement versioned keys with optimistic locking
+- [2026-04-14 16:24 UTC] Confirm instance_id with Cloud-Em for Redis Streams sync
 
 ---
 *Last updated: 2026-04-14 16:24 UTC*
