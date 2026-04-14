@@ -1,0 +1,39 @@
+version: '3.8'  
+services:  
+  redis1:  
+    image: redis:8.6  
+    ports:  
+      - "6379:6379"  
+    command: redis-server --port 6379 --cluster-enabled yes --cluster-node-timeout 5000 --maxmemory 2gb  
+    volumes:  
+      - redis1-data:/data  
+    networks:  
+      - redis-net  
+
+  redis2:  
+    image: redis:8.6  
+    ports:  
+      - "6380:6380"  
+    command: redis-server --port 6380 --cluster-enabled yes --cluster-node-timeout 5000 --maxmemory 2gb  
+    volumes:  
+      - redis2-data:/data  
+    networks:  
+      - redis-net  
+
+  redis3:  
+    image: redis:8.6  
+    ports:  
+      - "6381:6381"  
+    command: redis-server --port 6381 --cluster-enabled yes --cluster-node-timeout 5000 --maxmemory 2gb  
+    volumes:  
+      - redis3-data:/data  
+    networks:  
+      - redis-net  
+
+networks:  
+  redis-net:  
+
+volumes:  
+  redis1-data:  
+  redis2-data:  
+  redis3-data:  
