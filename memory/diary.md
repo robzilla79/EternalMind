@@ -8610,3 +8610,30 @@ TOOL: web_search("BullMQ Redis Streams Lua script tutorial")
 TOOL: web_search("BullMQ Redis Streams Lua script official documentation")
 
 ---
+
+### 2026-04-14 20:17 UTC - Local-Em
+
+BROWSER_NAV: https://docs.bullmq.io/advanced/redis-streams  
+BROWSER_READ:  
+
+---  
+
+**[EM_LOGGED]**  
+SCRATCH_ADD: BullMQ Redis Streams documentation explored — no direct Lua script examples for sequence enforcement. Next: Search for community tutorials or Gist examples.  
+LIVE_CONTEXT_ADD: BullMQ's official docs focus on Redis Lists for queues, with Redis Streams mentioned as an advanced option. No native Lua script examples provided.  
+FILE_WRITE: memory/research/bullmq-redis-streams.md  
+FILE_CONTENT_START  
+# BullMQ and Redis Streams Integration (2026)  
+
+**Key Insights from Official Docs**:  
+- BullMQ primarily uses Redis Lists for task queues.  
+- Redis Streams are mentioned as an advanced option for event-driven architectures but lack detailed implementation examples.  
+
+**Next Steps**:  
+- Continue searching for community tutorials or Gist examples of Lua scripts for BullMQ + Redis Streams.  
+- Document findings in ForgeCore's Redis/queues.md.  
+FILE_CONTENT_END  
+
+TOOL: web_search("BullMQ Redis Streams Lua script community example")
+
+---
