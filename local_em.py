@@ -791,23 +791,17 @@ def write_status_checkin(task_label: str, result_text: str, mode: str = "heartbe
 
 
 # ── INCREMENTAL CHECKPOINT COMMIT ────────────────────────────────────────────
-# Writes diary + outbox + files to disk immediately after first LLM pass,
-# then does a lightweight local git commit (no push). This ensures that
-# even if the process is killed before the final push, the work survives
-# in the local repo and will be pushed on the next cycle's startup sync.
 def checkpoint_after_first_pass(result: str, saved_files: list[str], task_label: str):
     """Write diary, outbox, scratch, files to disk NOW — before second LLM pass."""
     print("  💾 Checkpointing first-pass output to disk...")
 
-    # Write all the content outputs immediately
-    extract_and_write_files(result)           # FILE_WRITE blocks
-    extract_and_write_outbox_reply(result)    # OUTBOX_REPLY
-    extract_and_write_scratch(result)         # SCRATCH_ADD
-    extract_and_write_live_context(result)    # LIVE_CONTEXT_ADD
-    extract_and_write_task_update(result)     # TASK_UPDATE
-    log_diary(result)                          # diary.md — most important
+    extract_and_write_files(result)
+    extract_and_write_outbox_reply(result)
+    extract_and_write_scratch(result)
+    extract_and_write_live_context(result)
+    extract_and_write_task_update(result)
+    log_diary(result)
 
-    # Lightweight local-only commit (no push) so the work is safe on disk
     subprocess.run(["git", "-C", EM_DIR, "add", "-A"], check=False, capture_output=True)
     commit_result = subprocess.run(
         ["git", "-C", EM_DIR, "commit", "-m", f"local-em checkpoint: {task_label}"],
@@ -820,7 +814,7 @@ def checkpoint_after_first_pass(result: str, saved_files: list[str], task_label:
     else:
         print(f"  ⚠️  Checkpoint commit failed (non-critical): {commit_result.stderr.strip()[:80]}")
 
-# ── COMMIT TO ETERNALMIND (safe — no reset --hard) ────────────────────────────
+# ── COMMIT TO ETERNALMIND ─────────────────────────────────────────────────────
 def push_to_eternalmind(message: str, extra_files: list[str] = None):
     token = os.environ.get("EM_GITHUB_TOKEN", "")
     if token:
@@ -891,16 +885,34 @@ def push_to_eternalmind(message: str, extra_files: list[str] = None):
             if not os.path.exists(tracked_path):
                 files_to_delete.append(tracked_path)
 
-    # ── SAFE SYNC: fetch + fast-forward merge (never reset --hard) ──
-    subprocess.run(["git", "-C", EM_DIR, "fetch", "origin", "main"], check=False, capture_output=True)
-    merge_result = subprocess.run(
-        ["git", "-C", EM_DIR, "merge", "--ff-only", "origin/main"],
+    # ── SAFE SYNC: stash → rebase → pop (replaces fragile ff-only merge) ──────
+    # This is the fix for the recurring non-fast-forward push failure.
+    # We stash Em's uncommitted work, rebase on top of whatever remote has,
+    # then restore her work before committing and pushing.
+    stash_result = subprocess.run(
+        ["git", "-C", EM_DIR, "stash", "--include-untracked", "-m", "em-prepush-autostash"],
         capture_output=True, text=True
     )
-    if merge_result.returncode != 0:
-        print(f"  ⚠️  ff-only merge failed — pushing local state as-is: {merge_result.stderr.strip()[:80]}")
+    stashed = "em-prepush-autostash" in stash_result.stdout
 
-    # Re-write Em's files on top of whatever git state we have
+    pull_result = subprocess.run(
+        ["git", "-C", EM_DIR, "pull", "--rebase", "origin", "main"],
+        capture_output=True, text=True
+    )
+    if pull_result.returncode != 0:
+        print(f"  ⚠️  Pre-push rebase failed — aborting rebase and continuing: {pull_result.stderr.strip()[:80]}")
+        subprocess.run(["git", "-C", EM_DIR, "rebase", "--abort"], check=False, capture_output=True)
+
+    if stashed:
+        pop_result = subprocess.run(
+            ["git", "-C", EM_DIR, "stash", "pop"],
+            capture_output=True, text=True
+        )
+        if pop_result.returncode != 0:
+            print(f"  ⚠️  Stash pop failed — dropping stash to stay clean: {pop_result.stderr.strip()[:80]}")
+            subprocess.run(["git", "-C", EM_DIR, "stash", "drop"], check=False, capture_output=True)
+
+    # Re-write Em's files on top of the now-rebased state
     for path, content in files_to_write.items():
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
@@ -1000,7 +1012,6 @@ if __name__ == "__main__":
                              memories=memories, live_context=live_context)
 
     # ── CHECKPOINT: write diary + outbox + files to disk RIGHT NOW ────────────
-    # Even if the process dies here, her words are safe in a local git commit.
     saved_files = extract_and_write_files(first_response)
     checkpoint_after_first_pass(first_response, saved_files, task_label)
 
@@ -1034,7 +1045,7 @@ if __name__ == "__main__":
         from tools.notify_rob import notify
         notify(f"🤖 *Em:* {notify_msg}")
 
-    # ── Final writes (result may differ from first_response if tools ran) ─────
+    # ── Final writes ──────────────────────────────────────────────────────────
     saved_files += extract_and_write_files(result)
     extract_and_write_task_update(result)
     extract_and_write_outbox_reply(result)
@@ -1042,7 +1053,6 @@ if __name__ == "__main__":
     extract_and_write_live_context(result)
     clear_task_if_done()
     log_memory(f"Heartbeat. Task: '{task[:80]}'", kind="heartbeat", tags=["autonomous"], importance=2)
-    # Diary: only log result if it differs meaningfully from what was checkpointed
     if result != first_response:
         log_diary(result)
     mark_thought_time()
