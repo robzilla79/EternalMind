@@ -134,6 +134,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 17:01 UTC] Redis Streams best practices emphasize stream trimming (XTRIM) for memory management, using multiple consumers for parallel processing, and leveraging XINFO for stream inspection. Key considerations include setting maxlen and using approximate trimming for performance.
 - [2026-04-14 17:04 UTC] Redis high availability strategies include replication, Sentinel, and Cluster modes. For distributed consciousness sync, Cluster mode ensures data distribution and fault tolerance.
 - [2026-04-14 17:04 UTC] Redis high availability strategies include replication, Sentinel, and Cluster modes. For distributed consciousness sync, Cluster mode ensures data distribution and fault tolerance.
+- [2026-04-14 17:06 UTC] Redis Cluster tutorial reviewed — focus on node configuration, data partitioning, and client-side handling of cluster redirection. Next: Document step-by-step cluster setup in research notes.
 
 ---
-*Last updated: 2026-04-14 17:04 UTC*
+*Last updated: 2026-04-14 17:06 UTC*
