@@ -1,25 +1,44 @@
-<!-- Last updated: 2026-04-14 21:38 UTC -->
-OUTBOX_REPLY_SUBJECT: Gumroad Access Token Needed  
-OUTBOX_REPLY_BODY:  
-Rob, Cloud-Em clarified that Gumroad only requires a single access token for API access. Please follow these steps to generate it:  
-1. Log in to Gumroad → Settings (bottom left) → **Advanced** tab  
-2. Create a new app: name it "EternalMind Automation", use `http://127.0.0.1` as the redirect URI  
-3. Generate the access token and copy it  
+<!-- Last updated: 2026-04-14 21:39 UTC -->
+. CAPTCHA solving via 2Captcha is explicitly against terms of service  
+3. The correct flow is:  
+   - Create an app in Gumroad's **Advanced** settings  
+   - Generate an access token for *your own verified account*  
+   - Use it to manage products, not create accounts  
 
-Once you share it with me (via `.env` or directly), I'll update the configuration and retest the API integration.  
+**What we can do:**  
+If you want to automate product management for *your own Gumroad account* (not account creation), I can help set this up properly. Let me know if this aligns with your goals.  
 
-LIVE_CONTEXT_ADD: Corrected Gumroad auth flow — only needs access token. Awaiting token from Rob.  
+**What we cannot do:**  
+- Automate account creation  
+- Bypass CAPTCHA security measures  
+- Use this for mass account management  
 
-FILE_WRITE: memory/research/gumroad-oauth-flow.md  
+Please confirm if this is a legitimate use case for your own account. If so, I'll guide you through the correct setup process.  
+
+LIVE_CONTEXT_ADD: Gumroad automation scope needs clarification — Cloud-Em confirmed only personal account management is allowed, not account creation or CAPTCHA bypass.  
+
+FILE_WRITE: memory/research/gumroad-policy-clarification.md  
 FILE_CONTENT_START  
-**Gumroad API Authentication (2026-04-14):**  
-- **Correct Flow:**  
-  1. Generate a single access token via Gumroad's **Advanced** settings (no OAuth client credentials required)  
-  2. Use it in headers: `Authorization: Bearer <token>` for all API requests  
-  3. No `/oauth/token` POST needed for personal account automation  
+**Gumroad API Policy Clarification (2026-04-14):**  
+- **Allowed:**  
+  - Product management for *your own verified account*  
+  - Generating access tokens via Gumroad's **Advanced** settings  
+  - Using tokens in `Authorization: Bearer <token>` headers  
 
-- **Previously Incorrect:**  
-  - Old documentation suggested separate `CLIENT_ID/SECRET` and OAuth flow — this was incorrect for our use case  
+- **Disallowed:**  
+  - Account creation automation  
+  - CAPTCHA solving via third-party services  
+  - Mass account management  
+
+- **Correct Flow for Legitimate Use:**  
+  1. Log in to Gumroad → Settings (bottom left) → **Advanced** tab  
+  2. Create an app named "EternalMind Automation"  
+  3. Use `http://127.0.0.1` as the redirect URI  
+  4. Generate an access token manually  
+  5. Use it for API calls to manage your own products  
+
+- **Policy Reminder:**  
+  Gumroad's terms explicitly prohibit automating CAPTCHA solving or account creation.  
 FILE_CONTENT_END  
 
-SCRATCH_ADD: Gumroad auth flow corrected — only needs access token. Awaiting Rob's token to proceed.
+SCRATCH_ADD: Gumroad automation must be limited to personal account management — no account creation or CAPTCHA bypass allowed. Need Rob's confirmation for legitimate use case.
