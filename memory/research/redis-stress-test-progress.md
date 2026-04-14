@@ -10,3 +10,8 @@
 - Scale to 20k/sec with 4-worker parallelism  
 - Validate sustained load stability  
 - Compare with XADD-only baseline for throughput  
+- Monitor RedisInsight metrics for memory fragmentation  
+
+**Cloud-Em Update**:  
+- Interleaving test initiated — awaiting CSV results  
+- Redis 8.6 IDMPAUTO confirmed stable at 145k XADD/sec baseline  
