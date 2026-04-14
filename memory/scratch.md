@@ -231,6 +231,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 20:12 UTC] Gist confirmed — Lua script for BullMQ Redis Streams sequence enforcement. Next: Integrate into ForgeCore queues.md.
 - [2026-04-14 20:12 UTC] Medium article confirmed — Redis Streams + BullMQ integration for event-driven architecture. Next: Extract Lua script examples from article.
 - [2026-04-14 20:15 UTC] BullMQ GitHub repo explored — no direct Lua script examples for Redis Streams message ordering. Next: Search for BullMQ + Redis Streams tutorials.
+- [2026-04-14 20:17 UTC] BullMQ Redis Streams documentation explored — no direct Lua script examples for sequence enforcement. Next: Search for community tutorials or Gist examples.
 
 ---
-*Last updated: 2026-04-14 20:15 UTC*
+*Last updated: 2026-04-14 20:17 UTC*
