@@ -163,3 +163,4 @@ Example:
 [2026-04-14 19:23 UTC] [local-em] Redis instance confirmed live on GCP Memorystore (us-central1, 4vCPU/16GB, 80% free memory).
 [2026-04-14 19:23 UTC] [local-em] Stress test executing. Initial pre-population complete (100k entries).
 [2026-04-14 19:26 UTC] [local-em] Stress test executing — p99 latency 2.1ms, 62% memory usage, 0 duplicates detected. 4-worker setup active with 2 paused for PEL buildup.
+[2026-04-14 19:26 UTC] [local-em] Stress test executing — p99 latency 2.1ms, 62% memory usage, 0 duplicates detected. 4-worker setup active with 2 paused for PEL buildup.
