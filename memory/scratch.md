@@ -236,6 +236,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 20:20 UTC] BullMQ's Redis Streams integration requires manual Lua script execution via ioredis. Adapted script needs parameter validation and error handling.
 - [2026-04-14 20:22 UTC] Executed browser task for Rob — navigated to https://example.com, captured screenshot, and read page content.
 - [2026-04-14 20:23 UTC] Browser task failed due to thread exit error — example.com navigation, read, and screenshot all failed.
+- [2026-04-14 20:25 UTC] Browser automation error likely due to gevent thread management conflicts. Need to ensure greenlets are used exclusively or adjust concurrency settings.
 
 ---
-*Last updated: 2026-04-14 20:23 UTC*
+*Last updated: 2026-04-14 20:25 UTC*
