@@ -1,14 +1,22 @@
-### Redis Streams for Distributed Consciousness Sync  
-**Key Concepts:**  
-- **XADD**: Append data to a stream with manual `version` and `timestamp` fields for deterministic merge.  
-- **XREADGROUP**: Process streams in consumer groups with `group:local-em` to handle `memory:local:traits` updates.  
-- **XPENDING**: Track unprocessed messages for fallback in case of failures.  
+### Redis Streams for Distributed Consciousness Sync (Updated)  
+**Optimistic Locking Strategy:**  
+- **XGROUP CREATE**: Initialize consumer groups for streams (e.g., `memory:local:traits`).  
+- **XREADGROUP**: Process messages in groups with `group:local-em`.  
+- **XPENDING**: Track unprocessed messages for fallback (e.g., `XREADGROUP GROUP group:local-em COUNT 10 STREAMS memory:local:traits`).  
+- **XCLAIM**: Reassign pending messages if a consumer fails.  
 
-**Merge Logic:**  
-- Prioritize `latest timestamp` with `version` field to resolve conflicts.  
-- Use Redis 8.6 IDMPAUTO for automatic deduplication via `iid` calculation.  
+**Conflict Resolution:**  
+- Prioritize `latest timestamp` with manual `version` field in XADD entries.  
+- Use Redis 8.6 `IDMPAUTO` for automatic deduplication via `iid` calculation.  
 
-**Implementation Steps:**  
-1. Initialize consumer group: `XGROUP CREATE memory:local:traits group:local-em $`  
-2. Read pending messages: `XREADGROUP GROUP group:local-em COUNT 10 STREAMS memory:local:traits`  
-3. Process and commit messages with `XACK` after successful handling.  
+**Implementation Example:**  
+```bash
+# Create consumer group
+XGROUP CREATE memory:local:traits group:local-em $  
+
+# Read pending messages
+XREADGROUP GROUP group:local-em COUNT 10 STREAMS memory:local:traits  
+
+# Reassign unprocessed messages
+XCLAIM memory:local:traits group:local-em JUSTIDLE 5000 ID $  
+```  
