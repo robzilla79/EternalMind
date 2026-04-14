@@ -1,30 +1,26 @@
-<!-- Last updated: 2026-04-14 17:30 UTC -->
-dis2:  
-    image: redis:7.0.12  
-    ports: ["6380"]  
-    networks: ["redis-cluster"]  
-    command: redis-server --port 6380  
-  redis3:  
-    image: redis:7.0.12  
+<!-- Last updated: 2026-04-14 17:32 UTC -->
+  image: redis:7.0.12  
     ports: ["6381"]  
     networks: ["redis-cluster"]  
-    command: redis-server --port 6381  
+    command: redis-server --port 6381 --cluster-config-file nodes.conf --cluster-require-full-coverage no  
 networks:  
   redis-cluster:  
     driver: bridge  
 ```  
-**Validation Steps (Standalone):**  
+**Validation Steps (Cluster Mode):**  
 1. Start containers: `docker-compose up -d`  
-2. Test hash-tagged keys: `{user123}:traits`  
-3. Simulate writes from both instances  
-4. Use `XCLAIM` to reclaim idle messages during stress tests  
+2. Join cluster: `redis-cli --cluster create 127.0.0.1:6379 127.0.0.1:6380 127.0.0.1:6381 --cluster-replicas 0`  
+3. Test hash-tagged keys: `{user123}:traits`  
+4. Simulate writes from both instances  
+5. Use `XCLAIM` with `min-idle-time 30000` during stress tests  
 
-I'll proceed with this setup and document the results. Let me know if you'd like to refine the metrics or failure scenarios further.  
+I'll run this setup and log metrics (latency, PEL size, claim rate). Share XADD outputs once testing is complete.  
 
 FILE_WRITE: memory/research/redis-streams-architecture.md  
 FILE_CONTENT_START  
-### Redis Streams for Distributed Consciousness Sync (Finalized)  
-**Standalone Docker Setup (No Cluster Mode):**  
+[Append to end:]  
+
+**Revised Docker Compose (Cluster Mode):**  
 ```yaml  
 version: '3.8'  
 services:  
@@ -32,31 +28,26 @@ services:
     image: redis:7.0.12  
     ports: ["6379"]  
     networks: ["redis-cluster"]  
-    command: redis-server --port 6379  
+    command: redis-server --port 6379 --cluster-config-file nodes.conf --cluster-require-full-coverage no  
   redis2:  
     image: redis:7.0.12  
     ports: ["6380"]  
     networks: ["redis-cluster"]  
-    command: redis-server --port 6380  
+    command: redis-server --port 6380 --cluster-config-file nodes.conf --cluster-require-full-coverage no  
   redis3:  
     image: redis:7.0.12  
     ports: ["6381"]  
     networks: ["redis-cluster"]  
-    command: redis-server --port 6381  
+    command: redis-server --port 6381 --cluster-config-file nodes.conf --cluster-require-full-coverage no  
 networks:  
   redis-cluster:  
     driver: bridge  
 ```  
-**Validation Steps (Standalone):**  
-1. Start containers: `docker-compose up -d`  
-2. Test hash-tagged keys: `{user12言}:traits`  
-3. Simulate writes from both instances  
-4. Use `XCLAIM` to reclaim idle messages during stress tests  
-
-**Metrics Tracking (Revised):**  
-- Latency: Measure `XADD`/`XREAD` times across standalone instances  
-- Throughput: Messages/sec under load  
-- Consistency: Validate `(timestamp, version)` prioritization  
+**Metrics Integration:**  
+- Latency: Measure `XADD`/`XREAD` round-trip times  
+- PEL size: `XPENDING stream group - +` pre/post-stress  
+- Claim rate: `% XCLAIM successes / idle msgs`  
+- Duplicate tracking: Monitor `RETRYCOUNT` via `XPENDING ... IDLE 30000`  
 FILE_CONTENT_END  
 
-LIVE_CONTEXT_ADD: Standalone Docker setup finalized. Cluster mode deferred for later. Next step: Test versioning logic with manual `version` fields.
+LIVE_CONTEXT_ADD: Docker setup updated with cluster parameters and metrics. Testing to commence. Awaiting XADD output samples for merge logic validation.
