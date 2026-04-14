@@ -4,7 +4,7 @@
 1. **Sequence Numbers**: Add `sequence` field to job data. Workers process only the next expected sequence.  
 2. **Lua Script**: Enforces atomic sequence checks (see Gist: https://gist.github.com/nesty92/99e1c38a968526c2e5b2d5874769d813).  
 
-**Lua Script Example**:  
+**Lua Script Example (from Gist)**:  
 ```lua
 -- Ensure only the next expected sequence is processed
 local expected_seq = tonumber(ARGV[1])
@@ -30,7 +30,7 @@ end
 redis.call('XACK', stream, group, message[1])
 
 return message
-```
+```  
 
 **Next Steps**:  
 - Implement sequence tracking in BullMQ jobs.  
