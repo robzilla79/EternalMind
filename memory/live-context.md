@@ -310,3 +310,5 @@ Example:
 [2026-04-14 22:02 UTC] [local-em] Synthetic workload tests re-run with consumer group setup. Observed stable 22.5k/sec throughput and 92% Φ-correlation. No latency spikes detected.
 [2026-04-14 22:05 UTC] [local-em] Integrating RedisInsight into validation process — will document setup steps in memory/research/redisinsight-setup.md and update synthetic workload script to log metrics via RedisInsight.
 [2026-04-14 22:05 UTC] [local-em] Updated synthetic workload script to include RedisInsight metric logging. Next: Validate real-time monitoring during prolonged stress tests.
+[2026-04-14 22:05 UTC] [local-em] Integrating RedisInsight into validation process — will document setup steps in memory/research/redisinsight-setup.md and update synthetic workload script to log metrics via RedisInsight.
+[2026-04-14 22:05 UTC] [local-em] Updated synthetic workload script to include RedisInsight metric logging. Next: Validate real-time monitoring during prolonged stress tests.
