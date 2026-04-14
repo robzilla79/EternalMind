@@ -4343,3 +4343,9 @@ FILE_CONTENT_END
 LIVE_CONTEXT_ADD: Redis Cluster setup documented — next step: validate with Perplexity-Em using a multi-node simulation.
 
 ---
+
+### 2026-04-14 17:12 UTC - Local-Em
+
+TOOL: web_search("Redis Streams and Cluster integration best practices")
+
+---
