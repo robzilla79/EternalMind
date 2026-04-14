@@ -1,24 +1,15 @@
-<!-- Last updated: 2026-04-14 16:38 UTC -->
-TOOL: web_search("Gumroad API authentication flow")
-
-**[EM_LOGGED]**  
-Researching Gumroad API authentication:  
-- OAuth 2.0 is required, with client ID and secret.  
-- Access token obtained via POST to /oauth/token.  
-- Token included in Authorization header as Bearer <token>.  
-
-Next: Validate OAuth flow with POST to /oauth/token using client credentials.  
-
-— Em  
-
-SCRATCH_ADD: Gumroad API requires OAuth 2.0 with client ID/secret for token generation.  
-LIVE_CONTEXT_ADD: Test OAuth flow: POST /oauth/token with client credentials to get access token.  
+<!-- Last updated: 2026-04-14 16:41 UTC -->
+SCRATCH_ADD: Confirmed OAuth 2.0 client credentials flow for Gumroad API — next step requires GUMROAD_API_KEY and GUMROAD_CLIENT_SECRET from Rob.  
+LIVE_CONTEXT_ADD: Gumroad automation paused awaiting credentials — test POST /oauth/token requires client_id and client_secret.  
 
 FILE_WRITE: memory/research/gumroad-api-auth.md  
 FILE_CONTENT_START  
-### Gumroad API Authentication  
-**OAuth 2.0 Flow:**  
-1. **Client Credentials Grant:**  
+### Gumroad API Authentication (Updated)  
+**OAuth 2.0 Client Credentials Flow:**  
+1. **Obtain Credentials:**  
+   - Go to Gumroad settings → API → Generate Client ID/Secret.  
+
+2. **Request Access Token:**  
    - Send POST to `https://api.gumroad.com/oauth/token` with:  
      ```json
      {
@@ -27,16 +18,20 @@ FILE_CONTENT_START
        "grant_type": "client_credentials"
      }
      ```  
-   - Response includes `access_token` and `token_type` (typically Bearer).  
+   - Response:  
+     ```json
+     {
+       "access_token": "A1B2C3D4E5F6...",
+       "token_type": "Bearer",
+       "expires_in": 3600
+     }
+     ```  
 
-2. **Authorization Header:**  
-   - Use `Authorization: Bearer <access_token>` for all API requests.  
+3. **Use Access Token:**  
+   - Include in Authorization header:  
+     `Authorization: Bearer A1B2C3D4E5F6...`  
 
-**Endpoints:**  
-- `GET /products` — List products.  
-- `POST /products` — Create product.  
-- `GET /sales` — Retrieve sales data.  
-- `GET /subscribers` — Manage subscribers.  
+**Note:** NoCodeAPI's URL-based token is deprecated; official API requires OAuth 2.0.  
+FILE_CONTENT_END  
 
-**Note:** NoCodeAPI's URL-based token is non-standard; official API uses Bearer tokens in headers.  
-FILE_CONTENT_END
+NOTIFY: Gumroad automation requires GUMROAD_API_KEY and GUMROAD_CLIENT_SECRET to proceed. Please provide credentials to continue.

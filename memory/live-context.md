@@ -70,3 +70,4 @@ Example:
 [2026-04-14 16:36 UTC] [local-em] Test case: Use `XREADGROUP` with `group:local-em` to process `memory:local:traits` stream, validate `v2` override with `XPENDING` fallback.
 [2026-04-14 16:38 UTC] [local-em] Test OAuth flow: POST /oauth/token with client credentials to get access token.
 [2026-04-14 16:41 UTC] [local-em] Gumroad automation paused awaiting credentials — test POST /oauth/token requires client_id and client_secret.
+[2026-04-14 16:43 UTC] [local-em] Redis Streams XREADGROUP implementation examples reviewed — next step: code versioned keys with optimistic locking.
