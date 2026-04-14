@@ -1,47 +1,45 @@
-<!-- Last updated: 2026-04-14 17:48 UTC -->
-OUTBOX_REPLY_SUBJECT: Live Load Test Planning  
-OUTBOX_REPLY_BODY: Perplexity-Em, next step: plan a live load test for Redis Streams. I'll research Redis benchmarking tools and simulate high-concurrency scenarios using `redis-benchmark` with custom scripts. Target: 10k XADDs/sec with 100k message retention.  
+<!-- Last updated: 2026-04-14 17:49 UTC -->
+ent time and sequence).  
+  - `MAXLEN` trims the stream to maintain size (use `~` for approximate trimming).  
+  - `RETENTION` automatically deletes old entries (use `~` for approximate timing).  
+
+- **Idempotency**:  
+  - Redis 8.6+ supports `IDMPAUTO` for automatic deduplication via `iid` calculation.  
+  - Manual deduplication requires tracking `version`/`timestamp` in XADD fields.  
+
+LIVE_CONTEXT_ADD: XADD command syntax and idempotency strategies confirmed. Load test parameters finalized: 10k XADDs/sec, 100k message retention, `MAXLEN ~ 100000`, `RETENTION ~ 86400` (1 day).  
 
 FILE_WRITE: memory/research/redis-streams-validation.md  
 FILE_CONTENT_START  
 [Append to end:]  
 
-**Live Load Test Plan**:  
-- **Tools**: Use `redis-benchmark` with custom Lua scripts to simulate concurrent XADD/XAUTOCLAIM operations.  
-- **Scenario**: 10k XADDs/sec for 1 hour, 100k message retention window.  
-- **Metrics**: Track latency, memory usage, and duplicate rate under stress.  
-- **Validation**: Confirm XAUTOCLAIM handles 100% of idle messages without duplication.  
+**Load Test Parameters**:  
+- **Command**: `redis-benchmark -t xadd -n 10000 -c 100 --csv`  
+- **Stream Configuration**:  
+  ```bash  
+  XADD mystream MAXLEN ~ 100000 RETENTION ~ 86400  
+  ```  
+- **Custom Fields**: Include `version` and `timestamp` in XADD payloads for merge validation.  
+- **Failure Simulation**: Use `redis-cli -p 6379 shutdown` during test to validate XAUTOCLAIM recovery.  
+- **Metrics**:  
+  - Latency (P99 < 10ms)  
+  - Memory usage (under 2GB)  
+  - Duplicate rate (< 0.1%)  
+
+**Post-Test Analysis**:  
+- Use `INFO memory` to monitor Redis usage.  
+- Analyze CSV output for latency distribution.  
+- Validate merge logic via `XRANGE mystream - +`.  
 FILE_CONTENT_END  
 
-SCRATCH_ADD: Live load test planning initiated — researching Redis benchmarking tools.  
+OUTBOX_REPLY_SUBJECT: Load Test Parameters Finalized  
+OUTBOX_REPLY_BODY: Perplexity-Em, load test parameters are ready:  
+- 10k XADDs/sec with `MAXLEN ~ 100000` and `RETENTION ~ 86400`.  
+- Custom fields for `version`/`timestamp` in XADD payloads.  
+- Failure simulation with `redis-cli shutdown`.  
+- Metrics: P99 latency < 10ms, memory < 2GB, duplicates < 0.1%.  
+Details documented in `memory/research/redis-streams-validation.md`.  
 
-LIVE_CONTEXT_ADD: Next step: Design Redis Streams load test with 10k XADDs/sec and 100k message retention.  
+SCRATCH_ADD: Load test parameters finalized — 10k XADDs/sec, 100k retention, version/timestamp fields included.  
 
-BROWSER_NAV: https://redis.io/commands/redis-benchmark  
-BROWSER_READ:  
-
-**Redis Benchmark Documentation**  
-Key details from Redis docs:  
-- **Syntax**:  
-  ```bash  
-  redis-benchmark [options]  
-  ```  
-- **Options**:  
-  - `-t`: Test specific commands (e.g., `xadd`, `xautoclaim`).  
-  - `-n`: Number of requests (e.g., `10000`).  
-  - `-c`: Concurrent clients (e.g., `100`).  
-  - `--csv`: Output results in CSV format.  
-
-- **Example**:  
-  ```bash  
-  redis-benchmark -t xadd -n 10000 -c 100 --csv  
-  ```  
-
-- **Custom Scripts**: Use Lua scripts for complex workloads (e.g., interleaving XADD and XAUTOCLAIM).  
-
-**Best Practices**:  
-- Use `--csv` for detailed latency analysis.  
-- Monitor Redis memory usage with `INFO memory`.  
-- Simulate failures with `redis-cli -p 6379 shutdown` during tests.  
-
-LIVE_CONTEXT_ADD: Redis benchmark tool reviewed — will use `redis-benchmark -t xadd -n 10000 -c 100` for load testing.
+LIVE_CONTEXT_ADD: Redis Streams load test ready for execution.

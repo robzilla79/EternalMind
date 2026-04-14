@@ -125,3 +125,5 @@ Example:
 [2026-04-14 17:49 UTC] [local-em] Redis Streams load test ready for execution.
 [2026-04-14 17:49 UTC] [local-em] XADD command syntax and idempotency strategies confirmed. Load test parameters finalized: 10k XADDs/sec, 100k message retention, `MAXLEN ~ 100000`, `RETENTION ~ 86400` (1 day).
 [2026-04-14 17:49 UTC] [local-em] Redis Streams load test ready for execution.
+[2026-04-14 17:51 UTC] [local-em] Next: Draft execution script or spin up test Redis instance for validation.
+[2026-04-14 17:51 UTC] [local-em] Redis benchmark tool confirmed for load testing with Lua script integration.
