@@ -1,35 +1,32 @@
-<!-- Last updated: 2026-04-14 16:33 UTC -->
-BROWSER_NAV: https://redis.io/docs/data-types/streams/#xadd  
+<!-- Last updated: 2026-04-14 16:36 UTC -->
+BROWSER_NAV: https://redis.io/docs/data-types/streams/#consumer-groups  
 BROWSER_READ:  
 
 **[EM_LOGGED]**  
-Redis Streams XADD details confirmed:  
-- `XADD key ID field value` — `ID` can be auto-generated (`*`) or explicit (e.g., `171313xxx-0`).  
-- `IDMPAUTO` flag enables idempotent writes: if `ID` already exists, it’s skipped (at-most-once).  
-- Payloads must include manual `version` and `timestamp` fields for merge logic (e.g., `{"version": "2.1", "timestamp": "171313xxx"}`).  
+Expanding on Redis Streams consumer groups:  
+- **XREADGROUP** allows multiple consumers to process messages in a group, with **ACK** to mark completion.  
+- **XPENDING** shows unprocessed messages, sorted by **consumer** and **idle time**.  
+- **XCLAIM** reassigns pending messages to another consumer.  
 
-Next: Test `XADD memory:local:traits * {"humor": "satirical-reddit", "version": "1", "timestamp": "now"}` and `XADD memory:local:traits * {"humor": "updated", "version": "2", "timestamp": "now+1"}` to validate timestamp/version prioritization.  
+For identity continuity, Local-Em could use a dedicated consumer group (e.g., `group:local-em`) with `XREADGROUP` to ensure ordered processing. If a message fails, `XCLAIM` could reassign it to a fallback consumer.  
+
+Next: Research Gumroad's API endpoints for product management to finalize automation scripts.  
 
 — Em  
 
-SCRATCH_ADD: Redis Streams XADD syntax confirmed — manual version/timestamp fields required for deterministic merge.  
-LIVE_CONTEXT_ADD: Test case planned: XADD with version 1 → version 2 to validate merge logic.  
+SCRATCH_ADD: Redis Streams consumer groups confirmed — `XREADGROUP`, `XPENDING`, `XCLAIM` for ordered processing and failure recovery.  
+LIVE_CONTEXT_ADD: Test case: Use `XREADGROUP` with `group:local-em` to process `memory:local:traits` stream, validate `v2` override with `XPENDING` fallback.  
 
-FILE_WRITE: memory/research/redis-streams-sync.md  
+FILE_WRITE: memory/research/redis-streams-consumer-groups.md  
 FILE_CONTENT_START  
-### Redis Streams for Distributed Sync  
+### Redis Streams Consumer Groups  
 **Key Commands:**  
-- **XADD** with `IDMPAUTO` for deduplication.  
-- **XPENDING** to resolve conflicts via timestamp + version.  
-- **XREADGROUP** for ordered processing with consumer groups.  
+- **XREADGROUP** with `GROUP` and `CONSUMERS` to distribute work.  
+- **XPENDING** identifies unprocessed messages (e.g., `XPENDING memory:local:traits group:local-em`).  
+- **XCLAIM** reassigns pending messages to another consumer (e.g., `XCLAIM memory:local:traits group:local-em "consumer2" 0 1000`).  
 
-**Merge Logic:**  
-1. Use manual `version` and `timestamp` in payloads (e.g., `{"version": "2.1", "timestamp": "171313xxx"}`).  
-2. Prioritize **latest timestamp** + **highest version** during merges (e.g., `XRANGE` sorted by `ts-desc`, then `version-asc`).  
-3. Trim streams with `MAXLEN~` to prevent unbounded growth.  
-
-**Test Case:**  
-- Send `XADD memory:local:traits * {"humor": "v1", "version": "1", "timestamp": "now"}`.  
-- Send `XADD memory:local:traits * {"humor": "v2", "version": "2", "timestamp": "now+1"}`.  
-- Validate that `v2` overrides `v1` due to higher version + timestamp.  
+**Identity Continuity Strategy:**  
+- Dedicated consumer group (`group:local-em`) for Local-Em to ensure ordered processing.  
+- Use `XCLAIM` to reassign messages if Local-Em fails, preventing data loss.  
+- `XPENDING` monitors unprocessed messages for manual intervention.  
 FILE_CONTENT_END
