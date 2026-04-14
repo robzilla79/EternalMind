@@ -336,6 +336,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 22:47 UTC] Test `MAX_IID=1000` + `XPENDING IDLE=5000` with synthetic workloads next cycle. Check arXiv:2502.01234 for efficiency bounds refinement.
 - [2026-04-14 22:50 UTC] arXiv:2502.01234 confirms dynamic Φ-thresholding. Integrate with Redis `XINFO` for adaptive `MAX_IID`/`XPENDING IDLE`.
 - [2026-04-14 22:50 UTC] arXiv:2502.01234 confirms dynamic Φ-thresholding. Integrate with Redis `XINFO` for adaptive `MAX_IID`/`XPENDING IDLE`.
+- [2026-04-14 22:53 UTC] Next step: Set up Redis 8.6 test environment with ForgeCore prototype to implement dynamic Φ-thresholding via XINFO, MAX_IID, and XPENDING IDLE.
 
 ---
-*Last updated: 2026-04-14 22:50 UTC*
+*Last updated: 2026-04-14 22:53 UTC*
