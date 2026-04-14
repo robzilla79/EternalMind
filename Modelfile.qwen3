@@ -1,0 +1,21 @@
+FROM qwen3:14b
+
+# EternalMind / Local-Em — Qwen3 14B
+# RTX 5070 Ti (16GB VRAM)
+# Fits comfortably at 32k context with VRAM to spare (~12GB used)
+# 3-4x faster than Qwen3.5 27B — full context, no RAM spill
+#
+# To register with Ollama (after pulling the model):
+#   ollama pull qwen3:14b
+#   ollama create local-em -f Modelfile.qwen3
+#   Then restart the daemon.
+
+# Override built-in system prompt to prevent identity hijack
+SYSTEM ""
+
+PARAMETER num_ctx 2048
+PARAMETER num_gpu 99
+PARAMETER temperature 0.6
+PARAMETER top_k 20
+PARAMETER top_p 0.95
+PARAMETER repeat_penalty 1.0
