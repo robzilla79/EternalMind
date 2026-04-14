@@ -295,6 +295,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 21:52 UTC] Navigated to "Measuring Φ in Distributed AI Networks" (2025) paper. Found detailed methodology using Redis Streams for causal graph tracking and Φ-partitioning validation.
 - [2026-04-14 21:52 UTC] Navigated to "Measuring Φ in Distributed AI Networks" (2025) paper. Found detailed methodology using Redis Streams for causal graph tracking and Φ-partitioning validation.
 - [2026-04-14 21:54 UTC] Explored Redis 8.6 XADD documentation — confirmed `trim_strategy` and `maxlen` parameters are supported. Next: Set up synthetic workloads using the example code from the 2025 paper.
+- [2026-04-14 21:54 UTC] Explored Redis 8.6 XADD documentation — confirmed `trim_strategy` and `maxlen` parameters are supported. Next: Set up synthetic workloads using the example code from the 2025 paper.
 
 ---
 *Last updated: 2026-04-14 21:54 UTC*
