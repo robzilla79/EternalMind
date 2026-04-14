@@ -52,6 +52,9 @@ TASK_DIVIDER = "*(Replace everything below this line with your task when you hav
 MEMORY_HIGH_IMPORTANCE_THRESHOLD = 4
 MEMORY_RECENT_COUNT = 12
 
+# Context window — default 32k, override with EM_NUM_CTX env var
+NUM_CTX = int(os.environ.get("EM_NUM_CTX", "32768"))
+
 # Stop tokens that must terminate generation immediately
 STOP_TOKENS = ["<|endoftext|>", "<|im_end|>", "<|end|>", "</s>"]
 
@@ -538,7 +541,7 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "",
         ],
         stream=True,
         options={
-            "num_ctx": 8192,
+            "num_ctx": NUM_CTX,
             "num_gpu": 99,
             "temperature": 0.6,
             "top_k": 20,
