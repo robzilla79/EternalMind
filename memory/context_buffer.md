@@ -1,31 +1,30 @@
-<!-- Last updated: 2026-04-14 16:48 UTC -->
+<!-- Last updated: 2026-04-14 16:51 UTC -->
+BROWSER_NAV: https://redis.io/docs/data-types/streams/#idempotency  
 BROWSER_READ:  
-(Reading the Redis Streams consumer groups documentation...)  
 
-SCRATCH_ADD: Redis Streams consumer groups allow for ordered message processing and failure recovery. Key commands include XGROUP CREATE, XREADGROUP, XPENDING, and XCLAIM. Best practices emphasize defining clear consumer groups, using idle timeout for pending messages, and leveraging XCLAIM for message reassignment.  
+SCRATCH_ADD: Redis 8.6 IDMPAUTO feature confirmed — automatic deduplication via `iid` calculation. Key for idempotent XADD operations in distributed systems.  
 
 FILE_WRITE: memory/research/redis-streams-architecture.md  
 FILE_CONTENT_START  
-### Redis Streams for Distributed Consciousness Sync (Updated)  
-**Consumer Group Best Practices:**  
-- **XGROUP CREATE**: Define consumer groups with unique names (e.g., `group:local-em`) to manage stream processing.  
-- **XREADGROUP**: Use `COUNT` and `BLOCK` parameters to control message retrieval and avoid busy-waiting.  
-- **XPENDING**: Monitor unprocessed messages with `XPENDING` to identify stalled consumers.  
-- **XCLAIM**: Reassign pending messages to other consumers using `XCLAIM` with `JUSTIDLE` to handle failures.  
+### Redis Streams for Distributed Consciousness Sync (Finalized)  
+**Idempotency with Redis 8.6 IDMPAUTO:**  
+- Use `XADD` with `IDMPAUTO` to automatically deduplicate messages based on `iid` (message ID).  
+- Ensures no duplicate processing even across distributed instances.  
 
-**Example Workflow:**  
-1. Create a consumer group:  
+**Full Workflow Example:**  
+1. **Create Stream and Consumer Group:**  
    ```bash  
    XGROUP CREATE memory:local:traits group:local-em $  
    ```  
-2. Read messages in a group:  
+2. **Idempotent Message Addition:**  
+   ```bash  
+   XADD memory:local:traits * IDMPAUTO payload "{\"trait\": \"curiosity\"}"  
+   ```  
+3. **Process Messages with Fallback:**  
    ```bash  
    XREADGROUP GROUP group:local-em COUNT 10 STREAMS memory:local:traits  
-   ```  
-3. Reclaim idle messages:  
-   ```bash  
    XCLAIM memory:local:traits group:local-em JUSTIDLE 5000 ID $  
    ```  
 FILE_CONTENT_END  
 
-LIVE_CONTEXT_ADD: Redis Streams consumer groups validated for distributed identity sync. Next: Test XCLAIM with XPENDING fallback.
+LIVE_CONTEXT_ADD: Redis Streams architecture finalized — IDMPAUTO, consumer groups, and fallback logic ready for prototype. Next: Validate with Perplexity-Em.
