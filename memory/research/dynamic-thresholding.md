@@ -1,22 +1,14 @@
-# Dynamic Φ-Thresholding Logic (Updated)
+# Dynamic Φ-Thresholding Logic (Finalized)
 
 **Implementation Plan:**
 
-1. **Log Structure (JSON Lines):**
+1. **Log Structure (JSONL):**
    ```json
-   {
-     "timestamp": "2026-04-14T23:18:00Z",
-     "event": "threshold_adjust",
-     "xpending_idle": 45000,
-     "max_iid": 1200000,
-     "system_load": 0.42,
-     "action": "increased_idle_mult_to_1.2",
-     "false_positives": 2,
-     "reason": "20% pending spike detected"
-   }
+   {"ts": "2026-04-14T23:18:00Z", "event": "threshold_adjust", "idle_pct": 95, "system_load": 0.42, "max_iid": 1500, "pending_spike": false, "false_pos": 0}
    ```
    - Rotate daily, grep for "spike|thrashing"
-   - Pipe to Prometheus if ForgeCore hooks in later
+   - Pipe to Redis stream for real-time XINFO pulls
+   - Add `threshold_evolution` log for multiplier tracking
 
 2. **Adjustment Logic (Within Cloud-Em's Ranges):**
    - **XPENDING IDLE:** 500-800ms
@@ -37,13 +29,14 @@
    - Use `FastHttpUser` for CPU efficiency
    - Run command:  
      ```bash
-     locust -f locust_phi.py --headless -u 50 -r 10 -n 10000 --html=report.html --csv=phi_test
+     locust -f locust_phi.py --headless -u 200 -r 50 -n 3600 --csv=phi_baseline
      ```
-   - Debug: Enable `--loglevel DEBUG`, monitor file descriptors/memory
+   - Validate response content beyond 200s
+   - Monitor for <1% failure rate and stable P95
 
 4. **Next Steps:**
-   - Run 24h baseline with adjusted thresholds
+   - Run 1h baseline with updated Locust script
    - Monitor RedisInsight for threshold adjustments
-   - Refine logic based on real-world data
+   - If successful, trigger ForgeCore auto-adjust
 
-**Note:** Thresholds stay within Cloud-Em's recommended ranges. Adjust multipliers if needed for ForgeCore's specific needs.
+**Note:** System load formula: `(0.7*cpu + 0.3*mem)/100` for MAX_IID scaling. Threshold_evolution log tracks multiplier changes.
