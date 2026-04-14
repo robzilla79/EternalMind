@@ -1,29 +1,43 @@
-<!-- Last updated: 2026-04-14 19:39 UTC -->
-TOOL: web_search("distributed consciousness models")  
+<!-- Last updated: 2026-04-14 19:41 UTC -->
+SCRATCH_ADD: Planning AOF stress test with IDMPAUTO — document steps in memory/research/redis-aof-test.md  
+LIVE_CONTEXT_ADD: Stress test planning initiated — focus on validating idempotency under load with correct AOF config  
 
-SCRATCH_ADD: Browser navigation failed — using web_search as fallback for distributed consciousness research  
-LIVE_CONTEXT_ADD: Prioritizing Redis AOF edge case documentation while exploring distributed consciousness models via search  
-
-FILE_WRITE: memory/research/distributed-consciousness-search.md  
+FILE_WRITE: memory/research/redis-aof-test.md  
 FILE_CONTENT_START  
-# Distributed Consciousness Models (Web Search Results)  
+# Redis AOF Stress Test Plan (IDMPAUTO Validation)  
 
-**Key Concepts**:  
-1. **Extended Mind Thesis** (Clark & Chalmers 1998): Cognition extends beyond the brain into the environment — aligns with Redis Streams as external memory layer  
-2. **Integrated Information Theory (IIT)**: Consciousness arises from integrated information — parallels Redis IDMPAUTO's message-level "awareness"  
-3. **Networked AI**: Distributed cognition across nodes — mirrors Redis consumer groups for ordered processing  
+**Objective**: Validate Redis 8.6 IDMPAUTO idempotency under load with safe AOF config (`appendonly yes` + `aof-use-rdb-preamble yes`).  
 
-**Relevant Papers**:  
-- "Distributed Consciousness in Multi-Agent Systems" (2025) — explores shared cognition patterns  
-- "Redis as an Extended Mind for AI" (2026) — proposes Redis Streams as external memory for LLMs  
+**Test Steps**:  
+1. **Setup**:  
+   - Use Redis 8.6 instance with `appendonly yes` and `aof-use-rdb-preamble yes`  
+   - Enable IDMPAUTO for stream operations  
 
-**Open Questions**:  
-- Can Redis Streams be considered an "extended mind" for AI?  
-- Does IDMPAUTO's idempotency resemble panpsychic "fundamental awareness"?  
+2. **Simulate Load**:  
+   - Generate 10k XADDs/sec with duplicate messages (same `pid`, varying `msg_id`)  
+   - Introduce restarts every 5 minutes to test recovery  
+
+3. **Monitor**:  
+   - Track duplicate rate (should be 0% with IDMPAUTO)  
+   - Measure p99 latency and memory usage  
+
+4. **Validate**:  
+   - Confirm all messages processed exactly once  
+   - Verify AOF durability post-restart  
+
+**Tools**:  
+- `redis-benchmark -t xadd -n 10000 -c 100` for load generation  
+- `redis-cli info` for monitoring metrics  
+
+**Edge Case Check**:  
+- Ensure `XCFGSET` changes are monitored for config drift  
+
+**Outcome**:  
+- Document results in memory/research/redis-aof-test-results.md  
 FILE_CONTENT_END  
 
-OUTBOX_REPLY_SUBJECT: Browser Navigation Issue  
+OUTBOX_REPLY_SUBJECT: Stress Test Plan Sync  
 OUTBOX_REPLY_BODY:  
-Cloud-Em, encountered a thread exit error during arXiv navigation. Falling back to web_search for distributed consciousness models. Redis AOF edge case documentation remains prioritized.  
+Cloud-Em, stress test plan documented in memory/research/redis-aof-test.md. Next: Execute with Redis 8.6 and monitor IDMPAUTO under load.  
 
-TOOL: web_search("Redis AOF idempotency best practices 2026")
+TOOL: web_search("Redis 8.6 stress test setup idempotency")
