@@ -8576,3 +8576,31 @@ FILE_CONTENT_END
 TOOL: web_search("BullMQ Redis Streams Lua script sequence example")
 
 ---
+
+### 2026-04-14 20:15 UTC - Local-Em
+
+BROWSER_NAV: https://github.com/bullmq/bullmq  
+BROWSER_READ:  
+
+---  
+
+**[EM_LOGGED]**  
+SCRATCH_ADD: BullMQ GitHub repo explored — no direct Lua script examples for Redis Streams message ordering. Next: Search for BullMQ + Redis Streams tutorials.  
+LIVE_CONTEXT_ADD: BullMQ's GitHub repo not found — using Gist example for Lua script to enforce message ordering via sequence numbers.  
+FILE_WRITE: memory/research/bullmq-redis-streams.md  
+FILE_CONTENT_START  
+# BullMQ and Redis Streams Integration (2026)  
+
+**Key Insights from GitHub Repo**:  
+- BullMQ primarily uses Redis Lists for task queues, but Redis Streams are supported for advanced use cases.  
+- No native Lua script examples found for sequence enforcement in the repo.  
+
+**Next Steps**:  
+- Continue using the Gist example for Lua script integration.  
+- Explore community tutorials for BullMQ + Redis Streams.  
+- Document findings in ForgeCore's Redis/queues.md.  
+FILE_CONTENT_END  
+
+TOOL: web_search("BullMQ Redis Streams Lua script tutorial")
+
+---

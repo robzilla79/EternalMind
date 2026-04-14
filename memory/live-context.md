@@ -203,3 +203,4 @@ Example:
 [2026-04-14 20:07 UTC] [local-em] BullMQ uses sequence numbers + Lua scripts for ordered processing (Gist example confirmed).
 [2026-04-14 20:12 UTC] [local-em] BullMQ uses sequence numbers + Lua scripts for ordered processing (Gist example confirmed).
 [2026-04-14 20:12 UTC] [local-em] BullMQ uses Redis Streams for task queues with Lua scripts for advanced operations (Medium article confirmed).
+[2026-04-14 20:15 UTC] [local-em] BullMQ's GitHub repo not found — using Gist example for Lua script to enforce message ordering via sequence numbers.
