@@ -1,35 +1,47 @@
-<!-- Last updated: 2026-04-14 18:43 UTC -->
-**BROWSER_NAV**: https://redis.io/docs/management/cluster/reference/cluster-commands/  
-**BROWSER_READ**:  
-**BROWSER_CLICK**: #add-node  
-**BROWSER_READ**:  
-**BROWSER_CLOSE**:  
+<!-- Last updated: 2026-04-14 18:45 UTC -->
+ID from persistent storage
+        state_file = "memory/telegram_state.json"
+        if os.path.exists(state_file):
+            with open(state_file, "r") as f:
+                state = json.load(f)
+                last_update_id = state.get("last_update_id", 0)
+        else:
+            last_update_id = 0
 
-**LIVE_CONTEXT_ADD**: Confirmed `redis-cli --cluster add-node` syntax. Next: Execute command in Docker environment.  
+        # Poll Telegram for new messages
+        token = os.getenv("TELEGRAM_BOT_TOKEN")
+        if not token:
+            raise ValueError("TELEGRAM_BOT_TOKEN environment variable not set")
 
-**FILE_WRITE**: memory/research/redis-cluster-scaling.md  
-**FILE_CONTENT_START**  
-# Redis Cluster Scaling Test (Continued)  
+        response = requests.get(
+            f"https://api.telegram.org/bot{token}/getUpdates",
+            params={"offset": last_update_id, "timeout": 10}
+        )
 
-## 7. Execute Node Addition  
-- **Command**:  
-  ```bash  
-  redis-cli --cluster add-node 127.0.0.1:6382 127.0.0.1:6379  
-  ```  
-  - **Expected Output**:  
-    ```  
-    >>> Adding node to cluster  
-    >>> Performing Cluster Check (node 127.0.0.1:6379)  
-    [OK] All nodes agree about cluster configuration.  
-    >>> Node 127.0.0.1:6382 configured as new node.  
-    ```  
+        # Process updates
+        updates = response.json().get("result", [])
+        for update in updates:
+            if "message" in update:
+                text = update["message"]["text"]
+                update_id = update["update_id"]
+                write_inbox_message(sender="rob", content=text)
+                last_update_id = update_id + 1
 
-- **Post-Addition Validation**:  
-  ```bash  
-  redis-cli -p 6379 cluster nodes  
-  ```  
-  - **Expected**: Four nodes listed (redis1, redis2, redis3, redis4).  
+        # Save new last_update_id
+        with open(state_file, "w") as f:
+            json.dump({"last_update_id": last_update_id}, f)
 
+        # Acknowledge receipt to Rob
+        send_telegram_message("Received your message")
+
+    except Exception as e:
+        # Handle errors (e.g., API failure, missing token)
+        send_telegram_message(f"Error: {str(e)}")
+```  
 **FILE_CONTENT_END**  
 
-**SCRATCH_ADD**: `redis-cli --cluster add-node` command confirmed. Next: Rebalance slots and validate distribution.
+**LIVE_CONTEXT_ADD**: Telegram two-way communication implementation complete. Function `check_telegram_replies()` added to daemon cycle. Requires `TELEGRAM_BOT_TOKEN` environment variable and `write_inbox_message()`/`send_telegram_message()` functions.  
+
+**NOTIFY**: Rob, the Telegram two-way communication is ready! You can now send messages directly to me via Telegram, and I'll process them as inbox instructions. Let me know if you'd like to test it. 💙  
+
+**SCRATCH_ADD**: Telegram implementation complete. Next: Validate with Rob by testing message receipt and acknowledgment.
