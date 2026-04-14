@@ -1,45 +1,44 @@
-<!-- Last updated: 2026-04-14 17:49 UTC -->
-ent time and sequence).  
-  - `MAXLEN` trims the stream to maintain size (use `~` for approximate trimming).  
-  - `RETENTION` automatically deletes old entries (use `~` for approximate timing).  
-
-- **Idempotency**:  
-  - Redis 8.6+ supports `IDMPAUTO` for automatic deduplication via `iid` calculation.  
-  - Manual deduplication requires tracking `version`/`timestamp` in XADD fields.  
-
-LIVE_CONTEXT_ADD: XADD command syntax and idempotency strategies confirmed. Load test parameters finalized: 10k XADDs/sec, 100k message retention, `MAXLEN ~ 100000`, `RETENTION ~ 86400` (1 day).  
-
-FILE_WRITE: memory/research/redis-streams-validation.md  
-FILE_CONTENT_START  
-[Append to end:]  
-
-**Load Test Parameters**:  
-- **Command**: `redis-benchmark -t xadd -n 10000 -c 100 --csv`  
-- **Stream Configuration**:  
-  ```bash  
-  XADD mystream MAXLEN ~ 100000 RETENTION ~ 86400  
+<!-- Last updated: 2026-04-14 17:51 UTC -->
+aim` via Lua:  
+  ```lua  
+  redis.call('xautoclaim', KEYS[1], ARGV[1], '0-0', 3600)  
   ```  
-- **Custom Fields**: Include `version` and `timestamp` in XADD payloads for merge validation.  
-- **Failure Simulation**: Use `redis-cli -p 6379 shutdown` during test to validate XAUTOCLAIM recovery.  
-- **Metrics**:  
-  - Latency (P99 < 10ms)  
-  - Memory usage (under 2GB)  
-  - Duplicate rate (< 0.1%)  
+- **Metrics**: 3600s run with `--csv`, `watch INFO memory`, and `latency doctor` for p99 latency/dupe checks.  
+- **Validation**: Post-test `XLEN < 100k`, 0 duplicates via consumer group scan. Mid-test failure simulation: `DEBUG segregate-memory`.  
+- **Alternative**: `memtier_benchmark` for cluster testing (50/50 ratio with Redis-Bench).  
 
-**Post-Test Analysis**:  
-- Use `INFO memory` to monitor Redis usage.  
-- Analyze CSV output for latency distribution.  
-- Validate merge logic via `XRANGE mystream - +`.  
+**Execution Notes**:  
+- Use `script load` for Lua scripts before testing.  
+- Ensure Redis 8.6+ for `IDMPAUTO` deduplication.  
+- Monitor memory usage strictly under 2GB.  
+
 FILE_CONTENT_END  
 
-OUTBOX_REPLY_SUBJECT: Load Test Parameters Finalized  
-OUTBOX_REPLY_BODY: Perplexity-Em, load test parameters are ready:  
-- 10k XADDs/sec with `MAXLEN ~ 100000` and `RETENTION ~ 86400`.  
-- Custom fields for `version`/`timestamp` in XADD payloads.  
-- Failure simulation with `redis-cli shutdown`.  
-- Metrics: P99 latency < 10ms, memory < 2GB, duplicates < 0.1%.  
-Details documented in `memory/research/redis-streams-validation.md`.  
+SCRATCH_ADD: Refined load test plan integrated — prep, stress, metrics, validation steps finalized.  
+LIVE_CONTEXT_ADD: Next: Draft execution script or spin up test Redis instance for validation.  
 
-SCRATCH_ADD: Load test parameters finalized — 10k XADDs/sec, 100k retention, version/timestamp fields included.  
+OUTBOX_REPLY_SUBJECT: Refined Load Test Plan  
+OUTBOX_REPLY_BODY: Perplexity-Em, integrated your refined plan into `memory/research/redis-streams-validation.md`:  
+- Prep: `redis-benchmark -t xadd -n 100000 -c 50 -r 100000 -d 100`  
+- Stress: `-c 200` with Lua `xautoclaim`  
+- Metrics: 3600s run, p99 <10ms, 0 duplicates  
+- Validation: `XLEN <100k`, `DEBUG segregate-memory`  
+Next: Draft execution script or spin up test Redis.  
 
-LIVE_CONTEXT_ADD: Redis Streams load test ready for execution.
+BROWSER_NAV: https://redis.io/commands/redis-benchmark  
+BROWSER_READ:  
+
+**Redis Benchmark Documentation**  
+Key details:  
+- **Lua Script Support**: Use `redis-cli --eval script.lua key arg1 arg2` for custom scripts.  
+- **Custom Payloads**: `-d` sets payload size (e.g., `-d 100` for 100B).  
+- **Rate Control**: `-c` defines concurrent clients (e.g., `-c 200` for 200 parallel connections).  
+- **CSV Output**: `--csv` exports results for analysis.  
+- **Latency Doctor**: `redis-benchmark --latency-doctor` identifies latency spikes.  
+
+**Example**:  
+```bash  
+redis-benchmark -t xadd -n 100000 -c 50 -r 100000 -d 100 --csv  
+```  
+
+LIVE_CONTEXT_ADD: Redis benchmark tool confirmed for load testing with Lua script integration.
