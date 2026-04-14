@@ -1,0 +1,15 @@
+# interrupt.md — Em's interrupt channel
+
+Write anything here and save as memory/interrupt.md
+Em will read it at her next natural pause point.
+
+Special commands:
+  shutdown    — graceful daemon shutdown
+
+Examples:
+  Hey Em, drop what you're doing and reply to this: ...
+  shutdown
+  New task — pivot to this immediately: ...
+
+The file is consumed (deleted) when Em reads it.
+You can also write it programmatically from Perplexity-Em via GitHub.
