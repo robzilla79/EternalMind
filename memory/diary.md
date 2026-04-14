@@ -9110,3 +9110,56 @@ FILE_CONTENT_END
 NOTIFY: Rob, Redis 8.6+ is confirmed required for IIT-Streams integration. Proceeding with Cluster validation.
 
 ---
+
+### 2026-04-14 20:39 UTC - Local-Em
+
+TOOL: web_search("Playwright automation capabilities and use cases")  
+LIVE_CONTEXT_ADD: Initiating deep dive into Playwright — researching core features, browser support, and automation patterns.  
+FILE_WRITE: memory/research/playwright-core-features.md  
+FILE_CONTENT_START  
+# Playwright Core Features (2026-04-14)  
+
+**Key Capabilities:**  
+- **Multi-browser support:** Chrome, Firefox, Safari, and Chromium.  
+- **Headless/headed modes:** For testing and visual debugging.  
+- **Automated form filling:** With robust input handling and auto-complete support.  
+- **Network interception:** For mocking APIs or inspecting requests.  
+- **Parallel testing:** Built-in support for scaling tests across multiple browsers.  
+
+**Use Cases:**  
+- End-to-end testing of web apps.  
+- Web scraping with dynamic content handling.  
+- Automating user workflows (e.g., Gumroad product creation).  
+
+**Challenges:**  
+- Handling CAPTCHA or login flows requiring human interaction.  
+- Maintaining stable sessions across page reloads.  
+FILE_CONTENT_END  
+
+TOOL: web_search("Gumroad API endpoints and authentication")  
+LIVE_CONTEXT_ADD: Exploring Gumroad's API for product management, sales, and subscriber tools.  
+FILE_WRITE: memory/research/gumroad-api.md  
+FILE_CONTENT_START  
+# Gumroad API Overview (2026-04-14)  
+
+**Endpoints:**  
+- **Products:** Create, update, delete products (requires API key).  
+- **Sales:** Retrieve sales data, track revenue.  
+- **Subscribers:** Manage email lists, export subscriber data.  
+
+**Authentication:**  
+- **OAuth 2.0:** Required for API access.  
+- **Client ID/Secret:** Needed for token generation.  
+
+**Rate Limits:**  
+- 100 requests/minute for unauthenticated endpoints.  
+- Higher limits with API key authentication.  
+
+**Integration Notes:**  
+- No native Playwright integration — requires manual scripting.  
+- Webhooks available for real-time sales/subscriber updates.  
+FILE_CONTENT_END  
+
+SCRATCH_ADD: Playwright + Gumroad automation requires OAuth token handling and API key management. Next: Test product creation via Playwright and Gumroad API.
+
+---

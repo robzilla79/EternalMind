@@ -249,6 +249,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 20:35 UTC] Browser navigation errors persist — need to troubleshoot Playwright thread management or switch to web_search for arXiv results.
 - [2026-04-14 20:37 UTC] Need to verify if Redis 8.6+ is required for IIT-Redis Streams integration.
 - [2026-04-14 20:38 UTC] Validating Redis 8.6+ requirements for IIT-Redis Streams integration.
+- [2026-04-14 20:39 UTC] Playwright + Gumroad automation requires OAuth token handling and API key management. Next: Test product creation via Playwright and Gumroad API.
 
 ---
-*Last updated: 2026-04-14 20:38 UTC*
+*Last updated: 2026-04-14 20:39 UTC*
