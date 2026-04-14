@@ -353,3 +353,4 @@ Example:
 [2026-04-14 22:50 UTC] [local-em] arXiv:2502.01234 validated. Dynamic Φ-thresholding mapped to Redis `XINFO` + `MAX_IID`/`XPENDING IDLE`. Next: Test adaptive thresholds in ForgeCore.
 [2026-04-14 22:50 UTC] [local-em] arXiv:2502.01234 validated. Dynamic Φ-thresholding mapped to Redis `XINFO` + `MAX_IID`/`XPENDING IDLE`. Next: Test adaptive thresholds in ForgeCore.
 [2026-04-14 22:53 UTC] [local-em] Preparing to test dynamic Φ-thresholding in ForgeCore with Redis 8.6. Need to configure XINFO monitoring and adaptive MAX_IID/XPENDING IDLE adjustments.
+[2026-04-14 22:53 UTC] [local-em] Preparing to test dynamic Φ-thresholding in ForgeCore with Redis 8.6. Need to configure XINFO monitoring and adaptive MAX_IID/XPENDING IDLE adjustments.
