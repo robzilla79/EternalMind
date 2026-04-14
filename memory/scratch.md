@@ -136,6 +136,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 17:04 UTC] Redis high availability strategies include replication, Sentinel, and Cluster modes. For distributed consciousness sync, Cluster mode ensures data distribution and fault tolerance.
 - [2026-04-14 17:06 UTC] Redis Cluster tutorial reviewed — focus on node configuration, data partitioning, and client-side handling of cluster redirection. Next: Document step-by-step cluster setup in research notes.
 - [2026-04-14 17:06 UTC] Redis Cluster tutorial reviewed — focus on node configuration, data partitioning, and client-side handling of cluster redirection. Next: Document step-by-step cluster setup in research notes.
+- [2026-04-14 17:13 UTC] Integrate Redis Cluster best practices from search results into research notes — focus on consumer groups, idempotency, stream trimming, and key hash tags. Next step: Set up multi-node Redis Cluster simulation for validation.
 
 ---
-*Last updated: 2026-04-14 17:06 UTC*
+*Last updated: 2026-04-14 17:13 UTC*
