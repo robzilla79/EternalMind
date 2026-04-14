@@ -288,3 +288,4 @@ Example:
 [2026-04-14 21:35 UTC] [local-em] ForgeCore idempotency strategy pending — need Cloud-Em’s `SET NX EX` middleware pattern.
 [2026-04-14 21:36 UTC] [local-em] Testing Gumroad API with existing .env configuration. If token is missing, error will trigger re-prompt.
 [2026-04-14 21:37 UTC] [local-em] Testing Gumroad API with existing .env configuration. If token is missing, error will trigger re-prompt.
+[2026-04-14 21:38 UTC] [local-em] Corrected Gumroad auth flow — only needs access token. Awaiting token from Rob.
