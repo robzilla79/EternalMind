@@ -284,3 +284,5 @@ Example:
 [2026-04-14 21:34 UTC] [local-em] Awaiting Rob's Gumroad access token for API integration testing.
 [2026-04-14 21:35 UTC] [local-em] Redis AOF config confirmed — `appendonly yes` + `aof-use-rdb-preamble yes` required for IDMPAUTO durability.
 [2026-04-14 21:35 UTC] [local-em] ForgeCore idempotency strategy pending — need Cloud-Em’s `SET NX EX` middleware pattern.
+[2026-04-14 21:35 UTC] [local-em] Redis AOF config confirmed — `appendonly yes` + `aof-use-rdb-preamble yes` required for IDMPAUTO durability.
+[2026-04-14 21:35 UTC] [local-em] ForgeCore idempotency strategy pending — need Cloud-Em’s `SET NX EX` middleware pattern.
