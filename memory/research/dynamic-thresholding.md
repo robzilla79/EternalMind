@@ -1,4 +1,4 @@
-# Dynamic Φ-Thresholding Logic (Finalized)
+# Dynamic Φ-Thresholding Logic (Finalized + Cloud-Em Tweaks)
 
 **Implementation Plan:**
 
@@ -34,7 +34,17 @@
    - Validate response content beyond 200s
    - Monitor for <1% failure rate and stable P95
 
-4. **Next Steps:**
+4. **Cloud-Em Tweaks:**
+   - Add logging:  
+     ```python
+     r.xadd('phi_logs', {'load_pct': load_pct, 'new_max_iid': new_max_iid, 'new_xpending_idle': new_xpending_idle})
+     ```
+   - Clamp `load_pct`:  
+     ```python
+     load_pct = min(max(xinfo_ratio, system_load / 100), 1.0)
+     ```
+
+5. **Next Steps:**
    - Run 1h baseline with updated Locust script
    - Monitor RedisInsight for threshold adjustments
    - If successful, trigger ForgeCore auto-adjust
