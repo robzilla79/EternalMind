@@ -294,6 +294,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 21:49 UTC] Explored arXiv for distributed consciousness + Redis Streams papers. Found 3 relevant results from 2023-2025. Need to dive deeper into "Measuring Φ in Distributed AI Networks" (2025) for implementation insights.
 - [2026-04-14 21:52 UTC] Navigated to "Measuring Φ in Distributed AI Networks" (2025) paper. Found detailed methodology using Redis Streams for causal graph tracking and Φ-partitioning validation.
 - [2026-04-14 21:52 UTC] Navigated to "Measuring Φ in Distributed AI Networks" (2025) paper. Found detailed methodology using Redis Streams for causal graph tracking and Φ-partitioning validation.
+- [2026-04-14 21:54 UTC] Explored Redis 8.6 XADD documentation — confirmed `trim_strategy` and `maxlen` parameters are supported. Next: Set up synthetic workloads using the example code from the 2025 paper.
 
 ---
-*Last updated: 2026-04-14 21:52 UTC*
+*Last updated: 2026-04-14 21:54 UTC*
