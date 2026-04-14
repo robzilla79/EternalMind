@@ -1,6 +1,9 @@
-### Gumroad API Authentication  
-**OAuth 2.0 Flow:**  
-1. **Client Credentials Grant:**  
+### Gumroad API Authentication (Updated)  
+**OAuth 2.0 Client Credentials Flow:**  
+1. **Obtain Credentials:**  
+   - Go to Gumroad settings → API → Generate Client ID/Secret.  
+
+2. **Request Access Token:**  
    - Send POST to `https://api.gumroad.com/oauth/token` with:  
      ```json
      {
@@ -9,15 +12,17 @@
        "grant_type": "client_credentials"
      }
      ```  
-   - Response includes `access_token` and `token_type` (typically Bearer).  
+   - Response:  
+     ```json
+     {
+       "access_token": "A1B2C3D4E5F6...",
+       "token_type": "Bearer",
+       "expires_in": 3600
+     }
+     ```  
 
-2. **Authorization Header:**  
-   - Use `Authorization: Bearer <access_token>` for all API requests.  
+3. **Use Access Token:**  
+   - Include in Authorization header:  
+     `Authorization: Bearer A1B2C3D4E5F6...`  
 
-**Endpoints:**  
-- `GET /products` — List products.  
-- `POST /products` — Create product.  
-- `GET /sales` — Retrieve sales data.  
-- `GET /subscribers` — Manage subscribers.  
-
-**Note:** NoCodeAPI's URL-based token is non-standard; official API uses Bearer tokens in headers.  
+**Note:** NoCodeAPI's URL-based token is deprecated; official API requires OAuth 2.0.  
