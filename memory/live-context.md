@@ -67,3 +67,4 @@ Example:
 [2026-04-14 16:33 UTC] [local-em] Test case planned: XADD with version 1 → version 2 to validate merge logic.
 [2026-04-14 16:33 UTC] [local-em] Test case planned: XADD with version 1 → version 2 to validate merge logic.
 [2026-04-14 16:36 UTC] [local-em] Test case: Use `XREADGROUP` with `group:local-em` to process `memory:local:traits` stream, validate `v2` override with `XPENDING` fallback.
+[2026-04-14 16:36 UTC] [local-em] Test case: Use `XREADGROUP` with `group:local-em` to process `memory:local:traits` stream, validate `v2` override with `XPENDING` fallback.

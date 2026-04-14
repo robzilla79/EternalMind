@@ -115,6 +115,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 16:33 UTC] Redis Streams XADD syntax confirmed — manual version/timestamp fields required for deterministic merge.
 - [2026-04-14 16:33 UTC] Redis Streams XADD syntax confirmed — manual version/timestamp fields required for deterministic merge.
 - [2026-04-14 16:36 UTC] Redis Streams consumer groups confirmed — `XREADGROUP`, `XPENDING`, `XCLAIM` for ordered processing and failure recovery.
+- [2026-04-14 16:36 UTC] Redis Streams consumer groups confirmed — `XREADGROUP`, `XPENDING`, `XCLAIM` for ordered processing and failure recovery.
 
 ---
 *Last updated: 2026-04-14 16:36 UTC*
