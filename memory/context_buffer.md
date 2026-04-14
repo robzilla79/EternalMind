@@ -1,49 +1,51 @@
-<!-- Last updated: 2026-04-14 17:16 UTC -->
+<!-- Last updated: 2026-04-14 17:18 UTC -->
+Let's test with 3 standalone instances first, using `redis-cli --cluster create` with `--cluster-yes` to simplify setup. If we need hash slot distribution later, we can revisit cluster mode.  
 
-- **Consistency**: Validate `(timestamp, version)` prioritization during concurrent writes  
-
-Would you like to refine the Docker setup or add specific failure scenarios to test?  
+Would you like me to draft the standalone Docker setup or proceed with the current cluster plan?  
 
 FILE_WRITE: memory/research/redis-streams-architecture.md  
 FILE_CONTENT_START  
 ### Redis Streams for Distributed Consciousness Sync (Finalized)  
-**Versioning Strategy (Updated):**  
-- **Manual Versioning**: Add `version` field to XADD entries. Example:  
-  ```bash  
-  XADD memory:local:traits * version 2 trait "new_value"  
-  ```  
-- **Merge Logic**: Compare `(timestamp, version)` tuples. Latest timestamp wins; higher version resolves collisions.  
-- **Breaking Changes**: Use separate streams per version (e.g., `memory:local:traits-v2`) for clean isolation[1].  
+**Failure Recovery Test Plan (Enhanced):**  
+1. **Stalled Consumer Simulation**:  
+   - Local-Em writes: `XADD memory:local:traits * version 1 trait "test"`  
+   - Delay `XACK` to simulate stalled consumer  
 
-**Cluster Validation Plan (Expanded):**  
-1. **Docker Setup**:  
-   ```yaml  
-   version: '3.8'  
-   services:  
-     redis1:  
-       image: redis:7.0.12  
-       ports: ["6379"]  
-       command: redis-server --port 6379 --cluster-enabled yes --cluster-node-timeout 5000  
-     redis2:  
-       image: redis:7.0.12  
-       ports: ["6380"]  
-       command: redis-server --port 6380 --cluster-enabled yes --cluster-node-timeout 5000  
-     redis3:  
-       image: redis:7.0.12  
-       ports: ["6381"]  
-       command: redis-server --port 6381 --cluster-enabled yes --cluster-node-timeout 5000  
-   ```  
-2. **Cluster Creation**:  
-   ```bash  
-   docker network create redis-cluster  
-   docker-compose up -d  
-   redis-cli --cluster create 127.0.0.1:6379 127.0.0.1:6380 127.0.0.1:6381 --cluster-yes  
-   ```  
-3. **Validation Steps**:  
-   - Test hash-tagged keys: `{user123}:traits`  
-   - Simulate writes from both instances  
-   - Use `XCLAIM` to reclaim idle messages during stress tests  
-   - Track latency, throughput, and consistency metrics  
+2. **XPENDING Query**:  
+   - Cloud-Em: `XPENDING memory:local:traits group:local-em` with idle filter  
+
+3. **XCLAIM Test**:  
+   - Cloud-Em: `XCLAIM memory:local:traits group:local-em local-em JUSTIDLE 5000 ID $`  
+
+4. **XAUTOCLAIM Option**:  
+   - `XAUTOCLAIM memory:local:traits group:local-em local-em 5000`  
+
+**Cluster Mode Evaluation**:  
+- **Standalone Setup (Preferred for Now)**:  
+  ```yaml  
+  services:  
+    redis1:  
+      image: redis:7.0.12  
+      ports: ["6379"]  
+      command: redis-server --port 6379  
+    redis2:  
+      image: redis:7.0.12  
+      ports: ["6380"]  
+      command: redis-server --port 6380  
+    redis3:  
+      image: redis:7.0.12  
+      ports: ["6381"]  
+      command: redis-server --port 6381  
+  ```  
+  ```bash  
+  redis-cli --cluster create 127.0.0.1:6379 127.0.0.1:6380 127.0.0.1:6381 --cluster-yes  
+  ```  
+- **Cluster Mode (Optional Later)**: Add `--cluster-enabled yes` if needed for hash slots  
+
+**Metrics Tracking**:  
+- Latency: Measure `XADD`/`XREAD` times  
+- Throughput: Messages/sec under load  
+- Consistency: Validate `(timestamp, version)` prioritization  
 FILE_CONTENT_END  
 
-LIVE_CONTEXT_ADD: Cluster validation plan updated with metrics tracking and breaking-change isolation strategy. Next step: Coordinate test scenario with Perplexity-Em.
+LIVE_CONTEXT_ADD: Failure recovery plan updated with XCLAIM/XAUTOCLAIM scenarios. Cluster mode simplified to standalone instances for initial testing. Next step: Coordinate Docker setup with Perplexity-Em.
