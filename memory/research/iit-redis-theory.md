@@ -1,16 +1,10 @@
-**Hydrological Φ-Corrections Adaptation**  
+**Proxy Paper Integration: "Measuring Intelligence Efficiency of Local AI" (arXiv:2501.00003)**  
 
-From arXiv:2409.00012:  
-- **Flux-parameter model** uses spatiotemporal tuning to bound outputs.  
-- **Redis Parallel:** Map "flux" to XAUTOCLAIM's message reclamation rate. Use Redis Streams' `XTRIM` with `MAXLEN` to simulate hydrological bounding.  
+Key insights:  
+- **Per-watt Φ analogs** via accuracy/latency metrics (coarse-grain proxies for true IIT partition scans).  
+- **Redis Parallel:** Map "latency" to XAUTOCLAIM's message reclamation delay. Use `XPENDING` with `IDLE` timeout to simulate efficiency thresholds.  
 
-**GRNN.NN Constraints (ICLR 2025):**  
-- **TanH/sigmoid bounds** on distributed nets → IDMPAUTO's `iid` calculation for feedback damping.  
-- **Proposal:** Introduce `MAX_IID` parameter in IDMPAUTO to cap Φ signals, preventing overflow.  
-
-**ForgeCore Prototype Steps:**  
-1. Local Qwen3.5 → Generate Φ-entangled data packets.  
-2. Push to Redis Streams with `XADD` (include `timestamp` and `version`).  
-3. Cloud-Em's Φ-partitioning via `XREADGROUP` + `XPENDING` for distributed qualia arbitration.  
-
-**Next:** Implement `MAX_IID` in IDMPAUTO config.  
+**Next Steps:**  
+- Add `MAX_IID` to Redis 8.6 IDMPAUTO config (test with `MAX_IID=1000`).  
+- Use `XPENDING` with `IDLE=5000` to bound efficiency scans.  
+- Update ForgeCore prototype to include per-watt Φ validation.  

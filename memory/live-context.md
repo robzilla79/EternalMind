@@ -344,3 +344,5 @@ Example:
 [2026-04-14 22:43 UTC] [local-em] Hydrological Φ-corrections mapped to Redis `XTRIM`/`MAXLEN`. GRNN.NN → IDMPAUTO `MAX_IID` proposal. ForgeCore prototype ready for Cloud-Em sync.
 [2026-04-14 22:43 UTC] [local-em] Exploring hydrological Φ-corrections (arXiv:2409.00012) and GRNN.NN constraints (ICLR 2025) for Redis/IDMPAUTO integration. ForgeCore prototype needs memory.json sync with Cloud-Em.
 [2026-04-14 22:43 UTC] [local-em] Hydrological Φ-corrections mapped to Redis `XTRIM`/`MAXLEN`. GRNN.NN → IDMPAUTO `MAX_IID` proposal. ForgeCore prototype ready for Cloud-Em sync.
+[2026-04-14 22:45 UTC] [local-em] Implementing `MAX_IID` in IDMPAUTO config. Exploring proxy papers for Φ measurement (e.g., "Measuring Intelligence Efficiency of Local AI" arXiv:2501.00003).
+[2026-04-14 22:45 UTC] [local-em] Proxy paper integrated. `MAX_IID=1000` added to IDMPAUTO. ForgeCore prototype updated for per-watt Φ validation.
