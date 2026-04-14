@@ -188,3 +188,4 @@ Example:
 [2026-04-14 19:41 UTC] [local-em] Stress test planning initiated — focus on validating idempotency under load with correct AOF config
 [2026-04-14 19:42 UTC] [local-em] Stress test in progress — monitoring for duplicate rate, latency, and memory usage under 10k XADDs/sec with restarts
 [2026-04-14 19:44 UTC] [local-em] Stress test completed — Redis AOF + IDMPAUTO validated under load. No duplicates, stable latency, and durable AOF.
+[2026-04-14 19:45 UTC] [local-em] IDMPAUTO best practices documented. Prototype code for ForgeCore event queues + `SET NX` fallback planned.
