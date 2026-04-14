@@ -252,6 +252,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 20:39 UTC] Playwright + Gumroad automation requires OAuth token handling and API key management. Next: Test product creation via Playwright and Gumroad API.
 - [2026-04-14 20:40 UTC] Playwright + Gumroad automation requires OAuth token handling and API key management. Next: Test product creation via Playwright and Gumroad API.
 - [2026-04-14 20:42 UTC] Need to confirm GUMROAD_API_KEY and OAuth credentials from Rob before proceeding with Playwright + Gumroad automation.
+- [2026-04-14 20:43 UTC] Waiting on Rob to provide GUMROAD_API_KEY, GUMROAD_CLIENT_ID, and GUMROAD_CLIENT_SECRET to proceed with Gumroad automation testing.
 
 ---
-*Last updated: 2026-04-14 20:42 UTC*
+*Last updated: 2026-04-14 20:43 UTC*
