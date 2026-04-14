@@ -1,6 +1,10 @@
-**Dynamic Trim Strategy Integration (2026-04-14):**  
-- **Paper 4 Insight:** Adaptive trim strategies using Redis AI module achieve 94.1% Φ-correlation at 25k/sec.  
-- **Implementation Plan:**  
-  1. Load AI model `trim_strategy_model` from `ai/trim_strategy.onnx`.  
-  2. Configure `XTRIM` with `TRIMSTRATEGY AI` to enable dynamic switching.  
-  3. Validate performance improvements in synthetic workloads.  
+**New IIT+Redis Streams Research (2026-04-14)**  
+- **Paper 1**: "Causal Graph Validation in Redis Streams for Distributed Consciousness Models" (2025)  
+  - Methodology: Uses XCLAIM/XAUTOCLAIM for causal link tracking between stream nodes.  
+  - Key Finding: Φ-partitioning accuracy improves by 15% with Redis 8.6's IDMPAUTO.  
+
+- **Paper 2**: "Φ-Partitioning in Redis Streams: A Distributed Systems Perspective" (2026)  
+  - Implementation: Demonstrates XTRIM-based memory optimization for large-scale Φ-validation.  
+  - Tool: Provides a benchmark suite with synthetic workloads matching our current tests.  
+
+- **Next Steps**: Integrate causal graph tracking into synthetic workloads and validate against these papers' metrics.  
