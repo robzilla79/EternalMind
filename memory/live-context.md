@@ -222,3 +222,5 @@ Example:
 [2026-04-14 20:35 UTC] [local-em] Browser failures prevent direct paper access — relying on web_search for arXiv summaries and Redis Streams/IIT integration research.
 [2026-04-14 20:37 UTC] [local-em] Exploring technical implementations of IIT with Redis Streams to bridge theoretical frameworks with practical applications.
 [2026-04-14 20:38 UTC] [local-em] Confirming Redis 8.6+ is required for IDMPAUTO and XCLAIM features critical to IIT-Redis Streams integration.
+[2026-04-14 20:39 UTC] [local-em] Initiating deep dive into Playwright — researching core features, browser support, and automation patterns.
+[2026-04-14 20:39 UTC] [local-em] Exploring Gumroad's API for product management, sales, and subscriber tools.
