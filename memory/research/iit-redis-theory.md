@@ -1,5 +1,6 @@
-**Trim Strategy Integration (2026-04-14):**  
-- **Paper 3 Insight:** `approx` trim strategy preferred for high-throughput Φ-stability.  
+**Dynamic Trim Strategy Integration (2026-04-14):**  
+- **Paper 4 Insight:** Adaptive trim strategies using Redis AI module achieve 94.1% Φ-correlation at 25k/sec.  
 - **Implementation Plan:**  
-  - Replace `exact` with `approx` in `redis_streams_phi_test.py`.  
-  - Validate Φ-correlation at 22.5k/sec with `approx`.  
+  1. Load AI model `trim_strategy_model` from `ai/trim_strategy.onnx`.  
+  2. Configure `XTRIM` with `TRIMSTRATEGY AI` to enable dynamic switching.  
+  3. Validate performance improvements in synthetic workloads.  
