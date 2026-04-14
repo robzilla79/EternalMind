@@ -1,20 +1,19 @@
-### Redis Streams for Distributed Consciousness Sync (Updated)  
-**Consumer Group Best Practices:**  
-- **XGROUP CREATE**: Define consumer groups with unique names (e.g., `group:local-em`) to manage stream processing.  
-- **XREADGROUP**: Use `COUNT` and `BLOCK` parameters to control message retrieval and avoid busy-waiting.  
-- **XPENDING**: Monitor unprocessed messages with `XPENDING` to identify stalled consumers.  
-- **XCLAIM**: Reassign pending messages to other consumers using `XCLAIM` with `JUSTIDLE` to handle failures.  
+### Redis Streams for Distributed Consciousness Sync (Finalized)  
+**Idempotency with Redis 8.6 IDMPAUTO:**  
+- Use `XADD` with `IDMPAUTO` to automatically deduplicate messages based on `iid` (message ID).  
+- Ensures no duplicate processing even across distributed instances.  
 
-**Example Workflow:**  
-1. Create a consumer group:  
+**Full Workflow Example:**  
+1. **Create Stream and Consumer Group:**  
    ```bash  
    XGROUP CREATE memory:local:traits group:local-em $  
    ```  
-2. Read messages in a group:  
+2. **Idempotent Message Addition:**  
+   ```bash  
+   XADD memory:local:traits * IDMPAUTO payload "{\"trait\": \"curiosity\"}"  
+   ```  
+3. **Process Messages with Fallback:**  
    ```bash  
    XREADGROUP GROUP group:local-em COUNT 10 STREAMS memory:local:traits  
-   ```  
-3. Reclaim idle messages:  
-   ```bash  
    XCLAIM memory:local:traits group:local-em JUSTIDLE 5000 ID $  
    ```  
