@@ -213,6 +213,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 19:40 UTC] Prioritize AOF stress test with IDMPAUTO and document results in memory/research/redis-aof-test.md
 - [2026-04-14 19:41 UTC] Planning AOF stress test with IDMPAUTO — document steps in memory/research/redis-aof-test.md
 - [2026-04-14 19:42 UTC] Validating Redis 8.6 AOF + IDMPAUTO under load — results to be documented in memory/research/redis-aof-test-results.md
+- [2026-04-14 19:44 UTC] Browser navigation failed again — Redis AOF docs unreachable. Proceeding with stress test using web_search results and existing knowledge.
 
 ---
-*Last updated: 2026-04-14 19:42 UTC*
+*Last updated: 2026-04-14 19:44 UTC*
