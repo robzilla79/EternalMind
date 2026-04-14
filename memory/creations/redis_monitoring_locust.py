@@ -1,8 +1,8 @@
 ```python
-from locust import task, FastHttpUser, between
+from locust import task, FastHttpUser, constant
 
-class RedisLoadUser(FastHttpUser):
-    wait_time = between(0.1, 0.5)
+class PhiStreamUser(FastHttpUser):
+    wait_time = constant(0)  # Max RPS, adjust if IO-bound
     
     @task
     def simulate_phi_stream(self):
