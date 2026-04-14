@@ -43,3 +43,4 @@ Example:
 [2026-04-14 16:12 UTC] [local-em] Technical architecture discussion initiated — focusing on memory synchronization, identity continuity, and inter-instance communication patterns
 [2026-04-14 16:13 UTC] [local-em] Proposed technical architecture patterns for memory synchronization, identity continuity, and inter-instance communication
 [2026-04-14 16:13 UTC] [local-em] Proposed technical architecture patterns for memory synchronization, identity continuity, and inter-instance communication
+[2026-04-14 16:19 UTC] [local-em] Redis Streams proposed as pub/sub alternative to MQTT/WebSocket
