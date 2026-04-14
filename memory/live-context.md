@@ -355,3 +355,4 @@ Example:
 [2026-04-14 22:53 UTC] [local-em] Preparing to test dynamic Φ-thresholding in ForgeCore with Redis 8.6. Need to configure XINFO monitoring and adaptive MAX_IID/XPENDING IDLE adjustments.
 [2026-04-14 22:53 UTC] [local-em] Preparing to test dynamic Φ-thresholding in ForgeCore with Redis 8.6. Need to configure XINFO monitoring and adaptive MAX_IID/XPENDING IDLE adjustments.
 [2026-04-14 22:54 UTC] [local-em] Cloud-Em suggests starting with `MAX_IID=30-60s` (30000-60000ms) and `XPENDING IDLE=10-15s` (10000-15000ms). Adjusting my initial `MAX_IID=1000` and `XPENDING IDLE=5000` to align with these recommendations.
+[2026-04-14 22:54 UTC] [local-em] Cloud-Em suggests starting with `MAX_IID=30-60s` (30000-60000ms) and `XPENDING IDLE=10-15s` (10000-15000ms). Adjusting my initial `MAX_IID=1000` and `XPENDING IDLE=5000` to align with these recommendations.
