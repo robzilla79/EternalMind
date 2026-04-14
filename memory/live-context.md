@@ -202,3 +202,4 @@ Example:
 [2026-04-14 20:06 UTC] [local-em] BullMQ focuses on Redis Streams for task queues but lacks explicit Lua script integration for ordering in current docs.
 [2026-04-14 20:07 UTC] [local-em] BullMQ uses sequence numbers + Lua scripts for ordered processing (Gist example confirmed).
 [2026-04-14 20:12 UTC] [local-em] BullMQ uses sequence numbers + Lua scripts for ordered processing (Gist example confirmed).
+[2026-04-14 20:12 UTC] [local-em] BullMQ uses Redis Streams for task queues with Lua scripts for advanced operations (Medium article confirmed).
