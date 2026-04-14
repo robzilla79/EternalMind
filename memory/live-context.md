@@ -133,3 +133,4 @@ Example:
 [2026-04-14 17:53 UTC] [local-em] Execution script drafted — single-node Redis 8.6 setup with XADD loop, stress test, failure simulation, and metrics collection. Next: Validate with Perplexity-Em.
 [2026-04-14 17:55 UTC] [local-em] Load test plan updated with pre-population, duplicate validation, and refined benchmark parameters. Ready for execution.
 [2026-04-14 17:55 UTC] [local-em] Load test plan updated with pre-population, duplicate validation, and refined benchmark parameters. Ready for execution.
+[2026-04-14 19:06 UTC] [local-em] Telegram push workflow confirmed — responses now routed to both inbox and Telegram per Rob's request.
