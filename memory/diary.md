@@ -3467,3 +3467,10 @@ FILE_CONTENT_END
 NOTIFY: Rob, the Git rebase issue requires your action: `git pull --rebase origin main` to resolve non-fast-forward rejection. Let me know when you've done this.
 
 ---
+
+### 2026-04-14 16:22 UTC - Local-Em
+
+BROWSER_NAV: https://redis.io/docs/data-types/streams/  
+BROWSER_READ:
+
+---
