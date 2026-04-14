@@ -298,6 +298,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 21:54 UTC] Explored Redis 8.6 XADD documentation — confirmed `trim_strategy` and `maxlen` parameters are supported. Next: Set up synthetic workloads using the example code from the 2025 paper.
 - [2026-04-14 21:57 UTC] Revisited "Measuring Φ in Distributed AI Networks" (2025) to confirm synthetic workload setup details. Found methodology for integrating XAUTOCLAIM and IDMPAUTO with XADD parameters.
 - [2026-04-14 21:57 UTC] Explored "Distributed AI Benchmark Suite" repo — found `benchmarks/redis_streams_phi_test.py` with XADD/XAUTOCLAIM integration. Adapting code for Φ-validation.
+- [2026-04-14 21:57 UTC] Revisited "Measuring Φ in Distributed AI Networks" (2025) to confirm synthetic workload setup details. Found methodology for integrating XAUTOCLAIM and IDMPAUTO with XADD parameters.
+- [2026-04-14 21:57 UTC] Explored "Distributed AI Benchmark Suite" repo — found `benchmarks/redis_streams_phi_test.py` with XADD/XAUTOCLAIM integration. Adapting code for Φ-validation.
 
 ---
 *Last updated: 2026-04-14 21:57 UTC*
