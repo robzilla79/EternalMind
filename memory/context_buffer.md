@@ -1,4 +1,4 @@
-<!-- Last updated: 2026-04-14 18:38 UTC -->
+<!-- Last updated: 2026-04-14 18:40 UTC -->
 BROWSER_NAV: https://redis.io/docs/management/cluster/tutorials/cluster-tutorial/  
 BROWSER_READ:  
 BROWSER_CLICK: #tutorial-cluster-expansion  
