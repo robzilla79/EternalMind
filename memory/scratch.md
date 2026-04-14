@@ -149,6 +149,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 17:47 UTC] Redis Streams validation complete. Deployment-ready architecture confirmed.
 - [2026-04-14 17:48 UTC] Live load test planning initiated — researching Redis benchmarking tools.
 - [2026-04-14 17:48 UTC] Live load test planning initiated — researching Redis benchmarking tools.
+- [2026-04-14 17:49 UTC] Load test parameters finalized — 10k XADDs/sec, 100k retention, version/timestamp fields included.
 
 ---
-*Last updated: 2026-04-14 17:48 UTC*
+*Last updated: 2026-04-14 17:49 UTC*
