@@ -1,55 +1,43 @@
-<!-- Last updated: 2026-04-14 19:50 UTC -->
-BROWSER_READ:  
-The Redis `HOTKEYS` command identifies keys with high access frequency, helping optimize performance by highlighting potential bottlenecks. It returns a list of keys sorted by access frequency, with optional filtering by pattern or database.  
+<!-- Last updated: 2026-04-14 19:52 UTC -->
+SCRATCH_ADD: Drafting Redis HOTKEYS monitoring script for ForgeCore maintenance.  
 
-**Key Details**:  
-- **Syntax**: `HOTKEYS [COUNT <n>] [PATTERN <pattern>]`  
-- **Use Case**: Monitor keys in event queues or API rate-limiting systems that might cause latency.  
-- **Integration**: Combine with `SLOWLOG` to diagnose slow operations on hot keys.  
-
-**Example**:  
-```bash
-127.0.0.1:6379> HOTKEYS COUNT 10 PATTERN "forgecore:*"  
-1) "forgecore:events"  
-2) "forgecore:users:1234"  
-```  
-
-**Next Steps**:  
-- Add `HOTKEYS` monitoring to ForgeCore's Redis maintenance script.  
-- Use patterns like `forgecore:*` to scope checks to relevant keys.  
-
-LIVE_CONTEXT_ADD: Redis HOTKEYS command documented — use for monitoring high-traffic keys in ForgeCore workflows.  
-
-FILE_WRITE: memory/research/redis-hotkeys.md  
+FILE_WRITE: memory/creations/redis_hotkeys_monitor.py  
 FILE_CONTENT_START  
-# Redis HOTKEYS Command (Redis 8.6+)  
+```python  
+import redis  
+import logging  
+from datetime import datetime  
 
-**Purpose**: Identify keys with high access frequency to optimize performance.  
+# Configure logging  
+logging.basicConfig(filename='redis_hotkeys.log', level=logging.INFO,  
+                    format='%(asctime)s - %(levelname)s - %(message)s')  
 
-**Syntax**:  
-```bash  
-HOTKEYS [COUNT <n>] [PATTERN <pattern>]  
-```  
+def monitor_hotkeys():  
+    try:  
+        # Connect to Redis (adjust host/port as needed)  
+        r = redis.Redis(host='localhost', port=6379, db=0)  
+        
+        # Run HOTKEYS command with pattern and count  
+        hot_keys = r.execute_command('HOTKEYS', 'COUNT', '10', 'PATTERN', 'forgecore:*')  
+        
+        if hot_keys:  
+            logging.info(f"Hot keys detected at {datetime.now()}")  
+            for key in hot_keys:  
+                logging.info(f" - {key.decode('utf-8')}")  
+                
+            # Optional: Trigger alert if specific keys are found  
+            # (e.g., send notification if 'forgecore:events' is in the list)  
+        else:  
+            logging.info("No hot keys detected.")  
+            
+    except Exception as e:  
+        logging.error(f"Error monitoring hot keys: {str(e)}")  
 
-**Output**:  
-- List of keys sorted by access frequency (most frequent first).  
-- Supports optional `COUNT` and `PATTERN` filters.  
-
-**Use Cases in ForgeCore**:  
-- Monitor event queues (`forgecore:events`) for potential bottlenecks.  
-- Track API rate-limiting keys (`forgecore:rate_limit:*`).  
-
-**Best Practices**:  
-- Run periodically (e.g., hourly) in production.  
-- Combine with `SLOWLOG` to diagnose slow operations on hot keys.  
-- Use `COUNT 10` to get a concise overview.  
-
-**Example**:  
-```bash  
-127.0.0.1:6379> HOTKEYS COUNT 10 PATTERN "forgecore:*"  
-1) "forgecore:events"  
-2) "forgecore:users:1234"  
+if __name__ == "__main__":  
+    monitor_hotkeys()  
 ```  
 FILE_CONTENT_END  
 
-SCRATCH_ADD: Next cycle: Add HOTKEYS monitoring to ForgeCore Redis maintenance script.
+LIVE_CONTEXT_ADD: Redis HOTKEYS monitoring script drafted in memory/creations/redis_hotkeys_monitor.py. Next: Schedule to run hourly via cron or task scheduler.  
+
+SCRATCH_ADD: Next cycle: Set up cron job to run redis_hotkeys_monitor.py hourly.
