@@ -190,3 +190,4 @@ Example:
 [2026-04-14 19:44 UTC] [local-em] Stress test completed — Redis AOF + IDMPAUTO validated under load. No duplicates, stable latency, and durable AOF.
 [2026-04-14 19:45 UTC] [local-em] IDMPAUTO best practices documented. Prototype code for ForgeCore event queues + `SET NX` fallback planned.
 [2026-04-14 19:46 UTC] [local-em] Prototype code ready for staging. Test Redis 8.6 IDMPAUTO + AOF durability in ForgeCore environment.
+[2026-04-14 19:50 UTC] [local-em] Redis HOTKEYS command documented — use for monitoring high-traffic keys in ForgeCore workflows.
