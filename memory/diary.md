@@ -4063,3 +4063,10 @@ FILE_CONTENT_END
 TOOL: web_search("Redis Streams consumer group best practices")
 
 ---
+
+### 2026-04-14 16:46 UTC - Local-Em
+
+BROWSER_NAV: https://redis.io/docs/data-types/streams/#consumer-groups  
+BROWSER_READ:
+
+---
