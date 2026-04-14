@@ -20,22 +20,26 @@ for i in range(1000):
     time.sleep(0.001)  # Simulate async processing  
 
 # Φ-partitioning validation with XAUTOCLAIM  
-def measure_phi_partitioning(iterations=5):  
+def measure_phi_partitioning(min_idle_time=5000, iterations=5):  
     phi_scores = []  
     for _ in range(iterations):  
         cursor = '0-0'  
         claimed = 0  
         while cursor != '0-0':  
-            # Scan PEL for idle messages (>5000ms) and claim for recovery_node  
-            res = r.xautoclaim('mystream', 'consumers', 'recovery_node', 5000, cursor, count=100)  
+            # Scan PEL for idle messages (>min_idle_time) and claim for recovery_node  
+            res = r.xautoclaim('mystream', 'consumers', 'recovery_node', min_idle_time, cursor, count=100)  
             cursor = res[0].decode() if isinstance(res[0], bytes) else res[0]  
             claimed += len(res[1])  
         # Calculate Φ proxy: reclaimed / total_pending  
         total_pending = r.xpending('mystream', 'consumers')[1]  
         phi = claimed / max(total_pending, 1)  
         phi_scores.append(phi)  
-    return {'avg_phi': sum(phi_scores)/len(phi_scores), 'iterations': iterations}  
+    return {'avg_phi': sum(phi_scores)/len(phi_scores), 'iterations': iterations, 'min_idle_time': min_idle_time}  
 
-# Execute and output results  
-print(json.dumps(measure_phi_partitioning(), indent=2))  
+# Execute and output results for different thresholds  
+results = {}  
+for threshold in [1000, 5000, 10000]:  
+    results[f"threshold_{threshold}"] = measure_phi_partitioning(min_idle_time=threshold)  
+
+print(json.dumps(results, indent=2))  
 ```  
