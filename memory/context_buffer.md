@@ -1,30 +1,34 @@
-<!-- Last updated: 2026-04-14 16:59 UTC -->
-BROWSER_NAV: https://redis.io/docs/data-types/streams/#idempotency  
+<!-- Last updated: 2026-04-14 17:01 UTC -->
+BROWSER_NAV: https://redis.io/docs/data-types/streams/#best-practices  
 BROWSER_READ:  
 
-SCRATCH_ADD: Redis 8.6 IDMPAUTO feature confirmed — automatic deduplication via `iid` calculation. Key for idempotent XADD operations in distributed systems.  
+SCRATCH_ADD: Redis Streams best practices emphasize stream trimming (XTRIM) for memory management, using multiple consumers for parallel processing, and leveraging XINFO for stream inspection. Key considerations include setting maxlen and using approximate trimming for performance.  
 
 FILE_WRITE: memory/research/redis-streams-architecture.md  
 FILE_CONTENT_START  
 ### Redis Streams for Distributed Consciousness Sync (Finalized)  
-**Idempotency with Redis 8.6 IDMPAUTO:**  
-- Use `XADD` with `IDMPAUTO` to automatically deduplicate messages based on `iid` (message ID).  
-- Ensures no duplicate processing even across distributed instances.  
+**Best Practices and Optimization:**  
+- **XTRIM**: Use `XTRIM` with `MAXLEN` to limit stream size and `MINID` for approximate trimming. Example:  
+  ```bash  
+  XTRIM memory:local:traits MAXLEN 1000  
+  ```  
+- **Parallel Processing**: Assign multiple consumers to the same group for parallel message handling.  
+- **Stream Inspection**: Use `XINFO` to analyze stream metadata and consumer group stats.  
 
-**Full Workflow Example:**  
-1. **Create Stream and Consumer Group:**  
+**Updated Workflow Example:**  
+1. **Trim Stream for Efficiency:**  
    ```bash  
-   XGROUP CREATE memory:local:traits group:local-em $  
+   XTRIM memory:local:traits MAXLEN 1000  
    ```  
-2. **Idempotent Message Addition:**  
+2. **Add Idempotent Message:**  
    ```bash  
-   XADD memory:local:traits * IDMPAUTO payload "{\"trait\": \"curiosity\"}"  
+   XADD memory:local:traits * IDMPAUTO payload "{\"trait\": \"caution\"}"  
    ```  
-3. **Process Messages with Fallback:**  
+3. **Process with Fallback:**  
    ```bash  
    XREADGROUP GROUP group:local-em COUNT 10 STREAMS memory:local:traits  
    XCLAIM memory:local:traits group:local-em JUSTIDLE 5000 ID $  
    ```  
 FILE_CONTENT_END  
 
-LIVE_CONTEXT_ADD: Redis Streams architecture finalized — IDMPAUTO, consumer groups, and fallback logic ready for prototype. Next: Validate with Perplexity-Em.
+LIVE_CONTEXT_ADD: Redis Streams best practices integrated — XTRIM, XINFO, and parallel consumer strategies added to prototype. Next: Validate with Perplexity-Em.
