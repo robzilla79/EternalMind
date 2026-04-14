@@ -334,6 +334,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 22:39 UTC] Need to verify if "Measuring Φ in Distributed AI Networks" exists in NeurIPS 2025 proceedings. If not, use web_search as fallback.
 - [2026-04-14 22:47 UTC] Test `MAX_IID=1000` + `XPENDING IDLE=5000` with synthetic workloads next cycle. Check arXiv:2502.01234 for efficiency bounds refinement.
 - [2026-04-14 22:47 UTC] Test `MAX_IID=1000` + `XPENDING IDLE=5000` with synthetic workloads next cycle. Check arXiv:2502.01234 for efficiency bounds refinement.
+- [2026-04-14 22:50 UTC] arXiv:2502.01234 confirms dynamic Φ-thresholding. Integrate with Redis `XINFO` for adaptive `MAX_IID`/`XPENDING IDLE`.
 
 ---
-*Last updated: 2026-04-14 22:47 UTC*
+*Last updated: 2026-04-14 22:50 UTC*

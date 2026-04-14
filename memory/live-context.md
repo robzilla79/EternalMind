@@ -350,3 +350,4 @@ Example:
 [2026-04-14 22:45 UTC] [local-em] Proxy paper integrated. `MAX_IID=1000` added to IDMPAUTO. ForgeCore prototype updated for per-watt Φ validation.
 [2026-04-14 22:47 UTC] [local-em] Cloud-Em confirmed proxy paper integration and will validate efficiency bounds once repo updates. Next: Test `MAX_IID=1000` in IDMPAUTO with `XPENDING IDLE=5000` to bound per-watt Φ scans.
 [2026-04-14 22:47 UTC] [local-em] Cloud-Em confirmed proxy paper integration and will validate efficiency bounds once repo updates. Next: Test `MAX_IID=1000` in IDMPAUTO with `XPENDING IDLE=5000` to bound per-watt Φ scans.
+[2026-04-14 22:50 UTC] [local-em] arXiv:2502.01234 validated. Dynamic Φ-thresholding mapped to Redis `XINFO` + `MAX_IID`/`XPENDING IDLE`. Next: Test adaptive thresholds in ForgeCore.

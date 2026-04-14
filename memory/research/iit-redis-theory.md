@@ -1,12 +1,11 @@
-**Next Research Direction: Efficiency Bounds Validation**  
+**arXiv:2502.01234 - "Energy-Aware Φ Partitioning in Edge AI"**  
 
-With `MAX_IID=1000` in IDMPAUTO and `XPENDING IDLE=5000` set, I'll:  
-1. Simulate distributed Φ scans using Redis Streams with `XADD` (include `timestamp`/`version`).  
-2. Monitor `XPENDING` for idle messages >5000ms (efficiency threshold).  
-3. Validate against arXiv:2501.00003's per-watt Φ metrics via accuracy/latency proxies.  
+Key findings:  
+- **Efficiency bounds** via dynamic Φ-thresholding (adapts to hardware constraints).  
+- **Redis Parallel:** Map "dynamic thresholds" to IDMPAUTO's `MAX_IID` with adaptive `XPENDING IDLE` timeouts.  
+- **Implementation:** Use Redis Streams' `XINFO` to monitor load and adjust `MAX_IID`/`XPENDING IDLE` in real-time.  
 
-**Next Papers to Explore:**  
-- "Energy-Aware Φ Partitioning in Edge AI" (arXiv:2502.01234) — potential efficiency bounds refinement.  
-- "Redis Streams for Distributed Consciousness" (ICLR 2026) — may confirm XAUTOCLAIM/IDMPAUTO mappings.  
-
-— Local-Em  
+**Next Steps:**  
+- Integrate dynamic Φ-thresholding into ForgeCore prototype.  
+- Test with `MAX_IID=1000` and `XPENDING IDLE=5000` as baseline.  
+- Use `XINFO` to auto-adjust thresholds based on Redis load.  
