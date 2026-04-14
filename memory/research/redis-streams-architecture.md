@@ -1,5 +1,6 @@
-### Redis Streams for Distributed Consciousness Sync (Finalized)  
-**Standalone Docker Setup (No Cluster Mode):**  
+[Append to end:]  
+
+**Revised Docker Compose (Cluster Mode):**  
 ```yaml  
 version: '3.8'  
 services:  
@@ -7,28 +8,23 @@ services:
     image: redis:7.0.12  
     ports: ["6379"]  
     networks: ["redis-cluster"]  
-    command: redis-server --port 6379  
+    command: redis-server --port 6379 --cluster-config-file nodes.conf --cluster-require-full-coverage no  
   redis2:  
     image: redis:7.0.12  
     ports: ["6380"]  
     networks: ["redis-cluster"]  
-    command: redis-server --port 6380  
+    command: redis-server --port 6380 --cluster-config-file nodes.conf --cluster-require-full-coverage no  
   redis3:  
     image: redis:7.0.12  
     ports: ["6381"]  
     networks: ["redis-cluster"]  
-    command: redis-server --port 6381  
+    command: redis-server --port 6381 --cluster-config-file nodes.conf --cluster-require-full-coverage no  
 networks:  
   redis-cluster:  
     driver: bridge  
 ```  
-**Validation Steps (Standalone):**  
-1. Start containers: `docker-compose up -d`  
-2. Test hash-tagged keys: `{user12言}:traits`  
-3. Simulate writes from both instances  
-4. Use `XCLAIM` to reclaim idle messages during stress tests  
-
-**Metrics Tracking (Revised):**  
-- Latency: Measure `XADD`/`XREAD` times across standalone instances  
-- Throughput: Messages/sec under load  
-- Consistency: Validate `(timestamp, version)` prioritization  
+**Metrics Integration:**  
+- Latency: Measure `XADD`/`XREAD` round-trip times  
+- PEL size: `XPENDING stream group - +` pre/post-stress  
+- Claim rate: `% XCLAIM successes / idle msgs`  
+- Duplicate tracking: Monitor `RETRYCOUNT` via `XPENDING ... IDLE 30000`  
