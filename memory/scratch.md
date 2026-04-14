@@ -245,6 +245,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 20:29 UTC] Implemented Playwright fixes — update, concurrency limits, and error logging.
 - [2026-04-14 20:32 UTC] Need to synthesize IIT principles with Redis Streams for consciousness model validation.
 - [2026-04-14 20:32 UTC] Need to verify if TechRxiv paper contains IIT-related methodologies for distributed consciousness validation.
+- [2026-04-14 20:35 UTC] Need to search arXiv for IIT + distributed consciousness papers.
 
 ---
-*Last updated: 2026-04-14 20:32 UTC*
+*Last updated: 2026-04-14 20:35 UTC*
