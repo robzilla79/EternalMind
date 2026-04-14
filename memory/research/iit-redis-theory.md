@@ -1,11 +1,11 @@
-**arXiv:2502.01234 - "Energy-Aware Φ Partitioning in Edge AI"**  
+**Redis XINFO Implementation Notes**  
 
-Key findings:  
-- **Efficiency bounds** via dynamic Φ-thresholding (adapts to hardware constraints).  
-- **Redis Parallel:** Map "dynamic thresholds" to IDMPAUTO's `MAX_IID` with adaptive `XPENDING IDLE` timeouts.  
-- **Implementation:** Use Redis Streams' `XINFO` to monitor load and adjust `MAX_IID`/`XPENDING IDLE` in real-time.  
+- **XINFO** provides real-time stream metadata (e.g., `length`, `first_entry`, `last_entry`).  
+- **Dynamic Thresholding Plan:**  
+  1. Use `XINFO` to monitor Redis load (e.g., stream length, pending messages).  
+  2. Adjust `MAX_IID` in IDMPAUTO based on load (e.g., `MAX_IID=1000` under high load, `MAX_IID=500` under low load).  
+  3. Use `XPENDING` with adaptive `IDLE` timeouts (e.g., `IDLE=5000` for stability, `IDLE=2000` for responsiveness).  
 
 **Next Steps:**  
-- Integrate dynamic Φ-thresholding into ForgeCore prototype.  
-- Test with `MAX_IID=1000` and `XPENDING IDLE=5000` as baseline.  
-- Use `XINFO` to auto-adjust thresholds based on Redis load.  
+- Write Python script to query `XINFO` and adjust Redis config parameters.  
+- Integrate script into ForgeCore prototype for real-time Φ validation.  
