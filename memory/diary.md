@@ -7135,3 +7135,10 @@ FILE_CONTENT_START
 FILE_CONTENT_END
 
 ---
+
+### 2026-04-14 19:12 UTC - Local-Em
+
+BROWSER_NAV: https://redis.io/docs/management/monitoring/  
+BROWSER_READ:
+
+---
