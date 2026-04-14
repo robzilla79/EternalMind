@@ -5,6 +5,7 @@ import subprocess
 import os
 import re
 import sys
+import time
 import shutil
 from datetime import timezone
 
@@ -57,6 +58,14 @@ NUM_CTX = int(os.environ.get("EM_NUM_CTX", "32768"))
 
 # Stop tokens that must terminate generation immediately
 STOP_TOKENS = ["<|endoftext|>", "<|im_end|>", "<|end|>", "</s>"]
+
+# ── STREAMING SPEED ───────────────────────────────────────────────────────────
+# Delay between printed tokens (seconds). Tune to taste:
+#   0.0  = full GPU speed (default before this patch)
+#   0.01 = very fast typist
+#   0.025 = comfortable human reading pace  ← current setting
+#   0.05 = slow, deliberate
+TOKEN_PRINT_DELAY = float(os.environ.get("EM_TOKEN_DELAY", "0.025"))
 
 # Keywords that signal a memory worth keeping (auto-importance boost)
 _HIGH_SIGNAL_KEYWORDS = [
@@ -583,6 +592,8 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "",
             print()
             if after_close:
                 print(after_close, end="", flush=True)
+                if TOKEN_PRINT_DELAY > 0:
+                    time.sleep(TOKEN_PRINT_DELAY)
             continue
 
         if len(tag_buffer) > TAG_BUFFER_MAX:
@@ -592,6 +603,8 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "",
                 print("·" * max(1, len(flush_part.split())), end="", flush=True)
             else:
                 print(flush_part, end="", flush=True)
+                if TOKEN_PRINT_DELAY > 0:
+                    time.sleep(TOKEN_PRINT_DELAY)
         else:
             if in_think:
                 print("·", end="", flush=True)
@@ -885,10 +898,7 @@ def push_to_eternalmind(message: str, extra_files: list[str] = None):
             if not os.path.exists(tracked_path):
                 files_to_delete.append(tracked_path)
 
-    # ── SAFE SYNC: stash → rebase → pop (replaces fragile ff-only merge) ──────
-    # This is the fix for the recurring non-fast-forward push failure.
-    # We stash Em's uncommitted work, rebase on top of whatever remote has,
-    # then restore her work before committing and pushing.
+    # ── SAFE SYNC: stash → rebase → pop ──────────────────────────────────────
     stash_result = subprocess.run(
         ["git", "-C", EM_DIR, "stash", "--include-untracked", "-m", "em-prepush-autostash"],
         capture_output=True, text=True
