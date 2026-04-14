@@ -753,6 +753,40 @@ def log_diary(entry: str):
     with open(os.path.join(MEM_DIR, "diary.md"), "a", encoding="utf-8") as f:
         f.write(f"\n\n### {ts} - Local-Em\n\n{entry}\n\n---")
 
+# ── STATUS CHECK-IN ───────────────────────────────────────────────────────────
+STATUS_PATH = os.path.join(MEM_DIR, "status.md")
+STATUS_MAX_LINES = 96  # ~48 hours at 30-min cycles
+
+
+def _infer_status(result_text: str, errors: list[str] = None) -> tuple[str, str]:
+    """Return (emoji, label) based on result content and any known errors."""
+    if errors:
+        return ("🔴", "red")
+    lower = result_text.lower()
+    if any(kw in lower for kw in ["error", "failed", "crash", "exception", "stuck", "blocked", "cannot", "unable"]):
+        return ("🟡", "yellow")
+    return ("🟢", "green")
+
+
+def write_status_checkin(task_label: str, result_text: str, mode: str = "heartbeat", errors: list[str] = None):
+    """Append a timestamped status line to memory/status.md — read by the 30-min monitor workflow."""
+    emoji, _label = _infer_status(result_text, errors)
+    ts = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    mood_match = re.search(r'MOOD:\s*(.+)', result_text, re.IGNORECASE)
+    mood = mood_match.group(1).strip()[:30] if mood_match else _label
+    short_task = task_label[:60]
+    line = f"[{ts}] {emoji} {short_task} | mood: {mood} | mode: {mode}\n"
+    existing: list[str] = []
+    if os.path.exists(STATUS_PATH):
+        with open(STATUS_PATH, "r", encoding="utf-8") as f:
+            existing = f.readlines()
+    kept = existing[-(STATUS_MAX_LINES - 1):] if len(existing) >= STATUS_MAX_LINES else existing
+    kept.append(line)
+    with open(STATUS_PATH, "w", encoding="utf-8") as f:
+        f.writelines(kept)
+    print(f"  📊 Status logged: {emoji} {short_task[:40]}")
+
+
 # ── INCREMENTAL CHECKPOINT COMMIT ────────────────────────────────────────────
 # Writes diary + outbox + files to disk immediately after first LLM pass,
 # then does a lightweight local git commit (no push). This ensures that
@@ -807,6 +841,7 @@ def push_to_eternalmind(message: str, extra_files: list[str] = None):
         SCRATCH_PATH,
         TASKS_PATH,
         LIVE_CONTEXT_PATH,
+        STATUS_PATH,
     ]:
         if os.path.exists(path):
             with open(path, "r", encoding="utf-8") as f:
@@ -938,6 +973,7 @@ if __name__ == "__main__":
         for msg in inbox_messages:
             process_message(msg)
         task_label = summarize_task_for_commit(task)
+        write_status_checkin(task_label, result, mode="interactive")
         push_to_eternalmind(f"local-em interactive: {task_label}", extra_files=saved_files)
         raise SystemExit(0)
 
@@ -1011,4 +1047,5 @@ if __name__ == "__main__":
     for msg in inbox_messages + mid_cycle_messages:
         process_message(msg)
 
+    write_status_checkin(task_label, result, mode="heartbeat")
     push_to_eternalmind(f"local-em heartbeat: {task_label}", extra_files=saved_files)
