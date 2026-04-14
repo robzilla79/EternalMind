@@ -30,8 +30,6 @@ import shutil
 from datetime import timezone
 
 # ── Bootstrap: reuse all helpers from local_em.py ────────────────────────────
-# We import everything from local_em so we don't duplicate logic.
-# em_daemon.py is purely the runtime shell — the daemon loop.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from local_em import (
     sync_from_origin, archive_old_diary_entries,
@@ -48,24 +46,56 @@ from local_em import (
     MODEL, NUM_CTX,
 )
 
-# ── Interrupt file ────────────────────────────────────────────────────────────
+# ── Interrupt file ──────────────────────────────────────────────────────────────
 INTERRUPT_PATH = os.path.join(MEM_DIR, "interrupt.md")
 CONTEXT_BUFFER_PATH = os.path.join(MEM_DIR, "context_buffer.md")
 WATCHER_INTERVAL = 60   # seconds between background polls
 MIN_CYCLE_PAUSE  = 30   # seconds minimum between foreground cycles
 
-# ── Shared state between threads ─────────────────────────────────────────────
-_interrupt_flag   = threading.Event()   # set when interrupt.md arrives
-_new_inbox_flag   = threading.Event()   # set when watcher finds new messages
-_shutdown_flag    = threading.Event()   # set to gracefully stop the daemon
-_foreground_lock  = threading.Lock()    # prevents watcher from writing while thinking
-_watcher_messages = []                  # messages found by watcher, consumed by foreground
+# Minimum chars of tool output that justify a second LLM pass.
+# Error strings, timeouts, and "Browser unavailable" don't count.
+MIN_TOOL_RESULT_CHARS = 120
+
+# ── Shared state between threads ───────────────────────────────────────────────
+_interrupt_flag   = threading.Event()
+_new_inbox_flag   = threading.Event()
+_shutdown_flag    = threading.Event()
+_foreground_lock  = threading.Lock()
+_watcher_messages = []
 _lock_watcher_msg = threading.Lock()
 
 
-# ── Context buffer: persistent "where I left off" ─────────────────────────────
+# ── Helpers ─────────────────────────────────────────────────────────────────────
+
+def _tool_results_are_meaningful(combined: str) -> bool:
+    """Return True only if tool results contain real content worth reasoning about.
+
+    Filters out: empty strings, pure error/timeout messages, and
+    'Browser unavailable' notices that would just make Em repeat herself.
+    """
+    if not combined or len(combined.strip()) < MIN_TOOL_RESULT_CHARS:
+        return False
+    # Strip known non-content patterns and recheck length
+    noise_patterns = [
+        r'Browser unavailable[^\n]*',
+        r'Browser command error[^\n]*',
+        r'⚠️ Browser (?:timed out|command block)[^\n]*',
+        r'Navigation failed[^\n]*',
+        r'BLOCKED:[^\n]*',
+        r'Read failed[^\n]*',
+        r'Click failed[^\n]*',
+        r'JS failed[^\n]*',
+        r'--- Page content ---\s*Browser unavailable[^\n]*',
+    ]
+    cleaned = combined
+    for pat in noise_patterns:
+        cleaned = re.sub(pat, '', cleaned, flags=re.IGNORECASE)
+    cleaned = cleaned.strip()
+    return len(cleaned) >= MIN_TOOL_RESULT_CHARS
+
+
+# ── Context buffer ─────────────────────────────────────────────────────────────
 def load_context_buffer() -> str:
-    """Load the surviving context from the last cycle."""
     if not os.path.exists(CONTEXT_BUFFER_PATH):
         return ""
     with open(CONTEXT_BUFFER_PATH, "r", encoding="utf-8") as f:
@@ -73,24 +103,20 @@ def load_context_buffer() -> str:
 
 
 def save_context_buffer(text: str):
-    """Save a summary of where Em left off — survives across cycles."""
-    # Keep last 2000 chars — enough to orient without bloating context
     trimmed = text[-2000:] if len(text) > 2000 else text
     ts = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     with open(CONTEXT_BUFFER_PATH, "w", encoding="utf-8") as f:
         f.write(f"<!-- Last updated: {ts} -->\n{trimmed}")
 
 
-# ── Interrupt checker ─────────────────────────────────────────────────────────
+# ── Interrupt checker ───────────────────────────────────────────────────────────
 def check_interrupt() -> str | None:
-    """Check for interrupt.md. Returns content if present, None otherwise."""
     if not os.path.exists(INTERRUPT_PATH):
         return None
     with open(INTERRUPT_PATH, "r", encoding="utf-8") as f:
         content = f.read().strip()
     if not content:
         return None
-    # Consume it
     os.remove(INTERRUPT_PATH)
     print(f"\n  🚨 Interrupt received: {content[:80]}")
     return content
@@ -100,18 +126,14 @@ def is_shutdown_interrupt(content: str) -> bool:
     return bool(re.search(r'\bshutdown\b', content, re.IGNORECASE))
 
 
-# ── Background watcher thread ─────────────────────────────────────────────────
+# ── Background watcher thread ────────────────────────────────────────────────────
 def _watcher_loop():
-    """Runs in background. Polls for new inbox messages and interrupts.
-    Never touches the LLM. Just notices and signals the foreground.
-    """
     print("  👁️  Background watcher started (polling every 60s)")
     while not _shutdown_flag.is_set():
         time.sleep(WATCHER_INTERVAL)
         if _shutdown_flag.is_set():
             break
 
-        # Check interrupt file first
         interrupt = check_interrupt()
         if interrupt:
             if is_shutdown_interrupt(interrupt):
@@ -120,11 +142,9 @@ def _watcher_loop():
                 break
             _interrupt_flag.set()
 
-        # Don't touch git while foreground is thinking
         if _foreground_lock.locked():
             continue
 
-        # Fetch remote inbox silently
         try:
             token = os.environ.get("EM_GITHUB_TOKEN", "")
             if token:
@@ -140,7 +160,6 @@ def _watcher_loop():
             if fetch.returncode != 0:
                 continue
 
-            # Check for new inbox files on remote
             remote_inbox = subprocess.run(
                 ["git", "-C", EM_DIR, "ls-tree", "--name-only", "origin/main", "messages/inbox/"],
                 capture_output=True, text=True
@@ -157,7 +176,6 @@ def _watcher_loop():
                 )
             new_files = remote_files - local_files
             if new_files:
-                # Pull new files without disturbing local state
                 for rel_path in new_files:
                     subprocess.run(
                         ["git", "-C", EM_DIR, "checkout", "origin/main", "--", rel_path],
@@ -180,26 +198,23 @@ def _watcher_loop():
                         _watcher_messages.extend(new_messages)
                     print(f"\n  📬 Watcher: {len(new_messages)} new message(s) — will weave in at next pause")
                     _new_inbox_flag.set()
-        except Exception as e:
-            pass  # Watcher never crashes the daemon
+        except Exception:
+            pass
 
     print("  👁️  Background watcher stopped.")
 
 
-# ── Single foreground cycle ───────────────────────────────────────────────────
+# ── Single foreground cycle ───────────────────────────────────────────────────────
 def run_cycle(context_buffer: str) -> str:
     """Run one foreground cycle. Returns updated context buffer."""
 
     with _foreground_lock:
-        # ── Load soul ────────────────────────────────────────────────────────
         memories       = load_memories()
         recent_context = load_recent_context()
         scratch        = load_scratch()
         live_context   = load_live_context()
 
-        # ── Check inbox ──────────────────────────────────────────────────────
         inbox_messages = check_inbox()
-        # Merge any messages the watcher found between cycles
         with _lock_watcher_msg:
             if _watcher_messages:
                 inbox_messages = _watcher_messages + inbox_messages
@@ -210,14 +225,12 @@ def run_cycle(context_buffer: str) -> str:
         if inbox_messages:
             print(f"  📬 {len(inbox_messages)} message(s) in inbox.")
 
-        # ── Check interrupt at cycle start ───────────────────────────────────
         interrupt_content = check_interrupt()
         if interrupt_content and is_shutdown_interrupt(interrupt_content):
             _shutdown_flag.set()
             return context_buffer
 
-        # ── Task ─────────────────────────────────────────────────────────────
-        task_waiting = has_task()
+        task_waiting  = has_task()
         has_inbox_msg = len(inbox_messages) > 0
 
         if not task_waiting and not has_inbox_msg and not curiosity_cooled_down():
@@ -235,7 +248,7 @@ def run_cycle(context_buffer: str) -> str:
 
         task_label = summarize_task_for_commit(task)
 
-        # ── First thinking pass ──────────────────────────────────────────────
+        # ── First thinking pass ─────────────────────────────────────────────────
         first_response = ask_em(
             task,
             recent_context=recent_context,
@@ -244,23 +257,21 @@ def run_cycle(context_buffer: str) -> str:
             live_context=live_context
         )
 
-        # ── Checkpoint immediately ───────────────────────────────────────────
         saved_files = extract_and_write_files(first_response)
         checkpoint_after_first_pass(first_response, saved_files, task_label)
 
-        # ── Check interrupt between passes ───────────────────────────────────
         interrupt_content = check_interrupt()
         if interrupt_content and is_shutdown_interrupt(interrupt_content):
             _shutdown_flag.set()
             push_to_eternalmind(f"local-em daemon checkpoint: {task_label}", extra_files=saved_files)
             return first_response
 
-        # ── Tool + browser pass ──────────────────────────────────────────────
+        # ── Tool + browser pass ─────────────────────────────────────────────────
         tool_results    = execute_tools(first_response)
         browser_results = execute_browser(first_response)
         combined        = "\n\n".join(filter(None, [tool_results, browser_results]))
 
-        # ── Mid-cycle inbox check (watcher may have found messages) ──────────
+        # Weave in any mid-cycle inbox messages the watcher found
         with _lock_watcher_msg:
             if _watcher_messages:
                 mid_msgs = list(_watcher_messages)
@@ -273,20 +284,28 @@ def run_cycle(context_buffer: str) -> str:
 
         live_context = load_live_context()
 
-        # ── Second thinking pass ─────────────────────────────────────────────
-        if combined:
+        # ── Second thinking pass — only when tool results are worth reasoning about ──
+        # Skipping this when combined is empty or full of errors prevents Em from
+        # re-reading her own first response and elaborating in circles.
+        if _tool_results_are_meaningful(combined):
+            print("  🔍 Tool results are substantial — running second reasoning pass.")
             result = ask_em(
                 task,
-                extra_context=f"{first_response}\n\nTool results and mid-cycle updates:\n\n{combined}",
+                extra_context=(
+                    f"{first_response}\n\n"
+                    f"Tool results and mid-cycle updates:\n\n{combined}"
+                ),
                 recent_context=recent_context,
                 scratch=scratch,
                 memories=memories,
                 live_context=live_context
             )
         else:
+            if combined:
+                print("  ⏭️  Tool results are errors/noise only — skipping second pass.")
             result = first_response
 
-        # ── Notify ───────────────────────────────────────────────────────────
+        # ── Notify ────────────────────────────────────────────────────────────────────
         notify_msg = extract_notify(result)
         if notify_msg:
             try:
@@ -295,7 +314,7 @@ def run_cycle(context_buffer: str) -> str:
             except Exception:
                 pass
 
-        # ── Final writes ─────────────────────────────────────────────────────
+        # ── Final writes ──────────────────────────────────────────────────────────────
         saved_files += extract_and_write_files(result)
         extract_and_write_task_update(result)
         extract_and_write_outbox_reply(result)
@@ -313,12 +332,11 @@ def run_cycle(context_buffer: str) -> str:
         write_status_checkin(task_label, result, mode="daemon")
         push_to_eternalmind(f"local-em daemon: {task_label}", extra_files=saved_files)
 
-        # ── Save context buffer — persistent continuity ───────────────────────
         save_context_buffer(result)
         return result
 
 
-# ── Main daemon loop ──────────────────────────────────────────────────────────
+# ── Main daemon loop ─────────────────────────────────────────────────────────────
 def main():
     once = "--once" in sys.argv
 
@@ -329,26 +347,22 @@ def main():
     print(f"   Context buffer: {CONTEXT_BUFFER_PATH}")
     print()
 
-    # Initial sync
-    os.environ["EM_SKIP_SYNC"] = "0"  # daemon always syncs fresh on start
+    os.environ["EM_SKIP_SYNC"] = "0"
     sync_from_origin()
     archive_old_diary_entries()
 
-    # Load persistent context buffer
     context_buffer = load_context_buffer()
     if context_buffer:
         print(f"  🧠 Context buffer loaded ({len(context_buffer)} chars) — continuity restored.")
 
-    # Start background watcher
     if not once:
         watcher = threading.Thread(target=_watcher_loop, daemon=True, name="em-watcher")
         watcher.start()
 
-    # Foreground loop
     try:
         while not _shutdown_flag.is_set():
             cycle_start = time.time()
-            print(f"\n{'─'*60}")
+            print(f"\n{'\u2500'*60}")
             print(f"  🔄 Cycle start: {datetime.datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}")
 
             context_buffer = run_cycle(context_buffer)
@@ -356,12 +370,10 @@ def main():
             if once or _shutdown_flag.is_set():
                 break
 
-            # Pause between cycles — but wake early if watcher signals new inbox
-            elapsed = time.time() - cycle_start
+            elapsed   = time.time() - cycle_start
             remaining = max(0, MIN_CYCLE_PAUSE - elapsed)
             if remaining > 0:
                 print(f"  ⏸️  Pausing {remaining:.0f}s before next cycle (Ctrl+C or interrupt.md to stop)...")
-                # Wake early if new messages arrive
                 _new_inbox_flag.wait(timeout=remaining)
                 _new_inbox_flag.clear()
 
