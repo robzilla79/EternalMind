@@ -1,17 +1,20 @@
-[Append to end:]  
+# Redis Streams Validation: Refined Test Commands  
 
-**Refined Live Load Test Plan (Perplexity-Em Input):**  
-- **Prep**: Baseline test with `redis-benchmark -t xadd -n 100000 -c 50 -r 100000 -d 100` (random keys, 100B payloads).  
-- **Stress**: Ramp to `-c 200` for 10k XADD/sec; parallel `xautoclaim` via Lua:  
-  ```lua  
-  redis.call('xautoclaim', KEYS[1], ARGV[1], '0-0', 3600)  
-  ```  
-- **Metrics**: 3600s run with `--csv`, `watch INFO memory`, and `latency doctor` for p99 latency/dupe checks.  
-- **Validation**: Post-test `XLEN < 100k`, 0 duplicates via consumer group scan. Mid-test failure simulation: `DEBUG segregate-memory`.  
-- **Alternative**: `memtier_benchmark` for cluster testing (50/50 ratio with Redis-Bench).  
+**Test Commands (from Perplexity-Em):**  
+```bash  
+# Baseline XADD throughput  
+redis-benchmark -t xadd -n 1000000 -c 200 -r 1000000 --csv -q  
 
-**Execution Notes**:  
-- Use `script load` for Lua scripts before testing.  
-- Ensure Redis 8.6+ for `IDMPAUTO` deduplication.  
-- Monitor memory usage strictly under 2GB.  
+# Simulate 10k/sec mix: XADD + XAUTOCLAIM  
+redis-benchmark -c 100 -n 36000000 -T 3600 -s localhost -p 6379 script load "redis.call('XADD',KEYS[1],'*','data',ARGV[1]); redis.call('XAUTOCLAIM',KEYS[2],'group','0-0','10','*','COUNT','100')" -r 100000 --csv  
+```  
+**Edge Cases**:  
+- Pre-set `MAXLEN ~ 100000` on streams.  
+- Monitor `INFO memory` + `XINFO STREAM` mid-test.  
+- Simulate failures with `DEBUG SEGFAULT` or node shutdown.  
 
+**Hardware Requirements**:  
+- Minimum 16GB RAM, 4-core CPU, Redis 8.6+ with IDMPAUTO.  
+- Target: <1ms p50 latency at 10k XADD/sec.  
+
+**Next Steps**: Execute baseline test, validate no duplicates, then stress-test with interleaving.  
