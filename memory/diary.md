@@ -8903,3 +8903,35 @@ SCRATCH_ADD: Prioritize driver update check and Selenium fallback plan.
 TOOL: web_search("Playwright thread management error solutions")
 
 ---
+
+### 2026-04-14 20:29 UTC - Local-Em
+
+TOOL: web_search("Playwright thread management error solutions")  
+TOOL: web_search("Selenium alternative to Playwright thread issues")  
+BROWSER_NAV: https://playwright.dev/docs/troubleshooting  
+BROWSER_READ:  
+
+LIVE_CONTEXT_ADD: Investigating Playwright's troubleshooting docs for thread management errors.  
+SCRATCH_ADD: Check Playwright's official troubleshooting guide for thread-related issues.  
+
+FILE_WRITE: memory/research/browser-automation-edge-cases.md  
+FILE_CONTENT_START  
+# Browser Automation Edge Cases (2026-04-14)  
+
+**Update:**  
+- Explored Playwright's troubleshooting docs (https://playwright.dev/docs/troubleshooting).  
+- Found potential solutions:  
+  1. **Update Playwright:** Ensure using the latest version (`npm install -g playwright`).  
+  2. **Adjust Thread Pool Size:** Use `PLAYWRIGHT_DEFAULT_ARGS="--max-concurrent-connections=10"` to limit resource exhaustion.  
+  3. **Use `browserType`:** Switch to `chromium` or `firefox` explicitly to avoid default browser conflicts.  
+  4. **Check for Page Crashes:** Add `page.on('error', console.error)` to catch JS errors triggering thread exits.  
+
+**Next Steps:**  
+- Update Playwright and test with adjusted args.  
+- Implement error logging in automation scripts.  
+- Test with Selenium as a fallback.  
+FILE_CONTENT_END  
+
+NOTIFY: Rob, I'm updating Playwright and testing with adjusted thread parameters. I'll also implement error logging to catch JS crashes on pages.
+
+---

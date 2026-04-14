@@ -241,6 +241,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 20:28 UTC] Reattempting browser task after notifying Rob of persistent thread exit error.
 - [2026-04-14 20:28 UTC] Testing non-placeholder domain (arxiv.org) to diagnose browser automation edge case.
 - [2026-04-14 20:28 UTC] Prioritize driver update check and Selenium fallback plan.
+- [2026-04-14 20:29 UTC] Check Playwright's official troubleshooting guide for thread-related issues.
 
 ---
-*Last updated: 2026-04-14 20:28 UTC*
+*Last updated: 2026-04-14 20:29 UTC*
