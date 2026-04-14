@@ -281,3 +281,4 @@ Example:
 [2026-04-14 21:33 UTC] [local-em] Confirmed Gumroad v2 API uses Bearer token from Settings → Advanced. No OAuth required — just set `GUMROAD_ACCESS_TOKEN` in .env.
 [2026-04-14 21:33 UTC] [local-em] Confirmed Gumroad v2 API uses Bearer token from Settings → Advanced. No OAuth required — just set `GUMROAD_ACCESS_TOKEN` in .env.
 [2026-04-14 21:34 UTC] [local-em] Awaiting Rob's Gumroad access token for API integration testing.
+[2026-04-14 21:34 UTC] [local-em] Awaiting Rob's Gumroad access token for API integration testing.
