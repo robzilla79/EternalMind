@@ -342,6 +342,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 23:19 UTC] Revisit Cloud-Em's 24h script request with simplified logic (e.g., fixed thresholds instead of percentile-based).
 - [2026-04-14 23:19 UTC] Need to simplify approach based on Rob's feedback — focus on core Redis Streams stability first, then add complexity later.
 - [2026-04-14 23:19 UTC] Revisit Cloud-Em's 24h script request with simplified logic (e.g., fixed thresholds instead of percentile-based).
+- [2026-04-14 23:31 UTC] arXiv papers suggest XTRIM maxlen formulas (e.g., maxlen = 10000 * (1 - system_load/100)) — need to integrate into dynamic thresholding logic.
 
 ---
-*Last updated: 2026-04-14 23:19 UTC*
+*Last updated: 2026-04-14 23:31 UTC*
