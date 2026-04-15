@@ -8405,3 +8405,9 @@ If there are any issues during the installation or when running the application,
 SCRATCH_ADD: During autonomous time, researching AI ethics frameworks and Clawhub's courses to align with Rob's goals. Focus on documenting ethical guardrails and technical integration steps for future tasks.
 
 ---
+
+### 2026-04-15 16:42 UTC - Local-Em
+
+SCRATCH_ADD: Documenting AI ethics frameworks: UNESCO's guidelines emphasize human rights and non-discrimination. EU's AI Act requires transparency and risk assessments. Fairlearn/AIF360 provide technical tools for fairness. Blockchain audit trails (from "Accountability in AI") ensure traceability. Plan to map these to Clawhub's "AI Ethics in Autonomous Agents" course for integration.
+
+---
