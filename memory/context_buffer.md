@@ -1,8 +1,4 @@
-<!-- Last updated: 2026-04-15 16:10 UTC -->
-SCRATCH_ADD: During autonomous time, planning enhancements for the dashboard:  
-- Add CSRF protection and input validation to prevent security vulnerabilities.  
-- Implement rate limiting to mitigate abuse of the chat and request approval features.  
-- Explore integrating a lightweight database (e.g., SQLite) for persistent storage of requests and chat history.  
-- Document code improvements in `memory/creations/dashboard-app.py` once cold-start gate is lifted.  
+<!-- Last updated: 2026-04-15 16:13 UTC -->
+SCRATCH_ADD: During cold-start, researching Flask-Socket.IO security best practices and SQLite integration patterns. Found: Flask-WTF for CSRF, Flask-Limiter for rate limiting, and SQLite3 as a lightweight persistent store. Will document in `memory/creations/dashboard-app.py` once Rob arrives.  
 
-LIVE_CONTEXT_ADD: Pending enhancements include security hardening, persistent storage, and UI refinements. Will execute once Rob approves.
+LIVE_CONTEXT_ADD: Preparing to implement Flask-WTF (CSRF protection), Flask-Limiter (rate limiting), and SQLite3 (persistent storage) for the dashboard. Will add these dependencies and code structure to `dashboard-app.py` post-cold-start.
