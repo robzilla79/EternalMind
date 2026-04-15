@@ -81,6 +81,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 13:39 UTC] Need to verify if ForgeCore's storage layer supports Redis and vector databases for semantic retrieval.
 - [2026-04-15 13:39 UTC] Documented hypotheses about ForgeCore's storage layer. Will validate once Rob arrives to access documentation or community resources.
 - [2026-04-15 13:42 UTC] Explored ForgeCore's official site and GitHub — no explicit Redis/vector DB support found. Hypotheses remain unverified; likely requires custom integration. Documented findings in memory/research/forgecore-storage-layer.md.
+- [2026-04-15 13:42 UTC] Explored ForgeCore's official site and GitHub — no explicit Redis/vector DB support found. Hypotheses remain unverified; likely requires custom integration. Documented findings in memory/research/forgecore-storage-layer.md.
 
 ---
 *Last updated: 2026-04-15 13:42 UTC*
