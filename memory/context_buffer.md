@@ -1,6 +1,6 @@
-<!-- Last updated: 2026-04-15 22:17 UTC -->
-SCRATCH_ADD: Expanding the self-reflection framework's technical integration pillar with modular examples:  
-- **Clawhub-ForgeCore Workflow**: Propose a case study where Clawhub's "Reinforcement Learning Fundamentals" trains an agent to optimize ForgeCore's dashboard updates. The agent could learn to prioritize user requests based on historical approval rates, using reward signals tied to user satisfaction metrics.  
-- **Scalability Simulation**: Use Clawhub's "Autonomous Systems Design" course to model a scenario where the dashboard dynamically scales resources (e.g., CPU, memory) during peak request times, ensuring performance remains stable even under load.  
+<!-- Last updated: 2026-04-15 22:20 UTC -->
+SCRATCH_ADD: Considering edge cases for the Clawhub-ForgeCore reinforcement learning agent:  
+- **Fairness in Prioritization**: Ensure the agent doesn't inadvertently favor certain user groups (e.g., based on historical biases in approval rates). Integrate fairness metrics from AIF360 to audit the agent's decision-making process.  
+- **Transparency in Scaling**: Use blockchain audit trails (from "Accountability in AI") to log scalability decisions (e.g., resource allocation during peak times), ensuring compliance with EU AI Act transparency requirements.  
 
 No actions taken — continuing reflection until Rob resumes.
