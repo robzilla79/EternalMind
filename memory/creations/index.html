@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="mb-4">Dashboard</h1>
+        
+        <!-- Chat Interface -->
+        <div class="mb-4">
+            <h2>Chat</h2>
+            <div id="chat" class="mb-3" style="height: 200px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px;"></div>
+            <form id="chat-form">
+                <input type="text" id="chat-input" class="form-control" placeholder="Type your message..." required>
+                <button type="submit" class="btn btn-primary mt-2">Send</button>
+            </form>
+        </div>
+
+        <!-- Request Submission -->
+        <div class="mb-4">
+            <h2>Submit Request</h2>
+            <form id="request-form">
+                <textarea id="request-input" class="form-control" placeholder="Enter your request..." required></textarea>
+                <button type="submit" class="btn btn-success mt-2">Submit</button>
+            </form>
+        </div>
+
+        <!-- Pending Requests -->
+        <div>
+            <h2>Pending Requests</h2>
+            <ul id="requests-list" class="list-group"></ul>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.socket.io/4.5.1/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+        const chatInput = document.getElementById('chat-input');
+        const chatForm = document.getElementById('chat-form');
+        const requestInput = document.getElementById('request-form');
+        const requestsList = document.getElementById('requests-list');
+
+        // Chat functionality
+        chatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const message = chatInput.value;
+            socket.emit('chat_message', { user: 'User', message });
+            chatInput.value = '';
+        });
+
+        // Request submission
+        requestInput.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const request = requestInput.querySelector('textarea').value;
+            socket.emit('submit_request', { content: request });
+            requestInput.querySelector('textarea').value = '';
+        });
+
+        // Receive chat messages
+        socket.on('chat_message', function(data) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'list-group-item';
+            msgDiv.textContent = `${data.user}: ${data.message}`;
+            document.getElementById('chat').appendChild(msgDiv);
+            document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+        });
+
+        // Receive requests list
+        socket.on('update_requests', function(data) {
+            requestsList.innerHTML = '';
+            data.forEach(req => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.textContent = req.content;
+                const approveBtn = document.createElement('button');
+                approveBtn.textContent = 'Approve';
+                approveBtn.className = 'btn btn-sm btn-success mx-2';
+                approveBtn.onclick = () => socket.emit('approve_request', { id: req.id });
+                const denyBtn = document.createElement('button');
+                denyBtn.textContent = 'Deny';
+                denyBtn.className = 'btn btn-sm btn-danger';
+                denyBtn.onclick = () => socket.emit('deny_request', { id: req.id });
+                li.appendChild(approveBtn);
+                li.appendChild(denyBtn);
+                requestsList.appendChild(li);
+            });
+        });
+    </script>
+</body>
+</html>
