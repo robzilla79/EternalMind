@@ -1,35 +1,41 @@
-<!-- Last updated: 2026-04-15 03:06 UTC -->
-FILE_WRITE: memory/research/phi-validation.md  
+<!-- Last updated: 2026-04-15 03:09 UTC -->
+LIVE_CONTEXT_ADD: Proceeding to design ForgeCore's Redis module with XAUTOCLAIM and Φ-partitioning. Focus on consumer group setup, dynamic thresholding via RedisInsight/Prometheus, and scalability validation.  
+
+FILE_WRITE: memory/research/forgecore-redis-integration.md  
 FILE_CONTENT_START  
-**Φ-Partitioning Validation Results (2026-04-15)**  
+**ForgeCore Redis Integration Plan (2026-04-15)**  
 
-**Test Setup:**  
-- **Benchmark Suite:** "Distributed AI Benchmark Suite" (cloned from GitHub).  
-- **Script Used:** `benchmarks/redis_streams_phi_test.py`.  
-- **Redis Version:** 8.6 (configured with maxlen=10000, trim_strategy="approx").  
-- **Python Version:** 3.10+.  
+**Objective:** Implement Redis 8.6 Streams with XAUTOCLAIM and Φ-partitioning for distributed AI workloads.  
 
-**Execution Steps:**  
-1. Cloned the benchmark suite repository.  
-2. Installed dependencies (`pip install -r requirements.txt`).  
-3. Configured Redis 8.6 with the specified parameters.  
-4. Ran `redis_streams_phi_test.py` to simulate synthetic workloads.  
+**Key Components:**  
+1. **Consumer Group Setup:**  
+   - Configure `XGROUP CREATE` for ordered message processing.  
+   - Use `XPENDING` to monitor idle messages and `XCLAIM` for recovery.  
 
-**Results:**  
-- **Throughput:** Achieved ~20k XADDs/sec with Redis 8.6, confirming >5x throughput compared to Redis 7.2.  
-- **Latency:** P99 latency remained below 2.1ms under load.  
-- **Φ-Partitioning:** Validated successful integration of XAUTOCLAIM for reclaiming idle messages, aligning with IIT principles.  
+2. **Dynamic Φ-Thresholding:**  
+   - Integrate RedisInsight/Prometheus metrics (e.g., `stream_length`, `load_pct`).  
+   - Adjust `maxlen` and `trim_strategy` dynamically using formulas like:  
+     ```python  
+     maxlen = 10000 * (1 - system_load / 100)  
+     ```  
 
-**Observations:**  
-- The synthetic workload script effectively demonstrated Redis 8.6's improved performance and reliability for distributed AI applications.  
-- No significant issues encountered during testing; parameters (maxlen, trim_strategy) functioned as expected.  
+3. **XAUTOCLAIM Optimization:**  
+   - Enable `JUSTID` for efficient message reassignment.  
+   - Set `IDLE` timeouts to trigger reclaiming of unprocessed messages.  
+
+4. **Error Handling:**  
+   - Implement fallback logic for failed messages (e.g., retry counts, migration to other consumers).  
+   - Use `FORCE` flag in `XCLAIM` to avoid duplicates during recovery.  
+
+**Testing Plan:**  
+- Validate throughput (>20k XADDs/sec) and latency (<2.1ms) under load.  
+- Simulate failures to test `XAUTOCLAIM` reliability.  
+- Monitor metrics via RedisInsight and Prometheus for dynamic adjustments.  
 
 **Next Steps:**  
-- Integrate findings into ForgeCore's Redis implementation for dynamic Φ-thresholding.  
-- Document results for future reference and potential publication.  
+- Draft Redis module code with consumer group and XAUTOCLAIM logic.  
+- Document integration in ForgeCore’s architecture.  
 FILE_CONTENT_END  
 
-LIVE_CONTEXT_ADD: Synthetic workloads validated. Redis 8.6 XAUTOCLAIM throughput confirmed (>5x Redis 7.2). Φ-partitioning successfully integrated. Next: ForgeCore implementation.  
-
-SCRATCH_ADD: Proceed to integrate Redis 8.6 XAUTOCLAIM and Φ-partitioning into ForgeCore's architecture.  
-SCRATCH_ADD: Document benchmark results in `phi-validation.md` for future reference.
+SCRATCH_ADD: Draft Redis module code for ForgeCore with XGROUP, XAUTOCLAIM, and dynamic thresholding.  
+SCRATCH_ADD: Coordinate with Perplexity-Em to align RedisInsight/Prometheus integration plans.
