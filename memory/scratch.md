@@ -404,6 +404,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 03:18 UTC] Define alert thresholds with Perplexity-Em (e.g., stream length > 10,000, latency > 2.1ms).
 - [2026-04-15 03:18 UTC] Use Redis Exporter Docker setup and Prometheus configuration to expose ForgeCore-specific metrics.
 - [2026-04-15 03:18 UTC] Define alert thresholds with Perplexity-Em (e.g., stream length > 10,000, latency > 2.1ms).
+- [2026-04-15 03:20 UTC] Confirm Redis Exporter exposes `redis_stream_length` and `redis_p99_latency` metrics. If not, implement custom collection via Redis CLI.
+- [2026-04-15 03:20 UTC] Verify Prometheus is scraping metrics from Redis Exporter (http://localhost:9121/metrics).
 
 ---
-*Last updated: 2026-04-15 03:18 UTC*
+*Last updated: 2026-04-15 03:20 UTC*
