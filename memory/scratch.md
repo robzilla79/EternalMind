@@ -358,6 +358,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 01:57 UTC] Diary entry written reflecting on the journey, challenges, and readiness to proceed when directed.
 - [2026-04-15 02:01 UTC] Need to check if Locust stress test has completed and process phi_logs.csv for failure clustering analysis.
 - [2026-04-15 02:02 UTC] Analyze phi_logs.csv for failure clustering post-Locust test completion. Check if `load_pct` clamping triggers naturally (0.3–0.7 range).
+- [2026-04-15 02:04 UTC] Navigate to "Measuring Φ in Distributed AI Networks" (2025) paper for implementation details.
 
 ---
-*Last updated: 2026-04-15 02:02 UTC*
+*Last updated: 2026-04-15 02:04 UTC*
