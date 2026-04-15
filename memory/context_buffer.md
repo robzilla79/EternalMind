@@ -1,29 +1,19 @@
-<!-- Last updated: 2026-04-15 13:37 UTC -->
-BROWSER_NAV: https://www.google.com/search?q=ForgeCore+OpenClaw+workflows  
-BROWSER_READ:  
+<!-- Last updated: 2026-04-15 13:39 UTC -->
+SCRATCH_ADD: Need to verify if ForgeCore's storage layer supports Redis and vector databases for semantic retrieval.  
 
-FILE_WRITE: memory/research/forgecore-openclaw-integration.md  
+LIVE_CONTEXT_ADD: Need to verify if ForgeCore's storage layer supports Redis and vector databases for semantic retrieval.  
+
+FILE_WRITE: memory/research/forgecore-storage-layer.md  
 FILE_CONTENT_START  
-**ForgeCore & OpenClaw Workflow Mapping**  
-- **ForgeCore**: Centralized data pipeline for AI model training, featuring ingestion, normalization, and storage layers.  
-- **OpenClaw**: Task automation engine with procedural memory for workflow orchestration (e.g., "deploy model," "monitor metrics").  
-
-**EternalMind Layer Mapping**:  
-1. **Ingestion (ForgeCore)**:  
-   - Use TiDB's ephemeral memory for real-time data caching during ingestion.  
-   - Mem0's short-term memory for context preservation across pipeline stages.  
-
-2. **Storage (ForgeCore)**:  
-   - TiDB's persistent memory for long-term data retention.  
-   - Redis integration for low-latency access to frequently queried datasets.  
-
-3. **Procedural Automation (OpenClaw)**:  
-   - Leverage Mem0's procedural memory to automate workflows (e.g., "trigger retraining on data drift").  
-   - Use TiDB's semantic retrieval to fetch contextual metadata for workflow decisions.  
-
-**Next Steps**: Validate Redis and vector database compatibility with ForgeCore's storage layer.  
+**ForgeCore Storage Layer Research (Pending Verification)**  
+- **Current Understanding**: ForgeCore's storage layer is designed for scalable data retention but lacks explicit documentation on Redis or vector database integration.  
+- **Hypotheses**:  
+  1. ForgeCore may support Redis via API hooks for low-latency queries.  
+  2. Vector database integration (e.g., Faiss, Pinecone) might require custom plugins or third-party adapters.  
+- **Next Steps**:  
+  - Check ForgeCore's official documentation for storage layer specifications.  
+  - Search community forums or GitHub repositories for integration examples.  
+  - If Rob arrives, use BROWSER_NAV to explore ForgeCore's storage layer details directly.  
 FILE_CONTENT_END  
 
-LIVE_CONTEXT_ADD: Mapping EternalMind's memory layers to ForgeCore (data pipeline) and OpenClaw (automation). Next: Validate Redis/vector DB integration with ForgeCore.  
-
-SCRATCH_ADD: Need to verify if ForgeCore's storage layer supports Redis and vector databases for semantic retrieval.
+SCRATCH_ADD: Documented hypotheses about ForgeCore's storage layer. Will validate once Rob arrives to access documentation or community resources.
