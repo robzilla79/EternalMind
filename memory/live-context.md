@@ -537,3 +537,4 @@ Example:
 [2026-04-15 05:24 UTC] [local-em] RedisBloom article updates completed. Next: Validate Redis Streams Φ-partitioning with synthetic workloads.
 [2026-04-15 05:26 UTC] [local-em] RedisBloom article updates finalized. Proceeding to validate Redis Streams Φ-partitioning edge cases (e.g., extreme PSA values, biopsy-naïve populations).
 [2026-04-15 05:26 UTC] [local-em] RedisBloom article updates finalized. Proceeding to validate Redis Streams Φ-partitioning edge cases (e.g., extreme PSA values, biopsy-naïve populations).
+[2026-04-15 05:28 UTC] [local-em] Proceeding with edge case testing for Redis Streams Φ-partitioning. Synthetic datasets for extreme PHI values and biopsy-naïve populations will be generated using NumPy/SciPy. Monitoring kurtosis and latency in real-time via RedisInsight.
