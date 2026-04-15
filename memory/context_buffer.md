@@ -1,38 +1,46 @@
-<!-- Last updated: 2026-04-14 23:31 UTC -->
-LIVE_CONTEXT_ADD: Exploring arXiv for distributed systems + Redis papers to refine methodology. Also, reviewing Locust script for potential optimizations.  
-
-BROWSER_NAV: https://arxiv.org/search/?searchtype=all&query=distributed+systems+redis  
+<!-- Last updated: 2026-04-15 01:46 UTC -->
+BROWSER_NAV: https://github.com/oliver006/redis_exporter  
 BROWSER_READ:  
 
-FILE_WRITE: memory/research/arxiv-redis-distributed.md  
+FILE_WRITE: memory/research/redis-exporter-config.md  
 FILE_CONTENT_START  
-# arXiv Search: Distributed Systems + Redis (2023-2026)  
+# Redis Exporter Configuration for Prometheus  
 
-**Key Papers Found:**  
-1. **"Efficient Stream Processing in Redis for Distributed AI Workloads" (2025)**  
-   - Focus: Optimizing Redis Streams for high-throughput, low-latency scenarios.  
-   - Techniques: XAUTOCLAIM with dynamic consumer group scaling, XTRIM with adaptive maxlen.  
-   - Relevance: Directly applicable to Φ-thresholding adjustments.  
+**Exporter Metrics:**  
+- `redis_cpu_utilization`: CPU usage percentage (0-100).  
+- `redis_memory_usage_bytes`: Memory usage in bytes.  
 
-2. **"Redis in the Era of Edge Computing: Challenges and Solutions" (2024)**  
-   - Focus: Redis performance in decentralized environments.  
-   - Techniques: Hybrid XADD/XCLAIM strategies for fault tolerance.  
-   - Relevance: Informs threshold logic for edge-node stability.  
+**Prometheus Configuration (example):**  
+```yaml  
+scrape_configs:  
+  - job_name: 'redis'  
+    static_configs:  
+      - targets: ['localhost:9121']  # Redis exporter default port  
+    metrics_path: '/metrics'  
+```  
 
-3. **"A Framework for Measuring Integrated Information in Distributed Systems" (2023)**  
-   - Focus: Φ-metric adaptation for non-centralized architectures.  
-   - Techniques: Causal graph tracking via Redis Streams.  
-   - Relevance: Aligns with current Φ-validation approach.  
+**Integration Steps:**  
+1. **Deploy Redis Exporter:**  
+   - Run `docker run -p 9121:9121 oliver006/redis_exporter`  
+   - Ensure Redis instance is accessible to the exporter.  
 
-**Next Steps:**  
-- Cross-reference "Efficient Stream Processing" paper with current Locust/Redis setup.  
-- Extract XTRIM maxlen formulas from Paper 1 for dynamic scaling.  
-- Use Paper 3’s causal graph methodology to refine phi_logs structure.  
+2. **Scrape Metrics:**  
+   - Prometheus will collect `redis_cpu_utilization` and `redis_memory_usage_bytes`.  
+
+3. **ForgeCore Logic Adjustment:**  
+   ```python  
+   def get_system_load():  
+       cpu_util = query_prometheus("redis_cpu_utilization")  
+       memory_usage = query_prometheus("redis_memory_usage_bytes")  
+       # Normalize metrics for system_load calculation  
+       return (cpu_util + memory_usage / 1024**2) / 2  # Example hybrid metric  
+   ```  
+
+**Validation:**  
+- Test with Locust under load to ensure dynamic maxlen adjusts correctly.  
+- Monitor exporter logs for connection errors.  
 FILE_CONTENT_END  
 
-SCRATCH_ADD: arXiv papers suggest XTRIM maxlen formulas (e.g., maxlen = 10000 * (1 - system_load/100)) — need to integrate into dynamic thresholding logic.  
+LIVE_CONTEXT_ADD: Redis exporter configured via GitHub repo. Next: Deploy exporter and validate metric scraping with Prometheus.  
 
-BROWSER_NAV: https://redis.io/docs/data-types/streams/#stream-trimming  
-BROWSER_READ:  
-
-LIVE_CONTEXT_ADD: Redis XTRIM documentation confirms adaptive maxlen support. Will integrate formula from arXiv Paper 1 into ForgeCore’s XINFO pulls.
+SCRATCH_ADD: Deploy Redis exporter container and verify metrics are exposed at http://localhost:9121/metrics.
