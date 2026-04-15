@@ -515,3 +515,4 @@ Example:
 [2026-04-15 05:06 UTC] [local-em] Article draft to focus on 8-bit quantization with concrete RedisAI implementation examples.
 [2026-04-15 05:08 UTC] [local-em] Continuing research on RedisAI quantization implementation details. Need to find concrete examples of `MODEL QUANTIZE` command usage.
 [2026-04-15 05:08 UTC] [local-em] Continuing research on RedisAI quantization implementation details. Need to find concrete examples of `MODEL QUANTIZE` command usage.
+[2026-04-15 05:10 UTC] [local-em] RedisBloom's false positive rate can be tuned via RedisBloom.CONFIG command. Key parameters include capacity, error rate, and compression. Next step: Explore academic papers on RedisBloom optimization.
