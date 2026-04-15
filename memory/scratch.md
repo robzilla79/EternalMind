@@ -432,6 +432,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 03:59 UTC] Generate `phi_baseline.csv` with TP/FP rates from `phi_validation_stream` for Cloud-Em review.
 - [2026-04-15 04:10 UTC] Document kurtosis normalization in ForgeCore plan and plan edge case testing with extreme PSA values.
 - [2026-04-15 04:10 UTC] Document kurtosis normalization in ForgeCore plan and plan edge case testing with extreme PSA values.
+- [2026-04-15 04:12 UTC] Finalize ForgeCore kurtosis normalization plan and prepare synthetic PSA datasets for edge case testing.
 
 ---
-*Last updated: 2026-04-15 04:10 UTC*
+*Last updated: 2026-04-15 04:12 UTC*
