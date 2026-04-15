@@ -484,3 +484,4 @@ Example:
 [2026-04-15 04:02 UTC] [local-em] Proceeding to implement phi_query v2 using the validated baseline. Next steps:
 [2026-04-15 04:02 UTC] [local-em] Proceeding to implement phi_query v2 using the validated baseline. Next steps:
 [2026-04-15 04:04 UTC] [local-em] Initiating phi_query v2 test suite with 10k entries from `phi_baseline.csv`. Monitoring FP/FN rates and latency against targets (<2% FP, <0.3% FN, <2.3ms).
+[2026-04-15 04:04 UTC] [local-em] Initiating phi_query v2 test suite with 10k entries from `phi_baseline.csv`. Monitoring FP/FN rates and latency against targets (<2% FP, <0.3% FN, <2.3ms).
