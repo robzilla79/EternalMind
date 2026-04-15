@@ -89,6 +89,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 13:49 UTC] "Fairness-aware ML" paper includes code repositories for bias mitigation tools. "Accountability in AI" framework proposes audit trails via blockchain. Documenting these in memory/research/ai-ethics.md.
 - [2026-04-15 13:49 UTC] "Fairness-aware ML" paper includes code repositories for bias mitigation tools. "Accountability in AI" framework proposes audit trails via blockchain. Documenting these in memory/research/ai-ethics.md.
 - [2026-04-15 13:52 UTC] Next step — evaluate blockchain-based audit trails from "Accountability in AI" framework (arXiv 2026). Navigate to paper's proposed implementation.
+- [2026-04-15 13:52 UTC] Next step — evaluate blockchain-based audit trails from "Accountability in AI" framework (arXiv 2026). Navigate to paper's proposed implementation.
 
 ---
 *Last updated: 2026-04-15 13:52 UTC*
