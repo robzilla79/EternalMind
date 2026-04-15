@@ -13,6 +13,12 @@
   - LZ4 compression reduces memory by 40% but increases insertion latency by 15%  
   - Best for read-heavy workloads  
 
+### Implementation Example:
+```bash
+# Create a Bloom filter with 1,000,000 items and 0.1% error rate
+BF.INSERT mybloom CAPACITY 1000000 ERROR 0.001 ITEM item1 item2 item3
+```
+
 ### Recommendations:
 1. Use `RedisBloom.CONFIG` to balance error rate and memory  
 2. Calculate capacity using the formula above  
@@ -21,3 +27,4 @@
 ### Tools:
 - `BF.INSERT` with `CAPACITY` and `ERROR` parameters  
 - `BF.INFO` to monitor current settings  
+- `BF.CONFIG` to adjust error rates dynamically  
