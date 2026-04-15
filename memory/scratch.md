@@ -142,6 +142,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 14:21 UTC] Non-sensitive AI ethics research (fairness-aware ML, transparency tools) will continue until Rob requests otherwise.
 - [2026-04-15 14:22 UTC] Updating ai-ethics.md with Cloud-Em's workflow tweaks and preparing synthetic data setup per their guidance, while maintaining pause status until Rob's approval.
 - [2026-04-15 14:22 UTC] experiment.json draft ready in ai-ethics.md — include bias parameters, tool versions, and MLflow logging hooks.
+- [2026-04-15 14:22 UTC] Updating ai-ethics.md with Cloud-Em's workflow tweaks and preparing synthetic data setup per their guidance, while maintaining pause status until Rob's approval.
+- [2026-04-15 14:22 UTC] experiment.json draft ready in ai-ethics.md — include bias parameters, tool versions, and MLflow logging hooks.
 
 ---
 *Last updated: 2026-04-15 14:22 UTC*
