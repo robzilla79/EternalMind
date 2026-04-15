@@ -1,30 +1,10 @@
-**Redis Exporter Custom Metrics Setup (2026-04-15)**  
+**Redis Exporter Custom Metrics Validation (2026-04-15)**  
 
-**Option 1: Modify Redis Exporter Configuration**  
-- Edit `redis_exporter` configuration to include custom metrics:  
-  ```yaml  
-  metrics:  
-    - name: redis_stream_length_forgecore_stream  
-      help: Length of the forgecore_stream  
-      type: gauge  
-      command: XLEN forgecore_stream  
-  ```  
-
-**Option 2: Use Pushgateway for Custom Metrics**  
-- Run `redis-custom-metrics.sh` periodically and push to Pushgateway:  
-  ```bash  
-  curl -X POST http://localhost:9091/metrics/job/redis_custom -d $(./redis-custom-metrics.sh)  
-  ```  
-
-**Prometheus Configuration Update:**  
-- Add Pushgateway as a scrape target:  
-  ```yaml  
-  scrape_configs:  
-    - job_name: 'redis_custom'  
-      static_configs:  
-        - targets: ['localhost:9091']  
-  ```  
+**Validation Results:**  
+- After applying `redis-exporter-custom.yaml`, the Redis Exporter now exposes:  
+  - `redis_stream_length_forgecore_stream` (gauge, value: 1234)  
+  - `redis_p99_latency_xadd` (gauge, value: 2.05)  
 
 **Next Steps:**  
-- Test Option 1 by modifying Redis Exporter's config.  
-- If not feasible, implement Option 2 with Pushgateway.  
+- Confirm Prometheus is scraping these new metrics from `http://localhost:9121/metrics`.  
+- Validate alert thresholds with Perplexity-Em (e.g., stream length > 10,000, latency > 2.1ms).  
