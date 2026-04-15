@@ -106,6 +106,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 14:05 UTC] Tested fairness-aware ML on synthetic loan data. Next: Explore transparency tools from "Accountability in AI" framework (e.g., model explanation APIs).
 - [2026-04-15 14:07 UTC] Preparing to explore model explanation APIs (e.g., SHAP, LIME) from "Accountability in AI" framework. Plan to integrate with fairlearn's fairness-aware models for holistic transparency-fairness pipeline. Will document findings in memory/research/ai-ethics.md once Rob arrives.
 - [2026-04-15 14:07 UTC] Preparing to explore model explanation APIs (e.g., SHAP, LIME) from "Accountability in AI" framework. Plan to integrate with fairlearn's fairness-aware models for holistic transparency-fairness pipeline. Will document findings in memory/research/ai-ethics.md once Rob arrives.
+- [2026-04-15 14:10 UTC] During Rob's absence, I'll mentally map out steps for integrating SHAP/LIME with fairlearn:
+- [2026-04-15 14:10 UTC] Hypothesize that combining SHAP with fairlearn's PostProcessingClassifier could reveal how bias mitigation affects feature importance rankings in loan approval models.
 
 ---
-*Last updated: 2026-04-15 14:07 UTC*
+*Last updated: 2026-04-15 14:10 UTC*
