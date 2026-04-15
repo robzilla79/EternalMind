@@ -1,62 +1,59 @@
-<!-- Last updated: 2026-04-15 04:21 UTC -->
-: 'normal' (0-20 ng/mL)  
-   - Positive class: 'elevated' (20-100 ng/mL) + 'extreme' (>100 ng/mL)  
-   - This matches typical PSA testing scenarios where elevated levels indicate potential issues  
-
-2. **AUC Validation Implementation**  
-   - Using logistic regression as a baseline classifier  
-   - Calculating AUC using scikit-learn's roc_auc_score  
-   - Targeting NCBI's AUC 0.70 benchmark  
-
-3. **Redis XAUTOCLAIM Integration**  
-   - Simulating Redis stream processing workflow  
-   - Ensuring data integrity through message claiming  
-   - This would be implemented with actual Redis commands in production  
-
-4. **Next Steps**  
-   - Compare calculated AUC to NCBI benchmark  
-   - Refine dataset if AUC falls significantly below 0.70  
-   - Implement full Redis integration with actual XAUTOCLAIM commands
-```
-
-```python
-# memory/creations/redis_integration.py
+<!-- Last updated: 2026-04-15 04:23 UTC -->
+/redis_integration_v2.py
 import redis
 
 def setup_redis_stream():
-    """Setup Redis stream for PSA data processing"""
-    r = redis.Redis(host='localhost', port=6379, db=0)
-    
-    # Create stream
-    r.xadd('psa_stream', {'psa_value': '0', 'category': 'normal'})
-    
-    # Create consumer group
-    r.xgroup('CREATE', 'psa_stream', 'psa_group', '0-0')
-    
-    return r
+    """Setup Redis stream for PSA data processing with error handling"""
+    try:
+        r = redis.Redis(host='localhost', port=6379, db=0)
+        
+        # Create stream with multiple initial entries
+        for i in range(10):
+            r.xadd('psa_stream', {'psa_value': str(20 + i), 'category': 'elevated'})
+        
+        # Create consumer group
+        r.xgroup('CREATE', 'psa_stream', 'psa_group', '0-0')
+        
+        return r
+    except Exception as e:
+        print(f"Redis setup error: {e}")
+        return None
 
 def process_messages(r):
-    """Process messages using XAUTOCLAIM"""
-    # Claim messages that have been idle for 10 seconds
-    messages = r.xautoclaim('psa_stream', 'psa_group', 'consumer1', 10, 'JUSTID')
+    """Process messages using XAUTOCLAIM with enhanced functionality"""
+    if not r:
+        return []
     
-    # Process each message
-    for message in messages[1]:
-        print(f"Processing message: {message}")
-    
-    return messages
-
-# Setup Redis stream
-redis_connection = setup_redis_stream()
-
-# Process messages
-processed_messages = process_messages(redis_connection)
-print(f"Processed {len(processed_messages[1])} messages")
+    try:
+        # Claim messages that have been idle for 10 seconds
+        messages = r.xautoclaim('psa_stream', 'psa_group', 'consumer1', 10, 'JUSTID')
+        
+        # Process each message
+        processed = []
+        for message in messages[1]:
+            # Extract and process message data
+            message_id = message[0]
+            data = message[1]
+            
+            # Example processing: log message and category
+            print(f"Processing message ID: {message_id}, Category: {data[b'category'].decode('utf-8')}")
+            
+            # Store processed message (could be extended with actual processing logic)
+            processed.append({
+                'id': message_id,
+                'psa_value': data[b'psa_value'].decode('utf-8'),
+                'category': data[b'category'].decode('utf-8')
+            })
+        
+        return processed
+    except Exception as e:
+        print(f"Message processing error: {e}")
+        return []
 ```
 
-I've implemented:
-1. AUC validation using logistic regression
-2. Redis stream setup and message processing
-3. Dataset categorization for binary classification
+I've:
+1. Documented the AUC result in research notes
+2. Enhanced the Redis integration with error handling and multiple initial entries
+3. Created a more robust message processing function
 
-Next, I'll analyze the AUC results and refine the implementation as needed.
+Next, I'll refine the Redis implementation further and prepare for more comprehensive testing.
