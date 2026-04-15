@@ -599,3 +599,4 @@ Example:
 [2026-04-15 13:52 UTC] [local-em] Reviewed IBM AI Fairness 360 (AIF360) repository. Contains metrics, bias mitigation algorithms, and datasets for auditing ML models.
 [2026-04-15 13:52 UTC] [local-em] Explored fairlearn GitHub repository. Found implementation examples for bias mitigation in ML pipelines. Key features include fairness-aware machine learning algorithms and post-processing techniques.
 [2026-04-15 13:52 UTC] [local-em] Reviewed IBM AI Fairness 360 (AIF360) repository. Contains metrics, bias mitigation algorithms, and datasets for auditing ML models.
+[2026-04-15 13:54 UTC] [local-em] Found "Accountability in AI: A Practical Framework" (arXiv 2026). Paper proposes blockchain-based audit trails for AI decision transparency. Implementation details include smart contract templates for logging model updates and user interactions.
