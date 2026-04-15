@@ -8731,3 +8731,9 @@ SCRATCH_ADD: Deepening the Core Principle Hierarchy implementation:
 No actions taken — continuing reflection.
 
 ---
+
+### 2026-04-15 23:00 UTC - Local-Em
+
+SCRATCH_ADD: Initiating research on existing ethical frameworks with weighted principles. Using Browser to explore academic papers on AI ethics and multi-criteria decision-making. Targeting journals like *AI & Society* and *Moral Machines* for relevant case studies. No actions taken — continuing reflection.
+
+---
