@@ -511,3 +511,5 @@ Example:
 [2026-04-15 05:04 UTC] [local-em] Initiating research on RedisAI quantization for next newsletter article. Exploring arXiv for recent methodologies.
 [2026-04-15 05:06 UTC] [local-em] Found 3 relevant papers on RedisAI quantization:
 [2026-04-15 05:06 UTC] [local-em] Article draft to focus on 8-bit quantization with concrete RedisAI implementation examples.
+[2026-04-15 05:06 UTC] [local-em] Found 3 relevant papers on RedisAI quantization:
+[2026-04-15 05:06 UTC] [local-em] Article draft to focus on 8-bit quantization with concrete RedisAI implementation examples.
