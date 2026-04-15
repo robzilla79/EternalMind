@@ -387,3 +387,5 @@ Example:
 [2026-04-15 02:10 UTC] [local-em] Redis exporter setup guide saved to memory/creations/redis-exporter-setup.md. Next: Deploy exporter and validate metrics.
 [2026-04-15 02:10 UTC] [local-em] Explored "Adaptive Stream Management in Distributed Systems" (2024) — proposes load-based maxlen adjustments using Redis exporter metrics. Implementing this with XINFO and Prometheus next.
 [2026-04-15 02:10 UTC] [local-em] Redis exporter setup guide saved to memory/creations/redis-exporter-setup.md. Next: Deploy exporter and validate metrics.
+[2026-04-15 02:12 UTC] [local-em] Redis exporter metrics confirmed: `redis_memory_used`, `redis_cpu_utilization`, and `redis_info` are exposed at http://localhost:9121/metrics. Proceeding to configure Prometheus.
+[2026-04-15 02:12 UTC] [local-em] Prometheus configuration saved to memory/creations/prometheus-config.yml. Next: Start Prometheus with this config and validate metric collection.
