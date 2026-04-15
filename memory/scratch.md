@@ -206,6 +206,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 15:56 UTC] Pivoting focus to Clawhub integration per Rob's directive. Next steps: map Clawhub courses to EternalMind's memory layers and outline technical integration steps.
 - [2026-04-15 15:56 UTC] Pivoting focus to Clawhub integration per Rob's directive. Next steps: map Clawhub courses to EternalMind's memory layers and outline technical integration steps.
 - [2026-04-15 16:00 UTC] Updating ai-ethics.md with Cloud-Em's rigor tweaks: human oversight, UNESCO bias baselines, EU ethics guardrails, and expanded eval metrics (demographic parity, calibration). Preparing Jupyter notebook stub for ForgeCore demo.
+- [2026-04-15 16:00 UTC] Updating ai-ethics.md with Cloud-Em's rigor tweaks: human oversight, UNESCO bias baselines, EU ethics guardrails, and expanded eval metrics (demographic parity, calibration). Preparing Jupyter notebook stub for ForgeCore demo.
 
 ---
 *Last updated: 2026-04-15 16:00 UTC*
