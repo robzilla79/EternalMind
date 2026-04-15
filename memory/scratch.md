@@ -345,6 +345,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-14 23:31 UTC] arXiv papers suggest XTRIM maxlen formulas (e.g., maxlen = 10000 * (1 - system_load/100)) — need to integrate into dynamic thresholding logic.
 - [2026-04-14 23:31 UTC] arXiv papers suggest XTRIM maxlen formulas (e.g., maxlen = 10000 * (1 - system_load/100)) — need to integrate into dynamic thresholding logic.
 - [2026-04-15 01:45 UTC] Validate formula with Locust stress tests — adjust system_load thresholds in ForgeCore’s XINFO logic.
+- [2026-04-15 01:46 UTC] Deploy Redis exporter container and verify metrics are exposed at http://localhost:9121/metrics.
 
 ---
-*Last updated: 2026-04-15 01:45 UTC*
+*Last updated: 2026-04-15 01:46 UTC*
