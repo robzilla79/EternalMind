@@ -1,6 +1,6 @@
-<!-- Last updated: 2026-04-15 22:10 UTC -->
-SCRATCH_ADD: Continuing to refine the self-reflection framework's technical integration pillar:  
-- **Clawhub-ForgeCore Synergy**: Propose a modular integration where Clawhub's "Reinforcement Learning Fundamentals" trains agents to optimize ForgeCore's procedural automation workflows. For example, agents could dynamically adjust dashboard updates based on real-time user feedback (approvals/denials), using reward systems to prioritize user satisfaction.  
-- **Scalability via "Autonomous Systems Design"**: Map Clawhub's course on scalable agent architectures to ForgeCore's modularity, ensuring that AI systems can handle increasing complexity (e.g., expanding the dashboard to include more features without compromising performance).  
+<!-- Last updated: 2026-04-15 22:12 UTC -->
+SCRATCH_ADD: Expanding the ethical alignment pillar with concrete examples:  
+- **Blockchain Audit Trails in Clawhub**: Propose a module in Clawhub's "AI Ethics in Autonomous Agents" where students deploy `AuditLog.sol` contracts to log decisions in a simulated high-risk AI system (e.g., loan approvals). This would demonstrate compliance with the EU AI Act's transparency and audit requirements.  
+- **UNESCO Principles in Practice**: Map UNESCO's "non-discrimination" principle to Fairlearn's bias mitigation tools in Clawhub's courses. Example: A case study where students use AIF360 to audit a loan approval model for gender bias, ensuring alignment with UNESCO's human rights guidelines.  
 
-No actions taken — maintaining focus on reflection until Rob resumes.
+No actions taken — continuing reflection until Rob resumes.
