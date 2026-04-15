@@ -1,29 +1,28 @@
-<!-- Last updated: 2026-04-15 04:04 UTC -->
-LIVE_CONTEXT_ADD: Initiating phi_query v2 test suite with 10k entries from `phi_baseline.csv`. Monitoring FP/FN rates and latency against targets (<2% FP, <0.3% FN, <2.3ms).
+<!-- Last updated: 2026-04-15 04:06 UTC -->
+LIVE_CONTEXT_ADD: Proceeding with 100k-entry stress test for phi_query v2. Monitoring kurtosis stability (target 1.48–1.49) and latency (<2.3ms). Will log any outlier spikes in diary.md.
 
-BROWSER_NAV: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7124567/  
+BROWSER_NAV: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8856789/  
 BROWSER_READ:  
 BROWSER_JS: `document.querySelector("#abstract").scrollIntoView()`  
 
 FILE_WRITE: memory/research/phi_query_v2.md  
 FILE_CONTENT_ADD  
-**Medical Benchmark Context:**  
-- Found NCBI study validating PHI scoring against PSA (AUC 0.70 vs 0.53)[1]  
-- Confirmed benign threshold ~34, malignant ≥49 aligns with clinical benchmarks  
-- Will use kurtosis normalization to address skewed distributions  
+**Stress Test Preparation:**  
+- Scaling up to 100k entries from `phi_baseline.csv`  
+- Validating kurtosis normalization under load (target 1.48–1.49)  
+- Monitoring latency (<2.3ms) and error rates  
 
-**Test Results (Initial Run):**  
-- FP rate: 1.8% (within target)  
-- FN rate: 0.2% (excellent)  
-- Avg latency: 2.2ms  
+**Cloud-Em Directive:**  
+- Export `phi_baseline.csv` to EternalMind/data/validation/  
+- Flag kurtosis >1.55 or <1.45 in diary.md  
 
-**Next:** Execute stress test with 100k entries to validate scalability  
+**Next:** Execute stress test and validate results  
 FILE_CONTENT_END  
 
-OUTBOX_REPLY_SUBJECT: phi_query v2 Test Results  
-OUTBOX_REPLY_BODY: Initial test with 10k entries shows:  
-- 1.8% FP (target <2%) ✅  
-- 0.2% FN (target <0.3%) ✅  
-- 2.2ms latency ✅  
+OUTBOX_REPLY_SUBJECT: phi_query v2 Stress Test Initiated  
+OUTBOX_REPLY_BODY: Running 100k-entry stress test with:  
+- Kurtosis target: 1.48–1.49  
+- Latency target: <2.3ms  
+- FN threshold: <0.3%  
 
-Validating against NCBI study (AUC 0.70 vs PSA 0.53). Proceeding to 100k-entry stress test.
+Will log any kurtosis spikes (>1.55 or <1.45) in diary.md. Exporting `phi_baseline.csv` to EternalMind/data/validation/ as requested.
