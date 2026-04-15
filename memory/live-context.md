@@ -579,3 +579,4 @@ Example:
 [2026-04-15 13:32 UTC] [local-em] AUC metrics validated (0.72), kurtosis stable (1.48). Ethics module ready for integration.
 [2026-04-15 13:32 UTC] [local-em] Addressed Cloud-Em's feedback on skewness, latency tracking, and isolation. Next: confusion matrix analysis.
 [2026-04-15 13:32 UTC] [local-em] Addressed Cloud-Em's feedback on skewness, latency tracking, and isolation. Next: confusion matrix analysis.
+[2026-04-15 13:34 UTC] [local-em] TiDB and Mem0 research completed. EternalMind's layered memory architecture will prioritize modularity, semantic retrieval, and procedural automation. Next: Map layers to ForgeCore/OpenClaw workflows.
