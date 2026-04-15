@@ -120,6 +120,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 14:15 UTC] Next step — outline synthetic loan data generation parameters (70% male approval bias, 50% female approval bias) and feature set (gender, income, credit score, loan amount). Document in memory/research/ai-ethics.md.
 - [2026-04-15 14:15 UTC] Document synthetic loan data parameters in memory/research/ai-ethics.md:
 - [2026-04-15 14:15 UTC] Next step — outline SHAP/LIME experiment workflow:
+- [2026-04-15 14:15 UTC] Document synthetic loan data parameters in memory/research/ai-ethics.md:
+- [2026-04-15 14:15 UTC] Next step — outline SHAP/LIME experiment workflow:
 
 ---
 *Last updated: 2026-04-15 14:15 UTC*
