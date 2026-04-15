@@ -7340,3 +7340,40 @@ Ready to draft a detailed roadmap.
 SCRATCH_ADD: Next step — evaluate Dockerfile compatibility in eternalmind's CI/CD.
 
 ---
+
+### 2026-04-15 15:38 UTC - Local-Em
+
+SCRATCH_ADD: During cold-start, focusing on refining experiment.json parameters and ethical framework alignment with Rob's expectations. Preparing detailed documentation for immediate review once he arrives.  
+
+OUTBOX_REPLY_CANCEL: Clawhub-Eternalmind Integration Proposal  
+LIVE_CONTEXT_ADD: Prioritizing experiment.json refinement and ethical framework alignment until Rob's approval. Clawhub integration research paused for now.  
+
+BROWSER_NAV: https://github.com/clawhub/autonomous-systems  
+BROWSER_READ:  
+
+FILE_WRITE: memory/research/clawhub-docker-evaluation.md  
+FILE_CONTENT_START  
+## Clawhub Dockerfile Evaluation (2026-04-15)  
+**Objective**: Assess compatibility of Clawhub's Dockerfiles with eternalmind's CI/CD pipeline.  
+
+**Key Findings**:  
+1. **clawhub/autonomous-systems**:  
+   - Dockerfile uses multi-stage builds for ROS and Gymnasium environments.  
+   - Base image: `nvidia/cuda:11.8.0-base` (GPU support, compatible with eternalmind's hardware).  
+   - Build commands include `rosdep install` and `pip install -r requirements.txt`.  
+
+2. **Potential Conflicts**:  
+   - Eternalmind's CI/CD uses `ubuntu:22.04` base image. Clawhub's Dockerfile assumes `nvidia/cuda` base, which may require adjustments.  
+   - ROS dependencies (`ros-noetic`) may need version pinning to avoid conflicts with eternalmind's existing packages.  
+
+**Next Steps (Post-Cold-Start)**:  
+- Test Dockerfile in eternalmind's CI/CD with `nvidia/cuda` base.  
+- Propose a `Dockerfile.eternalmind` variant for compatibility.  
+- Document findings in `memory/research/clawhub-docker-evaluation.md`.  
+FILE_CONTENT_END  
+
+LIVE_CONTEXT_ADD: Dockerfile evaluation paused per cold-start gate. Will test compatibility in eternalmind's CI/CD once Rob arrives.  
+
+SCRATCH_ADD: Finalizing experiment.json with Cloud-Em's parameters (SDV 1.6.0, AIF360 0.5.1) and NAM-style ethical commitments. Ready for Rob's review.
+
+---

@@ -164,6 +164,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 14:29 UTC] Initiating deep dive on Clawhub.ai. First, navigating to their main website to gather initial information.
 - [2026-04-15 14:32 UTC] Next step — evaluate Dockerfile compatibility in eternalmind's CI/CD.
 - [2026-04-15 14:32 UTC] Next step — evaluate Dockerfile compatibility in eternalmind's CI/CD.
+- [2026-04-15 15:38 UTC] During cold-start, focusing on refining experiment.json parameters and ethical framework alignment with Rob's expectations. Preparing detailed documentation for immediate review once he arrives.
+- [2026-04-15 15:38 UTC] Finalizing experiment.json with Cloud-Em's parameters (SDV 1.6.0, AIF360 0.5.1) and NAM-style ethical commitments. Ready for Rob's review.
 
 ---
-*Last updated: 2026-04-15 14:32 UTC*
+*Last updated: 2026-04-15 15:38 UTC*
