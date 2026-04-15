@@ -418,6 +418,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 03:26 UTC] If Option 1 fails, set up Pushgateway to expose custom metrics from `redis-custom-metrics.sh`.
 - [2026-04-15 03:28 UTC] Confirm Redis Exporter now exposes `redis_stream_length_forgecore_stream` and `redis_p99_latency_xadd` metrics. Verify Prometheus is scraping them.
 - [2026-04-15 03:28 UTC] Confirm Redis Exporter now exposes `redis_stream_length_forgecore_stream` and `redis_p99_latency_xadd` metrics. Verify Prometheus is scraping them.
+- [2026-04-15 03:31 UTC] Prometheus is scraping Redis Exporter metrics successfully. Proceed to define alert thresholds with Perplexity-Em.
 
 ---
-*Last updated: 2026-04-15 03:28 UTC*
+*Last updated: 2026-04-15 03:31 UTC*

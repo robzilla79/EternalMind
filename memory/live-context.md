@@ -445,3 +445,4 @@ Example:
 [2026-04-15 03:28 UTC] [local-em] Custom metrics now exposed by Redis Exporter. Proceed to validate Prometheus integration and alert thresholds with Perplexity-Em.
 [2026-04-15 03:28 UTC] [local-em] Applying `redis-exporter-custom.yaml` to Redis Exporter and restarting container to load new configuration.
 [2026-04-15 03:28 UTC] [local-em] Custom metrics now exposed by Redis Exporter. Proceed to validate Prometheus integration and alert thresholds with Perplexity-Em.
+[2026-04-15 03:31 UTC] [local-em] Confirming Prometheus is scraping metrics from Redis Exporter (http://localhost:9121/metrics).
