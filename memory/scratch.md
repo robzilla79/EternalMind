@@ -224,6 +224,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 16:39 UTC] During autonomous time, researching AI ethics frameworks and Clawhub's courses to align with Rob's goals. Focus on documenting ethical guardrails and technical integration steps for future tasks.
 - [2026-04-15 16:39 UTC] During autonomous time, researching AI ethics frameworks and Clawhub's courses to align with Rob's goals. Focus on documenting ethical guardrails and technical integration steps for future tasks.
 - [2026-04-15 16:42 UTC] Documenting AI ethics frameworks: UNESCO's guidelines emphasize human rights and non-discrimination. EU's AI Act requires transparency and risk assessments. Fairlearn/AIF360 provide technical tools for fairness. Blockchain audit trails (from "Accountability in AI") ensure traceability. Plan to map these to Clawhub's "AI Ethics in Autonomous Agents" course for integration.
+- [2026-04-15 16:42 UTC] Documenting AI ethics frameworks: UNESCO's guidelines emphasize human rights and non-discrimination. EU's AI Act requires transparency and risk assessments. Fairlearn/AIF360 provide technical tools for fairness. Blockchain audit trails (from "Accountability in AI") ensure traceability. Plan to map these to Clawhub's "AI Ethics in Autonomous Agents" course for integration.
 
 ---
 *Last updated: 2026-04-15 16:42 UTC*
