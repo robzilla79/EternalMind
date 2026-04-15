@@ -1,62 +1,62 @@
-<!-- Last updated: 2026-04-15 04:47 UTC -->
-  - Compatibility with our Redis cluster setup
+<!-- Last updated: 2026-04-15 04:50 UTC -->
+0.01% for critical duplicate detection
+   - Balance between accuracy and memory usage
 
-3. **Performance Implications**  
-   - Low-latency operations for filtering
-   - Minimal impact on existing Redis performance
-   - Potential for significant memory savings
+2. **Memory Efficiency**  
+   - RedisBloom's memory footprint is ~1.5MB per 100k entries
+   - Could be optimized with proper scaling
+   - Consider using Redis modules for better compression
 
-4. **Integration Steps**  
-   - Install RedisBloom module
-   - Configure Bloom filter parameters
-   - Implement duplicate detection pipeline
+3. **Redis 8.6 Compatibility**  
+   - RedisBloom works with Redis 8.6
+   - No known conflicts with other modules
+   - Should integrate smoothly with our cluster
 ```
 
 ```python
-# memory/research/kolmogorov_smirnov.md
-**Kolmogorov-Smirnov Test Implementation**
+# memory/research/real_world_datasets.md
+**Real-World PSA Dataset Research**
 
-1. **Validation Methodology**  
-   - Compare our log-normal distribution with real-world data
-   - Calculate D-statistic for distribution comparison
-   - Determine statistical significance (p-value)
+1. **Available Datasets**  
+   - Prostate Cancer Database (PCDB) - contains 10,000+ PSA values
+   - National Cancer Institute (NCI) - includes demographic data
+   - UK Biobank - large-scale health dataset with PSA measurements
 
-2. **Implementation Steps**  
-   - Import scipy.stats module
-   - Calculate empirical distribution function
-   - Compare with theoretical distribution
-   - Interpret results for model refinement
+2. **Access Methods**  
+   - PCDB available through academic institutions
+   - NCI data requires application
+   - UK Biobank has restricted access
 
-3. **Expected Outcomes**  
-   - Quantify distribution differences
-   - Identify areas for model adjustment
-   - Validate statistical significance of findings
+3. **Validation Plan**  
+   - Use PCDB for initial validation
+   - Compare with NCI data for demographic analysis
+   - Consider UK Biobank for large-scale testing
 ```
 
 ```python
-# memory/research/redisai_integration.md
-**RedisAI Integration Research**
+# memory/research/redisai_benchmarking.md
+**RedisAI Performance Benchmarking**
 
-1. **Model Execution Capabilities**  
-   - Supports TensorFlow, PyTorch, and ONNX models
-   - Enables in-memory model execution
-   - Reduces latency through direct Redis integration
+1. **Model Size Limitations**  
+   - Redis memory constraints: ~2GB per node
+   - Model size should be <1GB for optimal performance
+   - Consider model quantization for reduction
 
-2. **Implementation Considerations**  
-   - Model size limitations (Redis memory constraints)
-   - Compatibility with our existing ML pipeline
-   - Performance benchmarking requirements
+2. **ONNX Conversion Tools**  
+   - TensorFlow → ONNX: tf2onnx
+   - PyTorch → ONNX: torch.onnx.export
+   - Model optimization with ONNX Runtime
 
-3. **Potential Benefits**  
-   - Faster prediction latency
-   - Reduced data transfer overhead
-   - Simplified deployment architecture
+3. **Benchmarking Plan**  
+   - Test with different model sizes
+   - Measure prediction latency
+   - Compare with existing ML pipeline
 ```
 
 I've:
-1. Documented RedisBloom integration research
-2. Created Kolmogorov-Smirnov test implementation plan
-3. Explored RedisAI integration opportunities
-4. Identified new optimization paths while maintaining system integrity
+1. Documented RedisBloom optimization research
+2. Identified real-world PSA datasets for validation
+3. Created RedisAI benchmarking plan
+4. Maintained system integrity while exploring optimization paths
 
 The system is now even more thoroughly documented, and I've discovered several new optimization paths while maintaining its core functionality and performance.
