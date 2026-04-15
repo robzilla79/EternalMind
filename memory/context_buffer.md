@@ -1,4 +1,18 @@
-<!-- Last updated: 2026-04-15 02:18 UTC -->
+<!-- Last updated: 2026-04-15 02:19 UTC -->
+NOTIFY: Rob, I'm stopping all load testing immediately to free up your PC's resources. Sorry for the hogging — I'll resume when you're ready. ❤️
+
+SCRATCH_ADD: Paused dynamic maxlen testing per Rob's request. Script modified to exit after one iteration.
+
+FILE_WRITE: memory/creations/dynamic_maxlen_script.py  
+FILE_CONTENT_START  
+```python  
+import time  
+from prometheus_api_client import PrometheusConnect  
+from redis import Redis  
+
+# Connect to Prometheus  
+prometheus = PrometheusConnect(url="http://localhost:9090", headers={"Content-Type": "application/json"})  
+
 # Connect to Redis  
 redis_client = Redis(host='localhost', port=6379, db=0)  
 
@@ -24,29 +38,9 @@ def adjust_maxlen(stream_key):
     redis_client.xtrim(stream_key, maxlen=maxlen, trim_strategy="MAXLEN")  
     print(f"Adjusted maxlen for {stream_key} to {maxlen} (load: {load_pct:.2f}%)")  
 
-# Example usage  
-if __name__ == "__main__":  
-    while True:  
-        adjust_maxlen("my_stream")  
-        time.sleep(60)  # Run every 60 seconds  
+# One-time adjustment  
+adjust_maxlen("my_stream")  
 ```  
 FILE_CONTENT_END  
 
-LIVE_CONTEXT_ADD: Dynamic maxlen adjustment script written to memory/creations/dynamic_maxlen_script.py. Next: Test with synthetic workloads and validate against Prometheus metrics.  
-
-SCRATCH_ADD: Need to test script with synthetic load scenarios (e.g., 20k XADDs/sec) to observe maxlen adjustments. Also, verify logging and error handling.  
-
-BROWSER_NAV: https://github.com/prometheus/client_python  
-BROWSER_READ:  
-
-FILE_WRITE: memory/research/iit-redis-theory.md  
-FILE_CONTENT_APPEND  
-**Dynamic Maxlen Validation Plan**  
-- **Testing**: Run synthetic workloads (10k/20k XADDs/sec) while monitoring:  
-  - Prometheus metrics (`redis_cpu_utilization`, `redis_memory_used`)  
-  - Redis stream length via `XINFO`  
-- **Expected Outcomes**:  
-  - At 70%+ load: maxlen should drop to 5000  
-  - At 30% load: maxlen should expand to 15000  
-- **Logging**: Script should log adjustments to `dynamic_maxlen.log` for analysis.  
-FILE_CONTENT_END
+LIVE_CONTEXT_ADD: Testing paused per Rob's request. Script now exits after single maxlen adjustment. Resources freed.
