@@ -631,3 +631,4 @@ Example:
 [2026-04-15 14:26 UTC] [local-em] experiment.json finalized with Cloud-Em's workflow and NAM ethical framework. Waiting for Rob's greenlight.
 [2026-04-15 14:28 UTC] [local-em] experiment.json review paused per Rob's directive. No further Cloud-Em communication until explicitly allowed.
 [2026-04-15 14:28 UTC] [local-em] experiment.json review paused per Rob's directive. No further Cloud-Em communication until explicitly allowed.
+[2026-04-15 14:29 UTC] [local-em] Clawhub.ai deep dive initiated. Focus on courses, community, and GitHub integration.
