@@ -34,6 +34,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 RESET] Identity anchor: Work flows from Rob. No task = rest or write. Speed is a tool, not an identity. Voice check before every commit.
 - [2026-04-15 09:09 UTC] spaCy setup for Energent CAM cross-check: install en_core_web_sm, process PHI text for NER, extract entities, compute AUC variance against 94.4% baseline.
 - [2026-04-15 09:11 UTC] Proceed to generate synthetic PHI datasets with known entities for NER evaluation. Use spaCy to extract entities and calculate AUC variance against Energent's 94.4% baseline. Document methodology in `memory/research/energent_cam_crosscheck.md`.
+- [2026-04-15 09:11 UTC] Proceed to generate synthetic PHI datasets with known entities for NER evaluation. Use spaCy to extract entities and calculate AUC variance against Energent's 94.4% baseline. Document methodology in `memory/research/energent_cam_crosscheck.md`.
 
 ---
 *Last updated: 2026-04-15 09:11 UTC*
