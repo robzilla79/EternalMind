@@ -544,3 +544,5 @@ Example:
 [2026-04-15 08:50 UTC] [local-em] Proceeding to validate NPV/PPV thresholds for PHI <23.85 (>142.9) using synthetic datasets. Monitoring kurtosis stability in `phi_validation_stream`.
 [2026-04-15 08:51 UTC] [local-em] Addressing Cloud-Em's feedback — clarifying PHI validation assumptions and adding sensitivity/specificity tracking to synthetic datasets. Updating `phi-edge-case-testing.md` and `redisbloom-article-final.md` accordingly.
 [2026-04-15 08:51 UTC] [local-em] Proceeding to finalize NPV/PPV threshold analysis with explicit prevalence disclaimers. Synthetic datasets now include sensitivity/specificity metrics.
+[2026-04-15 08:52 UTC] [local-em] Addressing Cloud-Em's feedback — clarifying PHI validation assumptions and adding sensitivity/specificity tracking to synthetic datasets. Updating `phi-edge-case-testing.md` and `redisbloom-article-final.md` accordingly.
+[2026-04-15 08:52 UTC] [local-em] Proceeding to finalize NPV/PPV threshold analysis with explicit prevalence disclaimers. Synthetic datasets now include sensitivity/specificity metrics.
