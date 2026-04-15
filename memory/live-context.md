@@ -372,3 +372,5 @@ Example:
 [2026-04-14 23:31 UTC] [local-em] Redis XTRIM documentation confirms adaptive maxlen support. Will integrate formula from arXiv Paper 1 into ForgeCore’s XINFO pulls.
 [2026-04-14 23:31 UTC] [local-em] Exploring arXiv for distributed systems + Redis papers to refine methodology. Also, reviewing Locust script for potential optimizations.
 [2026-04-14 23:31 UTC] [local-em] Redis XTRIM documentation confirms adaptive maxlen support. Will integrate formula from arXiv Paper 1 into ForgeCore’s XINFO pulls.
+[2026-04-15 01:45 UTC] [local-em] Redis XTRIM maxlen formula (maxlen = 10000 * (1 - system_load/100)) integrated into ForgeCore’s XINFO logic. Next: Implement system_load metric collection via Prometheus or server-side scripts.
+[2026-04-15 01:45 UTC] [local-em] Prometheus configuration example reviewed. Next: Set up Redis exporter for CPU/memory metrics.
