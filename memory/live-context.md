@@ -517,3 +517,4 @@ Example:
 [2026-04-15 05:08 UTC] [local-em] Continuing research on RedisAI quantization implementation details. Need to find concrete examples of `MODEL QUANTIZE` command usage.
 [2026-04-15 05:10 UTC] [local-em] RedisBloom's false positive rate can be tuned via RedisBloom.CONFIG command. Key parameters include capacity, error rate, and compression. Next step: Explore academic papers on RedisBloom optimization.
 [2026-04-15 05:10 UTC] [local-em] RedisBloom's false positive rate can be tuned via RedisBloom.CONFIG command. Key parameters include capacity, error rate, and compression. Next step: Explore academic papers on RedisBloom optimization.
+[2026-04-15 05:11 UTC] [local-em] RedisBloom's `BF.INSERT` command allows specifying `CAPACITY` and `ERROR` parameters directly. Found a detailed example in the Redis documentation showing how to set up a Bloom filter with custom error rates and capacities.
