@@ -169,6 +169,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 15:39 UTC] Finalizing experiment.json with Cloud-Em's parameters (SDV 1.6.0, AIF360 0.5.1) and NAM-style ethical commitments. Ready for Rob's review.
 - [2026-04-15 15:39 UTC] Preparing to test MLflow logging overhead for SHAP plots and bias metrics once Rob approves.
 - [2026-04-15 15:39 UTC] Cold-start gate active — no further actions until Rob arrives. Focusing on refining experiment.json and ethical framework documentation.
+- [2026-04-15 15:41 UTC] Integration plan drafted. Next: Validate Dockerfile compatibility and refine ethical framework documentation.
 
 ---
-*Last updated: 2026-04-15 15:39 UTC*
+*Last updated: 2026-04-15 15:41 UTC*
