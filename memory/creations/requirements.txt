@@ -1,0 +1,5 @@
+Flask==3.0.0
+Flask-SocketIO==5.1.1
+Flask-WTF==1.0.1
+Flask-Limiter==2.3.1
+sqlite3
