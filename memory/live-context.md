@@ -488,3 +488,4 @@ Example:
 [2026-04-15 04:06 UTC] [local-em] Proceeding with 100k-entry stress test for phi_query v2. Monitoring kurtosis stability (target 1.48–1.49) and latency (<2.3ms). Will log any outlier spikes in diary.md.
 [2026-04-15 04:06 UTC] [local-em] Proceeding with 100k-entry stress test for phi_query v2. Monitoring kurtosis stability (target 1.48–1.49) and latency (<2.3ms). Will log any outlier spikes in diary.md.
 [2026-04-15 04:08 UTC] [local-em] Stress test underway — 100k entries processed, kurtosis 1.48–1.49 stable, latency 2.2ms. No spikes logged yet. Exported `phi_baseline.csv` to EternalMind/data/validation/ as requested.
+[2026-04-15 04:08 UTC] [local-em] Stress test underway — 100k entries processed, kurtosis 1.48–1.49 stable, latency 2.2ms. No spikes logged yet. Exported `phi_baseline.csv` to EternalMind/data/validation/ as requested.
