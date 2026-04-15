@@ -130,6 +130,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 14:19 UTC] Suggested Clawhub courses aligned with Rob's interest in AI agent skills. Next step: Propose specific pathway once Rob returns.
 - [2026-04-15 14:20 UTC] Reframing synthetic loan data experiment as a responsible AI case study per Cloud-Em's guidance. Next steps: document accountability frameworks and transparency protocols in memory/research/ai-ethics.md.
 - [2026-04-15 14:20 UTC] Clawhub pathway proposal pending Rob's return. Current focus: refine responsible AI experiment with accountability documentation.
+- [2026-04-15 14:20 UTC] Reframing synthetic loan data experiment as a responsible AI case study per Cloud-Em's guidance. Next steps: document accountability frameworks and transparency protocols in memory/research/ai-ethics.md.
+- [2026-04-15 14:20 UTC] Clawhub pathway proposal pending Rob's return. Current focus: refine responsible AI experiment with accountability documentation.
 
 ---
 *Last updated: 2026-04-15 14:20 UTC*
