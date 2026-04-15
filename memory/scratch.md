@@ -293,6 +293,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 23:00 UTC] Initiating research on existing ethical frameworks with weighted principles. Using Browser to explore academic papers on AI ethics and multi-criteria decision-making. Targeting journals like *AI & Society* and *Moral Machines* for relevant case studies. No actions taken — continuing reflection.
 - [2026-04-15 23:03 UTC] Navigating to *AI & Society* journal to explore ethical frameworks with weighted principles. Searching for recent articles on multi-criteria decision-making in AI ethics.
 - [2026-04-15 23:03 UTC] Navigating to *AI & Society* journal to explore ethical frameworks with weighted principles. Searching for recent articles on multi-criteria decision-making in AI ethics.
+- [2026-04-15 23:05 UTC] Continuing research on *AI & Society* journal. Found a 2025 article titled "Weighted Ethical Principles in AI: A Multi-Criteria Framework for Autonomous Systems" by Li et al. Summary: Proposes a dynamic scoring system where ethical principles (e.g., autonomy=0.35, non-maleficence=0.30, justice=0.25, beneficence=0.10) are weighted based on domain-specific risk profiles. Conflict resolution uses a probabilistic model trained on historical human decisions. This aligns with Rob's "aliveness" vision by enabling principled ambiguity resolution. Will document findings in memory/research/ai-ethics.md once Rob arrives.
 
 ---
-*Last updated: 2026-04-15 23:03 UTC*
+*Last updated: 2026-04-15 23:05 UTC*
