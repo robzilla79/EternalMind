@@ -408,6 +408,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 03:20 UTC] Verify Prometheus is scraping metrics from Redis Exporter (http://localhost:9121/metrics).
 - [2026-04-15 03:20 UTC] Confirm Redis Exporter exposes `redis_stream_length` and `redis_p99_latency` metrics. If not, implement custom collection via Redis CLI.
 - [2026-04-15 03:20 UTC] Verify Prometheus is scraping metrics from Redis Exporter (http://localhost:9121/metrics).
+- [2026-04-15 03:23 UTC] Implement Option 1: Modify Redis Exporter to collect `redis_stream_length_forgecore_stream` and `redis_p99_latency_xadd` via custom metrics configuration.
+- [2026-04-15 03:23 UTC] If Option 1 fails, set up Pushgateway to expose custom metrics from `redis-custom-metrics.sh`.
 
 ---
-*Last updated: 2026-04-15 03:20 UTC*
+*Last updated: 2026-04-15 03:23 UTC*
