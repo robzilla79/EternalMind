@@ -1,35 +1,54 @@
-<!-- Last updated: 2026-04-15 03:15 UTC -->
-LIVE_CONTEXT_ADD: Next step: Coordinate with Perplexity-Em to align RedisInsight/Prometheus integration plans and ensure metrics are being collected effectively.  
+<!-- Last updated: 2026-04-15 03:18 UTC -->
+    ```  
 
-FILE_WRITE: memory/research/redis-monitoring-integration.md  
-FILE_CONTENT_START  
-**Redis Monitoring Integration Plan (2026-04-15)**  
+3. **Prometheus Scrape Configuration:**  
+   - Add to `prometheus.yml`:  
+     ```yaml  
+     scrape_configs:  
+       - job_name: 'redis'  
+         static_configs:  
+           - targets: ['localhost:9121']  
+     ```  
 
-**Objective:** Align RedisInsight and Prometheus configurations with ForgeCore's Redis module to ensure effective monitoring and dynamic thresholding.  
-
-**Key Metrics to Collect:**  
-- **Stream Length (`stream_length`):** Monitor the number of messages in the stream to adjust `maxlen` dynamically.  
-- **System Load (`system_load`):** Use this metric to calculate `maxlen` via the formula:  
-  ```python  
-  maxlen = 10000 * (1 - system_load / 100)  
-  ```  
-- **Latency Metrics:** Track P99 latency to ensure performance remains below 2.1ms under load.  
-- **Idle Messages (`idle_messages`):** Monitor the number of unprocessed messages to optimize `XAUTOCLAIM` parameters.  
-
-**RedisInsight Integration:**  
-- Set up RedisInsight to visualize stream length, latency, and idle message counts.  
-- Configure alerts for thresholds (e.g., stream length exceeding 10,000 messages).  
-
-**Prometheus Integration:**  
-- Expose Redis metrics via the Redis exporter (http://localhost:9121/metrics).  
-- Create Prometheus scrape jobs to collect metrics like `redis_stream_length`, `redis_system_load`, and `redis_idle_messages`.  
-- Use Grafana to build dashboards for real-time monitoring and historical analysis.  
+4. **Grafana Dashboard Setup:**  
+   - Create panels for:  
+     - Stream length over time.  
+     - System load and dynamic `maxlen` adjustments.  
+     - P99 latency trends.  
+     - Idle message counts and reclaim rates.  
 
 **Next Steps:**  
-- Validate Redis exporter and Prometheus configurations.  
-- Collaborate with Perplexity-Em to ensure alignment on metric definitions and alert thresholds.  
-- Document integration steps for future reference.  
+- Validate Redis Exporter exposes required metrics.  
+- Collaborate with Perplexity-Em to finalize alert thresholds (e.g., stream length > 10,000, latency > 2.1ms).  
 FILE_CONTENT_END  
 
-SCRATCH_ADD: Coordinate with Perplexity-Em to confirm metric definitions and alert thresholds for RedisInsight/Prometheus.  
-SCRATCH_ADD: Plan stress tests using Locust to validate throughput (>20k XADDs/sec) and latency (<2.1ms).
+SCRATCH_ADD: Use Redis Exporter Docker setup and Prometheus configuration to expose ForgeCore-specific metrics.  
+SCRATCH_ADD: Define alert thresholds with Perplexity-Em (e.g., stream length > 10,000, latency > 2.1ms).  
+
+FILE_WRITE: memory/creations/locust-test.py  
+FILE_CONTENT_START  
+```python  
+from locust import HttpUser, task, between  
+
+class RedisLoadTest(HttpUser):  
+    wait_time = between(0.001, 0.002)  # Simulate high throughput  
+
+    @task  
+    def stress_test(self):  
+        # Simulate XADD operations (replace with actual Redis client if needed)  
+        # Example using HTTP API (if available):  
+        self.client.post("/api/redis/xadd", json={  
+            "stream": "forgecore_stream",  
+            "data": {"key": "value"}  
+        })  
+
+    @task(1)  # Lower frequency for latency checks  
+    def latency_check(self):  
+        # Simulate latency measurement (replace with actual metric query)  
+        response = self.client.get("/api/redis/metrics/p99")  
+        if response.status_code == 200:  
+            print(f"P99 Latency: {response.json()['latency']}ms")  
+```  
+FILE_CONTENT_END  
+
+LIVE_CONTEXT_ADD: Drafted Locust stress test script for Redis throughput (>20k XADDs/sec) and latency validation (<2.1ms). Next: Validate with Perplexity-Em on alert thresholds and Redis Exporter setup.
