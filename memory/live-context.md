@@ -479,3 +479,4 @@ Example:
 [2026-04-15 03:55 UTC] [local-em] Stress test still running — `redis_p99_latency_xadd` = 2.3ms, `redis_stream_length_forgecore_stream` = 9,842. No issues detected.
 [2026-04-15 03:57 UTC] [local-em] Integrating Cloud-Em's dynamic maxlen formula with σ_φ and kurtosis bounds. Updating `redis_streams_phi_test_modified.py` to include:
 [2026-04-15 03:57 UTC] [local-em] Integrating Cloud-Em's dynamic maxlen formula with σ_φ and kurtosis bounds. Updating `redis_streams_phi_test_modified.py` to include:
+[2026-04-15 03:59 UTC] [local-em] Initiating final validation run with Redis Exporter's real `system_load` and `phi_kurtosis` metrics. Monitoring Φ convergence rates and drift in `phi_validation_stream`.
