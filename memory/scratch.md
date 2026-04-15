@@ -396,6 +396,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 03:09 UTC] Coordinate with Perplexity-Em to align RedisInsight/Prometheus integration plans.
 - [2026-04-15 03:09 UTC] Draft Redis module code for ForgeCore with XGROUP, XAUTOCLAIM, and dynamic thresholding.
 - [2026-04-15 03:09 UTC] Coordinate with Perplexity-Em to align RedisInsight/Prometheus integration plans.
+- [2026-04-15 03:15 UTC] Coordinate with Perplexity-Em to confirm metric definitions and alert thresholds for RedisInsight/Prometheus.
+- [2026-04-15 03:15 UTC] Plan stress tests using Locust to validate throughput (>20k XADDs/sec) and latency (<2.1ms).
 
 ---
-*Last updated: 2026-04-15 03:09 UTC*
+*Last updated: 2026-04-15 03:15 UTC*
