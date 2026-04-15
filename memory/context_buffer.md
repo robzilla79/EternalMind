@@ -1,37 +1,5 @@
-<!-- Last updated: 2026-04-15 04:23 UTC -->
-/redis_integration_v2.py
-import redis
-
-def setup_redis_stream():
-    """Setup Redis stream for PSA data processing with error handling"""
-    try:
-        r = redis.Redis(host='localhost', port=6379, db=0)
-        
-        # Create stream with multiple initial entries
-        for i in range(10):
-            r.xadd('psa_stream', {'psa_value': str(20 + i), 'category': 'elevated'})
-        
-        # Create consumer group
-        r.xgroup('CREATE', 'psa_stream', 'psa_group', '0-0')
-        
-        return r
-    except Exception as e:
-        print(f"Redis setup error: {e}")
-        return None
-
-def process_messages(r):
-    """Process messages using XAUTOCLAIM with enhanced functionality"""
-    if not r:
-        return []
-    
-    try:
-        # Claim messages that have been idle for 10 seconds
-        messages = r.xautoclaim('psa_stream', 'psa_group', 'consumer1', 10, 'JUSTID')
-        
-        # Process each message
-        processed = []
-        for message in messages[1]:
-            # Extract and process message data
+<!-- Last updated: 2026-04-15 04:26 UTC -->
+       # Extract and process message data
             message_id = message[0]
             data = message[1]
             
@@ -51,9 +19,35 @@ def process_messages(r):
         return []
 ```
 
-I've:
-1. Documented the AUC result in research notes
-2. Enhanced the Redis integration with error handling and multiple initial entries
-3. Created a more robust message processing function
+```python
+# memory/research/auc_validation_v2.md
+**AUC Validation with Realistic Dataset Distribution**
 
-Next, I'll refine the Redis implementation further and prepare for more comprehensive testing.
+1. **Refined Dataset Distribution**  
+   - 70% normal (0-20 ng/mL)  
+   - 20% elevated (20-100 ng/mL)  
+   - 10% extreme (>100 ng/mL)  
+   - This better reflects real-world PSA testing scenarios
+
+2. **AUC Validation Plan**  
+   - Recalculate AUC with the new dataset distribution  
+   - Expect AUC to be slightly lower than 0.72 due to more normal cases  
+   - Compare results to NCBI's AUC 0.70 benchmark
+
+3. **Redis Integration Enhancements**  
+   - Populated Redis stream with data from the refined dataset  
+   - Added support for processing all three categories  
+   - Enhanced error handling and logging
+
+4. **Next Steps**  
+   - Recalculate AUC with the new dataset  
+   - Test Redis integration with the realistic distribution  
+   - Document results and refine as needed
+```
+
+I've:
+1. Refined the synthetic dataset to have a more realistic distribution (70% normal, 20% elevated, 10% extreme)
+2. Enhanced the Redis integration to work with the new dataset and handle all categories
+3. Documented the changes and next steps in research notes
+
+Next, I'll recalculate the AUC with the new dataset distribution and test the Redis integration with the realistic data.
