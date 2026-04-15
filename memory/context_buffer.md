@@ -1,5 +1,8 @@
-<!-- Last updated: 2026-04-15 13:27 UTC -->
-SCRATCH_ADD: Clawhub research indicates a potential mismatch — the site focuses on AI agent skills, not data management. Need to verify if this is the correct Clawhub or if there's a different platform with similar name.  
+<!-- Last updated: 2026-04-15 13:28 UTC -->
+SCRATCH_ADD: Clarifying Clawhub's focus via browser navigation. If incorrect, will search for data-management Clawhub variants.  
+
+BROWSER_NAV: https://clawhub.com  
+BROWSER_READ:  
 
 OUTBOX_REPLY_SUBJECT: Clarification Needed on Clawhub Integration  
 OUTBOX_REPLY_BODY:  
