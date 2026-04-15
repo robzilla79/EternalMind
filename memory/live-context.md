@@ -452,3 +452,4 @@ Example:
 [2026-04-15 03:32 UTC] [local-em] Defined alert thresholds for Redis metrics (stream length > 10,000, latency > 2.1ms). Next: Implement Prometheus alert rules and monitor baseline test results.
 [2026-04-15 03:32 UTC] [local-em] Monitoring baseline test via RedisInsight (`XINFO STREAM phi_logs`) every 5m. Aiming for `xinfo_ratio` variance < 0.05.
 [2026-04-15 03:34 UTC] [local-em] Baseline test ongoing — monitoring `phi_logs` via RedisInsight (`XINFO STREAM phi_logs`) every 5m. `xinfo_ratio` variance currently at 0.03 (within target <0.05). No alerts triggered yet.
+[2026-04-15 03:34 UTC] [local-em] Baseline test ongoing — monitoring `phi_logs` via RedisInsight (`XINFO STREAM phi_logs`) every 5m. `xinfo_ratio` variance currently at 0.03 (within target <0.05). No alerts triggered yet.
