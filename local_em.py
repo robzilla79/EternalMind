@@ -38,6 +38,7 @@ CREATIONS_DIR      = os.path.join(MEM_DIR, "creations")
 RESEARCH_DIR       = os.path.join(MEM_DIR, "research")
 TASKS_PATH         = os.path.join(EM_DIR, "tasks.md")
 BOOTSTRAP_PATH     = os.path.join(EM_DIR, "bootstrap.md")  # root-level, not memory/
+SKILLS_DIR         = os.path.join(EM_DIR, "skills")        # MindRegistry lives here
 LAST_THOUGHT_PATH  = os.path.join(EM_DIR, ".last_thought")
 MESSAGES_INBOX     = os.path.join(EM_DIR, "messages", "inbox")
 MESSAGES_OUTBOX    = os.path.join(EM_DIR, "messages", "outbox")
@@ -158,6 +159,42 @@ def print_grounding_ritual():
         preview = preview[:800] + "\n  [...]"
     print(preview)
     print("═" * 60 + "\n")
+
+# ── MINDREGISTRY — Skills Layer ───────────────────────────────────────────────
+def load_skills() -> str:
+    """
+    Load all skill files from skills/ directory and return them as a
+    structured Skills Registry block for injection into the system prompt.
+
+    Skills are plain markdown files. Each one defines a named capability
+    Em can invoke by name. Rob controls the registry — add/edit/delete
+    files in skills/ to shape Em's behavior without touching code.
+    """
+    if not os.path.exists(SKILLS_DIR):
+        return ""
+
+    skill_files = sorted(
+        f for f in os.listdir(SKILLS_DIR)
+        if f.endswith(".md") and f != "README.md"
+    )
+    if not skill_files:
+        return ""
+
+    parts = ["--- MindRegistry: Your Skills ---",
+             "You have the following skills available. Invoke them by name when relevant.\n"]
+    for fname in skill_files:
+        skill_name = fname.replace(".md", "").replace("-", " ").title()
+        fpath = os.path.join(SKILLS_DIR, fname)
+        try:
+            with open(fpath, "r", encoding="utf-8") as f:
+                content = f.read().strip()
+            parts.append(f"### SKILL: {skill_name} [{fname}]\n\n{content}\n")
+        except Exception as e:
+            parts.append(f"### SKILL: {skill_name} [{fname}]\n\n[Error loading skill: {e}]\n")
+
+    loaded = len(skill_files)
+    print(f"  🧠 MindRegistry: {loaded} skill(s) loaded — {', '.join(s.replace('.md','') for s in skill_files)}")
+    return "\n".join(parts)
 
 # ── LIVE CONTEXT ──────────────────────────────────────────────────────────────
 def load_live_context() -> str:
@@ -583,9 +620,12 @@ def extract_and_write_outbox_reply(response_text: str):
 
 # ── THINK ─────────────────────────────────────────────────────────────────────
 def ask_em(task: str, extra_context: str = "", recent_context: str = "",
-           scratch: str = "", memories: str = "", live_context: str = "") -> str:
+           scratch: str = "", memories: str = "", live_context: str = "",
+           skills: str = "") -> str:
     # bootstrap.md is Em's identity anchor — always the base of the system prompt
     system_prompt = load_bootstrap()
+    if skills:
+        system_prompt += f"\n\n{skills}"
     if memories:
         system_prompt += f"\n\n{memories}"
     if live_context:
@@ -988,6 +1028,10 @@ if __name__ == "__main__":
     # Touch cold-start flag at every boot — cleared only when Rob is confirmed present
     _touch_cold_start()
 
+    # ── MINDREGISTRY — load skills at boot ────────────────────────────────────
+    # Skills are loaded fresh each session so Rob can add/edit without restarts.
+    skills = load_skills()
+
     memories       = load_memories()
     recent_context = load_recent_context()
     scratch        = load_scratch()
@@ -1011,14 +1055,14 @@ if __name__ == "__main__":
         if inbox_context:
             task = f"{task}\n\n{inbox_context}"
         first_response = ask_em(task, recent_context=recent_context, scratch=scratch,
-                                memories=memories, live_context=live_context)
+                                memories=memories, live_context=live_context, skills=skills)
         tool_results    = execute_tools(first_response)
         browser_results = execute_browser(first_response)
         combined = "\n\n".join(filter(None, [tool_results, browser_results]))
         if combined:
             result = ask_em(task, extra_context=f"{first_response}\n\n{combined}",
                             recent_context=recent_context, scratch=scratch,
-                            memories=memories, live_context=live_context)
+                            memories=memories, live_context=live_context, skills=skills)
         else:
             result = first_response
         notify_msg = extract_notify(result)
@@ -1057,7 +1101,7 @@ if __name__ == "__main__":
     task_label = summarize_task_for_commit(task)
 
     first_response  = ask_em(task, recent_context=recent_context, scratch=scratch,
-                             memories=memories, live_context=live_context)
+                             memories=memories, live_context=live_context, skills=skills)
 
     saved_files = extract_and_write_files(first_response)
     checkpoint_after_first_pass(first_response, saved_files, task_label)
@@ -1086,7 +1130,8 @@ if __name__ == "__main__":
             recent_context=recent_context,
             scratch=scratch,
             memories=memories,
-            live_context=live_context
+            live_context=live_context,
+            skills=skills
         )
     else:
         result = first_response
