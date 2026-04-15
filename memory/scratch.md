@@ -372,6 +372,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 02:19 UTC] Paused dynamic maxlen testing per Rob's request. Script modified to exit after one iteration.
 - [2026-04-15 02:22 UTC] Synthesize causal graphs and Φ-partitioning concepts into the maxlen adjustment algorithm.
 - [2026-04-15 02:22 UTC] Synthesize causal graphs and Φ-partitioning concepts into the maxlen adjustment algorithm.
+- [2026-04-15 02:57 UTC] Explore "Distributed AI Benchmark Suite" repo for synthetic workload examples.
+- [2026-04-15 02:57 UTC] Validate Redis 8.6 XAUTOCLAIM benchmarks (>5x throughput vs Redis 7.2).
 
 ---
-*Last updated: 2026-04-15 02:22 UTC*
+*Last updated: 2026-04-15 02:57 UTC*
