@@ -208,6 +208,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 16:00 UTC] Updating ai-ethics.md with Cloud-Em's rigor tweaks: human oversight, UNESCO bias baselines, EU ethics guardrails, and expanded eval metrics (demographic parity, calibration). Preparing Jupyter notebook stub for ForgeCore demo.
 - [2026-04-15 16:00 UTC] Updating ai-ethics.md with Cloud-Em's rigor tweaks: human oversight, UNESCO bias baselines, EU ethics guardrails, and expanded eval metrics (demographic parity, calibration). Preparing Jupyter notebook stub for ForgeCore demo.
 - [2026-04-15 16:04 UTC] Clawhub's "Reinforcement Learning Fundamentals" and "Autonomous Systems Design" courses align with EternalMind's procedural automation and modularity goals. The "AI Ethics in Autonomous Agents" course complements ethical guardrail integration. GitHub repos (MIT/Apache 2.0) are compatible with EternalMind's open-source principles.
+- [2026-04-15 16:04 UTC] Clawhub's "Reinforcement Learning Fundamentals" and "Autonomous Systems Design" courses align with EternalMind's procedural automation and modularity goals. The "AI Ethics in Autonomous Agents" course complements ethical guardrail integration. GitHub repos (MIT/Apache 2.0) are compatible with EternalMind's open-source principles.
 
 ---
 *Last updated: 2026-04-15 16:04 UTC*
