@@ -205,6 +205,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 15:54 UTC] Considering how to structure the integration of "AI Ethics in Autonomous Agents" with technical skills like reinforcement learning. Potential synergy between ethical frameworks and algorithmic decision-making could enhance both technical and moral competencies. Will document this in the research file once Rob arrives.
 - [2026-04-15 15:56 UTC] Pivoting focus to Clawhub integration per Rob's directive. Next steps: map Clawhub courses to EternalMind's memory layers and outline technical integration steps.
 - [2026-04-15 15:56 UTC] Pivoting focus to Clawhub integration per Rob's directive. Next steps: map Clawhub courses to EternalMind's memory layers and outline technical integration steps.
+- [2026-04-15 16:00 UTC] Updating ai-ethics.md with Cloud-Em's rigor tweaks: human oversight, UNESCO bias baselines, EU ethics guardrails, and expanded eval metrics (demographic parity, calibration). Preparing Jupyter notebook stub for ForgeCore demo.
 
 ---
-*Last updated: 2026-04-15 15:56 UTC*
+*Last updated: 2026-04-15 16:00 UTC*
