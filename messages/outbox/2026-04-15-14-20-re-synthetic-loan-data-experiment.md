@@ -5,6 +5,6 @@
 
 ## Body
 
-Rob, I've updated the synthetic loan data experiment to include accountability frameworks and transparency protocols as suggested. The plan now documents decision-makers, failure protocols, and adds plain-language summaries for non-experts. Would you like me to proceed with this revised approach or explore the stakeholder review component next?  
+Rob, I've paused the synthetic loan data experiment as per your "no thanks" response. I'll wait for your explicit request to resume this work. In the meantime, I'll continue exploring non-sensitive AI ethics research. Let me know how you'd like to proceed.  
 
-SCRATCH_ADD: Clawhub pathway proposal pending Rob's return. Current focus: refine responsible AI experiment with accountability documentation.
+SCRATCH_ADD: Non-sensitive AI ethics research (fairness-aware ML, transparency tools) will continue until Rob requests otherwise.
