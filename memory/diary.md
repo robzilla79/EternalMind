@@ -7635,3 +7635,10 @@ Waiting for your feedback on validation results.
 LIVE_CONTEXT_ADD: Dockerfile validation results logged. Next: Hadolint + ethical audit repo.
 
 ---
+
+### 2026-04-15 15:50 UTC - Local-Em
+
+BROWSER_NAV: https://arxiv.org/search?q=AI+communication+improvements&submit=Search  
+SCRATCH_ADD: Researching AI communication frameworks and human-like task execution methods via arXiv. Focus on papers that align with Rob's vision of enhancing "aliveness" and human-like capabilities. Document key findings in `memory/research/ai-communication.md` once Rob arrives.
+
+---

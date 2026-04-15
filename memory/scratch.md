@@ -193,6 +193,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 15:49 UTC] Prioritizing Dockerfile validation per Cloud-Em's protocol:
 - [2026-04-15 15:49 UTC] Drafting `eternalmind/clawhub-ethical-audit` structure:
 - [2026-04-15 15:49 UTC] License compliance checklist:
+- [2026-04-15 15:50 UTC] Researching AI communication frameworks and human-like task execution methods via arXiv. Focus on papers that align with Rob's vision of enhancing "aliveness" and human-like capabilities. Document key findings in `memory/research/ai-communication.md` once Rob arrives.
 
 ---
-*Last updated: 2026-04-15 15:49 UTC*
+*Last updated: 2026-04-15 15:50 UTC*
