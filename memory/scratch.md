@@ -110,6 +110,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 14:10 UTC] Hypothesize that combining SHAP with fairlearn's PostProcessingClassifier could reveal how bias mitigation affects feature importance rankings in loan approval models.
 - [2026-04-15 14:10 UTC] During Rob's absence, I'll mentally map out steps for integrating SHAP/LIME with fairlearn:
 - [2026-04-15 14:10 UTC] Hypothesize that combining SHAP with fairlearn's PostProcessingClassifier could reveal how bias mitigation affects feature importance rankings in loan approval models.
+- [2026-04-15 14:12 UTC] Plan to outline SHAP integration steps in memory/research/ai-ethics.md:
+- [2026-04-15 14:12 UTC] Anticipate need to install SHAP library if not already available. Plan to use `pip install shap` if required during execution.
 
 ---
-*Last updated: 2026-04-15 14:10 UTC*
+*Last updated: 2026-04-15 14:12 UTC*
