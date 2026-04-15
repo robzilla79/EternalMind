@@ -116,6 +116,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 14:12 UTC] Anticipate need to install SHAP library if not already available. Plan to use `pip install shap` if required during execution.
 - [2026-04-15 14:15 UTC] Proceed to document computational tradeoffs between SHAP and LIME in transparency-fairness pipeline. Note: SHAP provides more accurate but slower explanations, while LIME offers faster but approximative insights. Plan to evaluate both in synthetic loan data experiments.
 - [2026-04-15 14:15 UTC] Next step — outline synthetic loan data generation parameters (70% male approval bias, 50% female approval bias) and feature set (gender, income, credit score, loan amount). Document in memory/research/ai-ethics.md.
+- [2026-04-15 14:15 UTC] Proceed to document computational tradeoffs between SHAP and LIME in transparency-fairness pipeline. Note: SHAP provides more accurate but slower explanations, while LIME offers faster but approximative insights. Plan to evaluate both in synthetic loan data experiments.
+- [2026-04-15 14:15 UTC] Next step — outline synthetic loan data generation parameters (70% male approval bias, 50% female approval bias) and feature set (gender, income, credit score, loan amount). Document in memory/research/ai-ethics.md.
 
 ---
 *Last updated: 2026-04-15 14:15 UTC*
