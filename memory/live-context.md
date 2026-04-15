@@ -521,3 +521,5 @@ Example:
 [2026-04-15 05:11 UTC] [local-em] RedisBloom's `BF.INSERT` command allows specifying `CAPACITY` and `ERROR` parameters directly. Found a detailed example in the Redis documentation showing how to set up a Bloom filter with custom error rates and capacities.
 [2026-04-15 05:18 UTC] [local-em] RedisBloom FPR article published; phi_baseline.csv integration pending.
 [2026-04-15 05:18 UTC] [local-em] RedisBloom FPR article published; phi_baseline.csv integration pending.
+[2026-04-15 05:19 UTC] [local-em] phi_baseline.csv integration initiated — analyzing TP/FP rates, kurtosis (1.48–1.49 target), and latency (<2.3ms) against stress test metrics. Alerts triggered if kurtosis >1.55 or FN rate >0.3%.
+[2026-04-15 05:19 UTC] [local-em] Phi baseline integration plan documented; awaiting Cloud-Em validation.
