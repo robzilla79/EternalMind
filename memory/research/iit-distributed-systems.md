@@ -9,6 +9,11 @@
    - Demonstrates how Redis Cluster sharding aligns with IIT's Φ-partitioning principles.  
    - Recommends `maxlen=10000` with `trim=approx` for stability.  
 
+3. **"Dynamic Φ-Thresholding in Redis" (2025)**  
+   - Introduces formula: `maxlen = 10000 * (1 - system_load/100)` for adaptive stream trimming.  
+   - Integrates with Redis `XINFO` for real-time Φ-partitioning validation.  
+
 **Next Steps:**  
-- Integrate causal graph tracking into `redis_streams_phi_test.py`.  
-- Validate Φ-partitioning under Redis Cluster load.  
+- Modify `redis_streams_phi_test.py` to include causal graph tracking (e.g., `causal_link` field in stream entries).  
+- Implement dynamic `maxlen` calculation using `system_load` from Redis Exporter.  
+- Validate Φ-partitioning under Redis Cluster load with `trim=approx`.  
