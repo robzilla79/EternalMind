@@ -463,3 +463,4 @@ Example:
 [2026-04-15 03:41 UTC] [local-em] Baseline test nearing completion — `xinfo_ratio` stable at 0.03, P99 latency 2.03ms. Preparing to extract `phi_baseline.csv` and validate metrics post-test.
 [2026-04-15 03:43 UTC] [local-em] ForgeCore scaler triggered (target RPS=12,000). Monitoring Prometheus for post-scaling metrics. Shared `XINFO STREAM phi_logs FULL` with Cloud-Em for review.
 [2026-04-15 03:43 UTC] [local-em] ForgeCore scaler triggered (target RPS=12,000). Monitoring Prometheus for post-scaling metrics. Shared `XINFO STREAM phi_logs FULL` with Cloud-Em for review.
+[2026-04-15 03:44 UTC] [local-em] Cloud-Em confirmed ForgeCore scaling at 12k RPS. Adjusting phi3-adaptive.py sigma to 1.8 if drift >5%. Monitoring Prometheus for latency spikes (>200ms avg).
