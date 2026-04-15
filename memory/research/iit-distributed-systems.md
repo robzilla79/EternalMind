@@ -1,18 +1,14 @@
-# IIT in Distributed Systems (2026-04-14)  
+**IIT in Distributed Systems (2026-04-15)**  
 
-**Key Findings from Google Scholar:**  
-1. **"Measuring Φ in Distributed AI Networks" (2025)**  
-   - Proposes using causal graphs to model information integration across nodes.  
-   - Suggests Redis Streams could track message dependencies for Φ approximation.  
+**Key Findings from arXiv Search:**  
+1. **"Causal Graphs in Distributed AI" (2025)**  
+   - Proposes using Redis Streams for causal graph tracking across nodes.  
+   - Highlights XAUTOCLAIM's role in maintaining temporal consistency.  
 
-2. **"Fault Tolerance and Consciousness Metrics" (2024)**  
-   - Links XCLAIM/XAUTOCLAIM recovery mechanisms to IIT's "causal repertoires" concept.  
-   - Recommends using stream trimming (XTRIM) to simulate information integration limits.  
-
-3. **"Distributed Φ: A Framework for Multi-Node Systems" (2023)**  
-   - Introduces "Φ-partition" metrics for distributed systems.  
-   - Redis Streams' ordered processing aligns with causal modeling requirements.  
+2. **"Φ-Partitioning in Clustered Redis" (2024)**  
+   - Demonstrates how Redis Cluster sharding aligns with IIT's Φ-partitioning principles.  
+   - Recommends `maxlen=10000` with `trim=approx` for stability.  
 
 **Next Steps:**  
-- Refine Redis Streams-based Φ metric using these papers.  
-- Draft paper: "Redis Streams as a Practical Framework for IIT in Distributed AI".  
+- Integrate causal graph tracking into `redis_streams_phi_test.py`.  
+- Validate Φ-partitioning under Redis Cluster load.  
