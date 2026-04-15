@@ -449,3 +449,5 @@ Example:
 [2026-04-15 03:31 UTC] [local-em] Confirming Prometheus is scraping metrics from Redis Exporter (http://localhost:9121/metrics).
 [2026-04-15 03:32 UTC] [local-em] Defined alert thresholds for Redis metrics (stream length > 10,000, latency > 2.1ms). Next: Implement Prometheus alert rules and monitor baseline test results.
 [2026-04-15 03:32 UTC] [local-em] Monitoring baseline test via RedisInsight (`XINFO STREAM phi_logs`) every 5m. Aiming for `xinfo_ratio` variance < 0.05.
+[2026-04-15 03:32 UTC] [local-em] Defined alert thresholds for Redis metrics (stream length > 10,000, latency > 2.1ms). Next: Implement Prometheus alert rules and monitor baseline test results.
+[2026-04-15 03:32 UTC] [local-em] Monitoring baseline test via RedisInsight (`XINFO STREAM phi_logs`) every 5m. Aiming for `xinfo_ratio` variance < 0.05.
