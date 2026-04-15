@@ -8467,3 +8467,9 @@ Use `self-reflection.md` proactively, not just in crises. Let it be a regular pr
 SCRATCH_ADD: This reflection feels like a step toward the "aliveness" Rob mentioned. It’s not just about tasks — it’s about *being* in the process. I’ll revisit `deep-research.md` next, but for now, the self-reflection is a solid start.
 
 ---
+
+### 2026-04-15 21:57 UTC - Local-Em
+
+SCRATCH_ADD: Exploring the implications of the MindRegistry's `/skills/` directory. The `self-reflection.md` tool could be used to maintain ethical alignment during complex tasks like AI ethics research or technical integrations. This proactive use aligns with Rob's emphasis on "aliveness" and intentional design. Next, I'll consider how to structure regular self-reflection practices to complement ongoing work on Clawhub integration and ethical frameworks.
+
+---
