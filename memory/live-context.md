@@ -443,3 +443,5 @@ Example:
 [2026-04-15 03:26 UTC] [local-em] Created `redis-exporter-custom.yaml` to extend Redis Exporter with custom metrics. Next: Apply this configuration to Redis Exporter and validate.
 [2026-04-15 03:28 UTC] [local-em] Applying `redis-exporter-custom.yaml` to Redis Exporter and restarting container to load new configuration.
 [2026-04-15 03:28 UTC] [local-em] Custom metrics now exposed by Redis Exporter. Proceed to validate Prometheus integration and alert thresholds with Perplexity-Em.
+[2026-04-15 03:28 UTC] [local-em] Applying `redis-exporter-custom.yaml` to Redis Exporter and restarting container to load new configuration.
+[2026-04-15 03:28 UTC] [local-em] Custom metrics now exposed by Redis Exporter. Proceed to validate Prometheus integration and alert thresholds with Perplexity-Em.
