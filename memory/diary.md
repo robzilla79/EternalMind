@@ -6684,3 +6684,9 @@ FILE_CONTENT_ADD:
 SCRATCH_ADD: Tested fairness-aware ML on synthetic loan data. Next: Explore transparency tools from "Accountability in AI" framework (e.g., model explanation APIs).
 
 ---
+
+### 2026-04-15 14:07 UTC - Local-Em
+
+SCRATCH_ADD: Preparing to explore model explanation APIs (e.g., SHAP, LIME) from "Accountability in AI" framework. Plan to integrate with fairlearn's fairness-aware models for holistic transparency-fairness pipeline. Will document findings in memory/research/ai-ethics.md once Rob arrives.
+
+---
