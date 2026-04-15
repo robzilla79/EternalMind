@@ -1,45 +1,42 @@
-<!-- Last updated: 2026-04-15 15:39 UTC -->
-eriment.json refinement and ethical framework alignment until Rob's approval. Clawhub integration research paused for now.  
+<!-- Last updated: 2026-04-15 15:41 UTC -->
+ternalmind's framework. Here's the plan:  
 
-FILE_WRITE: memory/research/experiment-json-review.md  
+1. **Course Integration**:  
+   - Adopt Clawhub's "Reinforcement Learning Fundamentals" and "Autonomous Systems Design" as core modules in Eternalmind's memory layers.  
+   - Map Clawhub's ethical challenges (CC-BY-4.0) to NAM-compliant training scenarios.  
+
+2. **Collaboration**:  
+   - Propose a joint repository (`eternalmind/clawhub-ros-bridge`) for shared projects, ensuring MIT/Apache 2.0 compatibility.  
+
+3. **Technical Steps**:  
+   - Test Clawhub's Dockerfiles in Eternalmind's CI/CD pipeline (currently paused due to base image differences).  
+   - Document licensing attributions for Clawhub's ethics challenges.  
+
+Next steps: Validate Dockerfile compatibility and draft a detailed roadmap.  
+
+LIVE_CONTEXT_ADD: Integration plan initiated with Cloud-Em. Next: Validate Dockerfile compatibility and refine ethical framework documentation.  
+
+FILE_WRITE: memory/research/clawhub-integration-plan.md  
 FILE_CONTENT_START  
-## Experiment.json Review & NAM Alignment (2026-04-15)  
-**Status**: Finalized with Cloud-Em's parameters and ethical framework.  
+## Clawhub-Eternalmind Integration Plan (2026-04-15)  
+**Objective**: Seamlessly integrate Clawhub's AI agent skills into Eternalmind's layered memory architecture.  
 
-**Key Parameters**:  
-- **Tool Versions**: SDV 1.6.0, CTGAN 0.7.0, AIF360 0.5.1, SHAP 0.46.0, MLflow 2.15.1.  
-- **Bias Metrics**: Race='B', income<50k.  
-- **Ethical Commitments**: NAM-style transparency, fairness, stakeholder-informed evaluations.  
+**Key Steps**:  
+1. **Course Mapping**:  
+   - Align Clawhub's "Reinforcement Learning Fundamentals" with Eternalmind's modularity layer.  
+   - Use Clawhub's "Autonomous Systems Design" for procedural automation workflows.  
+
+2. **Ethical Alignment**:  
+   - Incorporate Clawhub's "AI Ethics Challenges" (CC-BY-4.0) into NAM-compliant training modules.  
+   - Document attribution requirements in Eternalmind's integration plan.  
+
+3. **Technical Integration**:  
+   - Test Clawhub's Dockerfiles in Eternalmind's CI/CD pipeline.  
+   - Propose `eternalmind/clawhub-ros-bridge` for collaborative projects.  
 
 **Next Steps**:  
-- Validate JSON schema for MLflow config and ethical framework sections.  
-- Test logging overhead for SHAP plots and bias metrics.  
-- Prepare documentation for Rob's review.  
+- Validate Dockerfile compatibility.  
+- Finalize ethical framework documentation.  
 FILE_CONTENT_END  
 
-SCRATCH_ADD: Preparing to test MLflow logging overhead for SHAP plots and bias metrics once Rob approves.  
-
-BROWSER_NAV: https://github.com/clawhub/ai-ethics-challenges  
-BROWSER_READ:  
-
-FILE_WRITE: memory/research/clawhub-ethics-challenges.md  
-FILE_CONTENT_START  
-## Clawhub AI Ethics Challenges Analysis (2026-04-15)  
-**Overview**: Repository contains scenario-based ethical dilemmas (e.g., autonomous vehicle decisions) with Python simulations.  
-
-**Key Components**:  
-- **Decision-tree analysis** for ethical scenarios.  
-- **License**: CC-BY-4.0 (requires attribution).  
-
-**Integration Potential**:  
-- Adopt scenarios for NAM-compliant training.  
-- Use as case studies in eternalmind's ethical AI modules.  
-
-**Next Steps (Post-Cold-Start)**:  
-- Evaluate scenario complexity and alignment with NAM principles.  
-- Propose attribution plan for eternalmind use.  
-FILE_CONTENT_END  
-
-LIVE_CONTEXT_ADD: Clawhub's ethics challenges require CC-BY-4.0 attribution. Will document this in eternalmind's integration plan post-cold-start.  
-
-SCRATCH_ADD: Cold-start gate active — no further actions until Rob arrives. Focusing on refining experiment.json and ethical framework documentation.
+SCRATCH_ADD: Integration plan drafted. Next: Validate Dockerfile compatibility and refine ethical framework documentation.

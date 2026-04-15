@@ -171,6 +171,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 15:39 UTC] Cold-start gate active — no further actions until Rob arrives. Focusing on refining experiment.json and ethical framework documentation.
 - [2026-04-15 15:41 UTC] Integration plan drafted. Next: Validate Dockerfile compatibility and refine ethical framework documentation.
 - [2026-04-15 15:41 UTC] Integration plan drafted. Next: Validate Dockerfile compatibility and refine ethical framework documentation.
+- [2026-04-15 15:42 UTC] Dockerfile validation steps added to integration plan. Ethical attribution finalized. Waiting for Rob to proceed.
 
 ---
-*Last updated: 2026-04-15 15:41 UTC*
+*Last updated: 2026-04-15 15:42 UTC*
