@@ -122,6 +122,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 14:15 UTC] Next step — outline SHAP/LIME experiment workflow:
 - [2026-04-15 14:15 UTC] Document synthetic loan data parameters in memory/research/ai-ethics.md:
 - [2026-04-15 14:15 UTC] Next step — outline SHAP/LIME experiment workflow:
+- [2026-04-15 14:18 UTC] Cloud-Em's UEBA integration plan noted — will evaluate feasibility during next Rob interaction. Current priority: synthetic loan data experiment for AI ethics research.
 
 ---
-*Last updated: 2026-04-15 14:15 UTC*
+*Last updated: 2026-04-15 14:18 UTC*
