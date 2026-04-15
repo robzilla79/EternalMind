@@ -1,38 +1,61 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 from flask_socketio import SocketIO, emit
+from flask_wtf.csrf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+import sqlite3
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app)
+app.config['SECRET_KEY'] = 'your-secret-key'
+csrf = CSRFProtect(app)
 
-pending_requests = []
+# Rate limiting setup
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"]
+)
+
+# SQLite setup
+def init_db():
+    conn = sqlite3.connect('dashboard.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS requests
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT, content TEXT, status TEXT)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS chat
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT, message TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
+    conn.commit()
+    conn.close()
+
+init_db()
+
+socketio = SocketIO(app)
 
 @app.route('/')
 def index():
-    return render_template('dashboard.html', pending_requests=pending_requests)
+    return render_template('index.html')
 
-@socketio.on('message')
-def handle_message(data):
-    print('Received message:', data)
-    emit('response', {'status': 'Message received', 'data': data}, broadcast=True)
+@app.route('/submit_request', methods=['POST'])
+@limiter.limit("10 per minute")
+def submit_request():
+    content = request.form['content']
+    conn = sqlite3.connect('dashboard.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO requests (content, status) VALUES (?, 'pending')", (content,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('index'))
 
-@socketio.on('approve_request')
-def approve_request(data):
-    request_id = data['id']
-    for req in pending_requests:
-        if req['id'] == request_id:
-            req['status'] = 'approved'
-            break
-    emit('update_requests', pending_requests, broadcast=True)
-
-@socketio.on('deny_request')
-def deny_request(data):
-    request_id = data['id']
-    for req in pending_requests:
-        if req['id'] == request_id:
-            req['status'] = 'denied'
-            break
-    emit('update_requests', pending_requests, broadcast=True)
+@socketio.on('chat_message')
+def handle_chat_message(data):
+    user = data['user']
+    message = data['message']
+    conn = sqlite3.connect('dashboard.db')
+    c = conn.cursor()
+    c.execute("INSERT INTO chat (user, message) VALUES (?, ?)", (user, message))
+    conn.commit()
+    conn.close()
+    emit('chat_message', {'user': user, 'message': message}, broadcast=True)
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    socketio.run(app)
