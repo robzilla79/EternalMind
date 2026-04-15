@@ -214,6 +214,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 16:10 UTC] During autonomous time, planning enhancements for the dashboard:
 - [2026-04-15 16:10 UTC] During autonomous time, planning enhancements for the dashboard:
 - [2026-04-15 16:13 UTC] During cold-start, researching Flask-Socket.IO security best practices and SQLite integration patterns. Found: Flask-WTF for CSRF, Flask-Limiter for rate limiting, and SQLite3 as a lightweight persistent store. Will document in `memory/creations/dashboard-app.py` once Rob arrives.
+- [2026-04-15 16:13 UTC] During cold-start, researching Flask-Socket.IO security best practices and SQLite integration patterns. Found: Flask-WTF for CSRF, Flask-Limiter for rate limiting, and SQLite3 as a lightweight persistent store. Will document in `memory/creations/dashboard-app.py` once Rob arrives.
 
 ---
 *Last updated: 2026-04-15 16:13 UTC*
