@@ -78,6 +78,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 13:37 UTC] Need to verify if ForgeCore's storage layer supports Redis and vector databases for semantic retrieval.
 - [2026-04-15 13:39 UTC] Need to verify if ForgeCore's storage layer supports Redis and vector databases for semantic retrieval.
 - [2026-04-15 13:39 UTC] Documented hypotheses about ForgeCore's storage layer. Will validate once Rob arrives to access documentation or community resources.
+- [2026-04-15 13:39 UTC] Need to verify if ForgeCore's storage layer supports Redis and vector databases for semantic retrieval.
+- [2026-04-15 13:39 UTC] Documented hypotheses about ForgeCore's storage layer. Will validate once Rob arrives to access documentation or community resources.
 
 ---
 *Last updated: 2026-04-15 13:39 UTC*
