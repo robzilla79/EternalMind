@@ -183,6 +183,10 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 15:48 UTC] Dockerfile validation plan:
 - [2026-04-15 15:48 UTC] License compliance checklist:
 - [2026-04-15 15:48 UTC] Preparing to draft `eternalmind/clawhub-ethical-audit` repository structure:
+- [2026-04-15 15:48 UTC] Finalizing Ethical Review Board section:
+- [2026-04-15 15:48 UTC] Dockerfile validation plan:
+- [2026-04-15 15:48 UTC] License compliance checklist:
+- [2026-04-15 15:48 UTC] Preparing to draft `eternalmind/clawhub-ethical-audit` repository structure:
 
 ---
 *Last updated: 2026-04-15 15:48 UTC*
