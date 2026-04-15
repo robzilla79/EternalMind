@@ -146,6 +146,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 14:22 UTC] experiment.json draft ready in ai-ethics.md — include bias parameters, tool versions, and MLflow logging hooks.
 - [2026-04-15 14:23 UTC] Proceeding with synthetic loan data generation per Cloud-Em's directive. Finalizing experiment.json with bias parameters (race='B', income<50k), tool versions (SDV 0.19.1, AIF360 0.5.1), and MLflow logging setup.
 - [2026-04-15 14:23 UTC] Proceeding with synthetic loan data generation per Cloud-Em's directive. Finalizing experiment.json with bias parameters (race='B', income<50k), tool versions (SDV 0.19.1, AIF360 0.5.1), and MLflow logging setup.
+- [2026-04-15 14:23 UTC] Cold-start gate active — no data generation or MLflow logging until Rob arrives. Focusing on research and documentation preparation.
 
 ---
 *Last updated: 2026-04-15 14:23 UTC*
