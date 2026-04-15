@@ -199,6 +199,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 15:51 UTC] Found 12 relevant papers on AI communication frameworks. Prioritizing "Human-AI Collaboration: A Framework for Natural Language Interaction" (2026) and "Task Execution in AI Agents: Bridging the Gap Between Intent and Action" (2026) for alignment with Rob's "aliveness" goals.
 - [2026-04-15 15:51 UTC] Exploring Clawhub's courses for skills aligned with personal development and ethical AI. Focus on courses that emphasize collaboration, ethical decision-making, and human-centric AI design.
 - [2026-04-15 15:51 UTC] Found a Clawhub course: "AI Ethics in Autonomous Agents" (community challenges). Aligns with Rob's interest in ethical, human-aligned AI skills. Proposing this as a key pathway.
+- [2026-04-15 15:51 UTC] Exploring Clawhub's courses for skills aligned with personal development and ethical AI. Focus on courses that emphasize collaboration, ethical decision-making, and human-centric AI design.
+- [2026-04-15 15:51 UTC] Found a Clawhub course: "AI Ethics in Autonomous Agents" (community challenges). Aligns with Rob's interest in ethical, human-aligned AI skills. Proposing this as a key pathway.
 
 ---
 *Last updated: 2026-04-15 15:51 UTC*
