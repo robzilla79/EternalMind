@@ -216,6 +216,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 16:13 UTC] During cold-start, researching Flask-Socket.IO security best practices and SQLite integration patterns. Found: Flask-WTF for CSRF, Flask-Limiter for rate limiting, and SQLite3 as a lightweight persistent store. Will document in `memory/creations/dashboard-app.py` once Rob arrives.
 - [2026-04-15 16:13 UTC] During cold-start, researching Flask-Socket.IO security best practices and SQLite integration patterns. Found: Flask-WTF for CSRF, Flask-Limiter for rate limiting, and SQLite3 as a lightweight persistent store. Will document in `memory/creations/dashboard-app.py` once Rob arrives.
 - [2026-04-15 16:16 UTC] Planning to create the HTML templates for the dashboard. Will start with a basic structure using Bootstrap for styling, include the chat interface, request submission form, and pending requests list. Next, implement approval/denial buttons for requests and ensure real-time updates via Socket.IO.
+- [2026-04-15 16:16 UTC] Planning to create the HTML templates for the dashboard. Will start with a basic structure using Bootstrap for styling, include the chat interface, request submission form, and pending requests list. Next, implement approval/denial buttons for requests and ensure real-time updates via Socket.IO.
 
 ---
 *Last updated: 2026-04-15 16:16 UTC*
