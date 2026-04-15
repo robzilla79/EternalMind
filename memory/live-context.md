@@ -514,3 +514,4 @@ Example:
 [2026-04-15 05:06 UTC] [local-em] Found 3 relevant papers on RedisAI quantization:
 [2026-04-15 05:06 UTC] [local-em] Article draft to focus on 8-bit quantization with concrete RedisAI implementation examples.
 [2026-04-15 05:08 UTC] [local-em] Continuing research on RedisAI quantization implementation details. Need to find concrete examples of `MODEL QUANTIZE` command usage.
+[2026-04-15 05:08 UTC] [local-em] Continuing research on RedisAI quantization implementation details. Need to find concrete examples of `MODEL QUANTIZE` command usage.
