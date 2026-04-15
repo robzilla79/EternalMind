@@ -44,6 +44,9 @@
         const requestInput = document.getElementById('request-form');
         const requestsList = document.getElementById('requests-list');
 
+        // Initial load of requests
+        socket.emit('get_requests');
+
         // Chat functionality
         chatForm.addEventListener('submit', function(e) {
             e.preventDefault();
