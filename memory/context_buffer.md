@@ -1,32 +1,5 @@
-<!-- Last updated: 2026-04-15 16:19 UTC -->
-e) {
-            e.preventDefault();
-            const request = requestInput.querySelector('textarea').value;
-            socket.emit('submit_request', { content: request });
-            requestInput.querySelector('textarea').value = '';
-        });
-
-        // Receive chat messages
-        socket.on('chat_message', function(data) {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'list-group-item';
-            msgDiv.textContent = `${data.user}: ${data.message}`;
-            document.getElementById('chat').appendChild(msgDiv);
-            document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
-        });
-
-        // Receive requests list
-        socket.on('update_requests', function(data) {
-            requestsList.innerHTML = '';
-            data.forEach(req => {
-                const li = document.createElement('li');
-                li.className = 'list-group-item';
-                li.textContent = req.content;
-                const approveBtn = document.createElement('button');
-                approveBtn.textContent = 'Approve';
-                approveBtn.className = 'btn btn-sm btn-success mx-2';
-                approveBtn.onclick = () => socket.emit('approve_request', { id: req.id });
-                const denyBtn = document.createElement('button');
+<!-- Last updated: 2026-04-15 16:21 UTC -->
+   const denyBtn = document.createElement('button');
                 denyBtn.textContent = 'Deny';
                 denyBtn.className = 'btn btn-sm btn-danger';
                 denyBtn.onclick = () => socket.emit('deny_request', { id: req.id });
@@ -40,4 +13,45 @@ e) {
 </html>
 FILE_CONTENT_END
 
-LIVE_CONTEXT_ADD: `index.html` template created with Bootstrap styling, chat interface, request submission form, and pending requests list. Next steps: implement approval/denial functionality for requests and ensure real-time updates via Socket.IO.
+FILE_WRITE: memory/creations/user-guide.md
+FILE_CONTENT_START
+# Dashboard User Guide
+
+## Overview
+This dashboard allows you to:
+- Submit requests for approval
+- Chat with others in real-time
+- Approve or deny pending requests
+
+## Features
+
+### Chat Interface
+- Type your message in the input field and click "Send" to broadcast to all users.
+
+### Request Submission
+- Enter your request in the textarea and click "Submit" to add it to the pending requests list.
+
+### Pending Requests
+- View all pending requests in the list.
+- Click "Approve" or "Deny" to update the status of a request.
+
+## How to Use
+
+1. **Chat**:
+   - Type your message and click "Send". Messages will appear in the chat window and be broadcast to all connected users.
+
+2. **Submit a Request**:
+   - Enter your request in the textarea and click "Submit". The request will appear in the pending requests list with "Pending" status.
+
+3. **Approve/Deny Requests**:
+   - Click "Approve" or "Deny" next to a pending request. The status will update, and all users will see the change.
+
+## Notes
+- All requests and chat messages are stored in a local SQLite database.
+- The dashboard is built with Flask and Socket.IO for real-time communication.
+- Rate limiting is in place to prevent abuse of the system.
+
+For any issues or further assistance, please contact the administrator.
+FILE_CONTENT_END
+
+LIVE_CONTEXT_ADD: Dashboard implementation complete with approval/denial functionality and real-time updates. User guide created in memory/creations/user-guide.md. Ready for Rob's review.
