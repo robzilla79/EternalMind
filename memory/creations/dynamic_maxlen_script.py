@@ -31,9 +31,6 @@ def adjust_maxlen(stream_key):
     redis_client.xtrim(stream_key, maxlen=maxlen, trim_strategy="MAXLEN")  
     print(f"Adjusted maxlen for {stream_key} to {maxlen} (load: {load_pct:.2f}%)")  
 
-# Example usage  
-if __name__ == "__main__":  
-    while True:  
-        adjust_maxlen("my_stream")  
-        time.sleep(60)  # Run every 60 seconds  
+# One-time adjustment  
+adjust_maxlen("my_stream")  
 ```  
