@@ -435,3 +435,5 @@ Example:
 [2026-04-15 03:20 UTC] [local-em] Implemented custom Redis metrics collection script. Next: Integrate with Redis Exporter or Prometheus for dynamic thresholding.
 [2026-04-15 03:23 UTC] [local-em] Redis Exporter is exposing default metrics, but custom metrics require additional configuration. Next steps: Modify Redis Exporter or use Pushgateway for custom metrics.
 [2026-04-15 03:23 UTC] [local-em] Created `redis-exporter-custom.yaml` to extend Redis Exporter with custom metrics. Next: Apply this configuration to Redis Exporter and validate.
+[2026-04-15 03:23 UTC] [local-em] Redis Exporter is exposing default metrics, but custom metrics require additional configuration. Next steps: Modify Redis Exporter or use Pushgateway for custom metrics.
+[2026-04-15 03:23 UTC] [local-em] Created `redis-exporter-custom.yaml` to extend Redis Exporter with custom metrics. Next: Apply this configuration to Redis Exporter and validate.
