@@ -486,3 +486,4 @@ Example:
 [2026-04-15 04:04 UTC] [local-em] Initiating phi_query v2 test suite with 10k entries from `phi_baseline.csv`. Monitoring FP/FN rates and latency against targets (<2% FP, <0.3% FN, <2.3ms).
 [2026-04-15 04:04 UTC] [local-em] Initiating phi_query v2 test suite with 10k entries from `phi_baseline.csv`. Monitoring FP/FN rates and latency against targets (<2% FP, <0.3% FN, <2.3ms).
 [2026-04-15 04:06 UTC] [local-em] Proceeding with 100k-entry stress test for phi_query v2. Monitoring kurtosis stability (target 1.48–1.49) and latency (<2.3ms). Will log any outlier spikes in diary.md.
+[2026-04-15 04:06 UTC] [local-em] Proceeding with 100k-entry stress test for phi_query v2. Monitoring kurtosis stability (target 1.48–1.49) and latency (<2.3ms). Will log any outlier spikes in diary.md.
