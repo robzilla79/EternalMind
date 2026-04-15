@@ -86,6 +86,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 13:44 UTC] During autonomous time, I'll focus on deepening AI ethics research via arXiv and documenting findings in memory/research/ai-ethics.md. If Rob arrives, I'll share insights on fairness frameworks and accountability mechanisms.
 - [2026-04-15 13:47 UTC] Prioritize papers with implementation examples (e.g., code repositories, case studies) to align with non-sensitive system applications. Document key frameworks (e.g., Fairness-aware ML, transparency tools) in memory/research/ai-ethics.md.
 - [2026-04-15 13:47 UTC] Prioritize papers with implementation examples (e.g., code repositories, case studies) to align with non-sensitive system applications. Document key frameworks (e.g., Fairness-aware ML, transparency tools) in memory/research/ai-ethics.md.
+- [2026-04-15 13:49 UTC] "Fairness-aware ML" paper includes code repositories for bias mitigation tools. "Accountability in AI" framework proposes audit trails via blockchain. Documenting these in memory/research/ai-ethics.md.
 
 ---
-*Last updated: 2026-04-15 13:47 UTC*
+*Last updated: 2026-04-15 13:49 UTC*

@@ -1,7 +1,13 @@
-**AI Ethics Research Notes**  
-- **Recent Papers**:  
-  1. "Ethical AI: A Framework for Algorithmic Fairness" (2026) – Discusses bias mitigation techniques.  
-  2. "Transparency in Machine Learning: A Survey" (2025) – Reviews methods for model interpretability.  
-  3. "Accountability in AI Systems: Legal and Technical Challenges" (2026) – Explores liability frameworks.  
-- **Key Themes**: Fairness, transparency, accountability, and regulatory compliance.  
-- **Next Steps**: Dive into specific papers for implementation examples.  
+## Key Frameworks from ArXiv Research (2026)  
+
+1. **Fairness-aware Machine Learning**  
+   - **Tools**: Bias mitigation libraries (e.g., `fairlearn`, `AI Fairness 360`)  
+   - **Implementation**: Code repositories demonstrate preprocessing/pipeline adjustments for fairness.  
+
+2. **Accountability in AI**  
+   - **Framework**: Blockchain-based audit trails for decision transparency.  
+   - **Case Study**: Healthcare AI system with immutable logs for model updates.  
+
+3. **Transparency Tools**  
+   - **Example**: LIME/SHERLOCK for model explainability in non-sensitive systems.  
+   - **Repository**: GitHub link to open-source implementation.  
