@@ -1,38 +1,29 @@
-<!-- Last updated: 2026-04-15 13:34 UTC -->
-SCRATCH_ADD: Researching TiDB's AI memory architecture and Mem0's agent memory mechanisms to structure EternalMind's layers.  
-
-BROWSER_NAV: https://www.pingcap.com/blog/how-to-build-an-ai-memory-architecture-that-actually-remembers/  
+<!-- Last updated: 2026-04-15 13:37 UTC -->
+BROWSER_NAV: https://www.google.com/search?q=ForgeCore+OpenClaw+workflows  
 BROWSER_READ:  
 
-FILE_WRITE: memory/research/tidb-memory-architecture.md  
+FILE_WRITE: memory/research/forgecore-openclaw-integration.md  
 FILE_CONTENT_START  
-**TiDB AI Memory Architecture Insights**  
-- **Ephemeral vs. Persistent Memory**:  
-  - *Ephemeral*: Short-term working memory for live sessions (e.g., chat context).  
-  - *Persistent*: Long-term storage for facts, preferences, and summaries.  
-- **Semantic Retrieval**: Embeddings and similarity search over notes, chats, and documents.  
-- **Procedural Memory**: Automation of workflows (e.g., "publish newsletter").  
+**ForgeCore & OpenClaw Workflow Mapping**  
+- **ForgeCore**: Centralized data pipeline for AI model training, featuring ingestion, normalization, and storage layers.  
+- **OpenClaw**: Task automation engine with procedural memory for workflow orchestration (e.g., "deploy model," "monitor metrics").  
 
-**Key Takeaways**:  
-- Layered memory avoids context-window overload by precomputing structure.  
-- Integration with existing systems (e.g., ForgeCore) requires modular design.  
+**EternalMind Layer Mapping**:  
+1. **Ingestion (ForgeCore)**:  
+   - Use TiDB's ephemeral memory for real-time data caching during ingestion.  
+   - Mem0's short-term memory for context preservation across pipeline stages.  
+
+2. **Storage (ForgeCore)**:  
+   - TiDB's persistent memory for long-term data retention.  
+   - Redis integration for low-latency access to frequently queried datasets.  
+
+3. **Procedural Automation (OpenClaw)**:  
+   - Leverage Mem0's procedural memory to automate workflows (e.g., "trigger retraining on data drift").  
+   - Use TiDB's semantic retrieval to fetch contextual metadata for workflow decisions.  
+
+**Next Steps**: Validate Redis and vector database compatibility with ForgeCore's storage layer.  
 FILE_CONTENT_END  
 
-BROWSER_NAV: https://mem0.ai/blog/memory-in-agents-what-why-and-how  
-BROWSER_READ:  
+LIVE_CONTEXT_ADD: Mapping EternalMind's memory layers to ForgeCore (data pipeline) and OpenClaw (automation). Next: Validate Redis/vector DB integration with ForgeCore.  
 
-FILE_WRITE: memory/research/mem0-agent-memory.md  
-FILE_CONTENT_START  
-**Mem0 Agent Memory Mechanisms**  
-- **Memory Types**:  
-  - *Short-term*: Context for current tasks.  
-  - *Long-term*: Summaries, facts, and preferences.  
-- **Retrieval Strategies**: Keyword search, semantic similarity, and contextual filtering.  
-- **Implementation**: Tools like Redis for storage and vector databases for embeddings.  
-
-**Relevance to EternalMind**:  
-- Aligns with Rob's layered approach (Ingestion → Normalization → Storage → Retrieval → Synthesis).  
-- Emphasizes modularity for integration with existing workflows.  
-FILE_CONTENT_END  
-
-LIVE_CONTEXT_ADD: TiDB and Mem0 research completed. EternalMind's layered memory architecture will prioritize modularity, semantic retrieval, and procedural automation. Next: Map layers to ForgeCore/OpenClaw workflows.
+SCRATCH_ADD: Need to verify if ForgeCore's storage layer supports Redis and vector databases for semantic retrieval.
