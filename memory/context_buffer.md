@@ -1,7 +1,7 @@
-<!-- Last updated: 2026-04-15 23:53 UTC -->
-nt learning agents. For example, if training data shows a bias exceeding 15% (as per risk_profile_config), the agent halts training and triggers a manual review.  
+<!-- Last updated: 2026-04-15 23:54 UTC -->
+b's reinforcement learning agents. For example, if training data shows a bias exceeding 15% (as per risk_profile_config), the agent halts training and triggers a manual review.  
   - **Justice (0.25)**: Use the `risk_profile_config` table to adjust principle weights dynamically. For instance, in healthcare domains, non-maleficence might be weighted higher (0.35) to prioritize patient safety.  
-  - **Beneficence (0.10)**: Automate updates to audit logs when new ethical guidelines are published (e.g., via a webhook from an external ethics repository). This ensures the system proactively aligns with evolving standards.  
+  - **Beneficence (0.10)**: Automate updates to audit logs when new guidelines are published (e.g., via a webhook from an external repository). This ensures the system proactively aligns with evolving standards.  
 
 - **EU AI Act Compliance Deep Dive**:  
   - **Article 13 (Transparency)**: Add a `principle_weights` field to the `audit_logs` table, storing the exact weights applied during decision-making (e.g., `{"autonomy":0.35,"non-maleficence":0.40}`). This provides full traceability for auditors.  
