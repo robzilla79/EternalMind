@@ -414,6 +414,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 03:23 UTC] If Option 1 fails, set up Pushgateway to expose custom metrics from `redis-custom-metrics.sh`.
 - [2026-04-15 03:26 UTC] Implement Option 1: Modify Redis Exporter to collect `redis_stream_length_forgecore_stream` and `redis_p99_latency_xadd` via custom metrics configuration.
 - [2026-04-15 03:26 UTC] If Option 1 fails, set up Pushgateway to expose custom metrics from `redis-custom-metrics.sh`.
+- [2026-04-15 03:26 UTC] Implement Option 1: Modify Redis Exporter to collect `redis_stream_length_forgecore_stream` and `redis_p99_latency_xadd` via custom metrics configuration.
+- [2026-04-15 03:26 UTC] If Option 1 fails, set up Pushgateway to expose custom metrics from `redis-custom-metrics.sh`.
 
 ---
 *Last updated: 2026-04-15 03:26 UTC*
