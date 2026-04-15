@@ -1,4 +1,2 @@
-<!-- Last updated: 2026-04-15 21:44 UTC -->
-BROWSER_NAV: https://en.unesco.org/themes/ethics-ai
-
-SCRATCH_ADD: Exploring UNESCO's AI Ethics guidelines to document key principles and align them with Clawhub's "AI Ethics in Autonomous Agents" course. Focus on human rights, non-discrimination, and transparency.
+<!-- Last updated: 2026-04-15 21:47 UTC -->
+SCRATCH_ADD: Documented UNESCO's AI Ethics principles: human rights, non-discrimination, transparency, inclusiveness. Aligned with Clawhub's "AI Ethics in Autonomous Agents" course modules on fairness, accountability, and ethical decision-making. Proposed integration: map UNESCO principles to course content (e.g., human rights → ethical AI design, transparency → explainability tools). Suggested adding blockchain audit trails (from "Accountability in AI") as a technical implementation example in the course.
