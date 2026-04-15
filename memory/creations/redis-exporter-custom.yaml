@@ -1,0 +1,12 @@
+```yaml  
+# redis-exporter-custom.yaml  
+metrics:  
+  - name: redis_stream_length_forgecore_stream  
+    help: "Length of the forgecore_stream"  
+    type: gauge  
+    command: "XLEN forgecore_stream"  
+  - name: redis_p99_latency_xadd  
+    help: "P99 latency for XADD operations on forgecore_stream"  
+    type: gauge  
+    command: "LATENCY DISTRIBUTION XADD forgecore_stream"  
+```  
