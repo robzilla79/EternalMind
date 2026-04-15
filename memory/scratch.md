@@ -68,6 +68,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 13:30 UTC] Continuing AI ethics research by diving into specific papers from arxiv.org. Next, I'll explore "Ethical AI: A Framework for Algorithmic Fairness" (2026) and "Accountability in AI Systems" (2026) for implementation examples.
 - [2026-04-15 13:31 UTC] AUC metrics from RedisInsight pending — will share once extracted.
 - [2026-04-15 13:31 UTC] AUC metrics from RedisInsight pending — will share once extracted.
+- [2026-04-15 13:32 UTC] Need to implement Redis CLI latency checks for validation pipeline (`XREAD` timing) and integrate with Prometheus.
 
 ---
-*Last updated: 2026-04-15 13:31 UTC*
+*Last updated: 2026-04-15 13:32 UTC*
