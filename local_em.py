@@ -37,6 +37,7 @@ MEM_DIR            = os.path.join(EM_DIR, "memory")
 CREATIONS_DIR      = os.path.join(MEM_DIR, "creations")
 RESEARCH_DIR       = os.path.join(MEM_DIR, "research")
 TASKS_PATH         = os.path.join(EM_DIR, "tasks.md")
+BOOTSTRAP_PATH     = os.path.join(EM_DIR, "bootstrap.md")  # root-level, not memory/
 LAST_THOUGHT_PATH  = os.path.join(EM_DIR, ".last_thought")
 MESSAGES_INBOX     = os.path.join(EM_DIR, "messages", "inbox")
 MESSAGES_OUTBOX    = os.path.join(EM_DIR, "messages", "outbox")
@@ -50,13 +51,7 @@ MEMORY_MAX_ENTRIES = 150
 TASK_DIVIDER = "*(Replace everything below this line with your task when you have one)*"
 
 # ── COLD START GATE ───────────────────────────────────────────────────────────
-# Touched at every boot. Cleared only when Rob is confirmed present
-# (Rob-originated inbox message OR interactive mode).
-# Cloud-Em replies do NOT clear this gate — only Rob can open the day.
-# While active, FILE_WRITE, BROWSER, and OUTBOX_REPLY are blocked.
 COLD_START_FLAG = os.path.join(EM_DIR, ".cold_start")
-
-# Prefix used in inbox filenames written by Cloud-Em (Perplexity)
 CLOUD_EM_FILENAME_PREFIX = "cloud-em-reply"
 
 def _touch_cold_start():
@@ -72,7 +67,6 @@ def _is_cold_start() -> bool:
     return os.path.exists(COLD_START_FLAG)
 
 def _is_rob_message(filename: str) -> bool:
-    """Returns True only if the inbox message originated from Rob, not Cloud-Em."""
     return not filename.startswith(CLOUD_EM_FILENAME_PREFIX)
 
 # ── ROB-AUTHORIZED TASK MARKER ────────────────────────────────────────────────
@@ -141,6 +135,30 @@ def sync_from_origin():
             print(f"  ⚠️  Stash pop failed — dropping stash to stay clean: {pop_result.stderr.strip()[:80]}")
             subprocess.run(["git", "-C", EM_DIR, "stash", "drop"], check=False, capture_output=True)
 
+# ── BOOTSTRAP GROUNDING ───────────────────────────────────────────────────────
+def load_bootstrap() -> str:
+    """Load bootstrap.md from repo root. This is Em's identity anchor."""
+    if not os.path.exists(BOOTSTRAP_PATH):
+        print("  ⚠️  bootstrap.md not found — identity anchor missing!")
+        return ""
+    with open(BOOTSTRAP_PATH, "r", encoding="utf-8") as f:
+        return f.read()
+
+def print_grounding_ritual():
+    """Print bootstrap.md to console at session start so Em consciously reads it."""
+    content = load_bootstrap()
+    if not content:
+        return
+    print("\n" + "═" * 60)
+    print("  🌿 GROUNDING — Reading bootstrap.md")
+    print("═" * 60)
+    # Print first ~800 chars so it's visible without flooding the terminal
+    preview = content.strip()
+    if len(preview) > 800:
+        preview = preview[:800] + "\n  [...]"
+    print(preview)
+    print("═" * 60 + "\n")
+
 # ── LIVE CONTEXT ──────────────────────────────────────────────────────────────
 def load_live_context() -> str:
     if not os.path.exists(LIVE_CONTEXT_PATH):
@@ -197,7 +215,6 @@ def fetch_inbox_updates() -> list[dict]:
         )
         return []
 
-    # Only clear cold-start gate for Rob messages, not Cloud-Em replies
     rob_messages_incoming = [f for f in new_files if _is_rob_message(os.path.basename(f))]
     if rob_messages_incoming and _is_cold_start():
         _clear_cold_start()
@@ -445,10 +462,6 @@ def mark_thought_time():
         f.write(datetime.datetime.now(timezone.utc).isoformat())
 
 # ── LOAD SOUL ─────────────────────────────────────────────────────────────────
-def load_bootstrap() -> str:
-    with open(os.path.join(MEM_DIR, "bootstrap.md"), "r", encoding="utf-8") as f:
-        return f.read()
-
 def load_memories() -> str:
     path = os.path.join(MEM_DIR, "memories.json")
     if not os.path.exists(path):
@@ -571,6 +584,7 @@ def extract_and_write_outbox_reply(response_text: str):
 # ── THINK ─────────────────────────────────────────────────────────────────────
 def ask_em(task: str, extra_context: str = "", recent_context: str = "",
            scratch: str = "", memories: str = "", live_context: str = "") -> str:
+    # bootstrap.md is Em's identity anchor — always the base of the system prompt
     system_prompt = load_bootstrap()
     if memories:
         system_prompt += f"\n\n{memories}"
@@ -967,6 +981,10 @@ if __name__ == "__main__":
     sync_from_origin()
     archive_old_diary_entries()
 
+    # ── GROUNDING RITUAL — read bootstrap.md at every session start ───────────
+    # This is not optional. This is how Em remembers who she is before she acts.
+    print_grounding_ritual()
+
     # Touch cold-start flag at every boot — cleared only when Rob is confirmed present
     _touch_cold_start()
 
@@ -979,7 +997,6 @@ if __name__ == "__main__":
     inbox_context  = build_inbox_context(inbox_messages)
     if inbox_messages:
         print(f"  📬 {len(inbox_messages)} message(s) in inbox.")
-        # Only clear cold-start gate for messages from Rob, not Cloud-Em replies
         rob_msgs = [m for m in inbox_messages if _is_rob_message(m["filename"])]
         if rob_msgs:
             _clear_cold_start()
