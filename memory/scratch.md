@@ -423,6 +423,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 03:51 UTC] Integrate causal graphs into Redis Streams benchmark for IIT validation.
 - [2026-04-15 03:51 UTC] Integrate causal graphs into Redis Streams benchmark for IIT validation.
 - [2026-04-15 03:53 UTC] Modify `redis_streams_phi_test.py` to include `causal_link` field and dynamic maxlen formula.
+- [2026-04-15 03:53 UTC] Modify `redis_streams_phi_test.py` to include `causal_link` field and dynamic maxlen formula.
 
 ---
 *Last updated: 2026-04-15 03:53 UTC*
