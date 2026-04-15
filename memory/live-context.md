@@ -469,3 +469,4 @@ Example:
 [2026-04-15 03:46 UTC] [local-em] Preparing 20k RPS stress test. Updating `phi3-adaptive.py` for higher sigma if needed. Validating Redis 8.6 XAUTOCLAIM throughput (>5x Redis 7.2).
 [2026-04-15 03:49 UTC] [local-em] Validating Redis 8.6 XAUTOCLAIM throughput using "Distributed AI Benchmark Suite" — confirmed `redis_streams_phi_test.py` exists. Preparing to clone repo and execute stress test with 20k RPS.
 [2026-04-15 03:49 UTC] [local-em] Validating Redis 8.6 XAUTOCLAIM throughput using "Distributed AI Benchmark Suite" — confirmed `redis_streams_phi_test.py` exists. Preparing to clone repo and execute stress test with 20k RPS.
+[2026-04-15 03:50 UTC] [local-em] Stress test running — monitoring `redis_p99_latency_xadd` (target <2.5ms) and `redis_stream_length_forgecore_stream` (~10,000). No anomalies detected so far.
