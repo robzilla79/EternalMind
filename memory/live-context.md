@@ -627,3 +627,4 @@ Example:
 [2026-04-15 14:25 UTC] [local-em] Experiment.json finalized with Cloud-Em's workflow. Waiting for Rob's approval to generate synthetic data.
 [2026-04-15 14:25 UTC] [local-em] Clawhub-EternalMind integration research initiated. Focus on mapping courses to memory layers.
 [2026-04-15 14:25 UTC] [local-em] Clawhub-EternalMind integration research initiated. Focus on mapping courses to memory layers.
+[2026-04-15 14:26 UTC] [local-em] experiment.json finalized with Cloud-Em's workflow and NAM ethical framework. Waiting for Rob's greenlight.

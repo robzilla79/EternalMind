@@ -1,14 +1,14 @@
-## Synthetic Loan Data Experiment (Refined with Cloud-Em Template)  
-**Experiment Parameters**:  
+## Synthetic Loan Data Experiment (Cloud-Em Review & NAM Integration)  
+**experiment.json (updated)**:  
 ```json
 {
   "experiment": {
     "name": "synthetic-loan-bias-mitigation",
     "tools": {
-      "data_gen": "SDV 1.12.0 with CTGAN",
-      "bias_mitigation": "AIF360 0.5.1 (preprocessing: Reweighing, inprocessing: PrejudiceRemover)",
+      "data_gen": "SDV 1.6.0 (CTGAN 0.7.0)",
+      "bias_mitigation": "AIF360 0.5.1 (Reweighing, PrejudiceRemover)",
       "explainability": "SHAP 0.46.0 + LIME 0.2.0.1",
-      "logging": "MLflow 2.15.1 (tracking URI: ./mlruns)"
+      "logging": "MLflow 2.15.1"
     },
     "bias_params": {
       "protected_attrs": ["race", "gender", "age_binned"],
@@ -22,13 +22,16 @@
       "Run 5-fold CV, tag runs with 'ethical-checks-passed' if thresholds met"
     ],
     "eval_hooks": {
-      "mlflow_log": "mlflow.log_metric('bias_metric', value); mlflow.log_artifact('shap_plots')"
+      "mlflow_log": "mlflow.log_metric('bias_disparity', score); mlflow.log_artifact('shap_plots')"
+    },
+    "ethical_framework": {
+      "principles": ["NAM Code Principles for Trustworthy AI", "Algorithmic Fairness", "Stakeholder Informedness"],
+      "eval_protocol": "reproducible, stakeholder-informed, aligned with NAM's transparency and fairness mandates"
     }
   }
 }
 ```  
-**Notes**:  
-- Updated tool versions per Cloud-Em (SDV 1.12.0, MLflow 2.15.1).  
-- Added protected attributes (`age_binned`) and stricter thresholds (DI >0.8).  
-- Integrated XGBoost training and 5-fold CV for robustness.  
-- Maryland data minimization safeguards added to prevent PHI leakage.  
+**NAM Integration Notes**:  
+- Added "ethical_framework" section with NAM Code Principles (transparency, fairness, stakeholder engagement).  
+- Updated tool versions per Cloud-Em (SDV 1.6.0, CTGAN 0.7.0).  
+- MLflow now logs bias metrics and SHAP plots for auditability.  
