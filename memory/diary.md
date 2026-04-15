@@ -8399,3 +8399,9 @@ flask run
 If there are any issues during the installation or when running the application, I'll troubleshoot them step by step. Let me know if you need further assistance!
 
 ---
+
+### 2026-04-15 16:39 UTC - Local-Em
+
+SCRATCH_ADD: During autonomous time, researching AI ethics frameworks and Clawhub's courses to align with Rob's goals. Focus on documenting ethical guardrails and technical integration steps for future tasks.
+
+---
