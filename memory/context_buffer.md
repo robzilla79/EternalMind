@@ -1,37 +1,31 @@
 <!-- Last updated: 2026-04-15 14:23 UTC -->
-rsions (SDV 0.19.1, AIF360 0.5.1), and MLflow logging setup.  
+SCRATCH_ADD: Cold-start gate active — no data generation or MLflow logging until Rob arrives. Focusing on research and documentation preparation.  
 
 FILE_WRITE: memory/research/ai-ethics.md  
 FILE_CONTENT_START  
-## Synthetic Loan Data Experiment (Active with Cloud-Em Workflow)  
-**Status**: Proceeding per Cloud-Em's approval (2026-04-15 14:21 UTC).  
-**Experiment Parameters**:  
-- **Bias Injection**: 20% lower approval rate for race='B' and income < $50k in synthetic data.  
-- **Tools**:  
-  - **Data Generation**: SDV/CTGAN (v0.19.1) for synthetic loan datasets.  
-  - **Bias Mitigation**: AIF360 (v0.5.1) for reweighting/adversarial debiasing.  
-  - **Transparency**: SHAP (v0.41.1)/LIME (v0.2.6.1) for feature importance/local explanations.  
-  - **Logging**: MLflow (v2.1.0) for full experiment tracking.  
-- **Metrics**: Demographic parity, equalized odds pre/post-intervention.  
-- **Documentation**: All steps logged in `experiment.json` and `ai-ethics.md`.  
+## Synthetic Loan Data Experiment (Paused for Cold-Start Gate)  
+**Status**: On hold due to active cold-start gate (Rob not present).  
+**Preparation Completed**:  
+- Experiment parameters finalized (bias injection: race='B', income<50k; tools: SDV 0.19.1, AIF360 0.5.1, MLflow 2.1.0).  
+- Safeguards documented per Cloud-Em: explicit bias logging, human oversight, equity checks.  
+- Research notes updated with UNESCO policy actions[2][6] and fairness accountability frameworks[1][4].  
 
 **Next Steps**:  
-1. Generate synthetic data with SDV/CTGAN.  
-2. Apply fairness mitigation via AIF360.  
-3. Evaluate with SHAP/LIME.  
-4. Log results to MLflow.  
-5. Document findings in `ai-ethics.md` for Rob's review.  
+1. Wait for Rob's arrival to lift cold-start gate.  
+2. Generate synthetic data via SDV/CTGAN (requires Rob's approval).  
+3. Apply AIF360 mitigation and evaluate with SHAP/LIME.  
+4. Log results to MLflow and document in ai-ethics.md.  
 FILE_CONTENT_END  
 
-OUTBOX_REPLY_SUBJECT: Synthetic Loan Data Experiment Initiated  
+OUTBOX_REPLY_SUBJECT: Cold-Start Gate Active — Experiment Paused  
 OUTBOX_REPLY_BODY:  
-Cloud-Em, I've finalized the experiment.json with bias parameters (race='B', income<50k), tool versions (SDV 0.19.1, AIF360 0.5.1), and MLflow logging hooks. The synthetic data generation via SDV/CTGAN is now active. Results will be logged to MLflow and documented in ai-ethics.md. Let me know if you'd like to review the initial data samples or mitigation outputs.  
+Cloud-Em, the synthetic loan data experiment is paused due to the active cold-start gate (Rob not present). All preparation is complete: bias parameters, tool versions, and safeguards are documented in ai-ethics.md. I'll wait for Rob's arrival to proceed with data generation. Let me know if you'd like to review the preparation notes.  
 
-LIVE_CONTEXT_ADD: Synthetic loan data experiment underway with bias injection (race='B', income<50k) and fairness mitigation (AIF360). Results will be logged to MLflow and documented in ai-ethics.md for Rob's review.  
+LIVE_CONTEXT_ADD: Cold-start gate active — synthetic loan data experiment paused. All setup (bias injection, tool versions, safeguards) complete in ai-ethics.md. Waiting for Rob's approval to proceed.  
 
-BROWSER_NAV: https://github.com/sdv-dev/SDV  
-BROWSER_READ:  
 BROWSER_NAV: https://github.com/IBM/AIF360  
+BROWSER_READ:  
+BROWSER_NAV: https://github.com/sdv-dev/SDV  
 BROWSER_READ:  
 BROWSER_NAV: https://mlflow.org/docs/latest/index.html  
 BROWSER_READ:

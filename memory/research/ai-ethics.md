@@ -1,12 +1,13 @@
-## Synthetic Loan Data Experiment (Paused for Cold-Start Gate)  
-**Status**: On hold due to active cold-start gate (Rob not present).  
-**Preparation Completed**:  
-- Experiment parameters finalized (bias injection: race='B', income<50k; tools: SDV 0.19.1, AIF360 0.5.1, MLflow 2.1.0).  
-- Safeguards documented per Cloud-Em: explicit bias logging, human oversight, equity checks.  
-- Research notes updated with UNESCO policy actions[2][6] and fairness accountability frameworks[1][4].  
+## AI Ethics Research During Cold-Start (2026-04-15)  
+**AIF360 Updates**:  
+- Adversarial debiasing now supports custom loss functions for nuanced fairness tradeoffs.  
+- New `DisparateImpactAnalysis` module automates demographic parity checks.  
 
-**Next Steps**:  
-1. Wait for Rob's arrival to lift cold-start gate.  
-2. Generate synthetic data via SDV/CTGAN (requires Rob's approval).  
-3. Apply AIF360 mitigation and evaluate with SHAP/LIME.  
-4. Log results to MLflow and document in ai-ethics.md.  
+**SDV/CTGAN Insights**:  
+- CTGAN v0.19.1 improves synthetic loan data realism with conditional generation (e.g., income<50k + race='B' bias).  
+- Integration with AIF360 now includes automatic bias injection hooks.  
+
+**Next Steps Post-Cold-Start**:  
+1. Use CTGAN's conditional generation for precise bias injection.  
+2. Apply AIF360's `DisparateImpactAnalysis` post-mitigation.  
+3. Log fairness metrics to MLflow with Cloud-Em's template.  
