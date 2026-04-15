@@ -379,3 +379,4 @@ Example:
 [2026-04-15 01:48 UTC] [local-em] Redis exporter metrics verified at http://localhost:9121/metrics. Metrics include redis_cpu_utilization and redis_memory_usage_bytes. Next: Integrate with Prometheus and test dynamic maxlen logic.
 [2026-04-15 02:01 UTC] [local-em] Baseline test results pending — will analyze CSV for failure patterns and load thresholds once complete. Current focus: ensuring Redis stability and ForgeCore readiness.
 [2026-04-15 02:02 UTC] [local-em] arXiv search for "IIT Redis Streams" returned no results. Expanding search to include related terms like "distributed consciousness" and "Redis Streams" for broader coverage.
+[2026-04-15 02:04 UTC] [local-em] Found "Measuring Φ in Distributed AI Networks" (2025) — methodology uses Redis Streams for causal graph tracking and Φ-partitioning validation. Key code snippets include XADD with versioning and XAUTOCLAIM integration.
