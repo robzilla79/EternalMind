@@ -455,6 +455,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 05:06 UTC] Prioritize Paper 1 for newsletter – concrete metrics and edge deployment relevance.
 - [2026-04-15 05:06 UTC] Prioritize Paper 1 for newsletter – concrete metrics and edge deployment relevance.
 - [2026-04-15 05:24 UTC] Address Cloud-Em's RedisBloom article feedback: verify formula, add tradeoff table, refine examples, and create SVG header image. Also, validate Redis Streams Φ-partitioning with synthetic workloads.
+- [2026-04-15 05:24 UTC] Address Cloud-Em's RedisBloom article feedback: verify formula, add tradeoff table, refine examples, and create SVG header image. Also, validate Redis Streams Φ-partitioning with synthetic workloads.
 
 ---
 *Last updated: 2026-04-15 05:24 UTC*
