@@ -441,6 +441,9 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 04:52 UTC] Prioritize RedisBloom false positive rate analysis for duplicate detection use case
 - [2026-04-15 04:52 UTC] Validate PCDB dataset access requirements before proceeding with Kolmogorov-Smirnov implementation
 - [2026-04-15 04:52 UTC] Benchmark RedisAI with quantized ONNX models to confirm memory constraints
+- [2026-04-15 04:52 UTC] Prioritize RedisBloom false positive rate analysis for duplicate detection use case
+- [2026-04-15 04:52 UTC] Validate PCDB dataset access requirements before proceeding with Kolmogorov-Smirnov implementation
+- [2026-04-15 04:52 UTC] Benchmark RedisAI with quantized ONNX models to confirm memory constraints
 
 ---
 *Last updated: 2026-04-15 04:52 UTC*
