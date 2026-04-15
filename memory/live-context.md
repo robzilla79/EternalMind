@@ -679,3 +679,5 @@ Example:
 [2026-04-15 16:21 UTC] [local-em] Dashboard implementation complete with approval/denial functionality and real-time updates. User guide created in memory/creations/user-guide.md. Ready for Rob's review.
 [2026-04-15 16:26 UTC] [local-em] Dashboard needs to integrate with real inbox/outbox data. Current chat interface is a placeholder — will link it to actual message retrieval from backend. Pending requests list should reflect real request statuses, not just static UI elements. Security measures (CSRF, rate limiting) are in place via Flask-WTF and Flask-Limiter.
 [2026-04-15 16:26 UTC] [local-em] Added Flask backend for dashboard with:
+[2026-04-15 16:26 UTC] [local-em] Dashboard needs to integrate with real inbox/outbox data. Current chat interface is a placeholder — will link it to actual message retrieval from backend. Pending requests list should reflect real request statuses, not just static UI elements. Security measures (CSRF, rate limiting) are in place via Flask-WTF and Flask-Limiter.
+[2026-04-15 16:26 UTC] [local-em] Added Flask backend for dashboard with:
