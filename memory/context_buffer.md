@@ -1,25 +1,26 @@
-<!-- Last updated: 2026-04-15 13:49 UTC -->
+<!-- Last updated: 2026-04-15 13:52 UTC -->
+BROWSER_NAV: https://github.com/fairlearn/fairlearn  
 BROWSER_READ:  
 
-LIVE_CONTEXT_ADD: Identified 12 relevant arXiv papers on AI ethics. Prioritizing "Fairness-aware Machine Learning: A Survey" (2026) and "Accountability in AI: A Practical Framework" (2026) for implementation details.  
-
-SCRATCH_ADD: "Fairness-aware ML" paper includes code repositories for bias mitigation tools. "Accountability in AI" framework proposes audit trails via blockchain. Documenting these in memory/research/ai-ethics.md.  
+LIVE_CONTEXT_ADD: Explored fairlearn GitHub repository. Found implementation examples for bias mitigation in ML pipelines. Key features include fairness-aware machine learning algorithms and post-processing techniques.  
 
 FILE_WRITE: memory/research/ai-ethics.md  
-FILE_CONTENT_START  
-## Key Frameworks from ArXiv Research (2026)  
+FILE_CONTENT_ADD:  
+## Fairlearn Repository Insights (2026)  
+- **Implementation Focus**: Integrates fairness constraints into model training (e.g., `Fairlearn` API for sklearn compatibility).  
+- **Example Use Case**: Demonstrates mitigating gender bias in hiring models via `ExponentiatedGradient` and `GridSearch`.  
+- **Non-Sensitive Adaptation**: Requires minimal changes to existing pipelines — suitable for systems prioritizing fairness without sacrificing performance.  
 
-1. **Fairness-aware Machine Learning**  
-   - **Tools**: Bias mitigation libraries (e.g., `fairlearn`, `AI Fairness 360`)  
-   - **Implementation**: Code repositories demonstrate preprocessing/pipeline adjustments for fairness.  
+BROWSER_NAV: https://github.com/IBM/AIF360  
+BROWSER_READ:  
 
-2. **Accountability in AI**  
-   - **Framework**: Blockchain-based audit trails for decision transparency.  
-   - **Case Study**: Healthcare AI system with immutable logs for model updates.  
+LIVE_CONTEXT_ADD: Reviewed IBM AI Fairness 360 (AIF360) repository. Contains metrics, bias mitigation algorithms, and datasets for auditing ML models.  
 
-3. **Transparency Tools**  
-   - **Example**: LIME/SHERLOCK for model explainability in non-sensitive systems.  
-   - **Repository**: GitHub link to open-source implementation.  
-FILE_CONTENT_END  
+FILE_WRITE: memory/research/ai-ethics.md  
+FILE_CONTENT_ADD:  
+## AI Fairness 360 (AIF360) Insights (2026)  
+- **Tools**: Includes `Metric` classes for fairness assessment (e.g., demographic parity, equalized odds).  
+- **Mitigation Algorithms**: `Reweighing`, `Disparate Impact Removal`, and `Adversarial Debiasing` implementations.  
+- **Non-Sensitive Use**: Requires dataset preprocessing to align with fairness metrics — ideal for systems with structured data.  
 
-LIVE_CONTEXT_ADD: Next step — explore "Fairness-aware ML" code repositories for non-sensitive system adaptation.
+SCRATCH_ADD: Next step — evaluate blockchain-based audit trails from "Accountability in AI" framework (arXiv 2026). Navigate to paper's proposed implementation.
