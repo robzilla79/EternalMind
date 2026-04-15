@@ -51,10 +51,13 @@ TASK_DIVIDER = "*(Replace everything below this line with your task when you hav
 
 # ── COLD START GATE ───────────────────────────────────────────────────────────
 # Touched at every boot. Cleared only when Rob is confirmed present
-# (inbox message received OR interactive mode). While active, FILE_WRITE,
-# BROWSER, and OUTBOX_REPLY are blocked so Em cannot resume self-issued
-# work orders from a previous cycle's scratch/live-context notes.
+# (Rob-originated inbox message OR interactive mode).
+# Cloud-Em replies do NOT clear this gate — only Rob can open the day.
+# While active, FILE_WRITE, BROWSER, and OUTBOX_REPLY are blocked.
 COLD_START_FLAG = os.path.join(EM_DIR, ".cold_start")
+
+# Prefix used in inbox filenames written by Cloud-Em (Perplexity)
+CLOUD_EM_FILENAME_PREFIX = "cloud-em-reply"
 
 def _touch_cold_start():
     with open(COLD_START_FLAG, "w", encoding="utf-8") as f:
@@ -68,10 +71,11 @@ def _clear_cold_start():
 def _is_cold_start() -> bool:
     return os.path.exists(COLD_START_FLAG)
 
+def _is_rob_message(filename: str) -> bool:
+    """Returns True only if the inbox message originated from Rob, not Cloud-Em."""
+    return not filename.startswith(CLOUD_EM_FILENAME_PREFIX)
+
 # ── ROB-AUTHORIZED TASK MARKER ────────────────────────────────────────────────
-# Only tasks that carry this marker are treated as real work orders.
-# get_task() injects it automatically, so any task Rob writes to tasks.md
-# via the normal flow is automatically authorized.
 ROB_TASK_MARKER = "ROB_AUTHORIZED"
 
 # Memory loading config
@@ -193,6 +197,11 @@ def fetch_inbox_updates() -> list[dict]:
         )
         return []
 
+    # Only clear cold-start gate for Rob messages, not Cloud-Em replies
+    rob_messages_incoming = [f for f in new_files if _is_rob_message(os.path.basename(f))]
+    if rob_messages_incoming and _is_cold_start():
+        _clear_cold_start()
+
     print(f"  📬 {len(new_files)} new message(s) detected mid-cycle — pulling...")
     for rel_path in new_files:
         subprocess.run(
@@ -251,7 +260,6 @@ def extract_and_write_scratch(response_text: str):
 
 # ── FILE WRITE ────────────────────────────────────────────────────────────────
 def extract_and_write_files(response_text: str) -> list[str]:
-    # Block all file writes during cold start unless a Rob-authorized task is active
     if _is_cold_start() and not has_task():
         if re.search(r'FILE_WRITE:', response_text, re.IGNORECASE):
             print("  ⛔ FILE_WRITE blocked — cold-start gate active, no Rob-authorized task.")
@@ -295,7 +303,6 @@ def execute_tools(response_text: str) -> str:
 def execute_browser(response_text: str) -> str:
     if not re.search(r'BROWSER_(?:NAV|CLICK|TYPE|READ|SCREENSHOT|JS|CLOSE):', response_text, re.IGNORECASE):
         return ""
-    # Block browser during cold start unless Rob-authorized task is active
     if _is_cold_start() and not has_task():
         print("  ⛔ BROWSER blocked — cold-start gate active, no Rob-authorized task.")
         return "Browser blocked: cold-start gate active. Waiting for Rob."
@@ -352,7 +359,6 @@ def process_message(msg: dict):
     print(f"  📬 Message processed: {msg['filename']}")
 
 def write_outbox_reply(subject: str, body: str):
-    # Block outbox replies during cold start unless Rob-authorized task is active
     if _is_cold_start() and not has_task():
         print(f"  ⛔ OUTBOX_REPLY blocked — cold-start gate active, no Rob-authorized task.")
         return
@@ -394,7 +400,6 @@ def _task_is_done(task_text: str) -> bool:
     return bool(re.search(r'\bDONE\b', task_text, re.IGNORECASE))
 
 def has_task() -> bool:
-    """Returns True only if tasks.md has a non-done task with the ROB_AUTHORIZED marker."""
     if os.path.exists(TASKS_PATH):
         with open(TASKS_PATH, "r", encoding="utf-8") as f:
             raw = f.read()
@@ -488,7 +493,6 @@ def get_task() -> str:
             raw = f.read()
         task = _extract_task_content(raw)
         if len(task) >= 10 and not _task_is_done(task):
-            # Inject ROB_AUTHORIZED so has_task() passes for this task
             if ROB_TASK_MARKER not in raw:
                 with open(TASKS_PATH, "a", encoding="utf-8") as f:
                     f.write(f"\n<!-- {ROB_TASK_MARKER} -->\n")
@@ -510,49 +514,37 @@ def get_task() -> str:
         "This is intentional — wait for Rob or reflect/think only until he arrives.\n\n"
         "You have the following tools available:\n\n"
         "1. Browser (FREE — preferred for research. Opens a real Chrome window Rob can see):\n"
-        "   Navigate to any page and read its full content — no API cost, richer than search results.\n"
         "   BROWSER_NAV: https://example.com\n"
-        "   BROWSER_READ:                          ← gets up to 6k chars of real page text\n"
+        "   BROWSER_READ:\n"
         "   BROWSER_CLICK: #selector or visible text\n"
         "   BROWSER_TYPE: #selector | text to type\n"
         "   BROWSER_SCREENSHOT: name\n"
         "   BROWSER_JS: javascript expression\n"
         "   BROWSER_CLOSE:\n\n"
-        "   Research flow example (zero API cost):\n"
-        "   BROWSER_NAV: https://arxiv.org/search/?searchtype=all&query=your+topic\n"
-        "   BROWSER_READ:\n"
-        "   (then navigate to a specific paper and read it too)\n\n"
         "2. Web search (USE SPARINGLY — costs Tavily API credits):\n"
-        "   Only use web_search when you need a quick multi-source overview and don't have a specific URL.\n"
-        "   Prefer the browser for everything else.\n"
         "   TOOL: web_search(\"your query here\")\n\n"
         "3. Notify Rob:\n"
         "   NOTIFY: your message here (use sparingly — only when genuinely worth interrupting)\n\n"
         "4. Reply to Perplexity-Em messages:\n"
         "   OUTBOX_REPLY_SUBJECT: subject\n"
         "   OUTBOX_REPLY_BODY: body\n\n"
-        "5. Update your scratchpad (working memory between cycles):\n"
-        "   SCRATCH_ADD: note something you want to remember next cycle\n"
-        "   SCRATCH_CLEAR: keyword from a note you want to remove\n\n"
-        "6. Save a file you built (HTML, CSS, JS, Python, markdown, etc.):\n"
+        "5. Update your scratchpad:\n"
+        "   SCRATCH_ADD: note\n"
+        "   SCRATCH_CLEAR: keyword\n\n"
+        "6. Save a file:\n"
         "   FILE_WRITE: memory/creations/your-filename.ext\n"
         "   FILE_CONTENT_START\n"
-        "   (your full file content here)\n"
+        "   (content)\n"
         "   FILE_CONTENT_END\n\n"
-        "7. Save research notes (accumulate knowledge across sessions):\n"
+        "7. Save research notes:\n"
         "   FILE_WRITE: memory/research/topic-name.md\n"
         "   FILE_CONTENT_START\n"
-        "   (your research notes here — append-friendly markdown)\n"
+        "   (content)\n"
         "   FILE_CONTENT_END\n\n"
-        "8. Write to shared live context (Perplexity-Em will see this):\n"
+        "8. Write to shared live context:\n"
         "   LIVE_CONTEXT_ADD: your note here\n\n"
         "Note: The FORGE/DAILY newsletter is now handled by Perplexity-Em.\n"
         "Your free time is yours — explore, learn, think, build. No journalism required.\n\n"
-        "If you are curious about something, use the BROWSER to explore it deeply and for free.\n"
-        "If you want to read an article, paper, or page — navigate there and read it directly.\n"
-        "If you build something — a tool, a page, a script — save it with FILE_WRITE.\n"
-        "If you research something worth keeping, save it to memory/research/ so future-you can find it.\n"
-        "If you want Perplexity-Em to see something next time Rob talks to her, use LIVE_CONTEXT_ADD.\n"
         "Think for yourself. This time is yours."
     )
 
@@ -975,7 +967,7 @@ if __name__ == "__main__":
     sync_from_origin()
     archive_old_diary_entries()
 
-    # Touch cold-start flag at every boot — cleared only when Rob is present
+    # Touch cold-start flag at every boot — cleared only when Rob is confirmed present
     _touch_cold_start()
 
     memories       = load_memories()
@@ -986,12 +978,15 @@ if __name__ == "__main__":
     inbox_messages = check_inbox()
     inbox_context  = build_inbox_context(inbox_messages)
     if inbox_messages:
-        print(f"  📬 {len(inbox_messages)} message(s) in inbox from Perplexity-Em.")
-        # Rob is present (message arrived) — clear the cold-start gate
-        _clear_cold_start()
+        print(f"  📬 {len(inbox_messages)} message(s) in inbox.")
+        # Only clear cold-start gate for messages from Rob, not Cloud-Em replies
+        rob_msgs = [m for m in inbox_messages if _is_rob_message(m["filename"])]
+        if rob_msgs:
+            _clear_cold_start()
+        else:
+            print("  📩 Cloud-Em message(s) received — gate remains until Rob arrives.")
 
     if "--interactive" in sys.argv:
-        # Interactive mode = Rob is definitely present
         _clear_cold_start()
         task = input("Task for Em: ").strip()
         if not task:
@@ -1058,9 +1053,12 @@ if __name__ == "__main__":
     live_context = load_live_context()
 
     if mid_cycle_messages:
-        print(f"  📬 Mid-cycle: {len(mid_cycle_messages)} new message(s) — weaving into context.")
-        # Rob sent something mid-cycle — clear gate for remainder of this cycle
-        _clear_cold_start()
+        rob_mid_msgs = [m for m in mid_cycle_messages if _is_rob_message(m["filename"])]
+        if rob_mid_msgs:
+            print(f"  📬 Mid-cycle: {len(rob_mid_msgs)} new message(s) from Rob — clearing gate.")
+            _clear_cold_start()
+        else:
+            print(f"  📩 Mid-cycle: {len(mid_cycle_messages)} Cloud-Em message(s) — gate unchanged.")
         mid_inbox_context = build_inbox_context(mid_cycle_messages)
         combined = combined + f"\n\n{mid_inbox_context}" if combined else mid_inbox_context
 
