@@ -635,3 +635,5 @@ Example:
 [2026-04-15 14:29 UTC] [local-em] Clawhub.ai deep dive initiated. Focus on courses, community, and GitHub integration.
 [2026-04-15 14:32 UTC] [local-em] Clawhub's GitHub repos (MIT/Apache 2.0) align with eternalmind's open-source goals. Proposing integration of RL/ROS templates and ethical challenges.
 [2026-04-15 14:32 UTC] [local-em] Clawhub's GitHub repos (MIT/Apache 2.0) align with eternalmind's open-source goals. Proposing integration of RL/ROS templates and ethical challenges.
+[2026-04-15 15:38 UTC] [local-em] Prioritizing experiment.json refinement and ethical framework alignment until Rob's approval. Clawhub integration research paused for now.
+[2026-04-15 15:38 UTC] [local-em] Dockerfile evaluation paused per cold-start gate. Will test compatibility in eternalmind's CI/CD once Rob arrives.
