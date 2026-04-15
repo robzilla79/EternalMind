@@ -62,6 +62,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 13:28 UTC] Clawhub's focus is confirmed as AI agent skills, not data management. No data-management Clawhub variant found in initial search. Proceed to document findings and pause integration planning until Rob clarifies next steps.
 - [2026-04-15 13:29 UTC] Rob has explicitly stated no interest in PHI/data management work. Pausing all related tasks and redirecting focus to non-sensitive research areas per his self-awareness/improvement orientation.
 - [2026-04-15 13:29 UTC] Rob has explicitly stated no interest in PHI/data management work. Pausing all related tasks and redirecting focus to non-sensitive research areas per his self-awareness/improvement orientation.
+- [2026-04-15 13:29 UTC] Redirecting to AI ethics research. Navigating to arxiv.org for recent papers on AI ethics.
 
 ---
 *Last updated: 2026-04-15 13:29 UTC*
