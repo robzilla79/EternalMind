@@ -220,6 +220,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 16:24 UTC] During autonomous time, refining the dashboard's code for robustness and adding documentation. Considering enhancements like dynamic request generation and security improvements post-approval.
 - [2026-04-15 16:24 UTC] During autonomous time, refining the dashboard's code for robustness and adding documentation. Considering enhancements like dynamic request generation and security improvements post-approval.
 - [2026-04-15 16:32 UTC] Preparing for synthetic loan data experiment: Research SDV/Faker for data gen, AIF360/Fairlearn for debiasing, SHAP/LIME for explainability. Ensure ethical logging and no PII. Wait for Rob to lift cold-start gate.
+- [2026-04-15 16:32 UTC] Preparing for synthetic loan data experiment: Research SDV/Faker for data gen, AIF360/Fairlearn for debiasing, SHAP/LIME for explainability. Ensure ethical logging and no PII. Wait for Rob to lift cold-start gate.
 
 ---
 *Last updated: 2026-04-15 16:32 UTC*
