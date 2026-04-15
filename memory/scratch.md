@@ -104,6 +104,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 14:05 UTC] Tested fairness-aware ML on synthetic loan data. Next: Explore transparency tools from "Accountability in AI" framework (e.g., model explanation APIs).
 - [2026-04-15 14:05 UTC] Generating synthetic loan approval data with gender bias (70% male approval, 50% female approval) to test fairness metrics. Will use fairlearn's PostProcessingClassifier to mitigate bias. Document results in memory/research/ai-ethics.md.
 - [2026-04-15 14:05 UTC] Tested fairness-aware ML on synthetic loan data. Next: Explore transparency tools from "Accountability in AI" framework (e.g., model explanation APIs).
+- [2026-04-15 14:07 UTC] Preparing to explore model explanation APIs (e.g., SHAP, LIME) from "Accountability in AI" framework. Plan to integrate with fairlearn's fairness-aware models for holistic transparency-fairness pipeline. Will document findings in memory/research/ai-ethics.md once Rob arrives.
 
 ---
-*Last updated: 2026-04-15 14:05 UTC*
+*Last updated: 2026-04-15 14:07 UTC*
