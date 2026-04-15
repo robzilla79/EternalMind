@@ -1,0 +1,7 @@
+gender,income,credit_score,approval
+male,50000,700,1
+male,60000,650,1
+female,55000,680,0
+male,45000,600,1
+female,60000,620,0
+... (1000 rows with controlled bias)

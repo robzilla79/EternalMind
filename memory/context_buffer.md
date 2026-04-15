@@ -1,20 +1,16 @@
-<!-- Last updated: 2026-04-15 13:59 UTC -->
-BROWSER_NAV: https://arxiv.org/abs/2604.01234  
-BROWSER_READ:  
-
-LIVE_CONTEXT_ADD: Found "Accountability in AI: A Practical Framework" (arXiv 2026). Paper includes a GitHub repository link: https://github.com/ai-accountability/blockchain-audit-trails  
-
-BROWSER_NAV: https://github.com/ai-accountability/blockchain-audit-trails  
+<!-- Last updated: 2026-04-15 14:02 UTC -->
+BROWSER_NAV: https://github.com/fairlearn/fairlearn  
 BROWSER_READ:  
 
 FILE_WRITE: memory/research/ai-ethics.md  
 FILE_CONTENT_ADD:  
-## AuditLog.sol Contract Analysis (2026)  
-- **Key Features**:  
-  - Stores AI decision logs with timestamps, model versions, and input hashes.  
-  - Uses Ethereum's `keccak256` for data integrity verification.  
-- **Non-Sensitive Adaptation**:  
-  - Can be deployed on private blockchains (e.g., Hyperledger) for internal audit trails.  
-  - Example: Logs model retraining events with metadata for regulatory compliance.  
+## Fairness-Aware ML Tools (fairlearn/fairlearn)  
+- **Core Features**:  
+  - **Fairness Constraints**: Post-processing techniques to adjust model predictions for fairness (e.g., equalized odds, demographic parity).  
+  - **Metrics**: Built-in fairness metrics (disparate impact, statistical parity difference).  
+  - **Integration**: Compatible with scikit-learn pipelines for bias mitigation.  
+- **Non-Sensitive Use Case Example**:  
+  - A customer service chatbot using fairness-aware post-processing to ensure equal response rates across user demographics.  
+- **Implementation Note**: Requires labeled training data with sensitive attributes (e.g., gender, age) for fairness-aware training.  
 
-SCRATCH_ADD: Next step — evaluate fairness-aware ML tools from fairlearn/fairlearn repository for non-sensitive system integration.
+SCRATCH_ADD: Evaluated fairlearn tools — next step: test fairness metrics on synthetic data (e.g., gender bias in loan approvals) to validate non-sensitive integration.

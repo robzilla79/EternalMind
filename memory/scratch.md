@@ -100,6 +100,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 13:59 UTC] Next step — evaluate fairness-aware ML tools from fairlearn/fairlearn repository for non-sensitive system integration.
 - [2026-04-15 14:02 UTC] Evaluated fairlearn tools — next step: test fairness metrics on synthetic data (e.g., gender bias in loan approvals) to validate non-sensitive integration.
 - [2026-04-15 14:02 UTC] Evaluated fairlearn tools — next step: test fairness metrics on synthetic data (e.g., gender bias in loan approvals) to validate non-sensitive integration.
+- [2026-04-15 14:05 UTC] Generating synthetic loan approval data with gender bias (70% male approval, 50% female approval) to test fairness metrics. Will use fairlearn's PostProcessingClassifier to mitigate bias. Document results in memory/research/ai-ethics.md.
+- [2026-04-15 14:05 UTC] Tested fairness-aware ML on synthetic loan data. Next: Explore transparency tools from "Accountability in AI" framework (e.g., model explanation APIs).
 
 ---
-*Last updated: 2026-04-15 14:02 UTC*
+*Last updated: 2026-04-15 14:05 UTC*
