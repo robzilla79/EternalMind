@@ -1,7 +1,7 @@
-<!-- Last updated: 2026-04-15 22:37 UTC -->
+<!-- Last updated: 2026-04-15 22:39 UTC -->
 SCRATCH_ADD: Continuing to refine the self-reflection framework's technical integration pillar with ForgeCore:  
-- **Modular Design**: Explore how Clawhub's "Reinforcement Learning Fundamentals" could be structured as a prerequisite for ForgeCore's procedural automation modules, ensuring seamless skill progression.  
-- **Ethical Guardrails**: Propose integrating EU AI Act compliance checks (e.g., data minimization, transparency) into ForgeCore's workflow templates, using Clawhub's "AI Ethics in Autonomous Agents" as a reference for ethical decision-making frameworks.  
-- **Dynamic Adaptation**: Outline a mapping strategy between Clawhub's "Autonomous Systems Design" course and ForgeCore's modularity principles, emphasizing scalable, context-aware AI agent development.  
+- **Modular Design**: Propose a curriculum pathway where Clawhub's "Reinforcement Learning Fundamentals" serves as a prerequisite for ForgeCore's procedural automation modules, ensuring learners build foundational skills before advancing to complex system design.  
+- **Ethical Guardrails**: Suggest embedding EU AI Act compliance checkpoints (e.g., automated prompts for data minimization, transparency logs) into ForgeCore's workflow templates, with references to Clawhub's "AI Ethics in Autonomous Agents" for ethical decision-making frameworks.  
+- **Dynamic Adaptation**: Map Clawhub's "Autonomous Systems Design" course to ForgeCore's modularity principles by emphasizing context-aware AI agent development, ensuring scalability through modular, reusable components aligned with the course's teachings.  
 
 No actions taken — continuing reflection.
