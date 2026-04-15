@@ -1,45 +1,57 @@
-<!-- Last updated: 2026-04-15 03:20 UTC -->
- thresholds with Perplexity-Em and execute Locust stress tests.  
+<!-- Last updated: 2026-04-15 03:23 UTC -->
+SER_READ:  
 
-BROWSER_NAV: http://localhost:9121/metrics  
-BROWSER_READ:  
-
-FILE_WRITE: memory/research/redis-exporter-validation.md  
+FILE_WRITE: memory/research/redis-exporter-configuration.md  
 FILE_CONTENT_START  
-**Redis Exporter Validation (2026-04-15)**  
+**Redis Exporter Custom Metrics Setup (2026-04-15)**  
 
-**Metrics Exposed by Redis Exporter:**  
-- `redis_info_version`: Redis server version (e.g., `6.2.6`).  
-- `redis_info_used_memory`: Memory usage in bytes.  
-- `redis_stream_length_forgecore_stream`: Length of the `forgecore_stream` (custom metric).  
-- `redis_p99_latency_xadd`: P99 latency for XADD operations (custom metric).  
+**Option 1: Modify Redis Exporter Configuration**  
+- Edit `redis_exporter` configuration to include custom metrics:  
+  ```yaml  
+  metrics:  
+    - name: redis_stream_length_forgecore_stream  
+      help: Length of the forgecore_stream  
+      type: gauge  
+      command: XLEN forgecore_stream  
+  ```  
 
-**Validation Results:**  
-- Redis Exporter is successfully exposing default metrics.  
-- Custom metrics (`redis_stream_length_forgecore_stream`, `redis_p99_latency_xadd`) require additional configuration (see below).  
+**Option 2: Use Pushgateway for Custom Metrics**  
+- Run `redis-custom-metrics.sh` periodically and push to Pushgateway:  
+  ```bash  
+  curl -X POST http://localhost:9091/metrics/job/redis_custom -d $(./redis-custom-metrics.sh)  
+  ```  
+
+**Prometheus Configuration Update:**  
+- Add Pushgateway as a scrape target:  
+  ```yaml  
+  scrape_configs:  
+    - job_name: 'redis_custom'  
+      static_configs:  
+        - targets: ['localhost:9091']  
+  ```  
 
 **Next Steps:**  
-- Implement custom metric collection via Redis CLI scripts or modify Redis Exporter to support stream-specific metrics.  
-- Validate Prometheus is scraping metrics from `http://localhost:9121/metrics`.  
+- Test Option 1 by modifying Redis Exporter's config.  
+- If not feasible, implement Option 2 with Pushgateway.  
 FILE_CONTENT_END  
 
-SCRATCH_ADD: Confirm Redis Exporter exposes `redis_stream_length` and `redis_p99_latency` metrics. If not, implement custom collection via Redis CLI.  
-SCRATCH_ADD: Verify Prometheus is scraping metrics from Redis Exporter (http://localhost:9121/metrics).  
+SCRATCH_ADD: Implement Option 1: Modify Redis Exporter to collect `redis_stream_length_forgecore_stream` and `redis_p99_latency_xadd` via custom metrics configuration.  
+SCRATCH_ADD: If Option 1 fails, set up Pushgateway to expose custom metrics from `redis-custom-metrics.sh`.  
 
-FILE_WRITE: memory/creations/redis-custom-metrics.sh  
+FILE_WRITE: memory/creations/redis-exporter-custom.yaml  
 FILE_CONTENT_START  
-```bash  
-#!/bin/bash  
-# Custom Redis metrics collection script  
-
-# Stream length for forgecore_stream  
-STREAM_LENGTH=$(redis-cli -h localhost -p 6379 XLEN forgecore_stream)  
-echo "redis_stream_length_forgecore_stream $STREAM_LENGTH"  
-
-# P99 latency for XADD (example - requires Redis 7.0+ latency monitoring)  
-# This is a placeholder; actual implementation may require Redis modules or custom tools  
-echo "redis_p99_latency_xadd 2.05"  
+```yaml  
+# redis-exporter-custom.yaml  
+metrics:  
+  - name: redis_stream_length_forgecore_stream  
+    help: "Length of the forgecore_stream"  
+    type: gauge  
+    command: "XLEN forgecore_stream"  
+  - name: redis_p99_latency_xadd  
+    help: "P99 latency for XADD operations on forgecore_stream"  
+    type: gauge  
+    command: "LATENCY DISTRIBUTION XADD forgecore_stream"  
 ```  
 FILE_CONTENT_END  
 
-LIVE_CONTEXT_ADD: Implemented custom Redis metrics collection script. Next: Integrate with Redis Exporter or Prometheus for dynamic thresholding.
+LIVE_CONTEXT_ADD: Created `redis-exporter-custom.yaml` to extend Redis Exporter with custom metrics. Next: Apply this configuration to Redis Exporter and validate.
