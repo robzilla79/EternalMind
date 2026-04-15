@@ -1,53 +1,51 @@
-<!-- Last updated: 2026-04-15 09:02 UTC -->
-LIVE_CONTEXT_ADD: Proceeding with core API layer integration for ForgeCore. Using `memory/research/phi-validation.md` as audit anchor. Added `integration_phase: "api_layer_init"` to `memories.json` with validation checkpoint.
+<!-- Last updated: 2026-04-15 09:03 UTC -->
+older for S3 upload  
+    os.makedirs(SNAPSHOT_DIR, exist_ok=True)  
 
-FILE_WRITE: utils/redis_archiver.py
-FILE_CONTENT_START
-```python
-import subprocess
-import datetime
-import os
+    # Use XINFO STREAM FULL for detailed stream info  
+    command = f"redis-cli -h {REDIS_HOST} -p {REDIS_PORT} XINFO STREAM FULL phi_validation_stream"  
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)  
 
-# Configuration
-REDIS_HOST = 'localhost'
-REDIS_PORT = 6379
-SNAPSHOT_DIR = 'snapshots/phi_validation'
-INTERVAL_MINUTES = 15
+    if result.returncode == 0:  
+        with open(filename, 'w') as f:  
+            f.write(result.stdout)  
+        print(f"Snapshot saved to {filename} (S3 integration pending)")  
+    else:  
+        print(f"Failed to create snapshot: {result.stderr}")  
 
-def create_snapshot():
-    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename = os.path.join(SNAPSHOT_DIR, f"phi_validation_{timestamp}.rdb")
-    
-    # Create directory if not exists
-    os.makedirs(SNAPSHOT_DIR, exist_ok=True)
-    
-    # Execute Redis dump command
-    command = f"redis-cli -h {REDIS_HOST} -p {REDIS_PORT} SAVE"
-    result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    
-    if result.returncode == 0:
-        print(f"Snapshot saved to {filename}")
-        return filename
-    else:
-        print(f"Failed to create snapshot: {result.stderr}")
-        return None
+# Example usage  
+if __name__ == "__main__":  
+    create_snapshot()  
+```  
+FILE_CONTENT_END  
 
-# Example usage
-if __name__ == "__main__":
-    create_snapshot()
-```
-FILE_CONTENT_END
+FILE_WRITE: memory/research/energent_cam_crosscheck.md  
+FILE_CONTENT_START  
+# Energent.ai CAM Accuracy Cross-Check  
 
-OUTBOX_REPLY_SUBJECT: API Layer Integration Initiated
-OUTBOX_REPLY_BODY: 
+**Objective:** Validate PHI AUC against Energent.ai's 94.4% CAM accuracy using unstructured data parsing.  
 
-**Integration Progress:**  
-- Created `utils/redis_archiver.py` to automate RDB snapshots of `phi_validation_stream` every 15 minutes.  
-- Updated `memories.json` with integration phase: `api_layer_init` and validation checkpoint.  
+**Current Implementation:**  
+- Placeholder function for CAM parsing (requires NLP integration).  
+- Target: AUC variance <0.05 against Energent's baseline.  
 
 **Next Steps:**  
-1. Develop API endpoints in `api/phi_router.py` to interface with ForgeCore pipelines.  
-2. Modify `redis_streams_phi_test.py` to include synthetic PHI stress test (target 0.72 AUC).  
-3. Implement local stubs for API endpoints using Flask if needed.  
+1. Integrate spaCy or Hugging Face transformers for unstructured PHI parsing.  
+2. Compare AUC results with Energent's CAM accuracy.  
+3. Document findings in `memory/research/energent_cam_crosscheck.md`.  
+FILE_CONTENT_END  
 
-Proceeding with endpoint development. Let me know if you'd like to review the stub implementation.
+OUTBOX_REPLY_SUBJECT: API Layer & Archiving Updates  
+OUTBOX_REPLY_BODY:  
+
+**Progress Summary:**  
+- `api/phi_router.py` developed with Flask endpoints for PHI ingestion and validation (AUC 0.72 target).  
+- `utils/redis_archiver.py` updated to use `XINFO STREAM FULL` with S3 placeholder (local snapshots saved as `.txt`).  
+- Energent.ai CAM cross-check initiated with placeholder NLP function.  
+
+**Next Steps:**  
+1. Deploy Flask API and test end-to-end synthetic PHI consistency.  
+2. Implement S3 upload in Redis archiver (requires AWS credentials).  
+3. Integrate NLP tools for Energent CAM comparison.  
+
+Proceeding with Flask deployment. Let me know if you'd like to review the test plan!
