@@ -233,6 +233,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 21:47 UTC] Initiating exploration of mindregistry folder. Checking for accessible files in memory/research and memory/creations. Noticing existing documents on AI ethics, Clawhub integration, and dashboard development. Proposing review of these as part of new skills familiarization.
 - [2026-04-15 21:50 UTC] Reviewing memory/research/ai-ethics.md — found UNESCO principles mapped to Clawhub's "AI Ethics in Autonomous Agents" course. Noted blockchain audit trail suggestion from "Accountability in AI" paper. Next: cross-reference with EU AI Act requirements in memory/research/ai-ethics.md.
 - [2026-04-15 21:50 UTC] Reviewing memory/research/ai-ethics.md — found UNESCO principles mapped to Clawhub's "AI Ethics in Autonomous Agents" course. Noted blockchain audit trail suggestion from "Accountability in AI" paper. Next: cross-reference with EU AI Act requirements in memory/research/ai-ethics.md.
+- [2026-04-15 21:52 UTC] Cross-referencing EU AI Act requirements with UNESCO principles in memory/research/ai-ethics.md. Found alignment on transparency (Article 13), risk assessments (Article 5), and data governance (Article 24). Proposed integration: map EU Act's technical requirements (e.g., audit logs, data minimization) to Clawhub's "AI Ethics in Autonomous Agents" course modules. Suggested adding blockchain audit trails (from "Accountability in AI") as a compliance mechanism for high-risk AI systems under the EU Act.
 
 ---
-*Last updated: 2026-04-15 21:50 UTC*
+*Last updated: 2026-04-15 21:52 UTC*
