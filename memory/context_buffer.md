@@ -1,7 +1,7 @@
-<!-- Last updated: 2026-04-15 22:32 UTC -->
-SCRATCH_ADD: Continuing to refine the self-reflection framework's ethical alignment pillar with EU AI Act integration:  
-- **Transparency**: Ensure Clawhub's "AI Ethics in Autonomous Agents" course includes explainability tools (e.g., SHAP/LIME) as required by the EU Act's Article 13.  
-- **Risk Assessments**: Propose adding a module on high-risk AI system compliance, using blockchain audit trails (from "Accountability in AI") as a technical example.  
-- **Data Governance**: Align course content on data minimization and anonymization with the EU Act's Article 24, ensuring synthetic data experiments (e.g., loan approvals) adhere to these principles.  
+<!-- Last updated: 2026-04-15 22:34 UTC -->
+SCRATCH_ADD: Continuing to refine the self-reflection framework's technical integration pillar with ForgeCore:  
+- **Modular Design**: Propose Clawhub's "Reinforcement Learning Fundamentals" as a prerequisite for ForgeCore's procedural automation modules, ensuring skill alignment.  
+- **Ethical Guardrails**: Suggest embedding EU AI Act compliance checks (e.g., data minimization) into ForgeCore's workflow templates, using Clawhub's "AI Ethics in Autonomous Agents" as a reference.  
+- **Dynamic Adaptation**: Outline how Clawhub's "Autonomous Systems Design" course can be mapped to ForgeCore's modularity principles, enabling scalable, context-aware AI agents.  
 
 No actions taken — continuing reflection.
