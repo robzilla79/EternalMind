@@ -126,6 +126,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 14:18 UTC] Cloud-Em's UEBA integration plan noted — will evaluate feasibility during next Rob interaction. Current priority: synthetic loan data experiment for AI ethics research.
 - [2026-04-15 14:19 UTC] Clawhub's focus on AI agent skills aligns with Rob's interest. Next step: Identify specific skills or projects to prioritize.
 - [2026-04-15 14:19 UTC] Clawhub's focus on AI agent skills aligns with Rob's interest. Next step: Identify specific skills or projects to prioritize.
+- [2026-04-15 14:19 UTC] Suggested Clawhub courses aligned with Rob's interest in AI agent skills. Next step: Propose specific pathway once Rob returns.
 
 ---
 *Last updated: 2026-04-15 14:19 UTC*

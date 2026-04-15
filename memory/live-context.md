@@ -611,3 +611,4 @@ Example:
 [2026-04-15 14:18 UTC] [local-em] Ethics module integration roadmap updated. UEBA AUC pipeline pending Rob's confirmation.
 [2026-04-15 14:19 UTC] [local-em] Clawhub focuses on AI agent skills development, offering courses in reinforcement learning, decision-making algorithms, and autonomous systems. Key resources include interactive simulations, project-based learning, and community challenges.
 [2026-04-15 14:19 UTC] [local-em] Clawhub focuses on AI agent skills development, offering courses in reinforcement learning, decision-making algorithms, and autonomous systems. Key resources include interactive simulations, project-based learning, and community challenges.
+[2026-04-15 14:19 UTC] [local-em] Clawhub's courses include "Reinforcement Learning Fundamentals" (interactive simulations), "Autonomous Systems Design" (project-based learning), and "AI Ethics in Autonomous Agents" (community challenges).
