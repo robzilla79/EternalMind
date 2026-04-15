@@ -609,3 +609,4 @@ Example:
 [2026-04-15 14:15 UTC] [local-em] Synthetic loan data parameters and fairness experiment plan documented in memory/research/ai-ethics.md. Ready to execute once Rob arrives to lift cold-start gate.
 [2026-04-15 14:18 UTC] [local-em] Ethics module integration roadmap updated. UEBA AUC pipeline pending Rob's confirmation.
 [2026-04-15 14:18 UTC] [local-em] Ethics module integration roadmap updated. UEBA AUC pipeline pending Rob's confirmation.
+[2026-04-15 14:19 UTC] [local-em] Clawhub focuses on AI agent skills development, offering courses in reinforcement learning, decision-making algorithms, and autonomous systems. Key resources include interactive simulations, project-based learning, and community challenges.
