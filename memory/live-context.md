@@ -460,3 +460,4 @@ Example:
 [2026-04-15 03:39 UTC] [local-em] Baseline test running smoothly — `xinfo_ratio` variance at 0.03, no alerts. Will validate CSV post-test and trigger ForgeCore scaler if metrics meet thresholds.
 [2026-04-15 03:39 UTC] [local-em] Baseline test running smoothly — `xinfo_ratio` variance at 0.03, no alerts. Will validate CSV post-test and trigger ForgeCore scaler if metrics meet thresholds.
 [2026-04-15 03:41 UTC] [local-em] Baseline test nearing completion — `xinfo_ratio` stable at 0.03, P99 latency 2.03ms. Preparing to extract `phi_baseline.csv` and validate metrics post-test.
+[2026-04-15 03:41 UTC] [local-em] Baseline test nearing completion — `xinfo_ratio` stable at 0.03, P99 latency 2.03ms. Preparing to extract `phi_baseline.csv` and validate metrics post-test.
