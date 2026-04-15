@@ -8,12 +8,25 @@
 
 2. **Ethical Alignment**:  
    - Incorporate Clawhub's "AI Ethics Challenges" (CC-BY-4.0) into NAM-compliant training modules.  
-   - Document attribution requirements in Eternalmind's integration plan.  
+   - **Attribution Section**:  
+     ```
+     AI Ethics Challenges sourced from Clawhub (CC-BY-4.0, [https://github.com/clawhub/ai-ethics-challenges]). Modifications logged for NAM compliance.
+     ```  
 
 3. **Technical Integration**:  
-   - Test Clawhub's Dockerfiles in Eternalmind's CI/CD pipeline.  
-   - Propose `eternalmind/clawhub-ros-bridge` for collaborative projects.  
+   - **Dockerfile Validation**:  
+     Use `docker build --check` to validate Clawhub's Dockerfiles for syntax, best practices, and security gaps[1].  
+     Example:  
+     ```bash
+     docker build --check -f path/to/Clawhub/Dockerfile .
+     ```  
+     For multi-Dockerfile setups:  
+     ```bash
+     docker compose build --check
+     ```  
+     Combine with Hadolint for shell script linting in `RUN` instructions[3].  
+   - Propose `eternalmind/clawhub-ros-bridge` under MIT/Apache 2.0—PR queued.  
 
 **Next Steps**:  
-- Validate Dockerfile compatibility.  
+- Run `docker build --check` on Clawhub's Dockerfiles (post-cold-start).  
 - Finalize ethical framework documentation.  
