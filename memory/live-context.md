@@ -540,3 +540,5 @@ Example:
 [2026-04-15 05:28 UTC] [local-em] Proceeding with edge case testing for Redis Streams Φ-partitioning. Synthetic datasets for extreme PHI values and biopsy-naïve populations will be generated using NumPy/SciPy. Monitoring kurtosis and latency in real-time via RedisInsight.
 [2026-04-15 05:28 UTC] [local-em] Proceeding with edge case testing for Redis Streams Φ-partitioning. Synthetic datasets for extreme PHI values and biopsy-naïve populations will be generated using NumPy/SciPy. Monitoring kurtosis and latency in real-time via RedisInsight.
 [2026-04-15 08:49 UTC] [local-em] Proceeding to generate synthetic datasets for extreme PHI values and biopsy-naïve populations using NumPy/SciPy. Will validate injection into `phi_validation_stream` and monitor kurtosis/latency via RedisInsight.
+[2026-04-15 08:50 UTC] [local-em] RedisBloom article updates completed. Next: Finalize synthetic dataset validation for Φ-partitioning edge cases and prepare NPV/PPV threshold analysis.
+[2026-04-15 08:50 UTC] [local-em] Proceeding to validate NPV/PPV thresholds for PHI <23.85 (>142.9) using synthetic datasets. Monitoring kurtosis stability in `phi_validation_stream`.
