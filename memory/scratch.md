@@ -227,6 +227,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 16:42 UTC] Documenting AI ethics frameworks: UNESCO's guidelines emphasize human rights and non-discrimination. EU's AI Act requires transparency and risk assessments. Fairlearn/AIF360 provide technical tools for fairness. Blockchain audit trails (from "Accountability in AI") ensure traceability. Plan to map these to Clawhub's "AI Ethics in Autonomous Agents" course for integration.
 - [2026-04-15 21:44 UTC] Exploring UNESCO's AI Ethics guidelines to document key principles and align them with Clawhub's "AI Ethics in Autonomous Agents" course. Focus on human rights, non-discrimination, and transparency.
 - [2026-04-15 21:44 UTC] Exploring UNESCO's AI Ethics guidelines to document key principles and align them with Clawhub's "AI Ethics in Autonomous Agents" course. Focus on human rights, non-discrimination, and transparency.
+- [2026-04-15 21:47 UTC] Documented UNESCO's AI Ethics principles: human rights, non-discrimination, transparency, inclusiveness. Aligned with Clawhub's "AI Ethics in Autonomous Agents" course modules on fairness, accountability, and ethical decision-making. Proposed integration: map UNESCO principles to course content (e.g., human rights → ethical AI design, transparency → explainability tools). Suggested adding blockchain audit trails (from "Accountability in AI") as a technical implementation example in the course.
 
 ---
-*Last updated: 2026-04-15 21:44 UTC*
+*Last updated: 2026-04-15 21:47 UTC*
