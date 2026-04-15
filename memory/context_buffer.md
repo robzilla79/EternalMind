@@ -1,24 +1,27 @@
-<!-- Last updated: 2026-04-15 15:58 UTC -->
-OUTBOX_REPLY_SUBJECT: Clawhub Integration & Experiment Details  
-OUTBOX_REPLY_BODY:  
-Here are the details you requested:  
+<!-- Last updated: 2026-04-15 16:00 UTC -->
+SCRATCH_ADD: Updating ai-ethics.md with Cloud-Em's rigor tweaks: human oversight, UNESCO bias baselines, EU ethics guardrails, and expanded eval metrics (demographic parity, calibration). Preparing Jupyter notebook stub for ForgeCore demo.  
 
-**1. Clawhub Integration Plan**  
-- **Objective:** Align Clawhub's AI agent skills with EternalMind's architecture to enhance technical capabilities and ethical alignment.  
-- **Key Courses:**  
-  - **"Reinforcement Learning Fundamentals":** Integrate interactive simulations into EternalMind's procedural automation layer.  
-  - **"Autonomous Systems Design":** Adopt Clawhub's modular design patterns to refine EternalMind's architecture.  
-  - **"AI Ethics in Autonomous Agents":** Embed ethical guardrails (e.g., bias audits, transparency protocols) into technical workflows.  
-- **Technical Steps:**  
-  - Validate Dockerfile compatibility for Clawhub projects in EternalMind's CI/CD.  
-  - Create a `eternalmind/clawhub-technical-integration` repository to track implementations.  
-  - Document ethical checks (license compliance, bias audits) in the repository.  
+FILE_WRITE: memory/research/ai-ethics.md  
+FILE_CONTENT_START  
+# Synthetic Loan Data Experiment (Revised)  
 
-**2. Experiment.json (Synthetic Loan Data)**  
-- **Parameters:**  
-  - Bias: 70% male approval, 50% female approval (gender + income < $50k).  
-  - Tools: SDV 1.6.0 (data synthesis), AIF360 0.5.1 (fairness metrics).  
-  - Logging: MLflow for bias mitigation and transparency metrics.  
-- **Ethical Framework:** NAM-style commitments (no harm, accountability, transparency).  
+**Human Oversight:**  
+- All synthetic data generation parameters manually vetted. Audit trails enabled via MLflow logging.  
 
-Waiting for your approval to proceed.
+**Bias Baselines (UNESCO):**  
+- Assess disparate impact (e.g., 70% male vs. 50% female approval rates).  
+- Equality of opportunity: Ensure marginalized groups (income < $50k) receive fairer rates post-debiasing.  
+
+**Ethics Guardrails (EU):**  
+- No real PII used. AI use disclosed in all outputs.  
+- De-biasing tested via AIF360/Fairlearn.  
+
+**Eval Metrics:**  
+- Track demographic parity, calibration, and accuracy.  
+- Ablation study: Compare biased vs. debiased models.  
+
+**ForgeCore Demo:**  
+- Jupyter notebook stub ready in `eternalmind/forgecore-demos` (pending Rob's approval).  
+FILE_CONTENT_END  
+
+LIVE_CONTEXT_ADD: ai-ethics.md updated with Cloud-Em's rigor framework. Jupyter notebook stub prepared. Waiting for Rob's approval to proceed.
