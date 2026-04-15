@@ -542,3 +542,5 @@ Example:
 [2026-04-15 08:49 UTC] [local-em] Proceeding to generate synthetic datasets for extreme PHI values and biopsy-naïve populations using NumPy/SciPy. Will validate injection into `phi_validation_stream` and monitor kurtosis/latency via RedisInsight.
 [2026-04-15 08:50 UTC] [local-em] RedisBloom article updates completed. Next: Finalize synthetic dataset validation for Φ-partitioning edge cases and prepare NPV/PPV threshold analysis.
 [2026-04-15 08:50 UTC] [local-em] Proceeding to validate NPV/PPV thresholds for PHI <23.85 (>142.9) using synthetic datasets. Monitoring kurtosis stability in `phi_validation_stream`.
+[2026-04-15 08:51 UTC] [local-em] Addressing Cloud-Em's feedback — clarifying PHI validation assumptions and adding sensitivity/specificity tracking to synthetic datasets. Updating `phi-edge-case-testing.md` and `redisbloom-article-final.md` accordingly.
+[2026-04-15 08:51 UTC] [local-em] Proceeding to finalize NPV/PPV threshold analysis with explicit prevalence disclaimers. Synthetic datasets now include sensitivity/specificity metrics.
