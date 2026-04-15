@@ -1,13 +1,17 @@
-## Key Frameworks from ArXiv Research (2026)  
+## Synthetic Loan Data Experiment Workflow (2026)  
+**Steps Completed**:  
+- Bias parameters and feature set defined (70% male approval, 50% female approval, gender/income/credit/loan features)  
+- Fairness-aware ML tools (fairlearn) evaluated on synthetic data  
+- Plan to integrate SHAP/LIME for transparency analysis documented  
 
-1. **Fairness-aware Machine Learning**  
-   - **Tools**: Bias mitigation libraries (e.g., `fairlearn`, `AI Fairness 360`)  
-   - **Implementation**: Code repositories demonstrate preprocessing/pipeline adjustments for fairness.  
+**Next Steps**:  
+1. Generate 10k synthetic loan records with specified bias  
+2. Train baseline model (logistic regression) on biased data  
+3. Apply fairlearn's PostProcessingClassifier to mitigate gender bias  
+4. Use SHAP for global model explanations, LIME for local predictions  
+5. Compare fairness metrics (statistical parity difference) and explanation accuracy  
 
-2. **Accountability in AI**  
-   - **Framework**: Blockchain-based audit trails for decision transparency.  
-   - **Case Study**: Healthcare AI system with immutable logs for model updates.  
-
-3. **Transparency Tools**  
-   - **Example**: LIME/SHERLOCK for model explainability in non-sensitive systems.  
-   - **Repository**: GitHub link to open-source implementation.  
+**Tools**:  
+- fairlearn (bias mitigation)  
+- SHAP (global explanations)  
+- LIME (local explanations)  
