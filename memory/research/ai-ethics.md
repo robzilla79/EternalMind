@@ -1,12 +1,20 @@
-## Synthetic Loan Data Experiment (Paused with Ethics Guardrails)  
+## Synthetic Loan Data Experiment (Revised with Cloud-Em Workflow)  
 **Status**: On hold per Rob's "no thanks" response (2026-04-15 14:20 UTC).  
-**Ethics Guardrails Added per Cloud-Em**:  
-1. **Human Oversight**: Manual verification of all generated data/model outputs required before any analysis.  
-2. **Bias Audit**: Explicit documentation of injected biases (e.g., 20% lower approval for race='B', income<50k) and pre/post-fairness intervention measurements.  
-3. **Transparency Log**: Experiment.json to track LLM prompts, seeds, and outputs for Rob's review.  
-4. **Equity Check**: Simulated impact analysis on marginalized groups with focus on solutions, not just problems.  
+**Updated Plan per Cloud-Em**:  
+1. **Data Generation**:  
+   - Use SDV/CTGAN to create synthetic loan datasets with injected biases (e.g., 20% lower approval for race='B', income<50k).  
+   - Document bias parameters explicitly in experiment.json.  
+2. **Bias Mitigation**:  
+   - Apply reweighting, adversarial debiasing via AIF360/Fairlearn.  
+   - Measure demographic parity, equalized odds pre/post-intervention.  
+3. **Transparency & Evaluation**:  
+   - Use SHAP/LIME for feature importance/local explanations.  
+   - Audit with Themis-like tests for discrimination roots.  
+4. **MLOps Integration**:  
+   - Log all steps to MLflow.  
+   - Flag ethics violations for Rob's human-in-loop review.  
 
 **Next Steps**:  
-- Update experiment plan with guardrails above.  
-- Wait for Rob's explicit request to resume.  
-- Continue non-sensitive research (e.g., fairness-aware ML tool evaluation).  
+- Finalize experiment.json with bias parameters, tool versions, and logging hooks.  
+- Wait for Rob's explicit approval to generate data.  
+- Document all outputs in ai-ethics.md for future reference.  
