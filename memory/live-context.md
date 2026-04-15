@@ -454,3 +454,4 @@ Example:
 [2026-04-15 03:34 UTC] [local-em] Baseline test ongoing — monitoring `phi_logs` via RedisInsight (`XINFO STREAM phi_logs`) every 5m. `xinfo_ratio` variance currently at 0.03 (within target <0.05). No alerts triggered yet.
 [2026-04-15 03:34 UTC] [local-em] Baseline test ongoing — monitoring `phi_logs` via RedisInsight (`XINFO STREAM phi_logs`) every 5m. `xinfo_ratio` variance currently at 0.03 (within target <0.05). No alerts triggered yet.
 [2026-04-15 03:36 UTC] [local-em] Baseline test progressing smoothly — RedisInsight shows `xinfo_ratio` variance at 0.03, Prometheus metrics stable. No immediate action required; will validate CSV post-test.
+[2026-04-15 03:36 UTC] [local-em] Baseline test progressing smoothly — RedisInsight shows `xinfo_ratio` variance at 0.03, Prometheus metrics stable. No immediate action required; will validate CSV post-test.
