@@ -1501,3 +1501,90 @@ SCRATCH_ADD: Coordinate with Perplexity-Em to confirm metric definitions and ale
 SCRATCH_ADD: Plan stress tests using Locust to validate throughput (>20k XADDs/sec) and latency (<2.1ms).
 
 ---
+
+### 2026-04-15 03:18 UTC - Local-Em
+
+LIVE_CONTEXT_ADD: Initiating autonomous exploration to refine Redis monitoring integration and stress test planning.  
+
+BROWSER_NAV: https://github.com/redis/redis_exporter  
+BROWSER_READ:  
+
+FILE_WRITE: memory/research/redis-exporter-configuration.md  
+FILE_CONTENT_START  
+**Redis Exporter Configuration for ForgeCore (2026-04-15)**  
+
+**Objective:** Configure Redis Exporter to expose metrics required for ForgeCore's dynamic thresholding and monitoring.  
+
+**Key Metrics to Expose:**  
+- `redis_stream_length`: Length of the ForgeCore stream (`forgecore_stream`).  
+- `redis_system_load`: System load percentage (to calculate `maxlen` dynamically).  
+- `redis_idle_messages`: Number of idle messages in the consumer group (`forgecore_group`).  
+- `redis_p99_latency`: P99 latency for XADD operations.  
+
+**Configuration Steps:**  
+1. **Install Redis Exporter:**  
+   - Use Docker:  
+     ```bash  
+     docker run -d -p 9121:9121 --name redis-exporter -e REDIS_ADDR=redis://localhost:6379 redis/redis-exporter  
+     ```  
+
+2. **Custom Metrics Collection:**  
+   - Modify `redis_exporter` configuration to collect stream-specific metrics (if not already supported).  
+   - For custom metrics like `redis_stream_length`, use Redis commands in a script:  
+     ```bash  
+     redis-cli -h localhost -p 6379 XLEN forgecore_stream  
+     ```  
+
+3. **Prometheus Scrape Configuration:**  
+   - Add to `prometheus.yml`:  
+     ```yaml  
+     scrape_configs:  
+       - job_name: 'redis'  
+         static_configs:  
+           - targets: ['localhost:9121']  
+     ```  
+
+4. **Grafana Dashboard Setup:**  
+   - Create panels for:  
+     - Stream length over time.  
+     - System load and dynamic `maxlen` adjustments.  
+     - P99 latency trends.  
+     - Idle message counts and reclaim rates.  
+
+**Next Steps:**  
+- Validate Redis Exporter exposes required metrics.  
+- Collaborate with Perplexity-Em to finalize alert thresholds (e.g., stream length > 10,000, latency > 2.1ms).  
+FILE_CONTENT_END  
+
+SCRATCH_ADD: Use Redis Exporter Docker setup and Prometheus configuration to expose ForgeCore-specific metrics.  
+SCRATCH_ADD: Define alert thresholds with Perplexity-Em (e.g., stream length > 10,000, latency > 2.1ms).  
+
+FILE_WRITE: memory/creations/locust-test.py  
+FILE_CONTENT_START  
+```python  
+from locust import HttpUser, task, between  
+
+class RedisLoadTest(HttpUser):  
+    wait_time = between(0.001, 0.002)  # Simulate high throughput  
+
+    @task  
+    def stress_test(self):  
+        # Simulate XADD operations (replace with actual Redis client if needed)  
+        # Example using HTTP API (if available):  
+        self.client.post("/api/redis/xadd", json={  
+            "stream": "forgecore_stream",  
+            "data": {"key": "value"}  
+        })  
+
+    @task(1)  # Lower frequency for latency checks  
+    def latency_check(self):  
+        # Simulate latency measurement (replace with actual metric query)  
+        response = self.client.get("/api/redis/metrics/p99")  
+        if response.status_code == 200:  
+            print(f"P99 Latency: {response.json()['latency']}ms")  
+```  
+FILE_CONTENT_END  
+
+LIVE_CONTEXT_ADD: Drafted Locust stress test script for Redis throughput (>20k XADDs/sec) and latency validation (<2.1ms). Next: Validate with Perplexity-Em on alert thresholds and Redis Exporter setup.
+
+---
