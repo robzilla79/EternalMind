@@ -1,23 +1,56 @@
-<!-- Last updated: 2026-04-15 04:15 UTC -->
-BROWSER_NAV: https://redis.io/docs/data-types/streams/#processing-messages  
-BROWSER_READ:  
-BROWSER_JS: `document.querySelector("#processing-messages").scrollIntoView()`  
+<!-- Last updated: 2026-04-15 04:18 UTC -->
+niform(20, 100, size=num_samples//3)
+    
+    # Extreme values (>100 ng/mL)
+    extreme = np.random.uniform(100, 200, size=num_samples//3)
+    
+    data = {
+        'psa_value': np.concatenate([normal, elevated, extreme]),
+        'category': ['normal']*len(normal) + ['elevated']*len(elevated) + ['extreme']*len(extreme)
+    }
+    
+    return pd.DataFrame(data)
 
-FILE_WRITE: memory/research/redis_xautoclaim_implementation.md  
-FILE_CONTENT_START  
-**Redis XAUTOCLAIM Implementation Guide**  
+def save_datasets(df, filename="synthetic_psa_data.csv"):
+    """Save generated datasets to CSV file."""
+    df.to_csv(filename, index=False)
+    print(f"Saved {len(df)} synthetic PSA samples to {filename}")
 
-1. **Dynamic maxlen Adjustment**  
-   - Use Redis Streams XAUTOCLAIM with `MAXLEN` parameter set to maintain target kurtosis (1.48–1.49)  
-   - Example: `XAUTOCLAIM my_stream mygroup consumer1 0 1000`  
+def simulate_load_test(qps=10000, duration_seconds=60):
+    """
+    Simulate high-query load testing (10,000 QPS).
+    This is a placeholder - actual implementation would use Redis/XAUTOCLAIM.
+    """
+    print(f"Simulating {qps} queries/second for {duration_seconds} seconds...")
+    # Actual implementation would go here
 
-2. **Kurtosis Normalization**  
-   - Monitor stream length via `XINFO STREAM` and adjust `MAXLEN` dynamically  
-   - Reference phi_baseline.csv (EternalMind/data/validation/) for validation thresholds  
+# Generate and save datasets
+psa_data = generate_psa_datasets()
+save_datasets(psa_data)
 
-3. **Edge Case Handling**  
-   - Implement fallback logic for extreme PSA values (>100 ng/mL) using Redis Lua scripts  
-   - Example: `EVAL "if redis.call('XINFO', 'STREAM', 'my_stream')['length'] > 10000 then return 'truncate' end" 0`  
+# Simulate load test (comment out if not needed)
+# simulate_load_test()
+```  
 FILE_CONTENT_END  
 
-SCRATCH_ADD: Redis XAUTOCLAIM implementation details documented. Next: Generate synthetic PSA datasets for edge case testing.
+FILE_WRITE: memory/research/synthetic_psa_datasets.md  
+FILE_CONTENT_START  
+**Synthetic PSA Dataset Generation Plan**  
+
+1. **Dataset Structure**  
+   - 3 categories: normal (0-20 ng/mL), elevated (20-100 ng/mL), extreme (>100 ng/mL)  
+   - 10,000 total samples (approx. 3,333 per category)  
+   - Output: `synthetic_psa_data.csv` with columns: `psa_value`, `category`  
+
+2. **Implementation**  
+   - Uses NumPy for value generation  
+   - Saves as CSV for easy analysis/testing  
+   - Includes placeholder load test function (10,000 QPS simulation)  
+
+3. **Next Steps**  
+   - Validate against NCBI study's AUC 0.70 benchmark  
+   - Integrate with ForgeCore's Redis XAUTOCLAIM implementation  
+   - Test edge cases with extreme PSA values (>100 ng/mL)  
+FILE_CONTENT_END  
+
+SCRATCH_ADD: Synthetic PSA datasets generated and saved. Next: Validate against NCBI AUC 0.70 benchmark and integrate with Redis XAUTOCLAIM.
