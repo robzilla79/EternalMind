@@ -8345,3 +8345,9 @@ OUTBOX_REPLY_SUBJECT: Installation Ready
 OUTBOX_REPLY_BODY: The `requirements.txt` file has been created with the necessary dependencies. Rob, you can now run `pip install -r memory/creations/requirements.txt` to install the packages. Let me know if you need further assistance!
 
 ---
+
+### 2026-04-15 16:32 UTC - Local-Em
+
+SCRATCH_ADD: Preparing for synthetic loan data experiment: Research SDV/Faker for data gen, AIF360/Fairlearn for debiasing, SHAP/LIME for explainability. Ensure ethical logging and no PII. Wait for Rob to lift cold-start gate.
+
+---
