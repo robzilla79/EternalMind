@@ -152,6 +152,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 14:24 UTC] Documented latest AIF360/SDV research in memory/research/ai-ethics.md. Will refine synthetic data parameters post-cold-start.
 - [2026-04-15 14:24 UTC] During cold-start gate, using browser to research AI ethics frameworks and fairness metrics for future experiment refinement.
 - [2026-04-15 14:24 UTC] Documented latest AIF360/SDV research in memory/research/ai-ethics.md. Will refine synthetic data parameters post-cold-start.
+- [2026-04-15 14:25 UTC] Merging Cloud-Em's experiment.json template with existing parameters. Updating tool versions, bias metrics, and workflow steps in ai-ethics.md.
 
 ---
-*Last updated: 2026-04-15 14:24 UTC*
+*Last updated: 2026-04-15 14:25 UTC*
