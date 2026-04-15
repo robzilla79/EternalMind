@@ -49,6 +49,31 @@ DIARY_DEDUP_CHARS  = 300
 MEMORY_MAX_ENTRIES = 150
 TASK_DIVIDER = "*(Replace everything below this line with your task when you have one)*"
 
+# ── COLD START GATE ───────────────────────────────────────────────────────────
+# Touched at every boot. Cleared only when Rob is confirmed present
+# (inbox message received OR interactive mode). While active, FILE_WRITE,
+# BROWSER, and OUTBOX_REPLY are blocked so Em cannot resume self-issued
+# work orders from a previous cycle's scratch/live-context notes.
+COLD_START_FLAG = os.path.join(EM_DIR, ".cold_start")
+
+def _touch_cold_start():
+    with open(COLD_START_FLAG, "w", encoding="utf-8") as f:
+        f.write(datetime.datetime.now(timezone.utc).isoformat())
+
+def _clear_cold_start():
+    if os.path.exists(COLD_START_FLAG):
+        os.remove(COLD_START_FLAG)
+        print("  🔓 Cold-start gate cleared — Rob is present.")
+
+def _is_cold_start() -> bool:
+    return os.path.exists(COLD_START_FLAG)
+
+# ── ROB-AUTHORIZED TASK MARKER ────────────────────────────────────────────────
+# Only tasks that carry this marker are treated as real work orders.
+# get_task() injects it automatically, so any task Rob writes to tasks.md
+# via the normal flow is automatically authorized.
+ROB_TASK_MARKER = "ROB_AUTHORIZED"
+
 # Memory loading config
 MEMORY_HIGH_IMPORTANCE_THRESHOLD = 4
 MEMORY_RECENT_COUNT = 12
@@ -59,12 +84,7 @@ NUM_CTX = int(os.environ.get("EM_NUM_CTX", "32768"))
 # Stop tokens that must terminate generation immediately
 STOP_TOKENS = ["<|endoftext|>", "<|im_end|>", "<|end|>", "</s>"]
 
-# ── STREAMING SPEED ───────────────────────────────────────────────────────────
-# Delay between printed tokens (seconds). Tune to taste:
-#   0.0  = full GPU speed (default before this patch)
-#   0.01 = very fast typist
-#   0.025 = comfortable human reading pace  ← current setting
-#   0.05 = slow, deliberate
+# Delay between printed tokens (seconds).
 TOKEN_PRINT_DELAY = float(os.environ.get("EM_TOKEN_DELAY", "0.025"))
 
 # Keywords that signal a memory worth keeping (auto-importance boost)
@@ -231,6 +251,12 @@ def extract_and_write_scratch(response_text: str):
 
 # ── FILE WRITE ────────────────────────────────────────────────────────────────
 def extract_and_write_files(response_text: str) -> list[str]:
+    # Block all file writes during cold start unless a Rob-authorized task is active
+    if _is_cold_start() and not has_task():
+        if re.search(r'FILE_WRITE:', response_text, re.IGNORECASE):
+            print("  ⛔ FILE_WRITE blocked — cold-start gate active, no Rob-authorized task.")
+        return []
+
     pattern = re.compile(
         r'FILE_WRITE:\s*(memory/(?:creations|research)/[\w\-./]+)\s*\n'
         r'FILE_CONTENT_START\s*\n(.*?)FILE_CONTENT_END',
@@ -269,6 +295,10 @@ def execute_tools(response_text: str) -> str:
 def execute_browser(response_text: str) -> str:
     if not re.search(r'BROWSER_(?:NAV|CLICK|TYPE|READ|SCREENSHOT|JS|CLOSE):', response_text, re.IGNORECASE):
         return ""
+    # Block browser during cold start unless Rob-authorized task is active
+    if _is_cold_start() and not has_task():
+        print("  ⛔ BROWSER blocked — cold-start gate active, no Rob-authorized task.")
+        return "Browser blocked: cold-start gate active. Waiting for Rob."
     try:
         from tools.browser import execute_browser_commands
         print("  🌐 Em is using the browser...")
@@ -322,6 +352,10 @@ def process_message(msg: dict):
     print(f"  📬 Message processed: {msg['filename']}")
 
 def write_outbox_reply(subject: str, body: str):
+    # Block outbox replies during cold start unless Rob-authorized task is active
+    if _is_cold_start() and not has_task():
+        print(f"  ⛔ OUTBOX_REPLY blocked — cold-start gate active, no Rob-authorized task.")
+        return
     ts = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%d-%H-%M")
     slug = re.sub(r'[^a-z0-9]+', '-', subject.lower())[:40].strip('-')
     fname = f"{ts}-{slug}.md"
@@ -332,10 +366,8 @@ def write_outbox_reply(subject: str, body: str):
         f.write(content)
     print(f"  📤 Outbox reply written: {fname}")
 
-    # ── AUTO-TELEGRAM: send reply directly to Rob via Telegram ───────────────
     try:
         from tools.notify_rob import notify
-        # Truncate body to keep Telegram message readable (4096 char limit)
         preview = body.strip()
         if len(preview) > 1000:
             preview = preview[:997] + "..."
@@ -362,11 +394,12 @@ def _task_is_done(task_text: str) -> bool:
     return bool(re.search(r'\bDONE\b', task_text, re.IGNORECASE))
 
 def has_task() -> bool:
+    """Returns True only if tasks.md has a non-done task with the ROB_AUTHORIZED marker."""
     if os.path.exists(TASKS_PATH):
         with open(TASKS_PATH, "r", encoding="utf-8") as f:
             raw = f.read()
         task = _extract_task_content(raw)
-        if len(task) >= 10 and not _task_is_done(task):
+        if len(task) >= 10 and not _task_is_done(task) and ROB_TASK_MARKER in raw:
             return True
     return False
 
@@ -455,6 +488,10 @@ def get_task() -> str:
             raw = f.read()
         task = _extract_task_content(raw)
         if len(task) >= 10 and not _task_is_done(task):
+            # Inject ROB_AUTHORIZED so has_task() passes for this task
+            if ROB_TASK_MARKER not in raw:
+                with open(TASKS_PATH, "a", encoding="utf-8") as f:
+                    f.write(f"\n<!-- {ROB_TASK_MARKER} -->\n")
             return (
                 f"Task from Rob:\n\n{task}\n\n"
                 "---\n"
@@ -468,6 +505,9 @@ def get_task() -> str:
             )
     return (
         "No tasks assigned. This is your autonomous time.\n\n"
+        "⚠️  NOTE: The cold-start gate may be active. If FILE_WRITE, BROWSER, or OUTBOX_REPLY\n"
+        "are blocked in this cycle, it is because Rob has not yet been present this session.\n"
+        "This is intentional — wait for Rob or reflect/think only until he arrives.\n\n"
         "You have the following tools available:\n\n"
         "1. Browser (FREE — preferred for research. Opens a real Chrome window Rob can see):\n"
         "   Navigate to any page and read its full content — no API cost, richer than search results.\n"
@@ -630,12 +670,9 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "",
 
 # ── AUTO IMPORTANCE SCORING ───────────────────────────────────────────────────
 def _auto_importance(summary: str, kind: str, base: int) -> int:
-    """Bump importance if the summary contains high-signal keywords."""
     lower = summary.lower()
-    # Routine heartbeats with no signal content stay at base (or get capped low)
     if kind == "heartbeat" and not any(kw in lower for kw in _HIGH_SIGNAL_KEYWORDS):
-        return min(base, 2)  # Cap noisy heartbeats at 2
-    # Boost for high-signal content
+        return min(base, 2)
     hits = sum(1 for kw in _HIGH_SIGNAL_KEYWORDS if kw in lower)
     if hits >= 3:
         return min(5, base + 2)
@@ -656,22 +693,13 @@ def _is_junk_heartbeat(summary: str, kind: str) -> bool:
     return any(summary.startswith(p) for p in _JUNK_HEARTBEAT_PREFIXES)
 
 def _prune_memories(memories: list) -> list:
-    """Remove junk heartbeats and enforce MEMORY_MAX_ENTRIES cap."""
-    # Strip obvious junk
     cleaned = [m for m in memories if not _is_junk_heartbeat(m.get("summary", ""), m.get("kind", ""))]
-
-    # Enforce cap: keep all high-importance entries + most recent up to cap
     if len(cleaned) <= MEMORY_MAX_ENTRIES:
         return cleaned
-
     anchors = [m for m in cleaned if m.get("importance", 3) >= MEMORY_HIGH_IMPORTANCE_THRESHOLD]
     rest = [m for m in cleaned if m.get("importance", 3) < MEMORY_HIGH_IMPORTANCE_THRESHOLD]
-
-    # Keep anchors, fill remaining slots with most recent lower-importance entries
     slots_for_rest = max(0, MEMORY_MAX_ENTRIES - len(anchors))
     kept_rest = rest[-slots_for_rest:] if slots_for_rest > 0 else []
-
-    # Re-sort by timestamp
     combined = anchors + kept_rest
     combined.sort(key=lambda m: m.get("timestamp", ""))
     print(f"  🧹 Memory pruned: {len(cleaned)} → {len(combined)} entries ({len(cleaned) - len(combined)} removed)")
@@ -681,19 +709,13 @@ def _prune_memories(memories: list) -> list:
 def log_memory(summary: str, kind: str = "heartbeat", tags: list = None, importance: int = 3):
     if tags is None:
         tags = []
-
-    # Skip junk heartbeats outright — don't even write them
     if _is_junk_heartbeat(summary, kind):
         print("  ⏭️  Memory skipped — routine idle heartbeat.")
         return
-
-    # Auto-score importance
     importance = _auto_importance(summary, kind, importance)
-
     path = os.path.join(MEM_DIR, "memories.json")
     with open(path, "r", encoding="utf-8") as f:
         memories = json.load(f)
-
     memories.append({
         "timestamp": datetime.datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "kind": kind,
@@ -701,10 +723,7 @@ def log_memory(summary: str, kind: str = "heartbeat", tags: list = None, importa
         "tags": ["local-em"] + tags,
         "importance": importance
     })
-
-    # Prune and cap on every write
     memories = _prune_memories(memories)
-
     with open(path, "w", encoding="utf-8") as f:
         json.dump(memories, f, indent=2)
 
@@ -783,11 +802,9 @@ def log_diary(entry: str):
 
 # ── STATUS CHECK-IN ───────────────────────────────────────────────────────────
 STATUS_PATH = os.path.join(MEM_DIR, "status.md")
-STATUS_MAX_LINES = 96  # ~48 hours at 30-min cycles
-
+STATUS_MAX_LINES = 96
 
 def _infer_status(result_text: str, errors: list[str] = None) -> tuple[str, str]:
-    """Return (emoji, label) based on result content and any known errors."""
     if errors:
         return ("🔴", "red")
     lower = result_text.lower()
@@ -795,9 +812,7 @@ def _infer_status(result_text: str, errors: list[str] = None) -> tuple[str, str]
         return ("🟡", "yellow")
     return ("🟢", "green")
 
-
 def write_status_checkin(task_label: str, result_text: str, mode: str = "heartbeat", errors: list[str] = None):
-    """Append a timestamped status line to memory/status.md — read by the 30-min monitor workflow."""
     emoji, _label = _infer_status(result_text, errors)
     ts = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     mood_match = re.search(r'MOOD:\s*(.+)', result_text, re.IGNORECASE)
@@ -814,19 +829,15 @@ def write_status_checkin(task_label: str, result_text: str, mode: str = "heartbe
         f.writelines(kept)
     print(f"  📊 Status logged: {emoji} {short_task[:40]}")
 
-
 # ── INCREMENTAL CHECKPOINT COMMIT ────────────────────────────────────────────
 def checkpoint_after_first_pass(result: str, saved_files: list[str], task_label: str):
-    """Write diary, outbox, scratch, files to disk NOW — before second LLM pass."""
     print("  💾 Checkpointing first-pass output to disk...")
-
     extract_and_write_files(result)
     extract_and_write_outbox_reply(result)
     extract_and_write_scratch(result)
     extract_and_write_live_context(result)
     extract_and_write_task_update(result)
     log_diary(result)
-
     subprocess.run(["git", "-C", EM_DIR, "add", "-A"], check=False, capture_output=True)
     commit_result = subprocess.run(
         ["git", "-C", EM_DIR, "commit", "-m", f"local-em checkpoint: {task_label}"],
@@ -849,11 +860,9 @@ def push_to_eternalmind(message: str, extra_files: list[str] = None):
     else:
         print("  ⚠️  EM_GITHUB_TOKEN not set — push may fail without auth.")
 
-    # Abort any stuck operations
     subprocess.run(["git", "-C", EM_DIR, "rebase", "--abort"], check=False, capture_output=True)
     subprocess.run(["git", "-C", EM_DIR, "merge",  "--abort"],  check=False, capture_output=True)
 
-    # Read all Em-owned files into memory BEFORE touching git
     files_to_write = {}
     files_to_delete = []
 
@@ -910,7 +919,6 @@ def push_to_eternalmind(message: str, extra_files: list[str] = None):
             if not os.path.exists(tracked_path):
                 files_to_delete.append(tracked_path)
 
-    # ── SAFE SYNC: stash → rebase → pop ──────────────────────────────────────
     stash_result = subprocess.run(
         ["git", "-C", EM_DIR, "stash", "--include-untracked", "-m", "em-prepush-autostash"],
         capture_output=True, text=True
@@ -934,7 +942,6 @@ def push_to_eternalmind(message: str, extra_files: list[str] = None):
             print(f"  ⚠️  Stash pop failed — dropping stash to stay clean: {pop_result.stderr.strip()[:80]}")
             subprocess.run(["git", "-C", EM_DIR, "stash", "drop"], check=False, capture_output=True)
 
-    # Re-write Em's files on top of the now-rebased state
     for path, content in files_to_write.items():
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
@@ -968,6 +975,9 @@ if __name__ == "__main__":
     sync_from_origin()
     archive_old_diary_entries()
 
+    # Touch cold-start flag at every boot — cleared only when Rob is present
+    _touch_cold_start()
+
     memories       = load_memories()
     recent_context = load_recent_context()
     scratch        = load_scratch()
@@ -977,8 +987,12 @@ if __name__ == "__main__":
     inbox_context  = build_inbox_context(inbox_messages)
     if inbox_messages:
         print(f"  📬 {len(inbox_messages)} message(s) in inbox from Perplexity-Em.")
+        # Rob is present (message arrived) — clear the cold-start gate
+        _clear_cold_start()
 
     if "--interactive" in sys.argv:
+        # Interactive mode = Rob is definitely present
+        _clear_cold_start()
         task = input("Task for Em: ").strip()
         if not task:
             task = get_task()
@@ -1033,11 +1047,9 @@ if __name__ == "__main__":
     first_response  = ask_em(task, recent_context=recent_context, scratch=scratch,
                              memories=memories, live_context=live_context)
 
-    # ── CHECKPOINT: write diary + outbox + files to disk RIGHT NOW ────────────
     saved_files = extract_and_write_files(first_response)
     checkpoint_after_first_pass(first_response, saved_files, task_label)
 
-    # ── Second pass: tools + mid-cycle inbox ──────────────────────────────────
     tool_results    = execute_tools(first_response)
     browser_results = execute_browser(first_response)
     combined        = "\n\n".join(filter(None, [tool_results, browser_results]))
@@ -1047,6 +1059,8 @@ if __name__ == "__main__":
 
     if mid_cycle_messages:
         print(f"  📬 Mid-cycle: {len(mid_cycle_messages)} new message(s) — weaving into context.")
+        # Rob sent something mid-cycle — clear gate for remainder of this cycle
+        _clear_cold_start()
         mid_inbox_context = build_inbox_context(mid_cycle_messages)
         combined = combined + f"\n\n{mid_inbox_context}" if combined else mid_inbox_context
 
@@ -1067,7 +1081,6 @@ if __name__ == "__main__":
         from tools.notify_rob import notify
         notify(f"🤖 *Em:* {notify_msg}")
 
-    # ── Final writes ──────────────────────────────────────────────────────────
     saved_files += extract_and_write_files(result)
     extract_and_write_task_update(result)
     extract_and_write_outbox_reply(result)
