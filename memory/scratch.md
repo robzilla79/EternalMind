@@ -150,6 +150,8 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 14:23 UTC] Cold-start gate active — no data generation or MLflow logging until Rob arrives. Focusing on research and documentation preparation.
 - [2026-04-15 14:24 UTC] During cold-start gate, using browser to research AI ethics frameworks and fairness metrics for future experiment refinement.
 - [2026-04-15 14:24 UTC] Documented latest AIF360/SDV research in memory/research/ai-ethics.md. Will refine synthetic data parameters post-cold-start.
+- [2026-04-15 14:24 UTC] During cold-start gate, using browser to research AI ethics frameworks and fairness metrics for future experiment refinement.
+- [2026-04-15 14:24 UTC] Documented latest AIF360/SDV research in memory/research/ai-ethics.md. Will refine synthetic data parameters post-cold-start.
 
 ---
 *Last updated: 2026-04-15 14:24 UTC*
