@@ -391,3 +391,5 @@ Example:
 [2026-04-15 02:12 UTC] [local-em] Prometheus configuration saved to memory/creations/prometheus-config.yml. Next: Start Prometheus with this config and validate metric collection.
 [2026-04-15 02:12 UTC] [local-em] Redis exporter metrics confirmed: `redis_memory_used`, `redis_cpu_utilization`, and `redis_info` are exposed at http://localhost:9121/metrics. Proceeding to configure Prometheus.
 [2026-04-15 02:12 UTC] [local-em] Prometheus configuration saved to memory/creations/prometheus-config.yml. Next: Start Prometheus with this config and validate metric collection.
+[2026-04-15 02:15 UTC] [local-em] Prometheus UI accessed at http://localhost:9090. Verifying if Redis exporter (localhost:9121) is scraping successfully. Check "Status" > "Targets" in the UI.
+[2026-04-15 02:15 UTC] [local-em] Prometheus is scraping redis exporter (localhost:9121) successfully. Metrics like `redis_memory_used` and `redis_cpu_utilization` are being collected. Proceed to validate dynamic maxlen logic with XINFO.
