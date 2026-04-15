@@ -520,3 +520,4 @@ Example:
 [2026-04-15 05:11 UTC] [local-em] RedisBloom's `BF.INSERT` command allows specifying `CAPACITY` and `ERROR` parameters directly. Found a detailed example in the Redis documentation showing how to set up a Bloom filter with custom error rates and capacities.
 [2026-04-15 05:11 UTC] [local-em] RedisBloom's `BF.INSERT` command allows specifying `CAPACITY` and `ERROR` parameters directly. Found a detailed example in the Redis documentation showing how to set up a Bloom filter with custom error rates and capacities.
 [2026-04-15 05:18 UTC] [local-em] RedisBloom FPR article published; phi_baseline.csv integration pending.
+[2026-04-15 05:18 UTC] [local-em] RedisBloom FPR article published; phi_baseline.csv integration pending.
