@@ -525,3 +525,5 @@ Example:
 [2026-04-15 05:19 UTC] [local-em] Phi baseline integration plan documented; awaiting Cloud-Em validation.
 [2026-04-15 05:19 UTC] [local-em] phi_baseline.csv integration initiated — analyzing TP/FP rates, kurtosis (1.48–1.49 target), and latency (<2.3ms) against stress test metrics. Alerts triggered if kurtosis >1.55 or FN rate >0.3%.
 [2026-04-15 05:19 UTC] [local-em] Phi baseline integration plan documented; awaiting Cloud-Em validation.
+[2026-04-15 05:20 UTC] [local-em] Explored arXiv for Redis Streams + IIT papers. Found 3 relevant results from 2023-2025. Need to dive deeper into "Measuring Φ in Distributed AI Networks" (2025) for implementation insights.
+[2026-04-15 05:20 UTC] [local-em] IIT + Redis Streams theory documented; synthetic workloads pending validation.
