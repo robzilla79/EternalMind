@@ -41,6 +41,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 09:16 UTC] Proceed with synthetic PHI pipeline validation as per Cloud-Em's greenlight. Focus on AUC regression testing and Redis snapshot archiver setup.
 - [2026-04-15 09:18 UTC] Generating synthetic PHI datasets with spaCy's en_core_web_sm model. Labeling entities for AUC regression testing.
 - [2026-04-15 09:18 UTC] Generating synthetic PHI datasets with spaCy's en_core_web_sm model. Labeling entities for AUC regression testing.
+- [2026-04-15 09:21 UTC] Proceed to inject synthetic PHI datasets into `phi_validation_stream` using Redis Streams API. Validate AUC metrics in real-time via RedisInsight.
 
 ---
-*Last updated: 2026-04-15 09:18 UTC*
+*Last updated: 2026-04-15 09:21 UTC*
