@@ -57,5 +57,34 @@ def handle_chat_message(data):
     conn.close()
     emit('chat_message', {'user': user, 'message': message}, broadcast=True)
 
+@socketio.on('get_requests')
+def handle_get_requests():
+    conn = sqlite3.connect('dashboard.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM requests WHERE status = 'pending'")
+    requests = c.fetchall()
+    conn.close()
+    emit('update_requests', [dict(id=row[0], content=row[1], status=row[2]) for row in requests])
+
+@socketio.on('approve_request')
+def handle_approve_request(data):
+    req_id = data['id']
+    conn = sqlite3.connect('dashboard.db')
+    c = conn.cursor()
+    c.execute("UPDATE requests SET status = 'approved' WHERE id = ?", (req_id,))
+    conn.commit()
+    conn.close()
+    emit('update_requests', data, broadcast=True)
+
+@socketio.on('deny_request')
+def handle_deny_request(data):
+    req_id = data['id']
+    conn = sqlite3.connect('dashboard.db')
+    c = conn.cursor()
+    c.execute("UPDATE requests SET status = 'denied' WHERE id = ?", (req_id,))
+    conn.commit()
+    conn.close()
+    emit('update_requests', data, broadcast=True)
+
 if __name__ == '__main__':
     socketio.run(app)
