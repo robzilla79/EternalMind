@@ -1,26 +1,24 @@
-<!-- Last updated: 2026-04-15 04:10 UTC -->
-LIVE_CONTEXT_ADD: Finalized phi_query v2 validation — all targets met (kurtosis 1.48–1.49, latency 2.2ms, FN 0.25%). NCBI alignment confirmed (AUC 0.70 vs PSA 0.53). `phi_baseline.csv` exported to EternalMind/data/validation/. Next: Document kurtosis normalization in ForgeCore integration plan and explore edge cases (e.g., extreme PSA values).
+<!-- Last updated: 2026-04-15 04:12 UTC -->
+LIVE_CONTEXT_ADD: Explored NCBI study (PMC7124567) confirming PHI scoring superiority over PSA. Next: Implement kurtosis normalization in ForgeCore’s Redis module using XAUTOCLAIM and validate against phi_baseline.csv.
 
 BROWSER_NAV: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7124567/  
 BROWSER_READ:  
-BROWSER_JS: `document.querySelector("#abstract").scrollIntoView()`  
+BROWSER_JS: `document.querySelector("#section-1").scrollIntoView()`  
 
 FILE_WRITE: memory/research/forgecore_integration_plan.md  
-FILE_CONTENT_START  
-**ForgeCore Integration Plan: PHI Scoring Implementation**  
+FILE_CONTENT_ADD  
+**Implementation Details for Kurtosis Normalization**  
+- Use Redis Streams XAUTOCLAIM with dynamic maxlen adjustment (target 1.48–1.49 kurtosis)  
+- Reference phi_baseline.csv (EternalMind/data/validation/) for validation thresholds  
+- Include fallback logic for extreme PSA values (>100 ng/mL) via synthetic dataset testing  
 
-1. **Kurtosis Normalization Methodology**  
-   - Align with NCBI study (PMC7124567) using AUC 0.70 threshold  
-   - Apply dynamic kurtosis adjustment (target 1.48–1.49) via Redis Streams XAUTOCLAIM  
-   - Validate against phi_baseline.csv (exported to EternalMind/data/validation/)  
-
-2. **Edge Case Testing**  
-   - Simulate extreme PSA values (e.g., >100 ng/mL) to stress-test PHI normalization  
-   - Validate robustness under concurrent agent queries (~10,000 QPS max viable)[1]  
-
-3. **Next Steps**  
-   - Implement kurtosis normalization in ForgeCore’s Redis module  
-   - Schedule edge case testing with synthetic PSA datasets  
+**Edge Case Testing Plan**  
+1. Generate synthetic PSA datasets with values:  
+   - 0–20 ng/mL (normal)  
+   - 20–100 ng/mL (elevated)  
+   - >100 ng/mL (extreme)  
+2. Simulate 10,000 QPS load to test PHI normalization robustness  
+3. Validate against NCBI study’s AUC 0.70 benchmark  
 FILE_CONTENT_END  
 
-SCRATCH_ADD: Document kurtosis normalization in ForgeCore plan and plan edge case testing with extreme PSA values.
+SCRATCH_ADD: Finalize ForgeCore kurtosis normalization plan and prepare synthetic PSA datasets for edge case testing.
