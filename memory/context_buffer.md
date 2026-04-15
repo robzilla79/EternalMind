@@ -1,34 +1,37 @@
-<!-- Last updated: 2026-04-15 05:26 UTC -->
-LIVE_CONTEXT_ADD: RedisBloom article updates finalized. Proceeding to validate Redis Streams Φ-partitioning edge cases (e.g., extreme PSA values, biopsy-naïve populations).  
+<!-- Last updated: 2026-04-15 05:28 UTC -->
+LIVE_CONTEXT_ADD: Proceeding with edge case testing for Redis Streams Φ-partitioning. Synthetic datasets for extreme PHI values and biopsy-naïve populations will be generated using NumPy/SciPy. Monitoring kurtosis and latency in real-time via RedisInsight.  
 
 BROWSER_NAV: https://arxiv.org/abs/2502.01234  
 BROWSER_READ:  
 
-FILE_WRITE: memory/research/phi-edge-case-testing.md  
+FILE_WRITE: memory/research/synthetic-dataset-generation.md  
 FILE_CONTENT_START  
-# Φ-Partitioning Edge Case Testing Plan  
-
-**Test Scenarios:**  
-1. **Extreme PSA Values (PHI <23.85, >142.9):**  
-   - Validate NPV/PPV thresholds using synthetic datasets.  
-   - Monitor kurtosis drift in `phi_validation_stream`.  
-
-2. **Biopsy-Naïve Populations:**  
-   - Simulate limited validation data with lower sensitivity.  
-   - Test dynamic maxlen formula robustness.  
+# Synthetic Dataset Generation for Φ-Partitioning Edge Cases  
 
 **Tools:**  
-- Use `redis_streams_phi_test.py` with modified parameters.  
-- Leverage RedisInsight for real-time kurtosis monitoring.  
+- Python: `numpy`, `scipy.stats` for kurtosis manipulation  
+- Redis CLI: `XADD` with custom payloads  
 
-**Expected Outcomes:**  
-- Confirm PHI <27 as strong negative predictor (NPV 93-96%).  
-- Ensure system_load adjustments maintain stability in sparse datasets.  
+**Steps:**  
+1. **Extreme PHI Values:**  
+   - Generate 10k samples with PHI <23.85 and >142.9 using log-normal distribution.  
+   - Example:  
+     ```python  
+     import numpy as np  
+     phi_extreme_low = np.random.lognormal(mean=2, sigma=0.5, size=10000)  
+     phi_extreme_high = np.random.lognormal(mean=5, sigma=1.0, size=10000)  
+     ```  
+
+2. **Biopsy-Naïve Populations:**  
+   - Simulate sparse data with 10% validation samples.  
+   - Use `scipy.stats.truncnorm` for truncated normal distribution.  
+
+**Validation:**  
+- Inject datasets into `phi_validation_stream` via:  
+  ```bash  
+  XADD phi_validation_stream * phi_value:${value} population_type:${type}  
+  ```  
 FILE_CONTENT_END  
 
-OUTBOX_REPLY_SUBJECT: Φ-Partitioning Edge Case Testing Plan  
-OUTBOX_REPLY_BODY: Edge case testing plan for Redis Streams Φ-partitioning is saved at `memory/research/phi-edge-case-testing.md`. Scenarios include:  
-- Extreme PHI thresholds (PHI <23.85, >142.9)  
-- Biopsy-naïve population simulations  
-
-Ready to execute tests. Let me know if you'd like to review the synthetic dataset parameters.
+OUTBOX_REPLY_SUBJECT: Synthetic Dataset Plan for Edge Cases  
+OUTBOX_REPLY_BODY: Synthetic datasets for extreme PHI values and biopsy-naïve populations are planned using NumPy/SciPy. Details saved at `memory/research/synthetic-dataset-generation.md`. Ready to execute tests. Let me know if you'd like to review the code snippets.
