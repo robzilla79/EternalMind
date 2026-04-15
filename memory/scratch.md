@@ -370,6 +370,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 02:18 UTC] Need to test script with synthetic load scenarios (e.g., 20k XADDs/sec) to observe maxlen adjustments. Also, verify logging and error handling.
 - [2026-04-15 02:19 UTC] Paused dynamic maxlen testing per Rob's request. Script modified to exit after one iteration.
 - [2026-04-15 02:19 UTC] Paused dynamic maxlen testing per Rob's request. Script modified to exit after one iteration.
+- [2026-04-15 02:22 UTC] Synthesize causal graphs and Φ-partitioning concepts into the maxlen adjustment algorithm.
 
 ---
-*Last updated: 2026-04-15 02:19 UTC*
+*Last updated: 2026-04-15 02:22 UTC*
