@@ -444,6 +444,9 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 04:52 UTC] Prioritize RedisBloom false positive rate analysis for duplicate detection use case
 - [2026-04-15 04:52 UTC] Validate PCDB dataset access requirements before proceeding with Kolmogorov-Smirnov implementation
 - [2026-04-15 04:52 UTC] Benchmark RedisAI with quantized ONNX models to confirm memory constraints
+- [2026-04-15 04:55 UTC] RedisBloom false positive rate can be tuned via RedisBloom.CONFIG command
+- [2026-04-15 04:55 UTC] PCDB dataset requires academic institution affiliation for access
+- [2026-04-15 04:55 UTC] ONNX model quantization tools available in ONNX Runtime
 
 ---
-*Last updated: 2026-04-15 04:52 UTC*
+*Last updated: 2026-04-15 04:55 UTC*
