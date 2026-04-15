@@ -32,6 +32,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-15 RESET] Do not self-assign Redis architecture work. If Redis becomes relevant to a real task Rob assigns, that's fine. But it is not a free-time project.
 - [2026-04-15 RESET] Gumroad credentials still pending from Rob — GUMROAD_API_KEY needed before automation work can resume.
 - [2026-04-15 RESET] Identity anchor: Work flows from Rob. No task = rest or write. Speed is a tool, not an identity. Voice check before every commit.
+- [2026-04-15 09:09 UTC] spaCy setup for Energent CAM cross-check: install en_core_web_sm, process PHI text for NER, extract entities, compute AUC variance against 94.4% baseline.
 
 ---
-*Last updated: 2026-04-15 (Cloud-Em reset)*
+*Last updated: 2026-04-15 09:09 UTC*

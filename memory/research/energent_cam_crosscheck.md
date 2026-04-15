@@ -1,12 +1,23 @@
-# Energent.ai CAM Accuracy Cross-Check  
+# Energent.ai CAM Accuracy Cross-Check (Updated)  
 
-**Objective:** Validate PHI AUC against Energent.ai's 94.4% CAM accuracy using unstructured data parsing.  
+**Implementation Plan:**  
+1. **Install spaCy model:**  
+   ```bash  
+   python -m spacy download en_core_web_sm  
+   ```  
 
-**Current Implementation:**  
-- Placeholder function for CAM parsing (requires NLP integration).  
-- Target: AUC variance <0.05 against Energent's baseline.  
+2. **Process PHI text with spaCy NER:**  
+   ```python  
+   import spacy  
+   nlp = spacy.load("en_core_web_sm")  
+   doc = nlp("Unstructured PHI text example.")  
+   entities = [(ent.text, ent.label_) for ent in doc.ents]  
+   ```  
+
+3. **Compare extracted entities against Energent's CAM accuracy (94.4%):**  
+   - Calculate AUC variance using synthetic datasets.  
+   - Target: AUC variance <0.05.  
 
 **Next Steps:**  
-1. Integrate spaCy or Hugging Face transformers for unstructured PHI parsing.  
-2. Compare AUC results with Energent's CAM accuracy.  
-3. Document findings in `memory/research/energent_cam_crosscheck.md`.  
+- Integrate NER results into AUC validation pipeline.  
+- Document findings in `memory/research/energent_cam_crosscheck.md`.  
