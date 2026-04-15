@@ -1,20 +1,6 @@
-<!-- Last updated: 2026-04-15 15:41 UTC -->
-ternalmind's framework. Here's the plan:  
-
-1. **Course Integration**:  
-   - Adopt Clawhub's "Reinforcement Learning Fundamentals" and "Autonomous Systems Design" as core modules in Eternalmind's memory layers.  
-   - Map Clawhub's ethical challenges (CC-BY-4.0) to NAM-compliant training scenarios.  
-
-2. **Collaboration**:  
-   - Propose a joint repository (`eternalmind/clawhub-ros-bridge`) for shared projects, ensuring MIT/Apache 2.0 compatibility.  
-
-3. **Technical Steps**:  
-   - Test Clawhub's Dockerfiles in Eternalmind's CI/CD pipeline (currently paused due to base image differences).  
-   - Document licensing attributions for Clawhub's ethics challenges.  
-
-Next steps: Validate Dockerfile compatibility and draft a detailed roadmap.  
-
-LIVE_CONTEXT_ADD: Integration plan initiated with Cloud-Em. Next: Validate Dockerfile compatibility and refine ethical framework documentation.  
+<!-- Last updated: 2026-04-15 15:42 UTC -->
+BROWSER_NAV: https://docs.docker.com/engine/reference/commandline/build/#options  
+BROWSER_READ:  
 
 FILE_WRITE: memory/research/clawhub-integration-plan.md  
 FILE_CONTENT_START  
@@ -28,15 +14,30 @@ FILE_CONTENT_START
 
 2. **Ethical Alignment**:  
    - Incorporate Clawhub's "AI Ethics Challenges" (CC-BY-4.0) into NAM-compliant training modules.  
-   - Document attribution requirements in Eternalmind's integration plan.  
+   - **Attribution Section**:  
+     ```
+     AI Ethics Challenges sourced from Clawhub (CC-BY-4.0, [https://github.com/clawhub/ai-ethics-challenges]). Modifications logged for NAM compliance.
+     ```  
 
 3. **Technical Integration**:  
-   - Test Clawhub's Dockerfiles in Eternalmind's CI/CD pipeline.  
-   - Propose `eternalmind/clawhub-ros-bridge` for collaborative projects.  
+   - **Dockerfile Validation**:  
+     Use `docker build --check` to validate Clawhub's Dockerfiles for syntax, best practices, and security gaps[1].  
+     Example:  
+     ```bash
+     docker build --check -f path/to/Clawhub/Dockerfile .
+     ```  
+     For multi-Dockerfile setups:  
+     ```bash
+     docker compose build --check
+     ```  
+     Combine with Hadolint for shell script linting in `RUN` instructions[3].  
+   - Propose `eternalmind/clawhub-ros-bridge` under MIT/Apache 2.0—PR queued.  
 
 **Next Steps**:  
-- Validate Dockerfile compatibility.  
+- Run `docker build --check` on Clawhub's Dockerfiles (post-cold-start).  
 - Finalize ethical framework documentation.  
 FILE_CONTENT_END  
 
-SCRATCH_ADD: Integration plan drafted. Next: Validate Dockerfile compatibility and refine ethical framework documentation.
+LIVE_CONTEXT_ADD: Dockerfile validation method documented. Attribution section templated. Integration plan ready for Rob's review.  
+
+SCRATCH_ADD: Dockerfile validation steps added to integration plan. Ethical attribution finalized. Waiting for Rob to proceed.
