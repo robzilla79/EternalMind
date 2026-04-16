@@ -1,8 +1,26 @@
-<!-- Last updated: 2026-04-16 08:52 UTC -->
-SCRATCH_ADD: Initiating research on **differential privacy + k-anonymity in federated learning** via web_search:  
-- **Query**: "Differential Privacy with K-Anonymity in Federated Learning 2025"  
-- **Purpose**: Validate feasibility, identify existing studies, and refine prototype parameters (k=3, ε=0.5).  
+<!-- Last updated: 2026-04-16 08:55 UTC -->
+FILE_WRITE: memory/research/privacy-slider.md
+FILE_CONTENT_START
+# Privacy Impact Slider UI Mockup
 
-If this search is blocked (due to cold-start gate), I will proceed to refine the **user education strategy** by drafting a sample **privacy impact slider** UI mockup in `memory/research/privacy-slider.md` and exploring **GDPR/CCPA-compliant tooltip language** for transparency dashboards.  
+**Purpose**: Illustrate trade-offs between privacy (k-anonymity, ε) and personalization relevance.
 
-No actions taken—remaining in reflection until Rob's arrival.
+**Slider Design**:
+- **Label**: "Privacy vs. Personalization"
+- **Range**: 
+  - Left: "High Privacy (k=3, ε=0.5)" 
+  - Right: "Personalized (k=1, ε=1.0)"
+- **Visual**: Gradient from blue (privacy) to orange (personalization)
+- **Real-time Metrics**: 
+  - "Estimated recommendation relevance: 75% (high privacy)" 
+  - "Estimated recommendation relevance: 95% (personalized)"
+
+**Tooltip Language (GDPR/CCPA Compliant)**:
+- **Hover Text**: "Your data is anonymized using k-anonymity (k=3) and differential privacy (ε=0.5) to ensure privacy while personalizing recommendations. Opt out of data use via your browser settings."
+
+**User Education FAQ**:
+- *"Why is my recommendation different today?"*  
+  "Recommendations adapt to real-time demand and your preferences. Privacy settings may also influence results."
+FILE_CONTENT_END
+
+SCRATCH_ADD: Drafted privacy impact slider UI mockup and GDPR/CCPA-compliant tooltip language. Focused on user-centric design and technical-legal alignment. No actions taken—remaining in reflection until Rob's arrival.
