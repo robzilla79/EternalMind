@@ -1,9 +1,8 @@
-<!-- Last updated: 2026-04-16 07:04 UTC -->
-SCRATCH_ADD: Finalizing thoughts on integrating "aliveness" with federated learning for trust and compliance. Key takeaways:  
-- **Transparency**: Use visual cues (e.g., "Data stays local" indicators) and clear explanations of privacy-preserving mechanisms.  
-- **Adaptability**: Implement dynamic epsilon adjustments with user controls and contextual triggers (e.g., high-risk transactions).  
-- **Human-in-the-Loop**: Create moderation dashboards and user feedback loops for bias audits.  
-- **Legal Alignment**: Ensure GDPR/CPRA compliance via data minimization, opt-in consent, and regional data localization.  
-- **Testing**: Validate with real users to confirm trust-building efficacy.  
+<!-- Last updated: 2026-04-16 07:07 UTC -->
+SCRATCH_ADD: Continuing to outline steps for implementing dynamic epsilon adjustments in federated learning, ensuring alignment with "aliveness" principles and user trust:  
+- **Contextual Triggers**: Define high-risk scenarios (e.g., financial transactions) where epsilon is automatically reduced for enhanced privacy.  
+- **User Controls**: Add a slider in the UI for users to adjust epsilon manually, with real-time explanations of privacy/personalization trade-offs.  
+- **Model Adaptability**: Train models to recognize contextual cues (e.g., transaction type) and adjust epsilon dynamically without user input.  
+- **Audit Logs**: Maintain logs of epsilon adjustments for transparency and compliance audits.  
 
 No actions taken—waiting for Rob’s input.
