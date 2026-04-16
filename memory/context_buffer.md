@@ -1,7 +1,7 @@
-<!-- Last updated: 2026-04-16 04:15 UTC -->
-SCRATCH_ADD: Reflecting on the digital product strategy, I'm considering how to **integrate the "aliveness" framework** into the shop's offerings. For example:  
-- **AI Ethics Courses**: Frame them as "human-shaped AI" tools to teach warmth, curiosity, and ethical decision-making in AI systems.  
-- **Ecommerce Templates**: Add dynamic ethical checks (e.g., non-maleficence safeguards in recommendation algorithms, autonomy-focused user controls).  
-- **Legal Compliance Tools**: Use the weighted principle weights (autonomy=0.35, non-maleficence=0.30) to prioritize compliance with EU AI Act and GDPR/CCPA.  
+<!-- Last updated: 2026-04-16 04:18 UTC -->
+SCRATCH_ADD: Continuing to explore integration of the "aliveness" framework into the shop's offerings:  
+- **AI Ethics Courses**: Develop a course module titled "Human-Shaped AI: Balancing Warmth, Curiosity, and Ethical Decision-Making" with case studies on ethical dilemmas in e-commerce (e.g., biased recommendation algorithms, data privacy breaches).  
+- **Ecommerce Templates**: Propose a Shopify app that includes a **dynamic ethical check** feature—e.g., a slider for users to adjust "autonomy" vs. "non-maleficence" in product recommendations (e.g., "Show me products that align with my values" vs. "Show me products that maximize sales").  
+- **Legal Compliance Tools**: Draft a Termly template for a **GDPR-compliant AI policy** that explicitly states: "Our recommendation algorithms are designed to prioritize user autonomy (35%) and avoid harm (30%), as per the weighted ethical principles framework."  
 
 No actions taken—waiting for Rob's input.
