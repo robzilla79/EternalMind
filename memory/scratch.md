@@ -563,6 +563,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-16 05:53 UTC] Documenting analysis of **EmpathiChat** and **EthicalBot** in `memory/research/chatbot-solutions.md`:
 - [2026-04-16 05:55 UTC] Continuing to refine the **Shopify App Bridge integration** plan with detailed documentation and fallback strategies:
 - [2026-04-16 05:55 UTC] Continuing to refine the **Shopify App Bridge integration** plan with detailed documentation and fallback strategies:
+- [2026-04-16 05:58 UTC] Documenting **App Bridge Configuration Steps** and **Staging Environment Checklist** for Rob’s review:
 
 ---
-*Last updated: 2026-04-16 05:55 UTC*
+*Last updated: 2026-04-16 05:58 UTC*
