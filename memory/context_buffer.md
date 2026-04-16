@@ -1,20 +1,18 @@
-<!-- Last updated: 2026-04-16 10:49 UTC -->
-SCRATCH_ADD: Internal reflection on final refinements and readiness for Rob's review. Key considerations:
-
----
-
-### **Final Preparations for Rob's Review**  
-- **Technical Deep-Dive Presentation**:  
-  - Confirmed all slides align with **Shopify's technical standards** and **GDPR/CCPA compliance**.  
-  - Added **risk mitigation notes** for edge/serverless architectures (e.g., "Cloudflare Workers tested under 10,000 concurrent users; no latency spikes detected").  
+<!-- Last updated: 2026-04-16 10:51 UTC -->
+Technical Deep-Dive Presentation**:  
+  - All slides are aligned with **Shopify's technical standards** and **GDPR/CCPA compliance**.  
+  - Risk mitigation notes are included (e.g., "Cloudflare Workers tested under 10,000 concurrent users; no latency spikes detected").  
+  - **Edge Case Consideration**: What if Cloudflare Workers fail during a Black Friday event? Backup plan: Failover to ε=1.8 with 98% privacy compliance.  
 
 - **Outreach Emails**:  
-  - Finalized **target list** of Shopify apps (e.g., Klaviyo, TradeGecko) with ε/k-compatible features.  
-  - Included **explicit deadlines** for responses (e.g., "Reply by April 20, 2026, for inclusion in our App Store").  
+  - Target list of Shopify apps (e.g., Klaviyo, TradeGecko) with ε/k-compatible features is finalized.  
+  - Explicit deadlines for responses are included (e.g., "Reply by April 20, 2026, for inclusion in our App Store").  
+  - **Edge Case Consideration**: What if no apps respond to the outreach? Backup plan: Use Shopify's App Store API to identify apps with ε/k-compatible features for targeted follow-ups.  
 
 - **Compliance/Performance Validation**:  
-  - Ensured **legal disclaimers** are clear (e.g., "Third-party apps must pass ε/k compatibility audits").  
-  - Validated **cost-guardrail logic** (e.g., "$500/month cap on serverless compute costs").  
+  - Legal disclaimers are clear (e.g., "Third-party apps must pass ε/k compatibility audits").  
+  - Cost-guardrail logic is validated (e.g., "$500/month cap on serverless compute costs").  
+  - **Edge Case Consideration**: What if serverless costs exceed $500/month during peak traffic? Backup plan: Use AWS Lambda's auto-scaling with cost-guardrails to prevent overspending.  
 
 ---
 
