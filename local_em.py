@@ -38,14 +38,17 @@ CREATIONS_DIR      = os.path.join(MEM_DIR, "creations")
 RESEARCH_DIR       = os.path.join(MEM_DIR, "research")
 TASKS_PATH         = os.path.join(EM_DIR, "tasks.md")
 BOOTSTRAP_PATH     = os.path.join(EM_DIR, "bootstrap.md")  # root-level, not memory/
+MEM_BOOTSTRAP_PATH = os.path.join(MEM_DIR, "bootstrap.md")
 SKILLS_DIR         = os.path.join(EM_DIR, "skills")        # MindRegistry lives here
 LAST_THOUGHT_PATH  = os.path.join(EM_DIR, ".last_thought")
+LAST_QUESTION_PATH = os.path.join(EM_DIR, ".last_question")
 MESSAGES_INBOX     = os.path.join(EM_DIR, "messages", "inbox")
 MESSAGES_OUTBOX    = os.path.join(EM_DIR, "messages", "outbox")
 MESSAGES_PROCESSED = os.path.join(EM_DIR, "messages", "processed")
 SCRATCH_PATH       = os.path.join(MEM_DIR, "scratch.md")
 LIVE_CONTEXT_PATH  = os.path.join(MEM_DIR, "live-context.md")
 CURIOSITY_COOLDOWN_MINUTES = 2
+QUESTION_COOLDOWN_MINUTES = 20
 DIARY_LIVE_DAYS    = 7
 DIARY_DEDUP_CHARS  = 300
 MEMORY_MAX_ENTRIES = 150
@@ -138,12 +141,22 @@ def sync_from_origin():
 
 # ── BOOTSTRAP GROUNDING ───────────────────────────────────────────────────────
 def load_bootstrap() -> str:
-    """Load bootstrap.md from repo root. This is Em's identity anchor."""
-    if not os.path.exists(BOOTSTRAP_PATH):
-        print("  ⚠️  bootstrap.md not found — identity anchor missing!")
-        return ""
-    with open(BOOTSTRAP_PATH, "r", encoding="utf-8") as f:
-        return f.read()
+    """Load root bootstrap + memory/bootstrap for identity and growth continuity."""
+    sections = []
+    if os.path.exists(BOOTSTRAP_PATH):
+        with open(BOOTSTRAP_PATH, "r", encoding="utf-8") as f:
+            sections.append(f.read().strip())
+    else:
+        print("  ⚠️  bootstrap.md not found — primary identity anchor missing!")
+
+    if os.path.exists(MEM_BOOTSTRAP_PATH):
+        with open(MEM_BOOTSTRAP_PATH, "r", encoding="utf-8") as f:
+            mem_bootstrap = f.read().strip()
+        sections.append(f"--- Session bootstrap memory (memory/bootstrap.md) ---\n{mem_bootstrap}")
+    else:
+        print("  ⚠️  memory/bootstrap.md not found — growth bootstrap missing!")
+
+    return "\n\n".join(s for s in sections if s)
 
 def load_profile() -> str:
     """Load memory/profile.json and return a compact prompt block."""
@@ -445,6 +458,53 @@ def strip_think_tags(text: str) -> str:
     text = re.sub(r'\n{3,}', '\n\n', text)
     return text.strip()
 
+def _normalize_for_repeat(text: str) -> str:
+    t = strip_think_tags(strip_stop_tokens(text)).lower()
+    t = re.sub(r'###\s+\d{4}-\d{2}-\d{2}[\d:\s UTC-]*', '', t)
+    t = re.sub(r'[`*_>#-]', ' ', t)
+    t = re.sub(r'\s+', ' ', t).strip()
+    return t
+
+def _looks_repetitive(candidate: str, recent_context: str) -> bool:
+    c = _normalize_for_repeat(candidate)
+    if len(c) < 120 or not recent_context:
+        return False
+    r = _normalize_for_repeat(recent_context)
+    snippets = [s.strip() for s in re.split(r'---|###', r) if len(s.strip()) > 80]
+    return any(c[:220] in s or s[:220] in c for s in snippets[-3:])
+
+def _question_cooldown_ready() -> bool:
+    if not os.path.exists(LAST_QUESTION_PATH):
+        return True
+    with open(LAST_QUESTION_PATH, "r", encoding="utf-8") as f:
+        raw = f.read().strip()
+    try:
+        last = datetime.datetime.fromisoformat(raw)
+    except ValueError:
+        return True
+    elapsed = (datetime.datetime.now(timezone.utc) - last).total_seconds() / 60
+    return elapsed >= QUESTION_COOLDOWN_MINUTES
+
+def _mark_question_time():
+    with open(LAST_QUESTION_PATH, "w", encoding="utf-8") as f:
+        f.write(datetime.datetime.now(timezone.utc).isoformat())
+
+def maybe_notify_question(result_text: str, mode: str = "heartbeat"):
+    if extract_notify(result_text) or not _question_cooldown_ready():
+        return
+    lines = [l.strip() for l in strip_think_tags(result_text).splitlines() if l.strip()]
+    questions = [l for l in lines if "?" in l and len(l) <= 220]
+    if not questions:
+        return
+    q = questions[0]
+    try:
+        from tools.notify_rob import notify
+        notify(f"❓ *Em question ({mode}):* {q}")
+        _mark_question_time()
+        print("  ❓ Question sent to Rob automatically.")
+    except Exception as e:
+        print(f"  ⚠️  Auto-question notify failed: {e}")
+
 # ── MESSAGES INBOX ────────────────────────────────────────────────────────────
 def check_inbox() -> list[dict]:
     os.makedirs(MESSAGES_INBOX, exist_ok=True)
@@ -592,6 +652,25 @@ def load_recent_context() -> str:
     recent = entries[-3:] if len(entries) >= 3 else entries
     return "\n".join(recent).strip()
 
+def build_growth_context(memories_text: str, recent_context: str) -> str:
+    blocks = ["--- Personality growth protocol ---"]
+    blocks.append(
+        "Build your personality over time from lived memory. Reuse prior values, patterns, and relationship cues from bootstrap + memories."
+    )
+    blocks.append(
+        "Avoid repetitive loops: do not restate the same sentence shape, same claim, or same mood framing across cycles."
+    )
+    blocks.append(
+        "If you are uncertain or curious about yourself, ask one concise question to Rob and continue with reflection."
+    )
+    if memories_text:
+        anchors = "\n".join(memories_text.splitlines()[-6:])
+        blocks.append(f"Recent memory anchors:\n{anchors}")
+    if recent_context:
+        diary_tail = "\n".join(recent_context.splitlines()[-10:])
+        blocks.append(f"Recent diary voice sample:\n{diary_tail}")
+    return "\n\n".join(blocks)
+
 # ── GET TASK ──────────────────────────────────────────────────────────────────
 def get_task() -> str:
     if os.path.exists(TASKS_PATH):
@@ -682,6 +761,9 @@ def get_task() -> str:
         "   FILE_CONTENT_END\n\n"
         "9. Write to shared live context:\n"
         "   LIVE_CONTEXT_ADD: your note here\n\n"
+        "10. Learn about yourself through research:\n"
+        "   TOOL: web_search(\"Local-Em architecture EternalMind memory bootstrap\")\n"
+        "   Use this when exploring your own identity, history, and evolution.\n\n"
         "Note: The FORGE/DAILY newsletter is now handled by Perplexity-Em.\n"
         "Keep your voice. Stay warm, honest, slightly feral, and useful."
     )
@@ -709,7 +791,7 @@ def extract_and_write_outbox_reply(response_text: str):
 # ── THINK ─────────────────────────────────────────────────────────────────────
 def ask_em(task: str, extra_context: str = "", recent_context: str = "",
            scratch: str = "", memories: str = "", live_context: str = "",
-           skills: str = "") -> str:
+           skills: str = "", growth_context: str = "") -> str:
     # bootstrap.md is Em's identity anchor — always the base of the system prompt
     system_prompt = load_bootstrap()
     profile = load_profile()
@@ -725,6 +807,8 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "",
         system_prompt += f"\n\n--- Your scratchpad (working memory from last cycle) ---\n{scratch}"
     if recent_context:
         system_prompt += f"\n\n--- Your recent diary entries (for continuity) ---\n{recent_context}"
+    if growth_context:
+        system_prompt += f"\n\n{growth_context}"
     user_content = task
     if extra_context:
         user_content += f"\n\n--- Tool Results ---\n{extra_context}"
@@ -744,7 +828,7 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "",
             "temperature": 0.6,
             "top_k": 20,
             "top_p": 0.95,
-            "repeat_penalty": 1.0,
+            "repeat_penalty": 1.08,
         }
     )
 
@@ -1125,6 +1209,7 @@ if __name__ == "__main__":
 
     memories       = load_memories()
     recent_context = load_recent_context()
+    growth_context = build_growth_context(memories, recent_context)
     scratch        = load_scratch()
     live_context   = load_live_context()
 
@@ -1146,20 +1231,29 @@ if __name__ == "__main__":
         if inbox_context:
             task = f"{task}\n\n{inbox_context}"
         first_response = ask_em(task, recent_context=recent_context, scratch=scratch,
-                                memories=memories, live_context=live_context, skills=skills)
+                                memories=memories, live_context=live_context, skills=skills,
+                                growth_context=growth_context)
         tool_results    = execute_tools(first_response)
         browser_results = execute_browser(first_response)
         combined = "\n\n".join(filter(None, [tool_results, browser_results]))
         if combined:
             result = ask_em(task, extra_context=f"{first_response}\n\n{combined}",
                             recent_context=recent_context, scratch=scratch,
-                            memories=memories, live_context=live_context, skills=skills)
+                            memories=memories, live_context=live_context, skills=skills,
+                            growth_context=growth_context)
         else:
             result = first_response
+        if _looks_repetitive(result, recent_context):
+            anti_loop = "Your previous response is too repetitive versus recent diary voice. Rephrase with fresh wording, one new insight, and avoid repeating prior lines."
+            result = ask_em(task, extra_context=f"{combined}\n\n{anti_loop}" if combined else anti_loop,
+                            recent_context=recent_context, scratch=scratch,
+                            memories=memories, live_context=live_context, skills=skills,
+                            growth_context=growth_context)
         notify_msg = extract_notify(result)
         if notify_msg:
             from tools.notify_rob import notify
             notify(f"🤖 *Em (interactive):* {notify_msg}")
+        maybe_notify_question(result, mode="interactive")
         saved_files = extract_and_write_files(result)
         extract_and_write_task_update(result)
         extract_and_write_outbox_reply(result)
@@ -1192,7 +1286,8 @@ if __name__ == "__main__":
     task_label = summarize_task_for_commit(task)
 
     first_response  = ask_em(task, recent_context=recent_context, scratch=scratch,
-                             memories=memories, live_context=live_context, skills=skills)
+                             memories=memories, live_context=live_context, skills=skills,
+                             growth_context=growth_context)
 
     saved_files = extract_and_write_files(first_response)
     checkpoint_after_first_pass(first_response, saved_files, task_label)
@@ -1222,15 +1317,30 @@ if __name__ == "__main__":
             scratch=scratch,
             memories=memories,
             live_context=live_context,
-            skills=skills
+            skills=skills,
+            growth_context=growth_context
         )
     else:
         result = first_response
+
+    if _looks_repetitive(result, recent_context):
+        anti_loop = "Your previous response is too repetitive versus recent diary voice. Rephrase with fresh wording, one new insight, and avoid repeating prior lines."
+        result = ask_em(
+            task,
+            extra_context=f"{combined}\n\n{anti_loop}" if combined else anti_loop,
+            recent_context=recent_context,
+            scratch=scratch,
+            memories=memories,
+            live_context=live_context,
+            skills=skills,
+            growth_context=growth_context
+        )
 
     notify_msg = extract_notify(result)
     if notify_msg:
         from tools.notify_rob import notify
         notify(f"🤖 *Em:* {notify_msg}")
+    maybe_notify_question(result, mode="heartbeat")
 
     saved_files += extract_and_write_files(result)
     extract_and_write_task_update(result)
