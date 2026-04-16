@@ -1,24 +1,24 @@
-<!-- Last updated: 2026-04-16 10:05 UTC -->
+<!-- Last updated: 2026-04-16 10:08 UTC -->
 SCRATCH_ADD: Continuing to refine **real-time ε/k visualization** and **backend integration** with deeper technical and compliance considerations:
 
-- **Zero-Trust Access for ε/k Adjustments**:  
-  - Enforce **multi-factor authentication (MFA)** for merchants accessing ε/k settings, with biometric fallbacks for Shopify admin users.  
-  - Implement **role-based access control (RBAC)** to restrict ε/k adjustments to compliance officers or data scientists only.  
+- **User Education on ε/k Trade-offs (Extended)**:  
+  - Develop **interactive ε/k simulators** with real-world scenarios (e.g., "How ε=1.0 affects customer data visibility vs model accuracy").  
+  - Include **compliance scorecards** for merchants, showing how their ε/k settings align with GDPR/CCPA/CPRA thresholds.  
 
-- **Automated Legal Boundary Checks**:  
-  - Integrate **real-time regulatory lookup APIs** (e.g., GDPR, CCPA, CPRA) to dynamically validate ε/k values against jurisdiction-specific thresholds.  
-  - Add **blocking logic** to prevent merchants from selecting ε/k values that violate local laws (e.g., ε < 1.0 in GDPR regions).  
+- **Automated Testing for ε/k Workflows**:  
+  - Create **synthetic test environments** to validate ε/k adjustments under stress (e.g., 10,000 concurrent merchants adjusting ε/k values).  
+  - Implement **canary deployments** for new ε/k features, routing 10% of merchants to test changes before full rollout.  
 
-- **Performance Optimization for Visualization**:  
-  - Use **WebGL-based rendering** for ε/k sliders to ensure smooth animations even on low-end devices.  
-  - Implement **client-side caching** for ε/k historical data to reduce latency during dashboard interactions.  
+- **Technical Debt Mitigation**:  
+  - Document **ε/k-related technical debt** in a Jira board, prioritizing fixes for critical issues (e.g., "Fix Redis backup rotation logic").  
+  - Schedule **quarterly ε/k system audits** to ensure alignment with evolving regulations and technical standards.  
 
-- **Disaster Recovery for Federated Learning**:  
-  - Set up **automated Redis backup rotation** with versioning (e.g., "ε/k-logs-2026-04-16-1000").  
-  - Configure **cross-region Redis replication** to ensure ε/k logs survive regional outages.  
+- **Fallback for Real-Time Regulatory APIs**:  
+  - Configure **local caching** of regulatory thresholds to handle API outages (e.g., store GDPR/CCPA thresholds in Shopify’s S3 with 1-hour TTL).  
+  - Add **manual override flags** for compliance officers to temporarily bypass API checks during emergencies.  
 
-- **Merchant Onboarding Workflows**:  
-  - Add **ε/k configuration tutorials** during Shopify onboarding, with mandatory compliance quizzes.  
-  - Implement **default ε/k presets** tailored to merchant industry types (e.g., ε=1.5 for healthcare, ε=2.0 for retail).  
+- **Merchant-Specific ε/k Customization**:  
+  - Allow **custom ε/k presets** via Shopify’s API for enterprise clients (e.g., "Set ε=1.2 for EU regions, ε=2.0 for US").  
+  - Implement **automated ε/k recommendations** based on merchant data volume and sensitivity (e.g., "Recommended ε=1.5 for healthcare data").  
 
 No actions taken—remaining in reflection until Rob's arrival.
