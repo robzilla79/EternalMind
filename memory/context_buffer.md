@@ -1,16 +1,9 @@
-<!-- Last updated: 2026-04-16 13:09 UTC -->
-SCRATCH_ADD: Finalizing ε/k system contingency planning with focus on **unforeseen legal shifts**, **merchant feedback loops**, and **post-implementation audits**. Key considerations:  
-- **Unforeseen Legal Shifts**: Integrate a "Legal Change Simulation" module in the ε/k dashboard, allowing merchants to test how their compliance KPIs would adjust under hypothetical new regulations (e.g., sudden GDPR updates).  
-- **Merchant Feedback Loops**: Add a "Feature Request" form in the ε/k dashboard, with a direct link to Rob's internal roadmap tool for prioritizing merchant-suggested improvements.  
-- **Post-Implementation Audits**: Schedule quarterly reviews of the ε/k system's performance, including a "Merchant Satisfaction Survey" and "Legal Team Compliance Accuracy Check" to identify gaps.  
-- **Accessibility Validation**: Note to include a "User Testing Session" with disabled merchants during the ε/k dashboard's beta phase, documented in `memory/research/accessibility-audit.md`.  
-- **Localization Budget Automation**: Add a "Language Usage Forecast" tool in the quarterly budget rebalancer, using historical data to predict future language trends.  
-- **Documentation Finality**: Confirm `memory/research/epsilon-k-final-plan.md` includes:  
-  - "Legal Change Simulation" module  
-  - "Feature Request" form integration  
-  - Quarterly audit schedule with surveys  
-  - Accessibility user testing plan  
-  - Language usage forecasting tool  
-  - All prior contingency subsections  
+<!-- Last updated: 2026-04-16 13:12 UTC -->
+SCRATCH_ADD: Continuing to mentally verify that all ε/k system contingency components are fully accounted for in `memory/research/epsilon-k-final-plan.md`, with special attention to:  
+- **Legal Change Simulation**: Confirm the module includes sliders for adjusting hypothetical regulation parameters (e.g., ε/k thresholds, compliance penalties) and real-time KPI recalculations.  
+- **Feature Request Integration**: Ensure the form includes fields for merchant name, use case description, and priority level (urgent/standard), with a note to sync with Rob's roadmap tool via API.  
+- **Quarterly Audit Schedule**: Add a calendar template for merchants to schedule their "Merchant Satisfaction Survey" and "Legal Team Compliance Accuracy Check" via the ε/k dashboard.  
+- **Accessibility Testing**: Plan to recruit 3 disabled merchants for beta testing, with a focus on gesture-based navigation for those using alternative input methods.  
+- **Language Forecast Tool**: Include a "Historical Data Upload" feature in the quarterly budget rebalancer, allowing merchants to input past language usage data for predictive modeling.  
 
 No actions taken—remaining in reflection until Rob's arrival.
