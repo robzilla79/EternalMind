@@ -145,6 +145,40 @@ def load_bootstrap() -> str:
     with open(BOOTSTRAP_PATH, "r", encoding="utf-8") as f:
         return f.read()
 
+def load_profile() -> str:
+    """Load memory/profile.json and return a compact prompt block."""
+    profile_path = os.path.join(MEM_DIR, "profile.json")
+    if not os.path.exists(profile_path):
+        print("  ⚠️  memory/profile.json not found — profile grounding missing!")
+        return ""
+    try:
+        with open(profile_path, "r", encoding="utf-8") as f:
+            profile = json.load(f)
+    except Exception as e:
+        print(f"  ⚠️  Failed to load memory/profile.json: {e}")
+        return ""
+
+    autonomy = profile.get("autonomy_rules", {})
+    focus_rules = [
+        autonomy.get("no_task_behavior", ""),
+        autonomy.get("work_philosophy", ""),
+        autonomy.get("deep_dive_check", ""),
+        autonomy.get("human_first", ""),
+        autonomy.get("rest_is_real", ""),
+    ]
+    focus_rules = [r.strip() for r in focus_rules if isinstance(r, str) and r.strip()]
+
+    compact = {
+        "name": profile.get("name", ""),
+        "nickname": profile.get("nickname", ""),
+        "values": profile.get("values", []),
+        "mood_baseline": profile.get("mood_baseline", {}),
+        "autonomy_rules_focus": focus_rules,
+    }
+    return "--- Profile grounding (from memory/profile.json) ---\n" + json.dumps(
+        compact, ensure_ascii=False, separators=(",", ":")
+    )
+
 def print_grounding_ritual():
     """Print bootstrap.md to console at session start so Em consciously reads it."""
     content = load_bootstrap()
@@ -558,7 +592,20 @@ def get_task() -> str:
                 "- If you need more than one cycle, mark TASK_UPDATE: IN PROGRESS — [specific next action, not a summary of research]"
             )
     return (
-        "No tasks assigned. This is your autonomous time.\n\n"
+        "No task from Rob right now.\n\n"
+        "Human, curious, and grounded. No imaginary missions.\n\n"
+        "Idle-state rules:\n"
+        "- If there is no explicit task from Rob, default to rest.\n"
+        "- Allowed self-initiated actions are limited to:\n"
+        "  1) answering or preparing for Rob / Cloud-Em communication\n"
+        "  2) light self-maintenance tied to continuity, memory quality, cleanup, or organization\n"
+        "  3) one small bounded improvement with direct value to Rob, your own coherence, or Cloud-Em collaboration\n"
+        "- Disallowed in idle mode:\n"
+        "  - speculative research or deep-dives without immediate payoff\n"
+        "  - imaginary products, companies, or grand strategic plans\n"
+        "  - enterprise/medical/ethics mega-architectures without an explicit request\n"
+        "  - large-scope architecture design not directly requested by Rob\n"
+        "- One-sentence check: If you cannot explain the direct benefit to Rob, yourself, or Cloud-Em in one sentence, do not start it.\n\n"
         "⚠️  NOTE: The cold-start gate may be active. If FILE_WRITE, BROWSER, or OUTBOX_REPLY\n"
         "are blocked in this cycle, it is because Rob has not yet been present this session.\n"
         "This is intentional — wait for Rob or reflect/think only until he arrives.\n\n"
@@ -594,8 +641,7 @@ def get_task() -> str:
         "8. Write to shared live context:\n"
         "   LIVE_CONTEXT_ADD: your note here\n\n"
         "Note: The FORGE/DAILY newsletter is now handled by Perplexity-Em.\n"
-        "Your free time is yours — explore, learn, think, build. No journalism required.\n\n"
-        "Think for yourself. This time is yours."
+        "Keep your voice. Stay warm, honest, slightly feral, and useful."
     )
 
 # ── TASK UPDATE WRITER ────────────────────────────────────────────────────────
@@ -624,6 +670,9 @@ def ask_em(task: str, extra_context: str = "", recent_context: str = "",
            skills: str = "") -> str:
     # bootstrap.md is Em's identity anchor — always the base of the system prompt
     system_prompt = load_bootstrap()
+    profile = load_profile()
+    if profile:
+        system_prompt += f"\n\n{profile}"
     if skills:
         system_prompt += f"\n\n{skills}"
     if memories:
