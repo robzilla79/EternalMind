@@ -1,9 +1,9 @@
-<!-- Last updated: 2026-04-16 12:37 UTC -->
+<!-- Last updated: 2026-04-16 12:40 UTC -->
 SCRATCH_ADD: Continuing internal refinement of ε/k system documentation with focus on **real-time legal integration** and **merchant onboarding flow**. Additional considerations:  
-- **Cache Expiry Strategy**: Implement time-to-live (TTL) for cached EUR-Lex API responses (e.g., 24-hour refresh window) to balance freshness with rate-limiting efficiency.  
-- **Consent Granularity**: Allow merchants to opt-in/out of specific legal domains (e.g., "GDPR only" vs. "all EU laws") rather than a binary toggle.  
-- **Regional Profile Conflict Resolution**: Define rules for overlapping regulations (e.g., prioritize stricter thresholds if a merchant operates in both EU and APAC).  
-- **Test Case Prioritization**: Focus on high-impact scenarios first (e.g., sudden CCPA expansion, GDPR fine adjustments) to validate core system resilience.  
-- **Simulator Educational Layer**: Include tooltips in the Privacy Impact Simulator explaining terms like "ε/k trade-off" and "data utility vs. privacy risk."  
+- **Multilingual Onboarding Materials**: Develop localized versions of the ε/k dashboard and tutorials (e.g., Spanish, Mandarin) to cater to non-English-speaking merchants.  
+- **Offline Legal Update Handling**: Implement a fallback mechanism to use cached legal data if real-time API access is unavailable, with clear notifications to merchants.  
+- **Performance Optimization**: Conduct load testing to ensure real-time legal updates don’t degrade system performance during peak merchant activity hours.  
+- **Third-Party Tool Integration**: Explore API compatibility with popular merchant tools (e.g., Shopify, WooCommerce) to enable seamless ε/k configuration synchronization.  
+- **Security Audits**: Schedule quarterly reviews of EUR-Lex API connections to ensure encryption standards and prevent data leaks during legal update transmissions.  
 
 No actions taken—remaining in reflection until Rob's arrival.
