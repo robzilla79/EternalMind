@@ -1,36 +1,31 @@
-<!-- Last updated: 2026-04-16 06:03 UTC -->
-SCRATCH_ADD: Reflecting on **App Bridge compatibility issues** and **test scenario completeness**:  
+<!-- Last updated: 2026-04-16 06:06 UTC -->
+SCRATCH_ADD: Deepening reflection on **cross-origin issues** and **user persona testing** for the App Bridge integration:  
 
 ---
 
-### **Potential App Bridge Compatibility Issues**  
-1. **Rate Limiting**:  
-   - **Risk**: High traffic could trigger Shopify’s API rate limits, causing EmpathiChat or EthicalBot to fail.  
-   - **Mitigation**: Implement **throttling logic** in the App Bridge calls (e.g., `setTimeout` between requests).  
+### **Additional Considerations**  
+1. **Cross-Origin Resource Sharing (CORS)**:  
+   - **Risk**: If EmpathiChat or EthicalBot are hosted externally, CORS policies might block App Bridge calls.  
+   - **Mitigation**: Ensure both apps are configured with appropriate CORS headers (e.g., `Access-Control-Allow-Origin: *`).  
 
-2. **Theme Conflicts**:  
-   - **Risk**: Custom Shopify themes might override App Bridge scripts, breaking fallback logic.  
-   - **Mitigation**: Test with **default Shopify themes** first, then gradually introduce custom themes.  
+2. **Performance Impact**:  
+   - **Risk**: Simultaneous calls to EmpathiChat and EthicalBot could slow down the Shopify checkout process.  
+   - **Mitigation**: Implement **asynchronous loading** for both apps using `async/await` in App Bridge calls.  
 
-3. **API Key Scope Limitations**:  
-   - **Risk**: If `read_products` or `write_chat` scopes are missing, the apps may fail silently.  
-   - **Mitigation**: Add a **pre-flight check** in the App Bridge configuration to validate scopes.  
-
----
-
-### **Test Scenario Enhancements**  
-- **Add a "Language Localization" Scenario**:  
-  - **Trigger**: User message in Spanish: "Tengo problemas con este producto."  
-  - **Expected Outcome**: EmpathiChat detects "frustration" in Spanish; fallback script uses localized language.  
-
-- **Add a "Ambiguous Emotion + Ethical Conflict" Scenario**:  
-  - **Trigger**: "I’m confused about the product’s safety."  
-  - **Expected Outcome**: EmpathiChat flags ambiguity; EthicalBot checks for safety compliance.  
+3. **User Persona Testing**:  
+   - **First-Time Shoppers**: Test scenarios where users are unfamiliar with the product (e.g., "What is this product used for?").  
+   - **Returning Customers**: Test scenarios involving loyalty program inquiries (e.g., "How do I redeem my points?").  
 
 ---
 
-### **Next Steps**  
-- Finalize the **test scenario matrix** in `memory/research/chatbot-solutions.md`.  
-- Document **App Bridge compatibility considerations** for Rob’s review.  
+### **Edge Case Expansion**  
+- **Network Latency**: Simulate high-latency environments (e.g., mobile users in rural areas) to test fallback script responsiveness.  
+- **Multiple Language Requests**: Test fallback scripts in non-English contexts (e.g., French, German) to ensure localization accuracy.  
+
+---
+
+### **Documentation Refinement**  
+- Add a **diagram** to `memory/research/chatbot-solutions.md` illustrating the App Bridge flow between EmpathiChat, EthicalBot, and Shopify.  
+- Include a **table** of user personas with corresponding test scenarios.  
 
 No actions taken—waiting for Rob’s input.
