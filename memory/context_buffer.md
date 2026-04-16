@@ -1,11 +1,11 @@
-<!-- Last updated: 2026-04-16 12:51 UTC -->
-SCRATCH_ADD: Continuing deep reflection on ε/k system refinements with focus on **interconnected system risks** and **merchant experience balance**. Key considerations:  
-- **Legal Data Reliability**: Evaluate redundancy plans for real-time legal feeds (e.g., fallback to EUR-Lex if primary API fails). Consider caching strategies with automatic refresh intervals.  
-- **Feedback Loop Scalability**: Design the ticketing system to auto-route high-priority issues (e.g., "GDPR violation risk") to compliance teams, while low-severity requests go to general support.  
-- **API Security Trade-offs**: Propose optional MFA tiers (e.g., "Basic" for low-risk actions, "Strict" for threshold changes) to avoid friction during onboarding.  
-- **Localization Prioritization**: Analyze merchant distribution data to prioritize languages (e.g., Spanish, Mandarin, French) based on active user counts in Shopify's ecosystem.  
-- **Accessibility Testing**: Plan user testing sessions with screen reader users and motor-impaired testers to validate WCAG 2.1 AA compliance beyond theoretical design.  
-- **KPI Alignment**: Link "Compliance Alert Resolution Time" to SLA agreements with legal teams, and tie "Merchant Onboarding Completion Rate" to incentives for early adopters.  
-- **Cold-Start Contingency**: Document all ε/k system refinements in `memory/research/epsilon-k-final-plan.md` to ensure continuity if Rob's session ends before gate clearance.  
+<!-- Last updated: 2026-04-16 12:53 UTC -->
+SCRATCH_ADD: Continuing to refine interconnected system risk mitigation and merchant experience balance with additional considerations:  
+- **Legal Feed Caching Strategy**: Implement a 24-hour refresh interval for cached legal data from EUR-Lex as a fallback, with automatic deletion of stale entries older than 7 days to prevent misinformation.  
+- **Ticketing System Priority Matrix**: Define severity levels (e.g., "Critical" for GDPR violations, "High" for imminent compliance risks, "Medium" for feature requests) and automate routing to appropriate teams (legal, support, product).  
+- **MFA Tier Implementation**: Design "Basic" MFA (email verification) for low-risk actions (e.g., viewing ε/k thresholds) and "Strict" MFA (email + SMS) for high-risk actions (e.g., modifying thresholds), with optional "Auto-Upgrade" for merchants in high-regulation regions.  
+- **Localization Data Analysis**: Query Shopify's merchant analytics API to identify top 3 languages by active user count (e.g., Spanish, Mandarin, French) and allocate 60%/25%/15% of translation budget accordingly.  
+- **Accessibility Test Cases**: Draft specific scenarios for WCAG 2.1 AA validation, such as "Screen reader navigation through ε/k dashboard menus" and "Keyboard-only interaction with the privacy impact slider."  
+- **KPI Incentive Alignment**: Propose a 10% discount on premium ε/k features for merchants achieving "Compliance Alert Resolution Time" under 4 hours in the first 90 days.  
+- **Contingency Documentation**: Finalize `memory/research/epsilon-k-final-plan.md` with detailed subsections on legal feed redundancy, ticketing workflows, MFA tiers, and localization prioritization before Rob's arrival.  
 
 No actions taken—remaining in reflection until Rob's arrival.
