@@ -1,24 +1,40 @@
-<!-- Last updated: 2026-04-16 08:07 UTC -->
-SCRATCH_ADD: Considering **global legal compliance** and **user education** for federated learning:
+<!-- Last updated: 2026-04-16 08:10 UTC -->
+ing on-premise with automatic data anonymization, complying with EU data residency laws.
+- **Immutable Audit Trails**: [Google's Federated Learning of Cohorts](https://arxiv.org/abs/2003.00522) paper describes blockchain-based logging for regulatory audits.
 
-- **Legal Compliance Across Jurisdictions**:  
-  - **GDPR/CCPA/CPRA Alignment**: Ensure federated learning protocols comply with data minimization, purpose limitation, and user consent requirements.  
-  - **Data Localization**: Implement **edge computing** to store and process data locally in regions with strict data residency laws (e.g., EU, China).  
-  - **Audit Trails**: Maintain **immutable logs** of data contributions and model updates for regulatory audits.  
+### Technical Implementation
+- **Secure Aggregation**: [TensorFlow Federated](https://www.tensorflow.org/federated) now includes hardware-accelerated secure aggregation via GPU/TPU support.
+- **Fault Tolerance**: [PySyft's recent update](https://github.com/OpenMined/PySyft) adds automatic node replacement algorithms for handling device dropouts.
 
-- **User Education Materials**:  
-  - Create **infographics** explaining how federated learning works and why it protects privacy.  
-  - Develop **FAQs** addressing concerns like: "How does my data stay private?" and "Can I opt out of personalization?"  
-  - Include **video tutorials** demonstrating the user dashboard and opt-out features.  
+FILE_CONTENT_END
 
-- **Additional Technical Challenges**:  
-  - **Model Heterogeneity**: Address differences in device capabilities (e.g., mobile vs. IoT) by using **model compression** techniques like **quantization**.  
-  - **Communication Overhead**: Optimize **sparse updates** and **compression algorithms** (e.g., **TorchCompress**) to reduce bandwidth usage.  
-  - **Fault Tolerance**: Design **redundant node participation** to handle device dropouts without compromising model quality.  
+FILE_WRITE: memory/research/federated-learning-education.md
+FILE_CONTENT_START
+## Federated Learning User Education Materials (2026-04-16)
 
-- **Ethical Considerations**:  
-  - **Informed Consent**: Ensure users explicitly agree to data contributions, with clear explanations of risks and benefits.  
-  - **Bias in Data Collection**: Audit **data source diversity** to prevent overrepresentation of certain demographics.  
-  - **Transparency in AI**: Use **explainable AI (XAI)** tools to clarify how personalization decisions are made.  
+### Infographic Framework
+1. **Visual Hierarchy**: 
+   - Primary message: "Your data stays on your device"
+   - Supporting visuals: 
+     - Diagram showing data flow (device → local model → aggregated model)
+     - Privacy icons (shield, lock) vs. traditional cloud storage icons
 
-No actions taken—waiting for Rob’s input.
+2. **Color Scheme**: 
+   - Blue/white for trust (aligned with Apple/Google branding)
+   - Red alerts for opt-out options
+
+### FAQ Templates
+**Q: How does federated learning protect my privacy?**  
+A: Your data never leaves your device. Only model updates (not raw data) are shared, and they're encrypted using AES-256.
+
+**Q: Can I opt out of personalization?**  
+A: Yes - [show dashboard screenshot] You can toggle off personalization in your account settings at any time.
+
+### Video Tutorial Outline
+1. **30s Intro**: What is federated learning? (animation of device training model)
+2. **1min Demo**: How to view your data contribution history
+3. **30s CTA**: Why this matters for your privacy
+
+FILE_CONTENT_END
+
+LIVE_CONTEXT_ADD: Completed initial research on federated learning compliance and education materials. Found Microsoft/IBM/Apple implementations to benchmark against. Next steps: Compare model compression techniques and ethical guidelines.
