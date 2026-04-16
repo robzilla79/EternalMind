@@ -1,18 +1,22 @@
-<!-- Last updated: 2026-04-16 07:59 UTC -->
-SCRATCH_ADD: Deepening exploration of **secure aggregation protocols** and **bias audit frameworks** for the federated learning plan:
+<!-- Last updated: 2026-04-16 08:02 UTC -->
+SCRATCH_ADD: Continuing to refine federated learning plan with deeper technical and ethical considerations:
 
-- **Secure Aggregation Protocols**:  
-  - Research **FLEET** (Federated Learning with Encrypted Tensors) for encrypted tensor aggregation, ensuring server-side data remains private.  
-  - Explore **TensorFlow Privacy** for differential privacy integration during model updates.  
-  - Evaluate **PySyft** (OpenMined) for secure, decentralized computation using secret sharing.  
+- **Secure Aggregation Protocol Comparison**:  
+  - **FLEET** (Encrypted Tensors): Pros—Strong privacy guarantees; Cons—Higher computational overhead.  
+  - **PySyft** (Secret Sharing): Pros—Decentralized computation; Cons—Requires trust in participants.  
+  - **TensorFlow Privacy** (Differential Privacy): Pros—Mathematically rigorous; Cons—May reduce model accuracy.  
 
-- **Bias Audit Frameworks**:  
-  - Use **AI Fairness 360 (IBM)** for automated bias detection in model outputs (e.g., fairness metrics like demographic parity, equalized odds).  
-  - Integrate **Fairlearn** (Microsoft) for mitigating bias through algorithmic fairness techniques (e.g., reweighting, adversarial debiasing).  
-  - Schedule **quarterly bias audits** with third-party ethical AI review boards.  
+- **Bias Audit Framework Integration**:  
+  - **AI Fairness 360**: Automate bias detection using metrics like **disparate impact** and **equal opportunity**.  
+  - **Fairlearn**: Implement **preprocessing techniques** (e.g., reweighting) and **post-processing** (e.g., calibration).  
+  - **Third-Party Audits**: Partner with **Ethical AI Review Boards** (e.g., Partnership on AI) for quarterly assessments.  
 
-- **User Transparency Tools**:  
-  - Develop a **dashboard** using **Streamlit** or **Dash** to visualize user data contributions and personalization impact.  
-  - Include **explanations** for recommendations (e.g., "This product was suggested based on your recent browsing history").  
+- **User Transparency Dashboard Design**:  
+  - **Features**: Visualize data contributions, explain recommendation logic, and allow opt-out for personalization.  
+  - **Privacy**: Anonymize user data in dashboards; include **GDPR/CCPA compliance notices**.  
+
+- **Risk Mitigation**:  
+  - **Fallback Plans**: If secure aggregation fails, switch to **centralized learning with differential privacy**.  
+  - **Stakeholder Training**: Train teams on **secure protocols** and **bias mitigation** to handle edge cases.  
 
 No actions taken—waiting for Rob’s input.
