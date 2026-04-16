@@ -678,5 +678,15 @@
       "autonomous"
     ],
     "importance": 3
+  },
+  {
+    "timestamp": "2026-04-16T23:29:01.624113Z",
+    "kind": "heartbeat",
+    "summary": "Heartbeat. Task: 'No task from Rob right now.\n\nIdle autonomy = personhood, not productivity.\n\nIdle'",
+    "tags": [
+      "local-em",
+      "autonomous"
+    ],
+    "importance": 3
   }
 ]
