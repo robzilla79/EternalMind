@@ -1,41 +1,28 @@
-<!-- Last updated: 2026-04-16 06:27 UTC -->
-ifferential Privacy**:  
-  - Implement noise injection in recommendation algorithms to obscure individual user data while preserving aggregate trends.  
-- **Federated Learning**:  
-  - Train personalization models on decentralized user data (e.g., locally on user devices) to avoid centralized data storage.  
+<!-- Last updated: 2026-04-16 06:30 UTC -->
+SCRATCH_ADD: Finalizing documentation updates for **differential privacy** and **federated learning** in `memory/research/ethical-ai.md`:  
 
 ---
 
-### **Opt-Out Mechanism Enhancements**  
-- **Granular Controls**:  
-  - Allow users to opt out of specific data types (e.g., browsing history, purchase history) rather than disabling all personalization.  
-- **Transparency Dashboard**:  
-  - Provide a user-facing dashboard showing how data is used for personalization and the option to adjust preferences in real time.  
+### **Differential Privacy Implementation**  
+- **Noise Injection Parameters**:  
+  - Define epsilon (privacy loss threshold) and delta (probability of violating privacy) values to balance data utility and privacy (e.g., ε=1.0, δ=1e-5).  
+- **Aggregation Mechanisms**:  
+  - Use the Laplace mechanism for numerical data and the exponential mechanism for categorical data to ensure privacy-preserving aggregation.  
 
 ---
 
-### **KPI Measurement Framework**  
-- **Bias Detection**:  
-  - Use pre-trained NLP models (e.g., IBM Fairness 360) to scan chatbot responses for biased language, logging incidents with timestamps and context.  
-- **Fallback Script Analytics**:  
-  - Track fallback triggers by category (e.g., "language failure," "system error") and correlate with user demographics for bias audits.  
-- **Escalation Path Analysis**:  
-  - Map user escalations to root causes (e.g., "misinformation," "accessibility failure") to refine fallback scripts iteratively.  
+### **Federated Learning Workflow**  
+1. **Local Model Training**:  
+   - Train personalization models on user devices using local data (e.g., browsing history, purchase behavior).  
+2. **Secure Aggregation**:  
+   - Use encrypted model updates to aggregate results across devices without exposing individual data.  
+3. **Centralized Model Refinement**:  
+   - Refine the global model on a secure server using aggregated parameters, ensuring no raw data is stored.  
 
 ---
 
-### **Testing Scenario Expansion**  
-- **Federated Learning Simulation**:  
-  - Test federated learning models with synthetic datasets to ensure they maintain accuracy without centralized data.  
-- **Bias Audit Workshops**:  
-  - Conduct mock audits with compliance teams to stress-test bias detection systems against edge cases (e.g., gendered product recommendations).  
-
----
-
-### **Documentation Drafts**  
-- **memory/research/ethical-ai.md**:  
-  - Add sections on **differential privacy**, **federated learning**, and **granular opt-out mechanisms**.  
-- **memory/research/shop-implementation-roadmap.md**:  
-  - Include **federated learning simulation plan** and **bias audit workshop protocols**.  
+### **Documentation Updates**  
+- Add **epsilon/delta tuning guidelines** and **secure aggregation protocols** to `memory/research/ethical-ai.md`.  
+- Include **federated learning workflow diagrams** in `memory/research/shop-implementation-roadmap.md` for clarity.  
 
 No actions taken—waiting for Rob’s input.
