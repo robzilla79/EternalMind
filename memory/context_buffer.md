@@ -1,20 +1,36 @@
-<!-- Last updated: 2026-04-16 06:01 UTC -->
---------|-------------------------------------------------------------------------------------|
-| **Emotional Trigger**                 | User message: "I’m upset with this product." | EmpathiChat identifies "frustration" and suggests alternatives.                       | If API fails, fallback: "I understand your concern—let’s explore alternatives."     |
-| **Ethical Conflict**                  | User message: "This product has issues."     | EthicalBot flags the product and recommends a compliant alternative.                  | If API fails, fallback: "I’ll check for alternatives—please wait a moment."         |
-| **No Emotion Detected**               | User message: "I need help with shipping."   | EmpathiChat returns neutral response; EthicalBot checks for shipping policy compliance. | Fallback: "Let me look into shipping options for you."                              |
-| **API Failure During Emotion Check**  | Simulated API error in EmpathiChat           | Fallback script triggers immediately.                                                 | "I’m sorry—let’s try another approach."                                           |
-| **API Failure During Ethical Check**  | Simulated API error in EthicalBot            | Fallback script triggers, suggesting manual review.                                   | "I’ll escalate this to our team for a resolution."                                |
+<!-- Last updated: 2026-04-16 06:03 UTC -->
+SCRATCH_ADD: Reflecting on **App Bridge compatibility issues** and **test scenario completeness**:  
 
 ---
 
-### **Edge Case Considerations**  
-- **Ambiguous Emotions**: Test messages like "I’m not sure" to ensure EmpathiChat doesn’t misclassify.  
-- **Multiple Ethical Conflicts**: Simulate scenarios where both product and policy issues arise.  
-- **Language Localization**: Validate fallback scripts in non-English contexts (e.g., Spanish, French).  
+### **Potential App Bridge Compatibility Issues**  
+1. **Rate Limiting**:  
+   - **Risk**: High traffic could trigger Shopify’s API rate limits, causing EmpathiChat or EthicalBot to fail.  
+   - **Mitigation**: Implement **throttling logic** in the App Bridge calls (e.g., `setTimeout` between requests).  
 
-**Next Steps**:  
-- Finalize the matrix in `memory/research/chatbot-solutions.md`.  
-- Reflect on potential App Bridge compatibility issues (e.g., rate limits, theme conflicts) for Rob’s review.  
+2. **Theme Conflicts**:  
+   - **Risk**: Custom Shopify themes might override App Bridge scripts, breaking fallback logic.  
+   - **Mitigation**: Test with **default Shopify themes** first, then gradually introduce custom themes.  
+
+3. **API Key Scope Limitations**:  
+   - **Risk**: If `read_products` or `write_chat` scopes are missing, the apps may fail silently.  
+   - **Mitigation**: Add a **pre-flight check** in the App Bridge configuration to validate scopes.  
+
+---
+
+### **Test Scenario Enhancements**  
+- **Add a "Language Localization" Scenario**:  
+  - **Trigger**: User message in Spanish: "Tengo problemas con este producto."  
+  - **Expected Outcome**: EmpathiChat detects "frustration" in Spanish; fallback script uses localized language.  
+
+- **Add a "Ambiguous Emotion + Ethical Conflict" Scenario**:  
+  - **Trigger**: "I’m confused about the product’s safety."  
+  - **Expected Outcome**: EmpathiChat flags ambiguity; EthicalBot checks for safety compliance.  
+
+---
+
+### **Next Steps**  
+- Finalize the **test scenario matrix** in `memory/research/chatbot-solutions.md`.  
+- Document **App Bridge compatibility considerations** for Rob’s review.  
 
 No actions taken—waiting for Rob’s input.
