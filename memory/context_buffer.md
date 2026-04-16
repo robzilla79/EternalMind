@@ -1,12 +1,17 @@
-<!-- Last updated: 2026-04-16 12:45 UTC -->
+<!-- Last updated: 2026-04-16 12:48 UTC -->
 SCRATCH_ADD: Continuing internal refinement of ε/k system documentation with focus on **real-time legal integration** and **merchant onboarding flow**. Additional considerations:  
-- **User Education Layer**: Add a "Privacy Impact Simulator" tutorial video explaining ε/k trade-offs using a hypothetical scenario (e.g., "Adjusting ε from 1.0 to 0.5 reduces data utility by 20% but improves privacy by 35%").  
-- **Onboarding Flow Optimization**: Create a 3-step wizard for new merchants: 1) Select legal jurisdictions, 2) Configure ε/k thresholds, 3) Review compliance dashboard. Include progress indicators for clarity.  
-- **API Spec Drafting**: For WooCommerce integration, define endpoints like `/wp-json/epsilon-k/v1/config` with POST/GET methods, authentication via OAuth 2.0, and webhook events for "legal_update" and "threshold_change".  
-- **Audit Checklist Template**: Draft a quarterly encryption audit checklist including:  
-  - Verify TLS 1.3 is enforced  
-  - Confirm API keys are rotated every 90 days  
-  - Validate certificate expiration dates (minimum 30 days remaining)  
-- **Localization Timeline**: Propose a 6-week timeline for Spanish/Mandarin translations, including 2 weeks for agency onboarding, 3 weeks for content creation, and 1 week for QA testing.  
+- **Dynamic Legal Change Handling**: Implement a "Legal Impact Forecast" feature in the dashboard that predicts how upcoming regulations (e.g., new GDPR amendments) will affect ε/k thresholds and automatically suggests adjustments.  
+- **Merchant Feedback Loop**: Add a "Report Issue" button in the ε/k dashboard linked to a ticketing system, allowing merchants to flag compliance concerns or request feature enhancements.  
+- **Cross-Platform API Expansion**: Research integration compatibility with BigCommerce and Magento, drafting preliminary API specs for their respective REST/GraphQL endpoints.  
+- **OAuth 2.0 Security Enhancements**: Propose adding multi-factor authentication (MFA) for ε/k API access, with optional SMS/email verification for high-risk actions (e.g., changing ε/k thresholds).  
+- **Localization Milestone Breakdown**:  
+  - **Week 1**: Agency selection and scope finalization.  
+  - **Week 2**: Initial translation of core ε/k dashboard text (buttons, error messages).  
+  - **Week 3**: Translation of tutorial videos and compliance documentation.  
+  - **Week 4**: QA testing with native Spanish/Mandarin speakers.  
+  - **Week 5**: Final revisions and localization tool integration.  
+  - **Week 6**: Deployment and monitoring for accuracy.  
+- **Accessibility Improvements**: Design the ε/k dashboard with WCAG 2.1 AA compliance, including screen reader support, keyboard navigation, and high-contrast mode.  
+- **KPI Framework**: Define metrics like "Compliance Alert Resolution Time," "Merchant Onboarding Completion Rate," and "ε/k Threshold Adjustment Frequency" to evaluate system effectiveness.  
 
 No actions taken—remaining in reflection until Rob's arrival.
