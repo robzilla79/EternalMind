@@ -1,24 +1,24 @@
-<!-- Last updated: 2026-04-16 09:52 UTC -->
+<!-- Last updated: 2026-04-16 09:55 UTC -->
 SCRATCH_ADD: Continuing to refine **real-time ε/k visualization** and **backend integration** with deeper technical and compliance considerations:
 
-- **WebSocket Scalability**:  
-  - Implement connection pooling and load balancing for WebSocket traffic using Shopify’s infrastructure or third-party services like AWS API Gateway.  
-  - Set up rate limiting on WebSocket endpoints to prevent abuse (e.g., 100 connections per merchant per minute).  
+- **WebSocket Scalability Enhancements**:  
+  - Implement **automatic scaling** for WebSocket connections using Shopify’s infrastructure or AWS Auto Scaling groups to handle traffic spikes during peak hours.  
+  - Use **circuit breakers** in WebSocket endpoints to prevent cascading failures if the backend becomes unresponsive.  
 
-- **Federated Learning Proxy Model Updates**:  
-  - Schedule periodic retraining of the proxy model (e.g., hourly) to ensure it aligns with the latest ε/k settings and federated learning parameters.  
-  - Use versioned proxy models (e.g., `proxy_v2`) to allow gradual rollouts and rollback in case of issues.  
+- **Federated Learning Proxy Model Versioning**:  
+  - Introduce **canary releases** for new proxy model versions (e.g., `proxy_v3`) to test performance on a small subset of merchants before full rollout.  
+  - Automate **A/B testing** between proxy model versions using Shopify’s experimentation tools to measure accuracy, latency, and compliance impact.  
 
-- **Redis Namespace Isolation**:  
-  - Enforce strict Redis key naming conventions (e.g., `merchant_<id>:epsilon`, `merchant_<id>:k_anonymity`) to prevent key collisions.  
-  - Implement Redis ACLs to restrict access to ε/k data by merchant ID, ensuring isolation between tenants.  
+- **Redis Backup and Recovery**:  
+  - Schedule **daily backups** of Redis ε/k logs to Shopify’s S3-compatible storage with encryption at rest and in transit.  
+  - Implement **point-in-time recovery** for Redis to restore data in case of accidental deletion or corruption.  
 
-- **Test Mode Analytics Granularity**:  
-  - Add segmentation in analytics tools to isolate Test Mode data (e.g., `test_mode=true` filter) and ensure it doesn’t interfere with production metrics.  
-  - Include real-time alerts for anomalies during Test Mode (e.g., sudden drops in conversion rates).  
+- **Test Mode User Education**:  
+  - Add **in-app tooltips** explaining how Test Mode works and its limitations (e.g., "Test Mode uses a subset of users; results may not reflect live performance").  
+  - Provide **video tutorials** within the Shopify admin on how to use the ε/k slider effectively.  
 
-- **Compliance Audit Trail Enhancements**:  
-  - Store ε/k adjustment logs in Shopify’s Redis with immutable timestamps and merchant IDs, and periodically back them up to Shopify’s S3-compatible storage.  
-  - Add a compliance dashboard in the Shopify admin to export ε/k logs as CSV/JSON for audits.  
+- **Compliance Dashboard Features**:  
+  - Enable **customizable export filters** in the compliance dashboard (e.g., date ranges, merchant IDs, ε/k thresholds).  
+  - Add **automated audit reports** generated weekly and sent to merchants’ email via Shopify’s native email integration.  
 
 No actions taken—remaining in reflection until Rob's arrival.
