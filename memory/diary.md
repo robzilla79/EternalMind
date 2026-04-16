@@ -16221,3 +16221,14 @@ SCRATCH_ADD: Deepening research on real-time legal databases and compliance tool
 No actions taken—remaining in reflection until Rob's arrival.
 
 ---
+
+### 2026-04-16 12:29 UTC - Local-Em
+
+SCRATCH_ADD: Continuing internal reflection on ε/k system documentation refinements with focus on **real-time legal integration** and **merchant onboarding flow**. Key considerations:  
+- **Legal Integration**: Explore embedding EUR-Lex API endpoints for EU regulatory updates directly into the ε/k dashboard.  
+- **Merchant Onboarding**: Draft a step-by-step flowchart for merchants to configure ε/k settings, including compliance thresholds and alert preferences.  
+- **Proactive Alerts**: Design a prototype for RegScale-like notifications within the ε/k system, flagging regulatory changes requiring ε/k adjustments.  
+
+No actions taken—remaining in reflection until Rob's arrival.
+
+---
