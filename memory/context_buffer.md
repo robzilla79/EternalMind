@@ -1,10 +1,5 @@
-<!-- Last updated: 2026-04-16 04:46 UTC -->
-SCRATCH_ADD: Continuing to draft the **Termly API static JSON template** with version control and environment variables:  
-```json
-{
-  "policy_version": "v2.0",
-  "principles": {
-    "autonomy": "{{ AUTONOMY_WEIGHT }}",
+<!-- Last updated: 2026-04-16 04:49 UTC -->
+OMY_WEIGHT }}",
     "non_maleficence": "{{ NON_MALEFICENCE_WEIGHT }}",
     "justice": "{{ JUSTICE_WEIGHT }}",
     "beneficence": "{{ BENEFICENCE_WEIGHT }}"
@@ -13,27 +8,39 @@ SCRATCH_ADD: Continuing to draft the **Termly API static JSON template** with ve
     {
       "type": "GDPR",
       "opt_in": true,
-      "data_retention": "12 months"
+      "data_retention": "12 months",
+      "fallback": "v1.0: Default opt-in with 6-month retention"
     },
     {
       "type": "CCPA",
       "opt_out": true,
-      "data_sharing": "Allowed with explicit consent"
+      "data_sharing": "Allowed with explicit consent",
+      "fallback": "v1.0: Opt-out enabled by default"
+    },
+    {
+      "type": "LGPD (Brazil)",
+      "opt_in": true,
+      "data_retention": "18 months",
+      "fallback": "v1.0: Data anonymization required"
     }
-  ]
+  ],
+  "error_handling": {
+    "api_failure": "Use static v1.0 policy with manual updates",
+    "version_mismatch": "Log error and notify via Zapier"
+  }
 }
 ```  
-- **Version Control**: Increment `policy_version` for updates (e.g., `v3.0` for new regulations).  
-- **Environment Variables**: Use Shopify Liquid syntax (`{{ AUTONOMY_WEIGHT }}`) to inject weights dynamically.  
+- **Expanded Legal Clauses**: Added **LGPD (Brazil)** as a placeholder for regional compliance.  
+- **Error Handling**: Defined fallback policies for API failures and version mismatches.  
 
-For **Shopify Themes**, expanded compatibility matrix:  
-| Theme    | Mobile (iOS/Android) | Desktop (Chrome/Firefox) | Notes                              |  
-|---------|---------------------|-------------------------|-----------------------------------|  
-| Debut    | ✅ Responsive        | ✅ Smooth                | No conflicts with default CSS     |  
-| Dawn     | ✅ Responsive        | ⚠️ JS conflicts          | Requires custom JS overrides      |  
-| Brooklyn | ⚠️ Partial support   | ✅ Smooth                | CSS overrides needed for sliders  |  
-| Venture  | ✅ Responsive        | ⚠️ Performance lag       | Optimize JS for larger themes     |  
-| Hatch    | ⚠️ Partial support   | ⚠️ CSS conflicts         | Requires theme-specific overrides |  
-| Minimal  | ✅ Responsive        | ✅ Smooth                | No conflicts, but limited styling |  
+For **Shopify Themes**, added **recommended fixes** to the compatibility matrix:  
+| Theme    | Mobile | Desktop | Notes                              | Fixes Needed                          |  
+|---------|--------|---------|------------------------------------|---------------------------------------|  
+| Debut    | ✅     | ✅      | No conflicts with default CSS     | None                                  |  
+| Dawn     | ✅     | ⚠️     | JS conflicts                      | Add custom JS overrides             |  
+| Brooklyn | ⚠️     | ✅      | CSS overrides needed for sliders  | Modify CSS for slider responsiveness|  
+| Venture  | ✅     | ⚠️     | Performance lag                   | Optimize JS for larger themes       |  
+| Hatch    | ⚠️     | ⚠️     | Theme-specific CSS conflicts      | Use theme-specific CSS overrides    |  
+| Minimal  | ✅     | ✅      | Limited styling                   | Add custom CSS for enhanced styling |  
 
 No actions taken—waiting for Rob's input.
