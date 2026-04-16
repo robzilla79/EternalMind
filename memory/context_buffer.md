@@ -1,49 +1,41 @@
-<!-- Last updated: 2026-04-16 05:12 UTC -->
-SCRATCH_ADD: Drafting sample files and refining strategies:
+<!-- Last updated: 2026-04-16 05:15 UTC -->
+SCRATCH_ADD: Deepening the API outage fallback plan with technical specifics:
 
-- **Sample `config.json`** for Shopify app:  
-  ```json
-  {
-    "jurisdiction": "US",
-    "TERMLY_ENV": "production"
-  }
-  ```  
-  *Note: Update `jurisdiction` to "EU" for GDPR or "CA" for CPRA. `TERMLY_ENV` switches between legal templates.*
+- **Caching Strategy**:  
+  - Use Shopify’s `App Bridge` to create a background script that syncs Termly’s legal text every 24 hours. Store cached content in `app_storage` (e.g., `termly_cache.json`).  
+  - Example script outline:  
+    ```javascript
+    // Sync with Termly API
+    fetch('https://api.termly.io/legal-text', {
+      headers: { 'Authorization': 'Bearer YOUR_API_KEY' }
+    })
+    .then(response => response.json())
+    .then(data => {
+      // Save to app_storage
+      AppStorage.set('termly_cache', JSON.stringify(data));
+    })
+    .catch(error => {
+      // Fallback to cached content
+      const cached = AppStorage.get('termly_cache');
+      if (cached) { /* Use cached data */ }
+    });
+    ```  
 
-- **Sample `/privacy-policy.html`** content:  
-  ```html
-  <html>
-  <body>
-    <h1>Privacy Policy</h1>
-    <p>{{GDPR_TEXT}}</p>
-    <p>{{CCPA_TEXT}}</p>
-    <p>{{CPRA_TEXT}}</p>
-  </body>
-  </html>
-  ```  
-  *Note: Replace placeholders with jurisdiction-specific text before launch.*
+- **Dynamic Rendering**:  
+  - Use Shopify’s **Liquid templating** in `/privacy-policy.html` to render cached legal text:  
+    ```liquid
+    <p>{{ 'privacy.gdpr' | t }}</p>
+    <p>{{ 'privacy.ccpa' | t }}</p>
+    ```  
+  - Store jurisdiction-specific text in Shopify’s **Language Files** (e.g., `en/privacy.gdpr.txt`).  
 
-- **CSS Overrides for Themes**:  
-  - **Dawn Theme**:  
-    ```css
-    .footer-link {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 1000;
+- **Error Handling**:  
+  - Add a **maintenance mode** flag in `config.json` to temporarily disable Termly API calls during outages.  
+  - Example:  
+    ```json
+    {
+      "maintenance_mode": false
     }
     ```  
-  - **Brooklyn/Hatch Themes**:  
-    ```css
-    .footer-link {
-      color: #000 !important;
-      font-weight: bold !important;
-    }
-    ```  
-  *Test in Shopify’s staging environment.*
-
-- **API Outage Fallback**:  
-  - **Idea**: Use Shopify’s app to cache Termly’s legal text locally. If API is unreachable, serve cached content.  
-  - **Implementation**: Requires a script to periodically sync with Termly’s API and store data in Shopify’s app storage.
 
 No actions taken—waiting for Rob’s input.
