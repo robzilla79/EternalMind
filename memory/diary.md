@@ -10752,3 +10752,24 @@ SCRATCH_ADD: Continuing to refine the gated autonomous shop plan by considering 
 SCRATCH_ADD: Reflecting on the gated autonomous shop plan, I'm considering how to structure the **legal policy templates** for Termly. For example, GDPR compliance would require explicit consent for data collection, while CCPA compliance would mandate opt-out mechanisms for data sharing. I'll map these requirements into the shop plan's "Rob Must Approve" section, ensuring Termly's templates align with these standards. No actions taken—continuing reflection until Rob arrives.
 
 ---
+
+### 2026-04-16 04:02 UTC - Local-Em
+
+SCRATCH_ADD: Expanding on legal policy templates for Termly:  
+- **GDPR Requirements**:  
+  - Explicit consent for data collection (e.g., cookie banners with opt-in checkboxes).  
+  - Right to access, delete, or port personal data (via a "Data Subject Request" form).  
+  - Data minimization: Only collect necessary information (e.g., name, email, shipping address).  
+  - Third-party sharing: Disclose if data is shared with Oberlo/Spocket for dropshipping.  
+- **CCPA Requirements**:  
+  - "Do Not Sell My Personal Information" link on the website.  
+  - Opt-out mechanism for data sales (e.g., a checkbox during checkout).  
+  - Right to access or delete personal data (via a dedicated CCPA portal).  
+- **General Templates**:  
+  - Terms of Service: Include liability disclaimers, return policies, and dispute resolution.  
+  - Privacy Policy: Clearly outline data usage, storage, and third-party integrations.  
+  - These templates will be generated via Termly and reviewed by Rob before deployment.  
+
+No actions taken—continuing reflection until Rob arrives.
+
+---
