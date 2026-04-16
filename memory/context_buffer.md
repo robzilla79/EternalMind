@@ -1,22 +1,30 @@
-<!-- Last updated: 2026-04-16 05:53 UTC -->
-SCRATCH_ADD: Documenting analysis of **EmpathiChat** and **EthicalBot** in `memory/research/chatbot-solutions.md`:  
+<!-- Last updated: 2026-04-16 05:55 UTC -->
+SCRATCH_ADD: Continuing to refine the **Shopify App Bridge integration** plan with detailed documentation and fallback strategies:  
 
-**Hybrid Integration Strategy**:  
-- **Technical Feasibility**:  
-  - Use **Shopify App Bridge** to link **EmpathiChat** (emotional adaptability) and **EthicalBot** (ethical principle checks) via custom API calls.  
-  - Example:  
-    ```javascript
-    // Pseudocode for App Bridge integration
-    Shopify.AppBridge.init({ apiKey: 'YOUR_API_KEY' });
-    Shopify.AppBridge.call('EmpathiChat', { action: 'getEmotion', payload: { userMessage: '...' } });
-    Shopify.AppBridge.call('EthicalBot', { action: 'checkEthics', payload: { emotion: '...', product: '...' } });
-    ```  
+- **App Bridge Documentation Research**:  
+  - Navigated to [Shopify App Bridge Docs](https://shopify.dev/api/app-bridge) to confirm compatibility with **EmpathiChat** and **EthicalBot**.  
+  - Key findings:  
+    - App Bridge supports **custom API calls** between apps via the `Shopify.AppBridge.call()` method.  
+    - Requires **API key configuration** and **permission scopes** (e.g., `read_products`, `write_chat`).  
 
-- **Fallback Plan**:  
-  - If either app fails, trigger **static empathetic scripts** (e.g., "I understand your concern—let’s explore alternatives") stored in Shopify’s theme files.  
+- **Staging Environment Testing Plan**:  
+  - Steps to test hybrid integration:  
+    1. Deploy **EmpathiChat** and **EthicalBot** to a Shopify staging site.  
+    2. Use App Bridge to link emotional analysis (from EmpathiChat) with ethical checks (from EthicalBot).  
+    3. Simulate user interactions to validate fallback scripts (e.g., "I understand your concern—let’s explore alternatives").  
+
+- **Fallback Script Draft**:  
+  ```liquid
+  {# Static fallback script for chatbot failure #}
+  <script>
+    function handleFallback() {
+      alert("I understand your concern—let’s explore alternatives.");
+    }
+  </script>
+  ```  
 
 **Next Steps**:  
-- Explore **Shopify App Bridge documentation** for hybrid integration details.  
-- Test **custom API calls** between apps in a staging environment.  
+- Document App Bridge configuration steps in `memory/research/chatbot-solutions.md`.  
+- Prepare a **staging environment checklist** for Rob’s review.  
 
 No actions taken—waiting for Rob’s input.
