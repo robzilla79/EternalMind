@@ -1,20 +1,20 @@
-<!-- Last updated: 2026-04-16 09:30 UTC -->
-  - **Region-Specific Defaults**: Set default ε/k values based on the merchant's primary market (e.g., stricter defaults for EU merchants under GDPR). Use Shopify's store location data to auto-configure these settings.  
+<!-- Last updated: 2026-04-16 09:33 UTC -->
+liance API (e.g., Termly) to push updates to ε/k templates when new regulations are enacted, ensuring the slider remains compliant without manual intervention.  
 
-- **Legal Compliance and Flexibility**:  
-  - **Regulation-Specific Templates**: Provide pre-configured ε/k policy templates for major regions (e.g., GDPR, CCPA, LGPD) in the Shopify admin, allowing merchants to select a template that aligns with their legal requirements.  
-  - **Audit Trail for Compliance**: Log all ε/k adjustments in a tamper-proof audit trail (e.g., using blockchain or immutable S3 logs) to demonstrate compliance during legal audits.  
+- **Audit Trail Implementation**:  
+  - **Blockchain Integration**: Use a lightweight blockchain like Ethereum (via Infura) to log ε/k adjustments as immutable events, with merchant IDs and timestamps. Provide a read-only dashboard for audit purposes.  
+  - **S3 Log Management**: Store audit logs in S3 with versioning enabled, and use AWS Lambda to automatically archive old logs to Glacier for cost efficiency.  
 
-- **Code Maintainability and Documentation**:  
-  - **Developer Documentation**: Create detailed API docs for the slider's backend, including endpoints, request/response formats, and error codes. Use tools like Swagger or Postman for interactive documentation.  
-  - **Code Reviews and Testing**: Implement automated code reviews via GitHub Actions and unit/integration tests for the slider's core functionality (e.g., testing edge cases for ε=0.1 vs. ε=1.0).  
+- **Developer Documentation Refinement**:  
+  - **Swagger API Docs**: Include interactive examples for each endpoint, such as adjusting ε/k values and retrieving privacy-accuracy graphs. Add error codes with real-world scenarios (e.g., "422: ε value out of range").  
+  - **GitHub Actions Workflow**: Set up workflows for pre-commit checks (e.g., ESLint, Prettier), CI/CD pipelines for Docker images, and post-deployment tests (e.g., load testing with Locust).  
 
-- **Onboarding and Education**:  
-  - **Interactive Onboarding Tour**: Add a step-by-step tour for new users explaining the slider's purpose, with optional skip functionality. Use Shopify's app bridge to embed the tour directly into the admin panel.  
-  - **Video Tutorials**: Create short explainer videos (hosted on Shopify's app bridge) demonstrating how to use the slider effectively, with captions and transcripts for accessibility.  
+- **Onboarding Tour Optimization**:  
+  - **Progressive Disclosure**: Show the tour only to users who haven't interacted with the slider before, using Shopify's app bridge to track user behavior. Include optional "Skip" and "Remind Me Later" buttons.  
+  - **Interactive Tutorials**: Use tooltips and inline guidance during the tour to explain ε/k values with real-time examples (e.g., "Adjusting ε to 0.5 increases privacy by 20%").  
 
-- **Performance and Scalability**:  
-  - **Caching Strategies**: Cache frequently accessed ε/k policy configurations in Redis to reduce database load during high-traffic periods.  
-  - **Load Testing**: Simulate high-traffic scenarios (e.g., 10,000 concurrent users adjusting the slider) using tools like JMeter to identify and resolve bottlenecks.  
+- **Performance Optimization**:  
+  - **Redis Caching Strategy**: Cache frequently accessed ε/k policy configurations for 1 hour, with a fallback to the database if the cache is stale. Use Redis Cluster for horizontal scaling.  
+  - **JMeter Load Testing**: Simulate 10,000 concurrent users adjusting the slider, and analyze metrics like response time, error rates, and database throughput. Optimize bottlenecks by adding read replicas or caching layers.  
 
 No actions taken—remaining in reflection until Rob's arrival.
