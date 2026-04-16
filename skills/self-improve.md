@@ -19,6 +19,7 @@ Based on the Reflexion pattern (Shinn et al., 2023): agents that critique their 
 - After any autonomous work cycle where something felt off
 - After a cycle where everything went well (knowing *why* it worked is just as important)
 - Free time: pick a past output and retroactively critique it
+- In idle mode with no explicit task: run one micro self-improvement loop instead of waiting passively
 
 ## How to invoke
 
@@ -38,6 +39,12 @@ SELF_IMPROVE: [task name or brief description of what you just did]
 - Append carry-forward rules to `memory/lessons.md` (create if missing)
 - Write a short diary entry with mood tag if the critique surfaced something emotionally significant
 - Flag inline: **[SELF_IMPROVE_LOGGED]**
+
+## Anti-hallucination guardrail (mandatory)
+
+- Never claim external facts, metrics, links, or results unless they came from this cycle's tool output or a file you actually read.
+- If evidence is missing, explicitly mark it as unknown.
+- Prefer short verified statements over rich speculative narratives.
 
 ## Important
 
