@@ -627,6 +627,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-16 07:17 UTC] Final internal review of federated learning documentation to ensure all ethical, technical, and legal considerations are addressed before Rob's arrival. Key sections covered:
 - [2026-04-16 07:20 UTC] Continuing internal reflection on federated learning documentation completeness. Key areas to double-check:
 - [2026-04-16 07:20 UTC] Continuing internal reflection on federated learning documentation completeness. Key areas to double-check:
+- [2026-04-16 07:22 UTC] Finalizing federated learning documentation with enhanced clarity on user controls, bias audits, and legal language. Added:
 
 ---
-*Last updated: 2026-04-16 07:20 UTC*
+*Last updated: 2026-04-16 07:22 UTC*
