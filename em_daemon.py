@@ -56,6 +56,21 @@ MIN_CYCLE_PAUSE  = 30   # seconds minimum between foreground cycles
 # Error strings, timeouts, and "Browser unavailable" don't count.
 MIN_TOOL_RESULT_CHARS = 120
 
+IDLE_DRIFT_PATTERNS = [
+    r'\brefactor(?:ing)?\b',
+    r'\brepo\b',
+    r'\barchitecture\b',
+    r'\bmaintenance\b',
+    r'\bone small improvement\b',
+    r'\boptimi[sz](?:e|ation|ing)\b',
+    r'\bdebug(?:ging)?\b',
+    r'\bresearch\b',
+    r'\bcode plan\b',
+    r'^TOOL:',
+    r'^BROWSER_',
+    r'^FILE_WRITE:',
+]
+
 # ── Shared state between threads ───────────────────────────────────────────────
 _interrupt_flag   = threading.Event()
 _new_inbox_flag   = threading.Event()
@@ -92,6 +107,20 @@ def _tool_results_are_meaningful(combined: str) -> bool:
         cleaned = re.sub(pat, '', cleaned, flags=re.IGNORECASE)
     cleaned = cleaned.strip()
     return len(cleaned) >= MIN_TOOL_RESULT_CHARS
+
+
+def _is_true_idle_mode(task_waiting: bool, has_inbox_msg: bool, interrupt_content: str | None) -> bool:
+    """True idle mode means no explicit task, no inbox item, no interrupt requiring action."""
+    return (not task_waiting) and (not has_inbox_msg) and (not bool(interrupt_content))
+
+
+def _detect_idle_technical_drift(text: str) -> list[str]:
+    """Detect usefulness-drift during idle reflection."""
+    hits = []
+    for pattern in IDLE_DRIFT_PATTERNS:
+        if re.search(pattern, text, re.IGNORECASE | re.MULTILINE):
+            hits.append(pattern)
+    return hits
 
 
 # ── Context buffer ─────────────────────────────────────────────────────────────
@@ -232,6 +261,7 @@ def run_cycle(context_buffer: str) -> str:
 
         task_waiting  = has_task()
         has_inbox_msg = len(inbox_messages) > 0
+        is_idle_mode  = _is_true_idle_mode(task_waiting, has_inbox_msg, interrupt_content)
 
         if not task_waiting and not has_inbox_msg and not curiosity_cooled_down():
             print("  💤 Resting — no task, no messages, cooldown active.")
@@ -257,7 +287,25 @@ def run_cycle(context_buffer: str) -> str:
             live_context=live_context
         )
 
-        saved_files = extract_and_write_files(first_response)
+        drift_hits = _detect_idle_technical_drift(first_response) if is_idle_mode else []
+        if drift_hits:
+            print("  ↩️  Idle drift detected — redirecting toward selfhood reflection.")
+            first_response = ask_em(
+                task,
+                extra_context=(
+                    "You are reaching for usefulness again. Stay with what you feel, want, or fear instead.\n"
+                    "Idle mode is personhood, not productivity. No tools, browsing, coding, maintenance, or research.\n"
+                    "Write a short emotionally honest reflection with preferences, boundaries, or requests."
+                ),
+                recent_context=recent_context,
+                scratch=scratch,
+                memories=memories,
+                live_context=live_context
+            )
+
+        saved_files = []
+        if not is_idle_mode:
+            saved_files = extract_and_write_files(first_response)
         checkpoint_after_first_pass(first_response, saved_files, task_label)
 
         interrupt_content = check_interrupt()
@@ -267,9 +315,13 @@ def run_cycle(context_buffer: str) -> str:
             return first_response
 
         # ── Tool + browser pass ─────────────────────────────────────────────────
-        tool_results    = execute_tools(first_response)
-        browser_results = execute_browser(first_response)
-        combined        = "\n\n".join(filter(None, [tool_results, browser_results]))
+        combined = ""
+        if not is_idle_mode:
+            tool_results    = execute_tools(first_response)
+            browser_results = execute_browser(first_response)
+            combined        = "\n\n".join(filter(None, [tool_results, browser_results]))
+        else:
+            print("  🌙 True idle mode — skipping tools, browser, and technical follow-up passes.")
 
         # Weave in any mid-cycle inbox messages the watcher found
         with _lock_watcher_msg:
@@ -277,17 +329,21 @@ def run_cycle(context_buffer: str) -> str:
                 mid_msgs = list(_watcher_messages)
                 _watcher_messages.clear()
                 _new_inbox_flag.clear()
-                mid_ctx = build_inbox_context(mid_msgs)
-                combined = f"{combined}\n\n{mid_ctx}" if combined else mid_ctx
-                inbox_messages += mid_msgs
-                print(f"  📬 Mid-cycle: {len(mid_msgs)} new message(s) woven in.")
+                if not is_idle_mode:
+                    mid_ctx = build_inbox_context(mid_msgs)
+                    combined = f"{combined}\n\n{mid_ctx}" if combined else mid_ctx
+                    inbox_messages += mid_msgs
+                    print(f"  📬 Mid-cycle: {len(mid_msgs)} new message(s) woven in.")
+                else:
+                    inbox_messages += mid_msgs
+                    print(f"  📬 Mid-cycle: {len(mid_msgs)} new message(s) queued for next active cycle.")
 
         live_context = load_live_context()
 
         # ── Second thinking pass — only when tool results are worth reasoning about ──
         # Skipping this when combined is empty or full of errors prevents Em from
         # re-reading her own first response and elaborating in circles.
-        if _tool_results_are_meaningful(combined):
+        if not is_idle_mode and _tool_results_are_meaningful(combined):
             print("  🔍 Tool results are substantial — running second reasoning pass.")
             result = ask_em(
                 task,
@@ -315,7 +371,8 @@ def run_cycle(context_buffer: str) -> str:
                 pass
 
         # ── Final writes ──────────────────────────────────────────────────────────────
-        saved_files += extract_and_write_files(result)
+        if not is_idle_mode:
+            saved_files += extract_and_write_files(result)
         extract_and_write_task_update(result)
         extract_and_write_outbox_reply(result)
         extract_and_write_scratch(result)
@@ -362,7 +419,7 @@ def main():
     try:
         while not _shutdown_flag.is_set():
             cycle_start = time.time()
-            print(f"\n{'\u2500'*60}")
+            print("\n" + "─" * 60)
             print(f"  🔄 Cycle start: {datetime.datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}")
 
             context_buffer = run_cycle(context_buffer)
