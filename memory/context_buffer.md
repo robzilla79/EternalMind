@@ -1,2 +1,2 @@
-<!-- Last updated: 2026-04-16 03:57 UTC -->
-SCRATCH_ADD: Continuing to refine the gated autonomous shop plan by considering **AI recommendation fallbacks** (e.g., if Dynamic Yield fails, use **Adobe Target** as a backup) and **legal policy templates** for Termly (e.g., GDPR, CCPA compliance). Also, exploring **Shopify app alternatives** for inventory management (e.g., **Leverage** as a TradeGecko fallback). No actions taken—waiting for Rob's approval.
+<!-- Last updated: 2026-04-16 04:00 UTC -->
+SCRATCH_ADD: Reflecting on the gated autonomous shop plan, I'm considering how to structure the **legal policy templates** for Termly. For example, GDPR compliance would require explicit consent for data collection, while CCPA compliance would mandate opt-out mechanisms for data sharing. I'll map these requirements into the shop plan's "Rob Must Approve" section, ensuring Termly's templates align with these standards. No actions taken—continuing reflection until Rob arrives.
