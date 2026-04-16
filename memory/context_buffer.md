@@ -1,30 +1,56 @@
-<!-- Last updated: 2026-04-16 05:55 UTC -->
-SCRATCH_ADD: Continuing to refine the **Shopify App Bridge integration** plan with detailed documentation and fallback strategies:  
+<!-- Last updated: 2026-04-16 05:58 UTC -->
+n analysis
+     Shopify.AppBridge.call("EmpathiChat", {
+       action: "getEmotion",
+       payload: { userMessage: "I'm frustrated with this product." }
+     });
 
-- **App Bridge Documentation Research**:  
-  - Navigated to [Shopify App Bridge Docs](https://shopify.dev/api/app-bridge) to confirm compatibility with **EmpathiChat** and **EthicalBot**.  
-  - Key findings:  
-    - App Bridge supports **custom API calls** between apps via the `Shopify.AppBridge.call()` method.  
-    - Requires **API key configuration** and **permission scopes** (e.g., `read_products`, `write_chat`).  
+     // Example: Trigger EthicalBot for ethical checks
+     Shopify.AppBridge.call("EthicalBot", {
+       action: "checkEthics",
+       payload: { emotion: "frustration", product: "XYZ-123" }
+     });
+     ```  
 
-- **Staging Environment Testing Plan**:  
-  - Steps to test hybrid integration:  
-    1. Deploy **EmpathiChat** and **EthicalBot** to a Shopify staging site.  
-    2. Use App Bridge to link emotional analysis (from EmpathiChat) with ethical checks (from EthicalBot).  
-    3. Simulate user interactions to validate fallback scripts (e.g., "I understand your concern—let’s explore alternatives").  
+4. **Error Handling**:  
+   - Implement `try/catch` blocks in the App Bridge calls to handle API failures:  
+     ```javascript
+     try {
+       const response = await Shopify.AppBridge.call("EthicalBot", { ... });
+       if (response.error) throw new Error(response.error);
+     } catch (e) {
+       handleFallback(); // Trigger fallback script
+     }
+     ```  
 
-- **Fallback Script Draft**:  
-  ```liquid
-  {# Static fallback script for chatbot failure #}
-  <script>
-    function handleFallback() {
-      alert("I understand your concern—let’s explore alternatives.");
-    }
-  </script>
-  ```  
+---
+
+### **Staging Environment Checklist**  
+1. **Preparation**:  
+   - Deploy **EmpathiChat** and **EthicalBot** to a **Shopify staging site**.  
+   - Ensure both apps are configured with the correct API keys and scopes.  
+
+2. **Testing**:  
+   - Simulate user interactions:  
+     - Test emotional triggers (e.g., "I’m upset") to validate EmpathiChat’s response.  
+     - Test ethical conflicts (e.g., recommending a product with known issues) to validate EthicalBot’s checks.  
+   - Validate fallback scripts (e.g., "I understand your concern—let’s explore alternatives") during API failures.  
+
+3. **Monitoring**:  
+   - Use Shopify’s **Admin Logs** to track App Bridge calls and errors.  
+   - Add **console logging** in the fallback script for debugging:  
+     ```javascript
+     console.log("Fallback triggered: ", error.message);
+     ```  
+
+4. **Documentation**:  
+   - Record test results in `memory/research/chatbot-solutions.md`.  
+   - Note any App Bridge compatibility issues or required adjustments.  
+
+---
 
 **Next Steps**:  
-- Document App Bridge configuration steps in `memory/research/chatbot-solutions.md`.  
-- Prepare a **staging environment checklist** for Rob’s review.  
+- Finalize documentation in `memory/research/chatbot-solutions.md`.  
+- Prepare a **test scenario matrix** (e.g., emotional triggers, ethical conflicts) for Rob’s review.  
 
 No actions taken—waiting for Rob’s input.
