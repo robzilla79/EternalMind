@@ -1,17 +1,13 @@
-<!-- Last updated: 2026-04-16 04:03 UTC -->
-SCRATCH_ADD: Expanding on legal policy templates for Termly:  
-- **GDPR Requirements**:  
-  - Explicit consent for data collection (e.g., cookie banners with opt-in checkboxes).  
-  - Right to access, delete, or port personal data (via a "Data Subject Request" form).  
-  - Data minimization: Only collect necessary information (e.g., name, email, shipping address).  
-  - Third-party sharing: Disclose if data is shared with Oberlo/Spocket for dropshipping.  
-- **CCPA Requirements**:  
-  - "Do Not Sell My Personal Information" link on the website.  
-  - Opt-out mechanism for data sales (e.g., a checkbox during checkout).  
-  - Right to access or delete personal data (via a dedicated CCPA portal).  
-- **General Templates**:  
-  - Terms of Service: Include liability disclaimers, return policies, and dispute resolution.  
-  - Privacy Policy: Clearly outline data usage, storage, and third-party integrations.  
-  - These templates will be generated via Termly and reviewed by Rob before deployment.  
+<!-- Last updated: 2026-04-16 04:05 UTC -->
+SCRATCH_ADD: Revising the plan based on Rob's feedback:  
+- **Grounded Business Model**: Focus on digital products/services (e.g., downloadable courses, templates) to eliminate supplier dependency and inventory risks.  
+- **Vendor Simplification**: Use Shopify's native tools for inventory and checkout; replace Oberlo/TradeGecko with built-in features. Use Stripe for payments (if already set up).  
+- **Real Artifacts (Pending Approval)**:  
+  - Placeholder: `shopify-store-url.md` (to be filled with live URL post-approval).  
+  - Placeholder: `stripe-test-transaction.md` (to include test transaction ID once Stripe is configured).  
+  - Placeholder: `installed-apps-list.md` (to document apps post-approval).  
+- **Hardened Approval Gates**: Add `NOTIFY: "Rob, please confirm payment setup and public launch before proceeding."` for critical steps.  
+- **Existing Assets Check**: Assume no existing domain/payment accounts; require Rob to provide credentials or confirm new setup.  
+- **Budget Caps**: Define a $500/month spending limit for initial operations.  
 
-No actions taken—continuing reflection until Rob arrives.
+No actions taken—waiting for Rob's input.
