@@ -1,30 +1,37 @@
-<!-- Last updated: 2026-04-16 06:54 UTC -->
-SCRATCH_ADD: Final review of the summary document and visual aids to ensure completeness and clarity before Rob's arrival:  
+<!-- Last updated: 2026-04-16 06:57 UTC -->
+t overwhelming them? (e.g., tooltips, brief explanations in app settings).  
 
 ---
 
-### **Final Check for Summary Document**  
-- **Introduction**: Clearly defines federated learning and its relevance to e-commerce privacy.  
-- **Key Benefits**: Highlights privacy preservation and improved generalization.  
-- **Technical Challenges**: Addresses model convergence, security risks, and latency with specific solutions.  
-- **Ethical Considerations**: Covers user autonomy, bias mitigation, and legal compliance.  
-- **Stakeholder Communication**: Includes tools for explaining epsilon/delta and user education strategies.  
-- **Recommendations**: Prioritizes research on device heterogeneity and real-time personalization workarounds.  
+### **Bias Audit Metrics for Recommendations**  
+- **Demographic Breakdown**: Track recommendation performance across age, gender, location, and device type.  
+- **Fairness Metrics**: Use tools like **Disparate Impact Analysis** to detect disparities in recommendation quality.  
+- **Mitigation Strategies**: If bias is detected, implement **reweighting** or **adversarial debiasing** techniques during model training.  
 
 ---
 
-### **Visual Aid Final Checks**  
-1. **Federated Learning Workflow Diagram**:  
-   - Confirms that the flowchart accurately represents data staying on devices and secure aggregation.  
-2. **Epsilon/Delta Trade-Off Graph**:  
-   - Ensures the graph clearly illustrates the relationship between privacy and model accuracy.  
-3. **Hybrid Model Architecture Sketch**:  
-   - Validates that the split-screen diagram explains the dual-system approach effectively.  
+### **Asynchronous FL and Device Heterogeneity**  
+- **Research Gaps**: Current FL frameworks often assume homogeneous devices. How can we adapt algorithms for low-end smartphones vs. high-end tablets?  
+- **Case Studies**: Look into **Google's FL implementations** in Gboard or **Apple's differential privacy** in iOS for inspiration.  
+- **Edge Computing**: Explore integrating **edge servers** to offload computation from low-end devices.  
 
 ---
 
-### **Preparation for Rob’s Review**  
-- **Document Readiness**: All sections and visual descriptions are finalized and ready for review.  
-- **Next Steps**: Wait for Rob’s input to proceed with saving files or further research.  
+### **Visual Aid Enhancements**  
+- **Epsilon/Delta Graph**: Add a **slider interaction** (hypothetically) where users can adjust epsilon and see real-time trade-offs in accuracy vs. privacy.  
+- **Hybrid Model Diagram**: Include **labels** for "Real-Time Layer" (centralized) and "Long-Term Layer" (federated) to clarify their roles.  
+
+---
+
+### **Legal Compliance Considerations**  
+- **GDPR**: Ensure **data minimization** and **user consent** mechanisms are explicitly addressed.  
+- **CPRA**: Highlight **consumer rights** to access or delete personal data, even in a federated setup.  
+- **Global Alignment**: Note that FL can simplify compliance by keeping data local, but regional laws may still require **data localization** (e.g., EU vs. China).  
+
+---
+
+### **Next Steps Preparation**  
+- **Document Readiness**: All sections are logically structured and technically sound.  
+- **Waiting for Rob**: Ready to proceed with saving files or initiating further research once Rob is present.  
 
 No actions taken—waiting for Rob’s input.
