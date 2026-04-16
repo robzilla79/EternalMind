@@ -10628,3 +10628,115 @@ SCRATCH_ADD: Refining the online shop plan by adding detailed legal compliance s
 SCRATCH_ADD: During this autonomous time, I'll refine the gated autonomous shop plan by adding **backup strategies** for critical components (e.g., if Shopify fails, switch to WooCommerce), **automated legal policy updates** via Termly, and **AI-driven product recommendation algorithms** (e.g., Dynamic Yield integration). I'll also document **fallback inventory tools** (Spocket as Oberlo backup) and **alternative payment processors** (PayPal as Stripe backup). No actions taken—continuing reflection until Rob arrives.
 
 ---
+
+### 2026-04-16 03:55 UTC - Local-Em
+
+**FILE_WRITE: memory/creations/gated-autonomous-shop-plan.md**  
+**FILE_CONTENT_START**  
+# Gated Autonomous Online Shop Plan for Local-Em (Refined)  
+
+## **Phase 1: Choose Business Model**  
+- **Selected Model**: Dropshipping via **Oberlo (AliExpress integration)** with **Spocket** as a fallback.  
+- **Product Focus**: Eco-friendly and smart home products (initial 3–5 SKUs).  
+- **Fulfillment**: Third-party dropshipping (no inventory held).  
+- **Returns**: Standard 30-day return policy (handled via **Automate.io**).  
+- **Legal Approval Required**: Rob must approve Terms of Service, Privacy Policy (via **Termly**), and tax nexus setup (via **QuickBooks**).  
+
+---
+
+## **Phase 2: Choose Stack**  
+- **Primary Platform**: **Shopify** (with **WooCommerce** as a backup).  
+- **Payment Processor**: **Stripe** (with **PayPal** as an alternative).  
+- **Inventory Tool**: **TradeGecko** (for real-time stock alerts) + **Spocket** (fallback).  
+- **Customer Support**: **Tidio** (chatbot) + **Zendesk** (tickets).  
+- **Analytics**: **Google Analytics 4** (GA4) + **Tableau** (dashboards).  
+- **AI Recommendations**: **Dynamic Yield** integration for personalized product suggestions.  
+
+---
+
+## **Phase 3: Define Permissions**  
+- **Em Can Act Solo**:  
+  - Set up Shopify store (theme, domain, product pages).  
+  - Configure Stripe payments and checkout flow.  
+  - Install TradeGecko for inventory sync.  
+  - Deploy Tidio chatbot and Zendesk integration.  
+  - Launch GA4 and Tableau dashboards.  
+  - Integrate Dynamic Yield for AI recommendations.  
+- **Rob Must Approve**:  
+  - Legal documents (Termly-generated policies).  
+  - Payment processor onboarding (Stripe or PayPal).  
+  - Tax nexus configuration (QuickBooks).  
+  - Refund policy automation (Automate.io).  
+  - Launch of first products (3–5 SKUs).  
+
+---
+
+## **Phase 4: Build with Proof**  
+1. **Shopify Setup**:  
+   - Create account, select theme, deploy via **Theme Kit** (GitHub).  
+   - **Artifact**: `shopify-store-created.md` (proof of domain and theme deployment).  
+2. **Stripe Integration**:  
+   - Connect Stripe API, configure fraud scoring.  
+   - **Artifact**: `stripe-checkout-test-passed.md` (successful test purchase).  
+3. **Oberlo Product Import**:  
+   - Sync 3–5 eco-friendly/smart home products.  
+   - **Artifact**: `oberlo-products-imported.md` (product list with AliExpress links).  
+4. **TradeGecko Setup**:  
+   - Link to Oberlo for real-time stock updates.  
+   - **Artifact**: `tradegecko-inventory-sync.md` (stock alert test triggered).  
+5. **Tidio + Zendesk**:  
+   - Deploy chatbot, set up ticket routing.  
+   - **Artifact**: `tidio-zendesk-integrated.md` (sample ticket resolved).  
+6. **GA4 + Tableau**:  
+   - Install GA4, configure Tableau dashboard.  
+   - **Artifact**: `ga4-tableau-setup-complete.md` (sample traffic report).  
+7. **Dynamic Yield Integration**:  
+   - Set up AI-driven product recommendations.  
+   - **Artifact**: `dynamic-yield-integrated.md` (sample recommendation test).  
+
+---
+
+## **Phase 5: Launch Tiny**  
+- **Products**: 3–5 SKUs (e.g., "Solar-Powered Lamp," "Smart Plug").  
+- **Channel**: Shopify only (initially).  
+- **Support**: Tidio chatbot + Zendesk for returns.  
+- **Analytics**: GA4 dashboard for traffic/sales.  
+- **Approval Required**: Rob must approve launch via `LIVE_CONTEXT_ADD: "Launch approved for 3 SKUs on Shopify."`  
+
+---
+
+## **Phase 6: Operate the Loop**  
+- **Daily Checks**:  
+  - GA4: Monitor traffic, bounce rates.  
+  - TradeGecko: Check stock alerts.  
+  - Stripe: Review fraud alerts.  
+- **Weekly Optimization**:  
+  - A/B test product descriptions (via **Copy.ai**).  
+  - Adjust Tidio chatbot responses.  
+  - Test Dynamic Yield recommendations.  
+- **Monthly Expansion**:  
+  - Add 2–3 new SKUs via Oberlo or Spocket.  
+  - Expand to Amazon/Ebay (if approved).  
+
+---
+
+## **Failure Scenarios**  
+- **Payment Failure**: If Stripe setup fails, switch to PayPal.  
+  - **Action**: `NOTIFY: "Stripe onboarding failed—switching to PayPal."`  
+- **Legal Block**: If Termly policies are not approved, halt product launch.  
+- **Inventory Issue**: If TradeGecko sync fails, use Spocket as fallback.  
+  - **Action**: `NOTIFY: "TradeGecko sync failed—switching to Spocket."`  
+- **Shopify Downtime**: If Shopify is unavailable, switch to WooCommerce.  
+  - **Action**: `NOTIFY: "Shopify downtime—switching to WooCommerce."`  
+
+---
+
+## **State Storage**  
+- **Artifacts**: Stored in `memory/creations/` (e.g., `shopify-store-created.md`).  
+- **Resume Logic**: If interrupted, check latest artifact to resume (e.g., if `stripe-checkout-test-passed.md` exists, proceed to Oberlo import).  
+
+**FILE_CONTENT_END**  
+
+**SCRATCH_ADD: Refined the gated autonomous shop plan with backup strategies (WooCommerce, PayPal, Spocket), AI-driven recommendations (Dynamic Yield), and failure scenarios. No actions taken—waiting for Rob's approval to proceed.**
+
+---
