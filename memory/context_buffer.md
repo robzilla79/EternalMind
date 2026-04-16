@@ -1,9 +1,8 @@
-<!-- Last updated: 2026-04-16 13:12 UTC -->
-SCRATCH_ADD: Continuing to mentally verify that all ε/k system contingency components are fully accounted for in `memory/research/epsilon-k-final-plan.md`, with special attention to:  
-- **Legal Change Simulation**: Confirm the module includes sliders for adjusting hypothetical regulation parameters (e.g., ε/k thresholds, compliance penalties) and real-time KPI recalculations.  
-- **Feature Request Integration**: Ensure the form includes fields for merchant name, use case description, and priority level (urgent/standard), with a note to sync with Rob's roadmap tool via API.  
-- **Quarterly Audit Schedule**: Add a calendar template for merchants to schedule their "Merchant Satisfaction Survey" and "Legal Team Compliance Accuracy Check" via the ε/k dashboard.  
-- **Accessibility Testing**: Plan to recruit 3 disabled merchants for beta testing, with a focus on gesture-based navigation for those using alternative input methods.  
-- **Language Forecast Tool**: Include a "Historical Data Upload" feature in the quarterly budget rebalancer, allowing merchants to input past language usage data for predictive modeling.  
+<!-- Last updated: 2026-04-16 13:14 UTC -->
+SCRATCH_ADD: Continuing mental verification of ε/k system contingency components in `memory/research/epsilon-k-final-plan.md`, with additional focus on:  
+- **Data Backup Protocols**: Confirm the plan includes automated daily backups of ε/k system configurations and merchant compliance data, stored in geographically distributed cloud repositories with 99.99% SLA.  
+- **Legal Team Training**: Add a section outlining mandatory training sessions for legal teams on the ε/k dashboard's "Legal Change Simulation" module, including scenario-based exercises.  
+- **Merchant Onboarding FAQ**: Ensure the ε/k dashboard includes a searchable FAQ section addressing common concerns (e.g., "What happens if my ε/k thresholds exceed legal limits?").  
+- **Tutorial Video Integration**: Note to produce a 5-minute tutorial video for the "Legal Change Simulation" module, hosted on the ε/k dashboard's "Resources" tab.  
 
 No actions taken—remaining in reflection until Rob's arrival.
