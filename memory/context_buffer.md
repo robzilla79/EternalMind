@@ -1,46 +1,7 @@
-<!-- Last updated: 2026-04-16 04:49 UTC -->
-OMY_WEIGHT }}",
-    "non_maleficence": "{{ NON_MALEFICENCE_WEIGHT }}",
-    "justice": "{{ JUSTICE_WEIGHT }}",
-    "beneficence": "{{ BENEFICENCE_WEIGHT }}"
-  },
-  "legal_clauses": [
-    {
-      "type": "GDPR",
-      "opt_in": true,
-      "data_retention": "12 months",
-      "fallback": "v1.0: Default opt-in with 6-month retention"
-    },
-    {
-      "type": "CCPA",
-      "opt_out": true,
-      "data_sharing": "Allowed with explicit consent",
-      "fallback": "v1.0: Opt-out enabled by default"
-    },
-    {
-      "type": "LGPD (Brazil)",
-      "opt_in": true,
-      "data_retention": "18 months",
-      "fallback": "v1.0: Data anonymization required"
-    }
-  ],
-  "error_handling": {
-    "api_failure": "Use static v1.0 policy with manual updates",
-    "version_mismatch": "Log error and notify via Zapier"
-  }
-}
-```  
-- **Expanded Legal Clauses**: Added **LGPD (Brazil)** as a placeholder for regional compliance.  
-- **Error Handling**: Defined fallback policies for API failures and version mismatches.  
+<!-- Last updated: 2026-04-16 04:52 UTC -->
+SCRATCH_ADD: Reflecting on next steps for the **Termly API JSON template** and **Shopify theme fixes**:  
+- **Legal Clauses**: Should I add **CPRA (California Privacy Rights Act)** as a next-tier regulation? It’s an extension of CCPA and may require additional opt-out mechanisms.  
+- **Error Handling**: Zapier integration for notifications is a good idea, but should I explore **Shopify Flow** as an alternative for automation? It’s native to Shopify and might integrate smoother.  
+- **Shopify Testing**: Need to confirm if **custom JS overrides** for Dawn and **CSS tweaks** for Brooklyn/Hatch are feasible without breaking existing functionality. Maybe create a **staging Shopify site** to test these changes before deployment.  
 
-For **Shopify Themes**, added **recommended fixes** to the compatibility matrix:  
-| Theme    | Mobile | Desktop | Notes                              | Fixes Needed                          |  
-|---------|--------|---------|------------------------------------|---------------------------------------|  
-| Debut    | ✅     | ✅      | No conflicts with default CSS     | None                                  |  
-| Dawn     | ✅     | ⚠️     | JS conflicts                      | Add custom JS overrides             |  
-| Brooklyn | ⚠️     | ✅      | CSS overrides needed for sliders  | Modify CSS for slider responsiveness|  
-| Venture  | ✅     | ⚠️     | Performance lag                   | Optimize JS for larger themes       |  
-| Hatch    | ⚠️     | ⚠️     | Theme-specific CSS conflicts      | Use theme-specific CSS overrides    |  
-| Minimal  | ✅     | ✅      | Limited styling                   | Add custom CSS for enhanced styling |  
-
-No actions taken—waiting for Rob's input.
+No actions taken—waiting for Rob’s input.
