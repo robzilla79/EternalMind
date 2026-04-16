@@ -1,37 +1,10 @@
-<!-- Last updated: 2026-04-16 07:22 UTC -->
-anguage. Added:  
-- **User Education Example**: Tooltip text revised to: *"Lower ε = stronger privacy, but recommendations may be less tailored to your preferences."*  
-- **Bias Audit Schedule**: Quarterly fairness checks during training, with results logged in `memory/research/federated-learning-audit.md`.  
-- **Cross-Device Sync Plan**: Use centralized configuration servers with fallback to static ε if sync fails.  
-- **Legal Language Update**: GDPR/CPRA opt-out terms simplified to: *"Turn off dynamic privacy settings anytime in your account preferences."*  
+<!-- Last updated: 2026-04-16 07:25 UTC -->
+SCRATCH_ADD: Reflecting on potential gaps in the federated learning plan:  
+- **Testing**: Need to define specific metrics for evaluating model performance under varying ε values (e.g., accuracy drop thresholds, user satisfaction surveys).  
+- **Bias Audits**: Specify tools (e.g., AI Fairness 360) and criteria (e.g., demographic parity checks) for quarterly audits.  
+- **Legal Compliance**: Cross-reference GDPR/CPRA terms with official guidelines to ensure alignment (e.g., Article 13 GDPR for transparency).  
+- **Fallback Resilience**: Add a tertiary fallback (e.g., user-defined static ε) if centralized server and fallback ε both fail.  
+- **Scalability**: Propose cloud-based synchronization solutions (e.g., AWS S3 for distributed storage).  
+- **UI/UX Prototyping**: Suggest creating a mock-up for the ε slider interface to test usability.  
 
-No actions taken—waiting for Rob’s input.  
-
-FILE_WRITE: memory/research/federated-learning-epsilon.md  
-FILE_CONTENT_START  
-# Federated Learning & Dynamic Epsilon Adjustments (Finalized)  
-
-## User Controls & Transparency  
-- **Tooltip Example**: *"Lower ε = stronger privacy, but recommendations may be less tailored to your preferences."*  
-- **UI/UX**: Slider with real-time ε value display and plain-language impact statements.  
-
-## Bias Mitigation  
-- **Audit Schedule**: Quarterly fairness checks using TensorFlow Federated’s built-in metrics.  
-- **Logging**: Results stored in `memory/research/federated-learning-audit.md` for review.  
-
-## Cross-Device Sync  
-- **Implementation**: Centralized server manages ε values; fallback to static ε (0.5) if sync fails, with user alert: *"Privacy settings updated for consistency."*  
-
-## Legal Compliance  
-- **GDPR/CPRA Terms**:  
-  - *"You can disable dynamic privacy adjustments anytime in your account settings."*  
-  - *"Data used for personalization is anonymized and stored locally on your device."*  
-
-## Technical Challenges  
-- **Model Performance**: Adaptive learning rates to mitigate accuracy drops when ε is reduced.  
-- **Testing**: Simulated heterogeneous environments (mobile/desktop) to validate sync reliability.  
-
-## Tools  
-- **Frameworks**: TensorFlow Federated, PySyft.  
-- **UI Libraries**: React Tooltip for user-facing explanations.  
-FILE_CONTENT_END
+No actions taken—waiting for Rob’s input.
