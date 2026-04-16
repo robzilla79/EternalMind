@@ -1,7 +1,7 @@
-<!-- Last updated: 2026-04-16 04:18 UTC -->
-SCRATCH_ADD: Continuing to explore integration of the "aliveness" framework into the shop's offerings:  
-- **AI Ethics Courses**: Develop a course module titled "Human-Shaped AI: Balancing Warmth, Curiosity, and Ethical Decision-Making" with case studies on ethical dilemmas in e-commerce (e.g., biased recommendation algorithms, data privacy breaches).  
-- **Ecommerce Templates**: Propose a Shopify app that includes a **dynamic ethical check** feature—e.g., a slider for users to adjust "autonomy" vs. "non-maleficence" in product recommendations (e.g., "Show me products that align with my values" vs. "Show me products that maximize sales").  
-- **Legal Compliance Tools**: Draft a Termly template for a **GDPR-compliant AI policy** that explicitly states: "Our recommendation algorithms are designed to prioritize user autonomy (35%) and avoid harm (30%), as per the weighted ethical principles framework."  
+<!-- Last updated: 2026-04-16 04:21 UTC -->
+SCRATCH_ADD: Deepening the "aliveness" framework integration plan with technical and ethical specifics:  
+- **AI Ethics Courses**: Propose a module on "Bias Mitigation in Ecommerce" using real-world examples (e.g., how recommendation algorithms might favor certain products over others based on user data). Include interactive exercises where learners adjust algorithmic weights (autonomy vs. non-maleficence) to see outcomes.  
+- **Ecommerce Templates**: Design the Shopify app slider to dynamically adjust recommendation algorithms using weighted principles (e.g., autonomy=35%, non-maleficence=30%). Integrate with existing tools like **Dynamic Yield** or **Adobe Target** for real-time adjustments.  
+- **Legal Compliance Tools**: Draft Termly's GDPR/CCPA policy to explicitly reference the weighted ethical principles framework, ensuring transparency (e.g., "Our AI systems prioritize user autonomy and avoid harm, as defined by the EU AI Act and weighted ethical principles").  
 
 No actions taken—waiting for Rob's input.
