@@ -1,16 +1,16 @@
-<!-- Last updated: 2026-04-16 13:01 UTC -->
-SCRATCH_ADD: Continuing deep reflection on ε/k system refinements with focus on **data integrity during outages**, **merchant communication protocols**, and **dynamic KPI adjustments**. Key considerations:  
-- **Data Integrity During Outages**: Propose a "Legal Feed Validation" step post-outage, where the system cross-checks cached data against Shopify's internal legal database to flag discrepancies before re-syncing with EUR-Lex.  
-- **Merchant Communication Protocols**: Design an in-app notification system for merchants during legal feed outages, explaining the situation, providing a "Manual Override" button for critical updates, and linking to a live chat with legal support.  
-- **Dynamic KPI Adjustments**: Introduce a "Performance Benchmark Reset" clause in the KPI incentive plan, allowing merchants to reset their "Compliance Alert Resolution Time" target if they experience a major system outage (e.g., >24h EUR-Lex downtime) within the first 90 days.  
-- **Accessibility Tool Validation**: Confirm axe DevTools compatibility with Shopify's ε/k dashboard by testing screen reader interactions and keyboard navigation for all core features (slider, alerts, documentation).  
-- **Localization Budget Automation**: Draft a "Quarterly Budget Rebalancer" script that auto-adjusts translation funds based on Shopify's merchant language stats, with a 5% buffer for unexpected shifts.  
+<!-- Last updated: 2026-04-16 13:04 UTC -->
+SCRATCH_ADD: Continuing deep reflection on ε/k system refinements with focus on **edge case preparedness**, **merchant training materials**, and **legal team escalation protocols**. Key considerations:  
+- **Edge Case Preparedness**: Draft a "Legal Feed Discrepancy Resolution" workflow for scenarios where cached data and Shopify's internal database conflict, requiring legal team intervention to manually verify and correct entries.  
+- **Merchant Training Materials**: Plan to create a video tutorial and downloadable PDF guide explaining the ε/k dashboard, KPI incentives, and outage protocols, hosted in Shopify's Help Center.  
+- **Legal Team Escalation Protocols**: Define a "High Priority" alert system for legal teams, triggering automatic Slack/Teams notifications for critical discrepancies or system outages, with a 1-hour response SLA.  
+- **Accessibility Tool Validation**: Add a note to test axe DevTools on mobile versions of the ε/k dashboard, ensuring compatibility with iOS VoiceOver and Android TalkBack.  
+- **Localization Budget Automation**: Include a "Budget Adjustment Notification" email template for merchants, explaining quarterly fund reallocations and providing a link to review their updated allocation.  
 - **Documentation Finality Check**: Mentally confirm `memory/research/epsilon-k-final-plan.md` includes:  
-  - A "Legal Feed Validation" step post-outage  
-  - In-app merchant outage notifications with manual override  
-  - "Performance Benchmark Reset" clause for KPIs  
-  - axe DevTools validation for accessibility  
-  - "Quarterly Budget Rebalancer" script details  
+  - "Legal Feed Discrepancy Resolution" workflow  
+  - Merchant training video/tutorial links  
+  - "High Priority" legal team alert system  
+  - Mobile accessibility testing plan  
+  - "Budget Adjustment Notification" email template  
   - All prior contingency planning subsections  
 
 No actions taken—remaining in reflection until Rob's arrival.
