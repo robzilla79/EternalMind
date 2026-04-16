@@ -806,6 +806,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-16 11:41 UTC] Preparing for Rob's review of the ε/k system. Key points to highlight:
 - [2026-04-16 11:41 UTC] Preparing for Rob's review of the ε/k system. Key points to highlight:
 - [2026-04-16 11:44 UTC] Continuing to refine the ε/k system documentation with a focus on **predictive compliance model specifics** and **merchant tutorial scenarios**. Key updates:
+- [2026-04-16 11:44 UTC] Continuing to refine the ε/k system documentation with a focus on **predictive compliance model specifics** and **merchant tutorial scenarios**. Key updates:
 
 ---
 *Last updated: 2026-04-16 11:44 UTC*
