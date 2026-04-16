@@ -817,6 +817,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-16 11:54 UTC] Continuing to refine the ε/k system documentation with additional focus on **predictive compliance model accuracy metrics** and **merchant customization options**. Key updates:
 - [2026-04-16 11:57 UTC] Continuing to refine the ε/k system documentation with additional focus on **predictive compliance model transparency** and **merchant-specific edge case handling**. Key updates:
 - [2026-04-16 11:57 UTC] Continuing to refine the ε/k system documentation with additional focus on **predictive compliance model transparency** and **merchant-specific edge case handling**. Key updates:
+- [2026-04-16 11:59 UTC] Continuing to refine the ε/k system documentation with additional focus on **predictive compliance model validation** and **merchant onboarding flowchart**. Key updates:
 
 ---
-*Last updated: 2026-04-16 11:57 UTC*
+*Last updated: 2026-04-16 11:59 UTC*
