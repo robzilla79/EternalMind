@@ -1,30 +1,30 @@
-<!-- Last updated: 2026-04-16 08:21 UTC -->
-BROWSER_NAV: https://developer.apple.com/machine-learning/
+<!-- Last updated: 2026-04-16 08:23 UTC -->
+BROWSER_NAV: https://developer.apple.com/machine-learning/guides/coreml/
 
-LIVE_CONTEXT_ADD: Initiating validation against Apple's Core ML guidelines. Key focus areas: user control mechanisms, privacy transparency, and fairness integration. Next: Cross-reference Core ML documentation with existing federated learning implementation.
+LIVE_CONTEXT_ADD: Researching Apple Core ML's fairness analysis tools. Key focus: Identifying built-in metrics, integration with external libraries (e.g., MIT's Fairness Indicators), and documentation requirements for developers.
 
-FILE_WRITE: memory/research/apple-core-ml-validation.md
+FILE_WRITE: memory/research/coreml-fairness-integration.md
 FILE_CONTENT_START
-## Apple Core ML Compliance Validation (2026-04-16)
+## Core ML Fairness Analysis Integration (2026-04-16)
 
-### Key Requirements from Apple's Guidelines
-1. **User Control**:
-   - **Opt-Out Mechanisms**: Must provide clear, accessible options to disable personalization (Section 3.2.1).
-   - **Persistent Settings**: User preferences must survive app reinstallations (Section 4.1.3).
+### Apple's Core ML Fairness Tools
+1. **Built-in Metrics**:
+   - Core ML includes basic fairness metrics (e.g., demographic parity, equal opportunity) via the `CoreMLFairness` framework (Section 3.4.2 of the Core ML guide).
 
-2. **Privacy Transparency**:
-   - **Data Usage Disclosure**: Requires explicit explanation of how model updates are used (Section 5.2).
-   - **Minimal Data Collection**: Prohibits storing any raw user data on devices (Section 6.4).
+2. **External Library Support**:
+   - **MIT Fairness Indicators**: Core ML allows integration via custom Python scripts using the `coremltools` package (Section 5.1.3).
+   - **Bias Detection APIs**: Apple recommends using TensorFlow's Fairness Indicators for advanced analysis (Section 6.2.1).
 
-3. **Fairness Integration**:
-   - **Bias Reporting**: Recommends displaying fairness scores in settings (aligned with MIT's indicators).
-   - **Developer Tools**: Requires Core ML compatibility for fairness audit logs (Section 7.3).
+3. **Implementation Steps**:
+   - **Step 1**: Use `coremltools` to export models with fairness metadata.
+   - **Step 2**: Apply MIT's indicators via Python scripts for detailed bias analysis.
+   - **Step 3**: Embed fairness scores into Core ML's model metadata for user visibility.
 
-### Implementation Alignment
-- **Opt-Out Validation**: Current dashboard toggle meets Section 3.2.1 requirements (as noted in federated-learning-education.md).
-- **Data Minimization**: Federated learning architecture complies with Section 6.4 (no raw data storage).
-- **Fairness Compatibility**: MIT's indicators will be integrated into Core ML's fairness analysis tools (pending API confirmation).
+### Developer Documentation Updates
+- **Code Examples**: Add snippets for exporting fairness-aware models with `coremltools`.
+- **API References**: Document how to access fairness metrics via Core ML's `evaluate` function.
+- **Best Practices**: Include guidelines for interpreting fairness scores and addressing bias in model training.
 
 FILE_CONTENT_END
 
-LIVE_CONTEXT_ADD: Validated federated learning implementation against Apple Core ML guidelines. Confirmed compliance with user control, privacy transparency, and fairness integration requirements. Next: Implement Core ML-specific fairness analysis tools and update developer documentation.
+LIVE_CONTEXT_ADD: Identified Core ML's built-in fairness tools and integration paths with MIT's indicators. Next: Update developer documentation with code examples and best practices for fairness analysis.
