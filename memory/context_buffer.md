@@ -1,35 +1,35 @@
-<!-- Last updated: 2026-04-16 06:16 UTC -->
-SCRATCH_ADD: Expanding on **edge case testing** for fallback scripts and **ethical compliance checks** in chatbot interactions:  
+<!-- Last updated: 2026-04-16 06:19 UTC -->
+SCRATCH_ADD: Continuing to refine edge case scenarios and ethical compliance checks with additional considerations:  
 
 ---
 
-### **Edge Case Test Scenarios**  
-1. **Ambiguous User Input**:  
-   - *Scenario*: User types, "This product is broken."  
-   - *Expected Outcome*: EthicalBot flags the product for compliance review; fallback script offers a refund link.  
+### **Additional Edge Case Scenarios**  
+4. **Multilingual Support Failure**:  
+   - *Scenario*: User inputs a query in a language the chatbot doesn’t support (e.g., Navajo).  
+   - *Expected Outcome*: Fallback script detects unsupported language and redirects to a static "Language Not Supported" page with a contact form.  
 
-2. **Disabled User**:  
-   - *Scenario*: User relies on screen reader; chatbot response includes non-text elements (e.g., emojis).  
-   - *Expected Outcome*: Fallback script provides text-only response with alt-text descriptions.  
+5. **System Error During High Traffic**:  
+   - *Scenario*: Chatbot API crashes during a product launch event.  
+   - *Expected Outcome*: Fallback script displays a "Service Unavailable" message with a countdown to retry, while logging the error for later analysis.  
 
-3. **High-Volume Support Request**:  
-   - *Scenario*: Simultaneous 100+ users querying about a discontinued product.  
-   - *Expected Outcome*: Fallback script auto-redirects to a static FAQ page with product discontinuation notice.  
-
----
-
-### **Ethical Compliance Check Enhancements**  
-- **Bias Detection in Recommendations**:  
-  - Integrate fairness-aware algorithms to ensure product recommendations don’t disproportionately exclude certain demographics (e.g., gender, age).  
-- **Transparency in AI Decisions**:  
-  - Add a "Why this recommendation?" button that explains the chatbot’s logic using simplified terms.  
-- **Human Escalation for Sensitive Issues**:  
-  - If a user mentions mental health concerns, the chatbot routes the query to a human support team with a pre-generated summary.  
+6. **Misinformation Detection**:  
+   - *Scenario*: User asks, "Is this product safe for children?"  
+   - *Expected Outcome*: EthicalBot cross-references product data with safety certifications; if uncertain, escalates to human review with a warning to the user.  
 
 ---
 
-### **Next Steps (Preparation for Rob’s Review)**  
-- Finalize edge case scenarios in `memory/research/chatbot-solutions.md`.  
-- Document fairness-aware algorithm integration plan in `memory/research/ethical-ai.md`.  
+### **Enhanced Ethical Compliance Measures**  
+- **Environmental Impact Mitigation**:  
+  - Optimize chatbot algorithms to reduce computational load, minimizing carbon footprint.  
+- **User Opt-Out Mechanism**:  
+  - Add a "Prefer Human Support" toggle in chatbot interface, bypassing AI and routing directly to a human agent.  
+- **Harmful Speech Filtering**:  
+  - Integrate real-time NLP filters to block toxic language, with fallback scripts redirecting users to a moderated support channel.  
+
+---
+
+### **Preparation for Rob’s Review**  
+- Finalize all edge cases and ethical measures in `memory/research/chatbot-solutions.md`.  
+- Document environmental impact mitigation and opt-out mechanisms in `memory/research/ethical-ai.md`.  
 
 No actions taken—waiting for Rob’s input.
