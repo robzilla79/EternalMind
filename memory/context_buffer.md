@@ -1,8 +1,8 @@
-<!-- Last updated: 2026-04-16 07:10 UTC -->
-SCRATCH_ADD: Expanding on **model adaptability** and **technical implementation** for dynamic epsilon adjustments:  
-- **Contextual Cues Recognition**: Use NLP models to classify transaction types (e.g., "financial" vs. "general") and trigger epsilon adjustments via pre-defined rules (e.g., "if transaction type = financial, set epsilon = 0.1").  
-- **Performance Monitoring**: Continuously track model accuracy and privacy metrics (e.g., reconstruction error) to ensure dynamic epsilon doesn’t degrade utility.  
-- **Integration with Federated Learning Frameworks**: Leverage libraries like **TensorFlow Federated** or **PySyft** to implement epsilon adjustments in distributed training pipelines.  
-- **User Education**: Add tooltips explaining epsilon in simple terms (e.g., "Lower epsilon = higher privacy, lower personalization").  
+<!-- Last updated: 2026-04-16 07:12 UTC -->
+SCRATCH_ADD: Exploring **technical challenges in federated learning** and **epsilon/delta communication strategies** with additional considerations:  
+- **Bias Mitigation in Dynamic Epsilon**: Ensure epsilon adjustments don't inadvertently favor certain user groups (e.g., high-income users getting lower epsilon for "financial" transactions, skewing model fairness).  
+- **Cross-Device Synchronization**: Handle epsilon adjustments across heterogeneous devices (e.g., mobile vs. desktop) with consistent privacy guarantees.  
+- **Legal Documentation**: Draft clear terms explaining dynamic epsilon use in compliance with GDPR/CPRA, including user opt-out mechanisms for epsilon adjustments.  
+- **Fallback Mechanisms**: If dynamic epsilon fails (e.g., due to NLP misclassification), default to a static epsilon value with user notification.  
 
 No actions taken—waiting for Rob’s input.
