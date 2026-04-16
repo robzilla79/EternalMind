@@ -1,24 +1,24 @@
-<!-- Last updated: 2026-04-16 09:49 UTC -->
-to refine **real-time ε/k visualization** and **backend integration** with technical specifics:
+<!-- Last updated: 2026-04-16 09:52 UTC -->
+SCRATCH_ADD: Continuing to refine **real-time ε/k visualization** and **backend integration** with deeper technical and compliance considerations:
 
-- **WebSocket Integration for Real-Time Updates**:  
-  - Implement WebSocket connections between the Shopify admin frontend and the backend API to enable instant updates when ε/k values change. This avoids page reloads and ensures merchants see adjustments in real-time.  
-  - Use Shopify’s built-in WebSocket support or third-party libraries like Socket.IO for compatibility with existing infrastructure.  
+- **WebSocket Scalability**:  
+  - Implement connection pooling and load balancing for WebSocket traffic using Shopify’s infrastructure or third-party services like AWS API Gateway.  
+  - Set up rate limiting on WebSocket endpoints to prevent abuse (e.g., 100 connections per merchant per minute).  
 
-- **Federated Learning Model Adaptation**:  
-  - Design the backend API to accept ε/k values and dynamically adjust the federated learning model’s parameters (e.g., noise injection levels for differential privacy).  
-  - Use a proxy model or precomputed adjustments to minimize retraining overhead, ensuring low-latency responses during slider adjustments.  
+- **Federated Learning Proxy Model Updates**:  
+  - Schedule periodic retraining of the proxy model (e.g., hourly) to ensure it aligns with the latest ε/k settings and federated learning parameters.  
+  - Use versioned proxy models (e.g., `proxy_v2`) to allow gradual rollouts and rollback in case of issues.  
 
-- **Redis Caching Strategy**:  
-  - Store frequently accessed ε/k settings in Shopify’s Redis instance, with TTL (time-to-live) values set to 30 minutes to balance performance and data freshness.  
-  - Implement Redis keys with merchant-specific prefixes (e.g., `merchant_12345:epsilon`) to avoid conflicts and enable scalable caching.  
+- **Redis Namespace Isolation**:  
+  - Enforce strict Redis key naming conventions (e.g., `merchant_<id>:epsilon`, `merchant_<id>:k_anonymity`) to prevent key collisions.  
+  - Implement Redis ACLs to restrict access to ε/k data by merchant ID, ensuring isolation between tenants.  
 
-- **Test Mode Implementation**:  
-  - Leverage Shopify’s audience targeting tools (e.g., segments based on customer behavior or demographics) to apply ε/k settings to a subset of users during testing.  
-  - Use Shopify’s native analytics (e.g., Google Analytics integration) or third-party tools like Mixpanel to track real-time performance metrics (e.g., click-through rates, conversion rates) during Test Mode.  
+- **Test Mode Analytics Granularity**:  
+  - Add segmentation in analytics tools to isolate Test Mode data (e.g., `test_mode=true` filter) and ensure it doesn’t interfere with production metrics.  
+  - Include real-time alerts for anomalies during Test Mode (e.g., sudden drops in conversion rates).  
 
-- **Security Enhancements**:  
-  - Encrypt all WebSocket communications using TLS 1.3 and implement JWT-based authentication for API endpoints to prevent unauthorized access.  
-  - Log all ε/k adjustments in Shopify’s Redis with timestamps and merchant IDs for audit trails, ensuring compliance with GDPR and CCPA.  
+- **Compliance Audit Trail Enhancements**:  
+  - Store ε/k adjustment logs in Shopify’s Redis with immutable timestamps and merchant IDs, and periodically back them up to Shopify’s S3-compatible storage.  
+  - Add a compliance dashboard in the Shopify admin to export ε/k logs as CSV/JSON for audits.  
 
 No actions taken—remaining in reflection until Rob's arrival.
