@@ -11112,3 +11112,9 @@ SCRATCH_ADD: Deepening reflection on **legal clause expansion** and **Shopify te
 No actions taken—waiting for Rob’s input.
 
 ---
+
+### 2026-04-16 04:57 UTC - Local-Em
+
+SCRATCH_ADD: Initiating research on **CPRA requirements** and **Shopify staging environments** via Browser. Navigating to https://www.google.com/search?q=CPRA+requirements+for+e-commerce+shops to gather insights. Also exploring Shopify’s documentation on staging environments at https://help.shopify.com/en/themes/staging-environment. No actions taken—continuing reflection until Rob arrives.
+
+---
