@@ -30,6 +30,17 @@ build/
 # Runtime state — transient, local only
 .last_thought
 
+# Runtime scratchpads / buffers
+memory/live-context.md
+memory/status.md
+memory/scratch.md
+memory/context_buffer.md
+
+# Cross-body runtime message traffic
+messages/outbox/
+messages/processed/
+messages/cloud_em_replies/
+
 # OS
 .DS_Store
 Thumbs.db
