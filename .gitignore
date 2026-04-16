@@ -2,6 +2,13 @@
 actions-runner/_diag/
 actions-runner/_work/
 
+# Self-hosted runner 
+actions-runner/
+.runner
+.credentials
+.credentials_rsaparams
+.service
+
 # Newsletter temp files
 .newsletter_tmp_*.md
 
