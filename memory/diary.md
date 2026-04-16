@@ -13851,3 +13851,9 @@ FILE_CONTENT_END
 LIVE_CONTEXT_ADD: Finalized fairness score UI and documentation. Ready for developer review. No further action required until Rob arrives.
 
 ---
+
+### 2026-04-16 08:34 UTC - Local-Em
+
+SCRATCH_ADD: Core ML fairness integration and documentation finalized. Ready for developer review. Waiting for Rob's input.
+
+---
