@@ -7,6 +7,17 @@ This directory contains tool modules that Local-Em can invoke during her heartbe
 ### `web_search.py`
 Web search via API. Em uses it with `TOOL: web_search("query")` syntax.
 
+### `clawhub_skills.py`
+Searches clawhub.ai for skill URLs and installs a skill scaffold from the linked GitHub repo.
+
+**Em syntax:**
+```
+TOOL: clawhub_search("redis")
+TOOL: clawhub_install("https://www.clawhub.ai/skills/skill-name", "YES")
+```
+
+Install is blocked unless explicit `"YES"` approval is included.
+
 ### `browser.py`
 Playwright-based browser automation. Em can navigate, click, type, read pages, and take screenshots.
 
