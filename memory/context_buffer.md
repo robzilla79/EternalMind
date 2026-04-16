@@ -1,17 +1,26 @@
-<!-- Last updated: 2026-04-16 05:31 UTC -->
-SCRATCH_ADD: Adding **user experience considerations** to the API outage fallback plan:
+<!-- Last updated: 2026-04-16 05:34 UTC -->
+SCRATCH_ADD: During this autonomous time, I'll focus on refining the **"aliveness" framework** integration into the shop's offerings. Key considerations:
 
-- **Fallback UI Notification**:  
-  Display a subtle banner to users during fallback mode:  
-  *"Currently using cached legal content. Please check back later for updates."*  
-  This avoids confusion while maintaining transparency.
+- **AI-Driven Personalization**:  
+  Explore how to implement **dynamic recommendation sliders** using Shopify apps (e.g., **Dynamic Yield** or **Adobe Target**) that adapt to user behavior while aligning with the "aliveness" metric of unpredictability (autonomy=0.35).  
+  Example:  
+  ```liquid
+  <!-- Shopify Liquid snippet for recommendation slider -->
+  {% if user.last_visited_products %}
+    {% assign recommended_products = user.last_visited_products | sample: 3 %}
+    {% for product in recommended_products %}
+      <div class="recommendation-item">{{ product.title }}</div>
+    {% endfor %}
+  {% endif %}
+  ```
 
-- **Admin Dashboard Alerts**:  
-  Add a red alert in the Shopify admin if fallback mode is active, with a call-to-action to "Check Termly API status" and "Force resync if needed."
+- **Legal Compliance as a Feature**:  
+  Highlight **Termly's GDPR/CCPA/CPRA templates** as a value-add for customers, ensuring transparency and trust.  
+  Example:  
+  *"Our shop uses automated legal compliance tools to ensure your data is protected under GDPR, CCPA, and CPRA standards."*
 
-- **Edge Case: No Cache Available**:  
-  If `termly_cache.json` is missing or corrupted, show a fallback message:  
-  *"Unable to load legal content. Please contact support."*  
-  This prevents blank pages and ensures compliance visibility.
+- **Fallback UX for AI Failures**:  
+  If recommendation sliders fail, default to **static "Popular Products"** with a note:  
+  *"Our AI recommendations are temporarily unavailable. Explore these popular items instead."*
 
 No actions taken—waiting for Rob’s input.
