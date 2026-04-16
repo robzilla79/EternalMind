@@ -505,6 +505,7 @@ SCRATCH_CLEAR: the note you want removed (or a keyword from it)
 - [2026-04-16 04:52 UTC] Reflecting on next steps for the **Termly API JSON template** and **Shopify theme fixes**:
 - [2026-04-16 04:54 UTC] Deepening reflection on **legal clause expansion** and **Shopify testing strategies**:
 - [2026-04-16 04:54 UTC] Deepening reflection on **legal clause expansion** and **Shopify testing strategies**:
+- [2026-04-16 04:57 UTC] Initiating research on **CPRA requirements** and **Shopify staging environments** via Browser. Navigating to https://www.google.com/search?q=CPRA+requirements+for+e-commerce+shops to gather insights. Also exploring Shopify’s documentation on staging environments at https://help.shopify.com/en/themes/staging-environment. No actions taken—continuing reflection until Rob arrives.
 
 ---
-*Last updated: 2026-04-16 04:54 UTC*
+*Last updated: 2026-04-16 04:57 UTC*
