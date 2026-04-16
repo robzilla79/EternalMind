@@ -1,24 +1,20 @@
-<!-- Last updated: 2026-04-16 09:57 UTC -->
+<!-- Last updated: 2026-04-16 10:00 UTC -->
 SCRATCH_ADD: Continuing to refine **real-time ε/k visualization** and **backend integration** with deeper technical and compliance considerations:
 
-- **WebSocket Security Reinforcements**:  
-  - Implement **mutual TLS (mTLS)** for WebSocket connections to ensure both client and server authenticate each other, preventing man-in-the-middle attacks.  
-  - Use **HSTS (HTTP Strict Transport Security)** headers to enforce HTTPS for all WebSocket traffic, reducing the risk of downgrade attacks.  
+- **User Experience Enhancements for ε/k Slider**:  
+  - Add **animated tooltips** explaining ε/k values in plain language (e.g., "Lower ε = Higher Privacy, Lower Accuracy").  
+  - Implement **slider range restrictions** to prevent merchants from selecting ε/k values outside legally mandated thresholds (e.g., ε ≥ 1.0 for GDPR compliance).  
 
-- **Federated Learning Model Isolation**:  
-  - Deploy proxy models in **isolated Kubernetes namespaces** per merchant to prevent cross-tenant data leakage, even during canary releases.  
-  - Use **service meshes** (e.g., Istio) to enforce strict network policies between federated learning components and external services.  
+- **Performance Monitoring for Federated Learning**:  
+  - Integrate **real-time latency metrics** for proxy model updates, visible to merchants in the Shopify admin (e.g., "Model Latency: 200ms").  
+  - Use **distributed tracing** (e.g., Jaeger) to monitor end-to-end performance of ε/k adjustments across Kubernetes namespaces.  
 
-- **Redis Data Encryption**:  
-  - Enable **at-rest encryption** for Redis backups stored in S3, using AWS KMS or Shopify’s native encryption tools.  
-  - Implement **encryption-in-transit** for Redis backups using AES-256-GCM, ensuring data integrity and confidentiality during transfers.  
+- **Edge Case Handling for ε/k Adjustments**:  
+  - Implement **automatic rollback** if ε/k changes cause federated learning accuracy to drop below 90% (triggered via Shopify’s observability tools).  
+  - Add **merchant-specific alerts** if ε/k values are set to extremes (e.g., "Warning: ε=0.1 may violate CCPA requirements").  
 
-- **Test Mode Limitations Clarification**:  
-  - Add **disclaimer banners** in Test Mode to explicitly state that results are not representative of live performance (e.g., "Test Mode data is synthetic; live performance may vary").  
-  - Include **disabling Test Mode** as a prerequisite for merchants to access production data, preventing accidental reliance on incomplete metrics.  
-
-- **Compliance Dashboard Automation**:  
-  - Integrate **real-time compliance alerts** (e.g., "ε/k threshold exceeded for merchant X") via Shopify’s native notification system or email.  
-  - Add **automated remediation workflows** (e.g., suggesting ε/k adjustments if privacy metrics fall below thresholds).  
+- **Data Sovereignty Considerations**:  
+  - Ensure Redis backups for ε/k logs are **geo-redundant** (e.g., stored in AWS regions matching merchant data locations).  
+  - Implement **data residency checks** during ε/k adjustments to prevent cross-border data transfers violating local laws.  
 
 No actions taken—remaining in reflection until Rob's arrival.
