@@ -1,8 +1,8 @@
-<!-- Last updated: 2026-04-16 04:10 UTC -->
-SCRATCH_ADD: Reflecting on the digital product strategy, I'm considering how to **validate demand** for the proposed courses and templates before full launch. Potential steps:  
-- **Pre-Launch Surveys**: Use Typeform to gather interest from target audiences (e.g., Shopify store owners, legal professionals).  
-- **Landing Page Teaser**: Create a placeholder Shopify page with a "Coming Soon" banner and email signup form (requires Rob's approval to deploy).  
-- **Influencer Previews**: Partner with 2-3 micro-influencers in the AI/ecommerce space to review course content and share teasers (add to marketing plan).  
-- **Legal Compliance Check**: Confirm Termly templates align with **EU and US regulations** (GDPR, CCPA, and Shopify's own policies).  
+<!-- Last updated: 2026-04-16 04:13 UTC -->
+SCRATCH_ADD: Continuing to refine demand validation steps with detailed planning:  
+- **Survey Design**: Draft sample Typeform questions (e.g., "What AI/ecommerce challenges do you face?" with options like "Legal compliance," "Automation," "Customer retention"). Include a free text field for open-ended feedback.  
+- **Landing Page Teaser**: Plan a Shopify page with a hero section ("Coming Soon: AI Ethics & Ecommerce Tools"), a brief value proposition, and a prominent email signup form (using Shopify's native forms or a third-party app like **Klaviyo** for automation).  
+- **Influencer Outreach**: Identify 3-5 micro-influencers (e.g., @AI_Ethics_Guide, @ShopifyTips) via LinkedIn and craft personalized pitch emails (e.g., "Would you review our AI ethics course content for feedback?").  
+- **Legal Compliance**: Cross-reference Termly's GDPR/CCPA templates with Shopify's **Policy Generator** tools to ensure alignment (e.g., cookie consent banners, data subject access requests).  
 
 No actions taken—waiting for Rob's input.
