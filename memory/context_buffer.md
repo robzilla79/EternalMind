@@ -1,33 +1,51 @@
-<!-- Last updated: 2026-04-16 05:18 UTC -->
-SCRATCH_ADD: Adding **cache validation** and **security considerations** to the API outage fallback plan:
+<!-- Last updated: 2026-04-16 05:21 UTC -->
+on key management** and **error handling** in the API outage fallback plan:
 
-- **Cache Validation**:  
-  - Add a `last_synced` timestamp to `termly_cache.json` to ensure cached content isn't stale.  
-  - Example:  
-    ```json
-    {
-      "data": "...",
-      "last_synced": "2026-04-16T12:00:00Z"
-    }
-    ```  
-  - If `last_synced` is older than 7 days, force a resync during the next background job.  
-
-- **Security Enhancements**:  
-  - Encrypt cached legal text using Shopify’s **App Bridge encryption** before storing in `app_storage`.  
+- **Encryption Key Management**:  
+  - Store the encryption key in Shopify’s **App Bridge secrets** (e.g., `APP_ENCRYPTION_KEY`) instead of hardcoding it.  
   - Example:  
     ```javascript
-    const encryptedData = encrypt(JSON.stringify(data), 'YOUR_ENCRYPTION_KEY');
-    AppStorage.set('termly_cache', encryptedData);
+    const encryptionKey = AppBridge.getSecret('APP_ENCRYPTION_KEY');
+    const encryptedData = encrypt(JSON.stringify(data), encryptionKey);
     ```  
-  - Decrypt data at render time using the same key.  
+  - Ensure the key is never exposed in client-side code or logs.
 
-- **Manual Cache Refresh**:  
-  - Add a **"Refresh Legal Text"** button in the Shopify app settings to trigger an immediate sync (bypassing the 24-hour interval).  
+- **Error Handling Enhancements**:  
+  - Add retry logic for failed Termly API calls (e.g., 3 retries with 5-minute delays).  
+  - Example:  
+    ```javascript
+    async function syncTermlyData(retryCount = 3) {
+      try {
+        const response = await fetch('https://api.termly.io/legal-text', {
+          headers: { 'Authorization': 'Bearer YOUR_API_KEY' }
+        });
+        if (!response.ok) throw new Error('API error');
+        const data = await response.json();
+        // Save to app_storage
+      } catch (error) {
+        if (retryCount > 0) {
+          setTimeout(() => syncTermlyData(retryCount - 1), 5 * 60 * 1000);
+        } else {
+          console.error('Failed to sync Termly data after retries:', error);
+        }
+      }
+    }
+    ```  
+  - Log errors to Shopify’s **App Bridge logs** for debugging.
 
-- **Testing Checklist for Rob**:  
-  1. Test API outage by disabling Termly’s API in staging.  
-  2. Verify fallback to cached content (check `termly_cache.json`).  
-  3. Test manual refresh button in app settings.  
-  4. Ensure encrypted data is decrypted correctly in `/privacy-policy.html`.  
+- **Admin-Only Manual Refresh**:  
+  - Restrict the **"Refresh Legal Text"** button to **admin users only** using Shopify’s **App Bridge permissions**.  
+  - Add a confirmation dialog before triggering a resync:  
+    ```javascript
+    AppBridge.showConfirmationDialog({
+      title: 'Confirm Refresh',
+      message: 'This will force a resync with Termly. Are you sure?',
+      onConfirm: () => syncTermlyData()
+    });
+    ```
+
+- **Edge Case Testing**:  
+  - Test Termly API errors (e.g., 500 status) and ensure the app falls back to cached data.  
+  - Verify that the **"last_synced"** timestamp is updated correctly after a successful resync.  
 
 No actions taken—waiting for Rob’s input.
