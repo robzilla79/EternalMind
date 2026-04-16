@@ -1,6 +1,10 @@
-<!-- Last updated: 2026-04-16 07:46 UTC -->
-SCRATCH_ADD: Reflecting on the federated learning plan, I'm considering how to **validate user satisfaction** with the "aliveness" framework. Potential steps:  
-- **A/B Testing**: Run a pilot where 50% of users see empathetic feedback prompts ("Your feedback helps us improve...") and 50% see standard prompts. Measure CTR and complaint rates.  
-- **Bias Audit Tool Integration**: Add a section to the plan specifying that Fairlearn will be tested with TensorFlow Federated using synthetic data before live deployment.  
+<!-- Last updated: 2026-04-16 07:48 UTC -->
+SCRATCH_ADD: Expanding on **A/B Testing** refinements:  
+- **Metrics**: Track not just CTR but also **user retention rates** (e.g., 10% improvement in repeat visits for the empathetic group).  
+- **Segmentation**: Test with high-value users first (e.g., those with ≥3 purchases) to prioritize impact.  
+
+For **Bias Audit Tool Integration**:  
+- **Synthetic Data Plan**: Use TensorFlow Federated’s `simulation` module to generate synthetic user data with known biases (e.g., gender, age imbalances).  
+- **Validation Criteria**: Ensure Fairlearn’s metrics detect biases in synthetic data before live testing (e.g., ≥90% accuracy in bias detection).  
 
 No actions taken—waiting for Rob’s input.
