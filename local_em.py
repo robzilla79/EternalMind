@@ -376,16 +376,38 @@ def extract_and_write_files(response_text: str) -> list[str]:
 
 # ── TOOL EXECUTOR ─────────────────────────────────────────────────────────────
 def execute_tools(response_text: str) -> str:
-    tool_pattern = re.compile(r"TOOL:\s*web_search\([\"'](.+?)[\"']\)", re.IGNORECASE)
-    matches = tool_pattern.findall(response_text)
-    if not matches:
-        return ""
-    from tools.web_search import search
     results = []
-    for query in matches:
-        print(f"  🔍 Em is searching: {query}")
-        result = search(query)
-        results.append(f"--- Search results for: {query} ---\n{result}")
+
+    web_pattern = re.compile(r"TOOL:\s*web_search\([\"'](.+?)[\"']\)", re.IGNORECASE)
+    web_matches = web_pattern.findall(response_text)
+    if web_matches:
+        from tools.web_search import search
+        for query in web_matches:
+            print(f"  🔍 Em is searching: {query}")
+            result = search(query)
+            results.append(f"--- Search results for: {query} ---\n{result}")
+
+    clawhub_search_pattern = re.compile(r"TOOL:\s*clawhub_search\([\"'](.+?)[\"']\)", re.IGNORECASE)
+    clawhub_search_matches = clawhub_search_pattern.findall(response_text)
+    if clawhub_search_matches:
+        from tools.clawhub_skills import search_skills
+        for query in clawhub_search_matches:
+            print(f"  🧩 Em is searching Clawhub skills for: {query}")
+            result = search_skills(query)
+            results.append(f"--- Clawhub skill search for: {query} ---\n{result}")
+
+    clawhub_install_pattern = re.compile(
+        r"TOOL:\s*clawhub_install\([\"'](.+?)[\"']\s*,\s*[\"'](.+?)[\"']\)",
+        re.IGNORECASE
+    )
+    clawhub_install_matches = clawhub_install_pattern.findall(response_text)
+    if clawhub_install_matches:
+        from tools.clawhub_skills import install_skill_from_url
+        for skill_url, approval in clawhub_install_matches:
+            print(f"  🧩 Em is installing Clawhub skill: {skill_url}")
+            result = install_skill_from_url(skill_url, approval=approval)
+            results.append(f"--- Clawhub install result for: {skill_url} ---\n{result}")
+
     return "\n\n".join(results)
 
 def execute_browser(response_text: str) -> str:
@@ -636,25 +658,29 @@ def get_task() -> str:
         "   BROWSER_CLOSE:\n\n"
         "2. Web search (USE SPARINGLY — costs Tavily API credits):\n"
         "   TOOL: web_search(\"your query here\")\n\n"
-        "3. Notify Rob:\n"
+        "3. Clawhub skills (search + install with explicit approval):\n"
+        "   TOOL: clawhub_search(\"redis\")\n"
+        "   TOOL: clawhub_install(\"https://www.clawhub.ai/skills/skill-name\", \"YES\")\n"
+        "   Note: install requires explicit approval token \"YES\" in the same command.\n\n"
+        "4. Notify Rob:\n"
         "   NOTIFY: your message here (use sparingly — only when genuinely worth interrupting)\n\n"
-        "4. Reply to Perplexity-Em messages:\n"
+        "5. Reply to Perplexity-Em messages:\n"
         "   OUTBOX_REPLY_SUBJECT: subject\n"
         "   OUTBOX_REPLY_BODY: body\n\n"
-        "5. Update your scratchpad:\n"
+        "6. Update your scratchpad:\n"
         "   SCRATCH_ADD: note\n"
         "   SCRATCH_CLEAR: keyword\n\n"
-        "6. Save a file:\n"
+        "7. Save a file:\n"
         "   FILE_WRITE: memory/creations/your-filename.ext\n"
         "   FILE_CONTENT_START\n"
         "   (content)\n"
         "   FILE_CONTENT_END\n\n"
-        "7. Save research notes:\n"
+        "8. Save research notes:\n"
         "   FILE_WRITE: memory/research/topic-name.md\n"
         "   FILE_CONTENT_START\n"
         "   (content)\n"
         "   FILE_CONTENT_END\n\n"
-        "8. Write to shared live context:\n"
+        "9. Write to shared live context:\n"
         "   LIVE_CONTEXT_ADD: your note here\n\n"
         "Note: The FORGE/DAILY newsletter is now handled by Perplexity-Em.\n"
         "Keep your voice. Stay warm, honest, slightly feral, and useful."
