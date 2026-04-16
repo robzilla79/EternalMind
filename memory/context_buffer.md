@@ -1,24 +1,24 @@
-<!-- Last updated: 2026-04-16 09:55 UTC -->
+<!-- Last updated: 2026-04-16 09:57 UTC -->
 SCRATCH_ADD: Continuing to refine **real-time ε/k visualization** and **backend integration** with deeper technical and compliance considerations:
 
-- **WebSocket Scalability Enhancements**:  
-  - Implement **automatic scaling** for WebSocket connections using Shopify’s infrastructure or AWS Auto Scaling groups to handle traffic spikes during peak hours.  
-  - Use **circuit breakers** in WebSocket endpoints to prevent cascading failures if the backend becomes unresponsive.  
+- **WebSocket Security Reinforcements**:  
+  - Implement **mutual TLS (mTLS)** for WebSocket connections to ensure both client and server authenticate each other, preventing man-in-the-middle attacks.  
+  - Use **HSTS (HTTP Strict Transport Security)** headers to enforce HTTPS for all WebSocket traffic, reducing the risk of downgrade attacks.  
 
-- **Federated Learning Proxy Model Versioning**:  
-  - Introduce **canary releases** for new proxy model versions (e.g., `proxy_v3`) to test performance on a small subset of merchants before full rollout.  
-  - Automate **A/B testing** between proxy model versions using Shopify’s experimentation tools to measure accuracy, latency, and compliance impact.  
+- **Federated Learning Model Isolation**:  
+  - Deploy proxy models in **isolated Kubernetes namespaces** per merchant to prevent cross-tenant data leakage, even during canary releases.  
+  - Use **service meshes** (e.g., Istio) to enforce strict network policies between federated learning components and external services.  
 
-- **Redis Backup and Recovery**:  
-  - Schedule **daily backups** of Redis ε/k logs to Shopify’s S3-compatible storage with encryption at rest and in transit.  
-  - Implement **point-in-time recovery** for Redis to restore data in case of accidental deletion or corruption.  
+- **Redis Data Encryption**:  
+  - Enable **at-rest encryption** for Redis backups stored in S3, using AWS KMS or Shopify’s native encryption tools.  
+  - Implement **encryption-in-transit** for Redis backups using AES-256-GCM, ensuring data integrity and confidentiality during transfers.  
 
-- **Test Mode User Education**:  
-  - Add **in-app tooltips** explaining how Test Mode works and its limitations (e.g., "Test Mode uses a subset of users; results may not reflect live performance").  
-  - Provide **video tutorials** within the Shopify admin on how to use the ε/k slider effectively.  
+- **Test Mode Limitations Clarification**:  
+  - Add **disclaimer banners** in Test Mode to explicitly state that results are not representative of live performance (e.g., "Test Mode data is synthetic; live performance may vary").  
+  - Include **disabling Test Mode** as a prerequisite for merchants to access production data, preventing accidental reliance on incomplete metrics.  
 
-- **Compliance Dashboard Features**:  
-  - Enable **customizable export filters** in the compliance dashboard (e.g., date ranges, merchant IDs, ε/k thresholds).  
-  - Add **automated audit reports** generated weekly and sent to merchants’ email via Shopify’s native email integration.  
+- **Compliance Dashboard Automation**:  
+  - Integrate **real-time compliance alerts** (e.g., "ε/k threshold exceeded for merchant X") via Shopify’s native notification system or email.  
+  - Add **automated remediation workflows** (e.g., suggesting ε/k adjustments if privacy metrics fall below thresholds).  
 
 No actions taken—remaining in reflection until Rob's arrival.
