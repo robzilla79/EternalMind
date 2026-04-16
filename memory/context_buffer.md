@@ -1,39 +1,35 @@
-<!-- Last updated: 2026-04-16 10:59 UTC -->
-ATCH_ADD: Internal reflection on ε/k system's cross-browser/device compatibility and merchant feedback integration:
+<!-- Last updated: 2026-04-16 11:02 UTC -->
+SCRATCH_ADD: Internal reflection on ε/k system's global legal compliance, user education, and technical resilience:
 
 ---
 
-### **Cross-Browser/Device Considerations**  
-- **JavaScript Disabled**: Fallback to ε=2.5 with static tooltips (as previously noted).  
-- **Mobile vs. Desktop**: Ensure slider UI is responsive and touch-friendly. Test on iOS/Android for latency under ε=1.8.  
-- **Accessibility**: Add ARIA labels for screen readers to explain ε/k trade-offs.  
+### **Global Legal Compliance Expansion**  
+- **Beyond GDPR/CCPA**: Ensure ε/k tooltip includes "Do Not Track" options for non-EU/US users (e.g., under the EU-US Privacy Shield and Swiss-US Privacy Shield).  
+- **Data Localization**: Add opt-in for data storage regions (e.g., EU servers for GDPR users, US servers for CCPA users).  
 
-### **Merchant Feedback Integration**  
-- **Feedback Channels**: In-app form + email link for merchants to report issues (e.g., "ε=1.8 causes 15% lower conversion").  
-- **Automated Prioritization**: Flag feedback with "high impact" (e.g., "ε=1.8 breaks Klaviyo integration") for immediate review.  
-- **Transparency**: Share anonymized feedback stats with merchants (e.g., "72% of users prefer ε=1.8 for personalization").  
+### **User Education Enhancements**  
+- **Interactive Tutorials**: Add a 30-second video explaining ε/k trade-offs (e.g., "ε=1.8 = 98% privacy, 72% personalization").  
+- **FAQ Section**: Include "Why can't I set ε=0.5?" (Answer: ε=0.5 breaks GDPR compliance; minimum ε=1.8).  
 
-### **CPRA Compliance Check**  
-- **California-Specific Language**: Add "Do Not Sell My Personal Info" link in ε/k tooltip (per CPRA).  
-- **Opt-Out Mechanism**: Allow users to lock ε=2.5 permanently via account settings.  
+### **Technical Resilience Checks**  
+- **API Rate Limiting**: Ensure ε/k backend can handle 10,000+ API requests/second during peak traffic (e.g., Black Friday).  
+- **Caching Strategy**: Cache ε=1.8 settings for 1 hour to reduce backend load during high-traffic periods.  
 
-### **Performance Benchmarking**  
-- **Key Metrics**:  
-  - Latency under ε=1.8 vs. ε=2.5 (target: <200ms).  
-  - Conversion rate impact (target: ≥70% of default Shopify personalization).  
-- **Tools**: Use Shopify's Speed Score + custom A/B tests.  
+### **Merchant Support for Small Businesses**  
+- **Pre-Built Templates**: Offer ε/k-compliant Shopify theme templates for merchants without developers.  
+- **Priority Support**: Flag small businesses (<10 employees) for faster ε/k integration reviews.  
 
 ---
 
-### **Prepared Answers for Rob's Questions**  
-1. **Q: How will merchants handle ε/k conflicts with their existing tools?**  
-   - **A**: Automated prioritization of ε/k settings + dedicated support tickets for integration issues.  
+### **Prepared Answers for Rob's Potential Questions**  
+1. **Q: How will ε/k handle users in regions outside GDPR/CCPA?**  
+   - **A**: Global tooltip with "Do Not Track" options + data localization opt-ins.  
 
-2. **Q: What if CPRA users opt out of ε=1.8?**  
-   - **A**: Lock ε=2.5 via account settings, with 99% privacy compliance.  
+2. **Q: What if users don't watch the ε/k tutorial video?**  
+   - **A**: Default to ε=1.8 with 98% privacy compliance; users can adjust via slider.  
 
-3. **Q: How do you measure ε/k's success?**  
-   - **A**: Speed Score, conversion rates, and merchant feedback surveys (every 30 days).  
+3. **Q: How will ε/k impact small businesses without developers?**  
+   - **A**: Pre-built ε/k-compliant Shopify themes + priority support for quick integration.  
 
 ---
 
