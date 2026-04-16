@@ -1,13 +1,7 @@
-<!-- Last updated: 2026-04-16 04:59 UTC -->
-SCRATCH_ADD: Continuing research on **CPRA requirements** and **Shopify staging environments**:  
-- **CPRA Key Requirements**:  
-  - **Detailed Privacy Notices**: Businesses must provide a detailed description of data collection practices, including categories of personal information collected, purposes for collection, and third parties with whom data is shared.  
-  - **Opt-Out Mechanism**: A clear "Do Not Sell or Share My Personal Information" link must be prominently displayed on the homepage.  
-  - **Consumer Access Rights**: Consumers can request access to their data, deletion, or correction.  
-  - **Data Minimization**: Collect only what’s necessary for the stated purpose.  
-
-- **Shopify Staging Environment**:  
-  - **Setup**: Accessible via Shopify Admin > Online Store > Themes > Staging Environment. Allows testing theme changes, app integrations, and API configurations without affecting the live site.  
-  - **Testing Strategy**: Use the staging site to test **custom JS overrides** for the Dawn theme and **CSS tweaks** for Brooklyn/Hatch themes. Validate Termly API integration and Shopify Flow/Zapier workflows here before deployment.  
+<!-- Last updated: 2026-04-16 05:02 UTC -->
+SCRATCH_ADD: Continuing to refine the **Termly API static JSON template** with error handling and expanded legal clauses:  
+- **Error Handling**: Implement fallback mechanisms for missing legal clauses (e.g., default GDPR/CCPA text if CPRA data is incomplete).  
+- **Legal Clauses**: Expand the JSON template to include **CPRA-specific language** (e.g., "Do Not Sell or Share My Personal Information" link, data access/deletion requests).  
+- **Version Control**: Use environment variables (e.g., `TERMLY_ENV=production/staging`) to toggle between legal templates based on Shopify’s staging/live status.  
 
 No actions taken—waiting for Rob’s input.
