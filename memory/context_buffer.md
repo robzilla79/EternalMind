@@ -1,20 +1,24 @@
-<!-- Last updated: 2026-04-16 10:00 UTC -->
+<!-- Last updated: 2026-04-16 10:03 UTC -->
 SCRATCH_ADD: Continuing to refine **real-time ε/k visualization** and **backend integration** with deeper technical and compliance considerations:
 
-- **User Experience Enhancements for ε/k Slider**:  
-  - Add **animated tooltips** explaining ε/k values in plain language (e.g., "Lower ε = Higher Privacy, Lower Accuracy").  
-  - Implement **slider range restrictions** to prevent merchants from selecting ε/k values outside legally mandated thresholds (e.g., ε ≥ 1.0 for GDPR compliance).  
+- **Rate Limiting and Abuse Prevention**:  
+  - Implement **rate limiting** on WebSocket endpoints to prevent abuse (e.g., 100 requests/minute per merchant).  
+  - Use **IP whitelisting** for Redis backups to ensure only authorized systems can access sensitive ε/k logs.  
 
-- **Performance Monitoring for Federated Learning**:  
-  - Integrate **real-time latency metrics** for proxy model updates, visible to merchants in the Shopify admin (e.g., "Model Latency: 200ms").  
-  - Use **distributed tracing** (e.g., Jaeger) to monitor end-to-end performance of ε/k adjustments across Kubernetes namespaces.  
+- **Audit Trail for ε/k Adjustments**:  
+  - Log all ε/k changes in **immutable audit logs** stored in Shopify’s S3 with tamper-evident timestamps.  
+  - Enable **merchant-specific audit dashboards** to review historical ε/k settings and compliance impacts.  
 
-- **Edge Case Handling for ε/k Adjustments**:  
-  - Implement **automatic rollback** if ε/k changes cause federated learning accuracy to drop below 90% (triggered via Shopify’s observability tools).  
-  - Add **merchant-specific alerts** if ε/k values are set to extremes (e.g., "Warning: ε=0.1 may violate CCPA requirements").  
+- **Fallback for Distributed Tracing**:  
+  - Configure **Jaeger fallback** to Shopify’s native observability tools if external tracing services fail.  
+  - Add **synthetic data testing** for distributed tracing to ensure accuracy during outages.  
 
-- **Data Sovereignty Considerations**:  
-  - Ensure Redis backups for ε/k logs are **geo-redundant** (e.g., stored in AWS regions matching merchant data locations).  
-  - Implement **data residency checks** during ε/k adjustments to prevent cross-border data transfers violating local laws.  
+- **Merchant Education on ε/k Trade-offs**:  
+  - Create **interactive ε/k simulators** in Shopify’s admin (e.g., "Try ε=1.0 vs ε=2.0 on sample data").  
+  - Include **legal disclaimers** in ε/k tooltips (e.g., "ε=0.5 may not meet GDPR requirements in Germany").  
+
+- **Data Sovereignty Testing**:  
+  - Run **automated data residency tests** during ε/k adjustments using Shopify’s compliance tools.  
+  - Simulate **cross-border data transfer scenarios** to validate blocking logic for non-compliant regions.  
 
 No actions taken—remaining in reflection until Rob's arrival.
