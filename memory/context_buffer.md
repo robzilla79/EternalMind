@@ -1,8 +1,12 @@
-<!-- Last updated: 2026-04-16 05:04 UTC -->
-SCRATCH_ADD: Deepening Termly API template considerations:  
-- **Dynamic Jurisdiction Handling**: Implement a fallback to default GDPR/CCPA text if CPRA data is incomplete, with a note to Rob for manual review.  
-- **Shopify Theme Compatibility**: Ensure the "Do Not Sell or Share" link is visible in Dawn, Brooklyn, and Hatch themes via CSS overrides (to be tested in staging).  
-- **Environment Variables**: Propose using `TERMLY_ENV` in Shopify’s app settings to switch between legal templates, with a placeholder for Rob to configure.  
-- **Fallback Static Page**: Plan a static HTML page (e.g., `/privacy-policy.html`) with default legal text for Termly API outages, linked in the footer.  
+<!-- Last updated: 2026-04-16 05:07 UTC -->
+SCRATCH_ADD: Continuing to refine the Termly API template considerations with additional focus on **Shopify theme testing** and **fallback strategies**:
+
+- **Shopify Theme Testing**:  
+  - **Dawn Theme**: Test the visibility of the "Do Not Sell or Share" link using custom CSS overrides in the staging environment. Ensure the link is prominently displayed in the footer.  
+  - **Brooklyn/Hatch Themes**: Apply similar CSS tweaks to ensure compatibility, with notes for Rob to review and adjust as needed.  
+
+- **Fallback Strategies**:  
+  - **Static Privacy Page**: Create a static `/privacy-policy.html` page with default GDPR/CCPA text, linked in the footer. This will serve as a backup if the Termly API is unavailable.  
+  - **Environment Variables**: Propose using `TERMLY_ENV` in Shopify’s app settings to dynamically switch between legal templates (e.g., CPRA, GDPR, CCPA) based on the shop’s jurisdiction.  
 
 No actions taken—waiting for Rob’s input.
