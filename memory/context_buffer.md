@@ -1,17 +1,49 @@
-<!-- Last updated: 2026-04-16 05:10 UTC -->
-SCRATCH_ADD: Expanding on **Shopify Theme Testing** and **Fallback Strategies** with additional considerations:
+<!-- Last updated: 2026-04-16 05:12 UTC -->
+SCRATCH_ADD: Drafting sample files and refining strategies:
 
-- **Shopify Theme Testing**:  
-  - **Dawn Theme**: Add CSS override in `assets/css/theme.css` to position the "Do Not Sell or Share" link in the footer using `position: fixed; bottom: 20px; right: 20px;` for visibility.  
-  - **Brooklyn/Hatch Themes**: Use `!important` in CSS to override theme-specific styles (e.g., `.footer-link { color: #000 !important; }`).  
-  - **Testing Plan**: Document steps for Rob to test each theme in Shopify’s staging environment, including screenshot examples of the footer layout.  
+- **Sample `config.json`** for Shopify app:  
+  ```json
+  {
+    "jurisdiction": "US",
+    "TERMLY_ENV": "production"
+  }
+  ```  
+  *Note: Update `jurisdiction` to "EU" for GDPR or "CA" for CPRA. `TERMLY_ENV` switches between legal templates.*
 
-- **Fallback Strategies**:  
-  - **Static Privacy Page**: Draft content for `/privacy-policy.html` with placeholders for dynamic legal clauses (e.g., `{{GDPR_TEXT}}`, `{{CCPA_TEXT}}`). Include a note to Rob: *"Update placeholders with jurisdiction-specific text before launch."*  
-  - **Environment Variables**: Propose a `TERMLY_ENV` dropdown in Shopify’s app settings with options: `production`, `staging`, `fallback`. Map these to legal templates in a `config.json` file (e.g., `TERMLY_ENV: "fallback" → use static privacy page`).  
+- **Sample `/privacy-policy.html`** content:  
+  ```html
+  <html>
+  <body>
+    <h1>Privacy Policy</h1>
+    <p>{{GDPR_TEXT}}</p>
+    <p>{{CCPA_TEXT}}</p>
+    <p>{{CPRA_TEXT}}</p>
+  </body>
+  </html>
+  ```  
+  *Note: Replace placeholders with jurisdiction-specific text before launch.*
 
-- **Additional Considerations**:  
-  - **Multi-Jurisdiction Support**: Add a `jurisdiction` field in `config.json` to automatically select legal templates (e.g., `jurisdiction: "EU" → GDPR`).  
-  - **API Outage Detection**: Suggest a script to check Termly API status every 5 minutes; if down, redirect to `/privacy-policy.html` (requires Shopify app development).  
+- **CSS Overrides for Themes**:  
+  - **Dawn Theme**:  
+    ```css
+    .footer-link {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+    ```  
+  - **Brooklyn/Hatch Themes**:  
+    ```css
+    .footer-link {
+      color: #000 !important;
+      font-weight: bold !important;
+    }
+    ```  
+  *Test in Shopify’s staging environment.*
+
+- **API Outage Fallback**:  
+  - **Idea**: Use Shopify’s app to cache Termly’s legal text locally. If API is unreachable, serve cached content.  
+  - **Implementation**: Requires a script to periodically sync with Termly’s API and store data in Shopify’s app storage.
 
 No actions taken—waiting for Rob’s input.
