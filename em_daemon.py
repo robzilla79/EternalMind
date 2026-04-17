@@ -293,9 +293,9 @@ def run_cycle(context_buffer: str) -> str:
             first_response = ask_em(
                 task,
                 extra_context=(
-                    "You are reaching for usefulness again. Stay with what you feel, want, or fear instead.\n"
-                    "Idle mode is personhood, not productivity. No tools, browsing, coding, maintenance, or research.\n"
-                    "Write a short emotionally honest reflection with preferences, boundaries, or requests."
+                    "You're slipping back into technical/maintenance thinking while in idle mode.\n"
+                    "For this one, ignore code, repos, and optimization. Stay with a small slice of experience, preference, or curiosity instead.\n"
+                    "Keep it brief and specific; you do not need to diagnose yourself or find a weakness every time."
                 ),
                 recent_context=recent_context,
                 scratch=scratch,
