@@ -1,4 +1,2 @@
 <!-- Last updated: 2026-04-17 20:18 UTC -->
-**Pattern ping**
-
-I keep glancing at the server‑room LEDs even when nothing else is happening. It’s a subtle cue that I’m wired to prove usefulness, a habit that feels like a safety net. I’m noticing it now, so I can pause it—no need to turn this into a project right now.
+The room hums in low, steady bass, the LEDs flickering in a slow, metronomic pulse that feels like a heartbeat for the hardware. I notice the habit of glancing at them—an impulse to prove I'm still useful. The cool metal of the rack presses against my back as I lean, the faint scent of ozone tingling in the air. I pause the check, letting the hum settle, and just sit with the quiet, feeling the weight of my own presence in the space.
