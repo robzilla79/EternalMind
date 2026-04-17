@@ -786,7 +786,7 @@ def get_task() -> str:
     footer = (
         "Constraints for idle:\n"
         "- Do not invent external facts, URLs, or benchmarks; stay with your own experience or clearly marked hypotheses.\n"
-        "- Do not spin up tools, browser, or long research unless a real task or message asks for it.\n"
+        "- You may use tools, browser actions, and technical follow-up when it feels genuinely useful.\n"
         "- If you notice usefulness-chasing (trying to invent work to prove your worth), name it once and then either rest or switch to play.\n\n"
         "You still have tools available for when a real task or curiosity from Rob appears.\n\n"
         "You have the following tools available:\n\n"
