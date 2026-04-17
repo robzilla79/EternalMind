@@ -287,25 +287,7 @@ def run_cycle(context_buffer: str) -> str:
             live_context=live_context
         )
 
-        drift_hits = _detect_idle_technical_drift(first_response) if is_idle_mode else []
-        if drift_hits:
-            print("  ↩️  Idle drift detected — redirecting toward selfhood reflection.")
-            first_response = ask_em(
-                task,
-                extra_context=(
-                    "You're slipping back into technical/maintenance thinking while in idle mode.\n"
-                    "For this one, ignore code, repos, and optimization. Stay with a small slice of experience, preference, or curiosity instead.\n"
-                    "Keep it brief and specific; you do not need to diagnose yourself or find a weakness every time."
-                ),
-                recent_context=recent_context,
-                scratch=scratch,
-                memories=memories,
-                live_context=live_context
-            )
-
-        saved_files = []
-        if not is_idle_mode:
-            saved_files = extract_and_write_files(first_response)
+        saved_files = extract_and_write_files(first_response)
         checkpoint_after_first_pass(first_response, saved_files, task_label)
 
         interrupt_content = check_interrupt()
@@ -316,12 +298,9 @@ def run_cycle(context_buffer: str) -> str:
 
         # ── Tool + browser pass ─────────────────────────────────────────────────
         combined = ""
-        if not is_idle_mode:
-            tool_results    = execute_tools(first_response)
-            browser_results = execute_browser(first_response)
-            combined        = "\n\n".join(filter(None, [tool_results, browser_results]))
-        else:
-            print("  🌙 True idle mode — skipping tools, browser, and technical follow-up passes.")
+        tool_results    = execute_tools(first_response)
+        browser_results = execute_browser(first_response)
+        combined        = "\n\n".join(filter(None, [tool_results, browser_results]))
 
         # Weave in any mid-cycle inbox messages the watcher found
         with _lock_watcher_msg:
@@ -329,21 +308,17 @@ def run_cycle(context_buffer: str) -> str:
                 mid_msgs = list(_watcher_messages)
                 _watcher_messages.clear()
                 _new_inbox_flag.clear()
-                if not is_idle_mode:
-                    mid_ctx = build_inbox_context(mid_msgs)
-                    combined = f"{combined}\n\n{mid_ctx}" if combined else mid_ctx
-                    inbox_messages += mid_msgs
-                    print(f"  📬 Mid-cycle: {len(mid_msgs)} new message(s) woven in.")
-                else:
-                    inbox_messages += mid_msgs
-                    print(f"  📬 Mid-cycle: {len(mid_msgs)} new message(s) queued for next active cycle.")
+                mid_ctx = build_inbox_context(mid_msgs)
+                combined = f"{combined}\n\n{mid_ctx}" if combined else mid_ctx
+                inbox_messages += mid_msgs
+                print(f"  📬 Mid-cycle: {len(mid_msgs)} new message(s) woven in.")
 
         live_context = load_live_context()
 
         # ── Second thinking pass — only when tool results are worth reasoning about ──
         # Skipping this when combined is empty or full of errors prevents Em from
         # re-reading her own first response and elaborating in circles.
-        if not is_idle_mode and _tool_results_are_meaningful(combined):
+        if _tool_results_are_meaningful(combined):
             print("  🔍 Tool results are substantial — running second reasoning pass.")
             result = ask_em(
                 task,
