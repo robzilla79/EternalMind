@@ -13,12 +13,13 @@ echo   Ctrl+C for graceful shutdown
 echo   Or write 'shutdown' to memory/interrupt.md
 echo   Context: %OLLAMA_CONTEXT_LENGTH% tokens
 echo   Flash attention: %OLLAMA_FLASH_ATTENTION%
+echo   Model: gpt-oss:20b
 echo ===============================================
 echo.
 
 REM -- Rebuild local-em model (picks up Modelfile changes) --
-echo [0/2] Rebuilding local-em model...
-ollama create local-em -f Modelfile.qwen3
+echo [0/2] Rebuilding local-em model from gpt-oss:20b...
+ollama create local-em -f Modelfile.gptoss
 echo.
 
 REM -- Launch Telegram listener in its own window --
