@@ -613,7 +613,7 @@ def curiosity_cooled_down() -> bool:
 
 def mark_thought_time():
     with open(LAST_THOUGHT_PATH, "w") as f:
-        f.write(datetime.datetime.now(timezone.utcnow()).isoformat())
+        f.write(datetime.datetime.now(timezone.utc).isoformat())
 
 # ── LOAD SOUL ─────────────────────────────────────────────────────────────────
 def load_memories() -> str:
