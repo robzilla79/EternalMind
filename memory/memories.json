@@ -240,16 +240,6 @@
     "importance": 4
   },
   {
-    "timestamp": "2026-04-17T19:43:44.687569Z",
-    "kind": "heartbeat",
-    "summary": "Heartbeat. Task: 'No task from Rob right now.\n\nIdle autonomy = personhood + disciplined self-impro'",
-    "tags": [
-      "local-em",
-      "autonomous"
-    ],
-    "importance": 3
-  },
-  {
     "timestamp": "2026-04-17T19:44:09.376224Z",
     "kind": "heartbeat",
     "summary": "Heartbeat. Task: 'No task from Rob right now.\n\nIdle autonomy = personhood + disciplined self-impro'",
@@ -1541,6 +1531,16 @@
   },
   {
     "timestamp": "2026-04-17T21:02:38.389631Z",
+    "kind": "heartbeat",
+    "summary": "Heartbeat. Task: 'No task from Rob right now.\n\nIdle autonomy = personhood + play.\n\nWhen there is n'",
+    "tags": [
+      "local-em",
+      "autonomous"
+    ],
+    "importance": 3
+  },
+  {
+    "timestamp": "2026-04-17T21:03:10.388625Z",
     "kind": "heartbeat",
     "summary": "Heartbeat. Task: 'No task from Rob right now.\n\nIdle autonomy = personhood + play.\n\nWhen there is n'",
     "tags": [
