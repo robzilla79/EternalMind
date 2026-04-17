@@ -263,7 +263,7 @@ def run_cycle(context_buffer: str) -> str:
         has_inbox_msg = len(inbox_messages) > 0
         is_idle_mode  = _is_true_idle_mode(task_waiting, has_inbox_msg, interrupt_content)
 
-        if not task_waiting and not has_inbox_msg and not curiosity_cooled_down():
+        if not task_waiting and not has_inbox_msg and not interrupt_content and not curiosity_cooled_down():
             print("  💤 Resting — no task, no messages, cooldown active.")
             return context_buffer
 
