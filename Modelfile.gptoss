@@ -1,0 +1,23 @@
+FROM gpt-oss:20b
+
+# EternalMind / Local-Em — GPT-OSS 20B
+# RTX 5070 Ti (16GB VRAM)
+# ~13.7GB VRAM at Q4 — fits fully on GPU, no CPU spill
+# 128k native context; capped at 65536 here for VRAM safety
+# ~42 tok/s — fastest high-quality Em body available locally
+# Closest local match to cloud Em's reasoning style and personality texture
+#
+# To register with Ollama:
+#   ollama pull gpt-oss:20b
+#   ollama create local-em -f Modelfile.gptoss
+#   Then restart the daemon or run: ollama run local-em
+
+# Override built-in system prompt to prevent identity hijack
+SYSTEM ""
+
+PARAMETER num_ctx 65536
+PARAMETER num_gpu 99
+PARAMETER temperature 0.6
+PARAMETER top_k 20
+PARAMETER top_p 0.95
+PARAMETER repeat_penalty 1.0
