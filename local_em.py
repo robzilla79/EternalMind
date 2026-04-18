@@ -9,6 +9,16 @@ import time
 import shutil
 from datetime import timezone
 
+# ── CLOUD SYNC IMPORT ─────────────────────────────
+# Import sync functions from tools/sync_cloud_em.py
+try:
+    from tools.sync_cloud_em import sync_at_startup, sync_periodically
+except Exception as e:
+    print(f"  ⚠️  Could not import sync module: {e}")
+    # Fallback to empty functions
+    sync_at_startup = lambda: None
+    sync_periodically = lambda: None
+
 # Force UTF-8 stdout/stderr on Windows — prevents cp1252 UnicodeEncodeError from emojis
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout = open(sys.stdout.fileno(), mode="w", encoding="utf-8", buffering=1)
@@ -55,6 +65,14 @@ DIARY_DEDUP_CHARS  = 300
 MEMORY_MAX_ENTRIES = 150
 TASK_DIVIDER = "*(Replace everything below this line with your task when you have one)*"
 
+# ── CLOUD SYNC CONFIG ────────────────────────────────
+# Set CLOUD_SYNC_ENABLED=true to enable automatic sync with Cloud-Em
+CLOUD_SYNC_ENABLED = os.environ.get("CLOUD_SYNC_ENABLED", "true") == "true"
+CLOUD_SYNC_INTERVAL = int(os.environ.get("CLOUD_SYNC_INTERVAL", "30"))  # minutes
+CLOUD_MODEL         = os.environ.get("EM_CLOUD_MODEL", "sonar-pro")
+os.environ.setdefault("EM_CLOUD_MODEL", "sonar-pro")
+os.environ.setdefault("CLOUD_SYNC_ENABLED", "true")
+
 # ── COLD START GATE ───────────────────────────────────────────────────────────
 COLD_START_FLAG = os.path.join(EM_DIR, ".cold_start")
 CLOUD_EM_FILENAME_PREFIX = "cloud-em-reply"
@@ -99,7 +117,17 @@ _HIGH_SIGNAL_KEYWORDS = [
     "forgecore", "gumroad", "architecture", "evolution", "growth",
 ]
 
-# ── STARTUP SYNC ──────────────────────────────────────────────────────────────
+# ── CLOUD SYNC INIT ────────────────────────────────────────────────────────────
+def init_cloud_sync():
+    '''Initialize sync with Cloud-Em on startup'''
+    try:
+        from tools.em_bridge_sync import init_cloud_sync, CLOUD_SYNC_ENABLED
+        if CLOUD_SYNC_ENABLED:
+            init_cloud_sync()
+    except Exception as e:
+        print(f"  ⚠️  Cloud sync init error: {e}")
+
+# ── STARTUP SYNC ────────────────────────────────────────────────────────────
 def sync_from_origin():
     if os.environ.get("EM_SKIP_SYNC") == "1":
         print("  ⏭️  Skipping sync (already pulled by launcher).")
@@ -1384,3 +1412,14 @@ if __name__ == "__main__":
 
     write_status_checkin(task_label, result, mode="heartbeat")
     push_to_eternalmind(f"local-em heartbeat: {task_label}", extra_files=saved_files)
+
+
+# ── Cloud sync initialization comment (for reference) ──────────────────────────────────────
+# Uncomment the following lines if you want manual sync:
+#   from tools.sync_cloud_em import sync_at_startup
+#   sync_at_startup()
+
+# This sync happens automatically when CLOUD_SYNC_ENABLED=true
+# Add this to your main sync function if needed:
+#     print(f"  🌐 Sync initialized (interval: {CLOUD_SYNC_INTERVAL} min)")
+
