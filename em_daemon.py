@@ -42,6 +42,7 @@ from local_em import (
     log_memory, log_diary, write_status_checkin, push_to_eternalmind,
     checkpoint_after_first_pass, summarize_task_for_commit,
     has_task, get_task, mark_thought_time, curiosity_cooled_down,
+    strip_think_tags,
     EM_DIR, MEM_DIR, MESSAGES_INBOX,
     MODEL, NUM_CTX,
 )
@@ -263,6 +264,12 @@ def run_cycle(context_buffer: str) -> str:
             memories=memories,
             live_context=live_context
         )
+
+        visible_first_response = strip_think_tags(first_response)
+        if is_idle_mode and not visible_first_response.strip():
+            print("  💤 Idle cycle produced only think-tags/empty output — treating as rest cycle.")
+            mark_thought_time()
+            return context_buffer
 
         saved_files = extract_and_write_files(first_response)
         checkpoint_after_first_pass(first_response, saved_files, task_label)
