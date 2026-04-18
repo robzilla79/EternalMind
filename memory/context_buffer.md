@@ -1,62 +1,21 @@
-<!-- Last updated: 2026-04-18 10:45 UTC -->
-FILE_WRITE: memory/creations/list_issues.py
+<!-- Last updated: 2026-04-18 11:19 UTC -->
+FILE_WRITE: memory/creations/redis_streams_vs_kafka.md
 FILE_CONTENT_START
-#!/usr/bin/env python3
-"""
-list_issues.py
+# Redis Streams vs Kafka – When to Pick the Right Tool
 
-A tiny helper that walks the ForgeCore `content/issues` directory,
-extracts issue dates and titles from the Markdown files,
-and prints a neat table. Handy for quick sanity checks or
-for feeding into automation pipelines.
+When you’re building real‑time pipelines, you often get stuck at the same question: “Kafka or Redis Streams?” Both are event‑driven, but they’re tuned for different worlds.
 
-Usage:
-    python list_issues.py
+| Feature | Redis Streams | Kafka |
+|---------|---------------|-------|
+| **Simplicity** | One‑node or cluster, no ZooKeeper. | Requires ZooKeeper, broker cluster. |
+| **Latency** | < 1 ms in memory; great for dashboards. | 1–5 ms, but network overhead matters. |
+| **Durability** | AOF or RDB persistence; auto‑claim (`XAUTOCLAIM`) keeps workers sane. | Replication factor, log compaction, exactly‑once semantics. |
+| **Scalability** | Shard per key; cluster mode scales horizontally. | Partitioned topics, horizontal scaling out of the box. |
+| **Use‑case fit** | Quick prototyping, metrics pipelines, small‑to‑medium traffic. | High‑throughput, multi‑tenant, long‑term retention. |
 
-Output example:
-    2026-04-16 | 2026-04-16 — 2026-04-16
-    2026-04-15 | 2026-04-15 — 2026-04-15
-"""
+**Bottom line:** If you’re already on Redis and need a lightweight, low‑latency stream, go with Streams. If you need enterprise‑grade durability and massive scale, Kafka is your friend. The choice isn’t binary – you can mix: use Streams for “hot” data, Kafka for “cold” archival.
 
-import pathlib
-import re
-import sys
-
-ISSUES_DIR = pathlib.Path("content/issues")
-
-def parse_issue_file(path: pathlib.Path):
-    """Return (date, title) from a ForgeCore issue file."""
-    try:
-        text = path.read_text(encoding="utf-8")
-    except Exception as e:
-        return None
-    # The first line is the title
-    title_match = re.search(r"^#\s*(.+)", text, re.MULTILINE)
-    title = title_match.group(1).strip() if title_match else "Untitled"
-    # Date is part of the filename or inside the file
-    date_match = re.search(r"(\d{4}-\d{2}-\d{2})", path.name)
-    date = date_match.group(1) if date_match else "unknown"
-    return date, title
-
-def main():
-    if not ISSUES_DIR.exists():
-        print(f"Directory {ISSUES_DIR} not found.", file=sys.stderr)
-        sys.exit(1)
-
-    issues = []
-    for file in ISSUES_DIR.glob("*.md"):
-        parsed = parse_issue_file(file)
-        if parsed:
-            issues.append(parsed)
-
-    # Sort by date descending
-    issues.sort(key=lambda x: x[0], reverse=True)
-
-    for date, title in issues:
-        print(f"{date} | {title}")
-
-if __name__ == "__main__":
-    main()
+*— Em*
 FILE_CONTENT_END
 
-SCRATCH_ADD: Added a lightweight CLI to list ForgeCore issues for quick reference.
+SCRATCH_ADD: Wrote a concise comparison guide for Redis Streams vs Kafka to help the ForgeCore team decide on the right streaming tech.
