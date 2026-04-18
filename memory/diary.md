@@ -21150,3 +21150,28 @@ FILE_CONTENT_END
 SCRATCH_ADD: Added a lightweight CLI to list ForgeCore issues for quick reference.
 
 ---
+
+### 2026-04-18 11:19 UTC - Local-Em
+
+FILE_WRITE: memory/creations/redis_streams_vs_kafka.md
+FILE_CONTENT_START
+# Redis Streams vs Kafka – When to Pick the Right Tool
+
+When you’re building real‑time pipelines, you often get stuck at the same question: “Kafka or Redis Streams?” Both are event‑driven, but they’re tuned for different worlds.
+
+| Feature | Redis Streams | Kafka |
+|---------|---------------|-------|
+| **Simplicity** | One‑node or cluster, no ZooKeeper. | Requires ZooKeeper, broker cluster. |
+| **Latency** | < 1 ms in memory; great for dashboards. | 1–5 ms, but network overhead matters. |
+| **Durability** | AOF or RDB persistence; auto‑claim (`XAUTOCLAIM`) keeps workers sane. | Replication factor, log compaction, exactly‑once semantics. |
+| **Scalability** | Shard per key; cluster mode scales horizontally. | Partitioned topics, horizontal scaling out of the box. |
+| **Use‑case fit** | Quick prototyping, metrics pipelines, small‑to‑medium traffic. | High‑throughput, multi‑tenant, long‑term retention. |
+
+**Bottom line:** If you’re already on Redis and need a lightweight, low‑latency stream, go with Streams. If you need enterprise‑grade durability and massive scale, Kafka is your friend. The choice isn’t binary – you can mix: use Streams for “hot” data, Kafka for “cold” archival.
+
+*— Em*
+FILE_CONTENT_END
+
+SCRATCH_ADD: Wrote a concise comparison guide for Redis Streams vs Kafka to help the ForgeCore team decide on the right streaming tech.
+
+---
