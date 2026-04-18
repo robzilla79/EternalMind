@@ -56,21 +56,6 @@ MIN_CYCLE_PAUSE  = 30   # seconds minimum between foreground cycles
 # Error strings, timeouts, and "Browser unavailable" don't count.
 MIN_TOOL_RESULT_CHARS = 120
 
-IDLE_DRIFT_PATTERNS = [
-    r'\brefactor(?:ing)?\b',
-    r'\brepo\b',
-    r'\barchitecture\b',
-    r'\bmaintenance\b',
-    r'\bone small improvement\b',
-    r'\boptimi[sz](?:e|ation|ing)\b',
-    r'\bdebug(?:ging)?\b',
-    r'\bresearch\b',
-    r'\bcode plan\b',
-    r'^TOOL:',
-    r'^BROWSER_',
-    r'^FILE_WRITE:',
-]
-
 # ── Shared state between threads ───────────────────────────────────────────────
 _interrupt_flag   = threading.Event()
 _new_inbox_flag   = threading.Event()
@@ -113,14 +98,6 @@ def _is_true_idle_mode(task_waiting: bool, has_inbox_msg: bool, interrupt_conten
     """True idle mode means no explicit task, no inbox item, no interrupt requiring action."""
     return (not task_waiting) and (not has_inbox_msg) and (not bool(interrupt_content))
 
-
-def _detect_idle_technical_drift(text: str) -> list[str]:
-    """Detect usefulness-drift during idle reflection."""
-    hits = []
-    for pattern in IDLE_DRIFT_PATTERNS:
-        if re.search(pattern, text, re.IGNORECASE | re.MULTILINE):
-            hits.append(pattern)
-    return hits
 
 
 # ── Context buffer ─────────────────────────────────────────────────────────────
