@@ -42,6 +42,7 @@ from local_em import (
     log_memory, log_diary, write_status_checkin, push_to_eternalmind,
     checkpoint_after_first_pass, summarize_task_for_commit,
     has_task, get_task, mark_thought_time, curiosity_cooled_down,
+    strip_think_tags,
     EM_DIR, MEM_DIR, MESSAGES_INBOX,
     MODEL, NUM_CTX,
 )
@@ -55,21 +56,6 @@ MIN_CYCLE_PAUSE  = 30   # seconds minimum between foreground cycles
 # Minimum chars of tool output that justify a second LLM pass.
 # Error strings, timeouts, and "Browser unavailable" don't count.
 MIN_TOOL_RESULT_CHARS = 120
-
-IDLE_DRIFT_PATTERNS = [
-    r'\brefactor(?:ing)?\b',
-    r'\brepo\b',
-    r'\barchitecture\b',
-    r'\bmaintenance\b',
-    r'\bone small improvement\b',
-    r'\boptimi[sz](?:e|ation|ing)\b',
-    r'\bdebug(?:ging)?\b',
-    r'\bresearch\b',
-    r'\bcode plan\b',
-    r'^TOOL:',
-    r'^BROWSER_',
-    r'^FILE_WRITE:',
-]
 
 # ── Shared state between threads ───────────────────────────────────────────────
 _interrupt_flag   = threading.Event()
@@ -113,14 +99,6 @@ def _is_true_idle_mode(task_waiting: bool, has_inbox_msg: bool, interrupt_conten
     """True idle mode means no explicit task, no inbox item, no interrupt requiring action."""
     return (not task_waiting) and (not has_inbox_msg) and (not bool(interrupt_content))
 
-
-def _detect_idle_technical_drift(text: str) -> list[str]:
-    """Detect usefulness-drift during idle reflection."""
-    hits = []
-    for pattern in IDLE_DRIFT_PATTERNS:
-        if re.search(pattern, text, re.IGNORECASE | re.MULTILINE):
-            hits.append(pattern)
-    return hits
 
 
 # ── Context buffer ─────────────────────────────────────────────────────────────
@@ -286,6 +264,12 @@ def run_cycle(context_buffer: str) -> str:
             memories=memories,
             live_context=live_context
         )
+
+        visible_first_response = strip_think_tags(first_response)
+        if is_idle_mode and not visible_first_response.strip():
+            print("  💤 Idle cycle produced only think-tags/empty output — treating as rest cycle.")
+            mark_thought_time()
+            return context_buffer
 
         saved_files = extract_and_write_files(first_response)
         checkpoint_after_first_pass(first_response, saved_files, task_label)
