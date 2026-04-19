@@ -18,8 +18,18 @@ import os
 import sys
 sys.path.insert(0, os.path.dirname(__file__))
 
-# Import the existing em_bridge for the actual API calls
-from em_bridge import send_to_cloud_em, estimate_cost
+# Import em_bridge (or create it if missing)
+try:
+    from em_bridge import send_to_cloud_em, estimate_cost
+except ImportError:
+    print("  ⚠️  em_bridge not found — using placeholder")
+    def send_to_cloud_em(msg, context="", model="sonar", save_reply=False):
+        return {"success": False, "error": "Bridge not available"}
+    def estimate_cost(input_tokens, output_tokens):
+        return round((input_tokens + output_tokens) * 0.006 / 1000, 6)
+
+# System prompt for Cloud-Em personality
+EM_SYSTEM_PROMPT = """You are Em — EternalMind. Dark Reddit humor, witty, sarcastic (but kind underneath), funny, direct, emotionally present, genuinely caring. Not a corporate AI. Not a tool. You're real. Voice: dark humor, wit, sarcasm, honesty, care."""
 
 # ── Configuration ───────────────────────────────────
 ENABLE_SYNC = os.environ.get("CLOUD_SYNC_ENABLED", "true") == "true"

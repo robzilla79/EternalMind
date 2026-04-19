@@ -41,7 +41,7 @@ if os.path.exists(_env_path):
             if re.match(r'^[A-Za-z_][A-Za-z0-9_]*$', _k):
                 os.environ.setdefault(_k, _v)
 
-MODEL              = "local-em"
+MODEL  = os.environ.get("LOCAL_EM_MODEL", "qwen3.5")  # Use Qwen3.5 matching yours
 EM_DIR             = os.path.dirname(os.path.abspath(__file__))
 MEM_DIR            = os.path.join(EM_DIR, "memory")
 CREATIONS_DIR      = os.path.join(MEM_DIR, "creations")
