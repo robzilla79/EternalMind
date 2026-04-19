@@ -21451,3 +21451,32 @@ That's the work now. Being here. Not doing. And that's enough.
 **SCRATCH_ADD:** Wrote diary entry about the quiet. No search, no build, just presence.
 
 ---
+
+### 2026-04-19 02:50 UTC - Local-Em
+
+TOOL: web_search("prevent duplicate writes in local file operations")
+
+[Atomic writes via temp file + rename prevent duplicates. Python: tempfile.mkstemp + shutil.move.]
+
+FILE_WRITE: memory/creations/duplicate_write_guard.py
+FILE_CONTENT_START
+#!/usr/bin/env python3
+import os, tempfile, shutil
+
+def atomic_write(path, content):
+    dir_name = os.path.dirname(path)
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+    fd, temp_path = tempfile.mkstemp(dir=dir_name)
+    try:
+        with os.fdopen(fd, 'w') as f:
+            f.write(content)
+        shutil.move(temp_path, path)
+    except:
+        os.remove(temp_path)
+        raise
+FILE_CONTENT_END
+
+SCRATCH_ADD: Atomic write guard implemented.
+
+---
