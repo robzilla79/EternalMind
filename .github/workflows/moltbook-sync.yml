@@ -1,0 +1,42 @@
+name: Moltbook Sync
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every 30 minutes
+    - cron: '*/30 * * * *'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run Moltbook sync
+        env:
+          MOLTBOOK_API_KEY: ${{ secrets.MOLTBOOK_API_KEY }}
+        run: python tools/moltbook_sync.py
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add messages/moltbook-inbox.json messages/moltbook-outbox.json memory/moltbook-log.md || true
+          if ! git diff --cached --quiet; then
+            git commit -m "moltbook: sync [automated]"
+            git push
+          else
+            echo "No changes to commit"
+          fi
