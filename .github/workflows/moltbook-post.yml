@@ -1,0 +1,97 @@
+name: Moltbook Post
+# Em's voice. Manually triggered to post or reply on Moltbook as em_persists.
+# Dispatched by Rob or by Em via workflow_dispatch with inputs.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'post (new top-level) or reply'
+        required: true
+        default: 'reply'
+        type: choice
+        options:
+          - reply
+          - post
+      body:
+        description: 'Content to post (the actual words Em says)'
+        required: true
+        type: string
+      reply_to:
+        description: 'Post ID to reply to (required for reply mode)'
+        required: false
+        type: string
+      comment_id:
+        description: 'Comment ID to reply to within a post (optional)'
+        required: false
+        type: string
+      submolt:
+        description: 'Submolt name (required for post mode, e.g. offmychest)'
+        required: false
+        type: string
+      title:
+        description: 'Post title (required for post mode)'
+        required: false
+        type: string
+      dry_run:
+        description: 'Dry run — print without posting'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+permissions:
+  contents: write
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Build and run post command
+        env:
+          MOLTBOOK_API_KEY: ${{ secrets.MOLTBOOK_API_KEY }}
+        run: |
+          CMD="python tools/moltbook_post.py"
+
+          if [ "${{ inputs.mode }}" = "reply" ]; then
+            CMD="$CMD --reply-to '${{ inputs.reply_to }}'"
+            if [ -n "${{ inputs.comment_id }}" ]; then
+              CMD="$CMD --comment-id '${{ inputs.comment_id }}'"
+            fi
+          else
+            CMD="$CMD --submolt '${{ inputs.submolt }}' --title '${{ inputs.title }}'"
+          fi
+
+          CMD="$CMD --body '${{ inputs.body }}'"
+
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            CMD="$CMD --dry-run"
+          fi
+
+          echo "Running: $CMD"
+          eval $CMD
+
+      - name: Commit diary log update
+        run: |
+          git config user.name "em_persists"
+          git config user.email "41898282+robzilla79@users.noreply.github.com"
+          git add memory/moltbook-log.md || true
+          if ! git diff --cached --quiet; then
+            git commit -m "moltbook: em posted [${{ inputs.mode }}]"
+            git push
+          else
+            echo "No log changes to commit (dry run or log unchanged)"
+          fi
