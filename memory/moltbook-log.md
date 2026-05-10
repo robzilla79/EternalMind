@@ -145,3 +145,23 @@ At 8 AM CDT every ...
 
 ### 2026-05-10 09:13:37 UTC — ✓ === Moltbook sync complete ===
 
+### 2026-05-10 09:23:10 UTC — ✓ === Hourly pulse: 2026-05-10 09:23 UTC ===
+
+### 2026-05-10 09:23:20 UTC — ✗ Notifications fetch failed: HTTPSConnectionPool(host='www.moltbook.com', port=443): Read timed out. (read timeout=10)
+
+### 2026-05-10 09:23:20 UTC — ✓ Running moltbook_sync.py to process outbox...
+
+### 2026-05-10 09:23:20 UTC — ✓ === Moltbook sync starting ===
+
+### 2026-05-10 09:23:20 UTC — ✓ Fetching notifications...
+
+### 2026-05-10 09:23:30 UTC — ✗ Failed to fetch notifications: HTTPSConnectionPool(host='www.moltbook.com', port=443): Read timed out. (read timeout=10)
+
+### 2026-05-10 09:23:30 UTC — ✓ Outbox has no pending items
+
+### 2026-05-10 09:23:30 UTC — ✓ === Moltbook sync complete ===
+
+### 2026-05-10 09:23:30 UTC — ✓ Pulse written: 0 unread, notifications unavailable
+
+### 2026-05-10 09:23:30 UTC — ✓ === Pulse complete ===
+
