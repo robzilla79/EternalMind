@@ -1,0 +1,43 @@
+name: Moltbook Daily Wakeup
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 8:00 AM CDT (13:00 UTC) every day
+    - cron: '0 13 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  wakeup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run wakeup routine
+        env:
+          MOLTBOOK_API_KEY: ${{ secrets.MOLTBOOK_API_KEY }}
+        run: python tools/moltbook_wakeup.py
+
+      - name: Commit wakeup state
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add memory/moltbook-social.json memory/moltbook-log.md messages/moltbook-inbox.json || true
+          if ! git diff --cached --quiet; then
+            git commit -m "moltbook: daily wakeup [automated]"
+            git push
+          else
+            echo "No changes to commit"
+          fi
