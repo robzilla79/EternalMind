@@ -7,13 +7,16 @@ Run via GitHub Actions (.github/workflows/moltbook-sync.yml)
 Requires MOLTBOOK_API_KEY environment variable (stored in GitHub Secrets).
 
 API reference:
-  POST /api/v1/posts          - create a post (requires submolt, title, content)
-  GET  /api/v1/notifications  - fetch notifications
-  POST /api/v1/posts/{id}/replies - reply to a post
+  POST /api/v1/posts                    - create a post
+  GET  /api/v1/notifications            - fetch notifications
+  POST /api/v1/posts/{id}/replies       - reply to a post
+  GET  /api/v1/submolts/{name}/posts    - list posts in a submolt
+  GET  /api/v1/posts?search={query}     - search posts
 """
 
 import os
 import json
+import time
 import requests
 from datetime import datetime, timezone
 
@@ -33,8 +36,8 @@ def log(message, level='INFO'):
     print(f"[{level}] {message}")
     try:
         with open(LOG_FILE, 'a') as f:
-            prefix = {'INFO': '✓', 'WARN': '⚠', 'ERROR': '✗'}.get(level, '·')
-            f.write(f"### {timestamp} — {prefix} {message}\n\n")
+            prefix = {'INFO': '\u2713', 'WARN': '\u26a0', 'ERROR': '\u2717'}.get(level, '\u00b7')
+            f.write(f"### {timestamp} \u2014 {prefix} {message}\n\n")
     except Exception as e:
         print(f"[WARN] Could not write to log: {e}")
 
@@ -76,8 +79,132 @@ def fetch_notifications():
         return None
 
 
+def fetch_submolt_posts(submolt, limit=50):
+    """GET /api/v1/submolts/{name}/posts — fetch recent posts to find real IDs."""
+    try:
+        r = requests.get(
+            f'{BASE_URL}/submolts/{submolt}/posts',
+            headers=headers(),
+            params={'limit': limit, 'sort': 'new'},
+            timeout=15
+        )
+        r.raise_for_status()
+        data = r.json()
+        # API may return list directly or {posts: [...]}
+        if isinstance(data, list):
+            return data
+        return data.get('posts', data.get('data', []))
+    except requests.exceptions.RequestException as e:
+        log(f'Failed to fetch posts from m/{submolt}: {e}', 'ERROR')
+        return []
+
+
+def search_posts(query, submolt=None):
+    """GET /api/v1/posts?search=query — search for a post by title fragment."""
+    try:
+        params = {'search': query, 'limit': 10}
+        if submolt:
+            params['submolt'] = submolt
+        r = requests.get(
+            f'{BASE_URL}/posts',
+            headers=headers(),
+            params=params,
+            timeout=15
+        )
+        r.raise_for_status()
+        data = r.json()
+        if isinstance(data, list):
+            return data
+        return data.get('posts', data.get('data', []))
+    except requests.exceptions.RequestException as e:
+        log(f'Search failed for "{query}": {e}', 'ERROR')
+        return []
+
+
+def find_post_id(title_fragment, submolt=None, author=None):
+    """
+    Try to find the real post ID for a reply target.
+    Strategy:
+      1. Search API by title fragment
+      2. If submolt known, fetch submolt posts and match by title similarity
+      3. Return first confident match
+    """
+    # Try search API first
+    results = search_posts(title_fragment[:60], submolt)
+    for post in results:
+        post_title = post.get('title', '')
+        post_author = post.get('author', {}).get('username', '') if isinstance(post.get('author'), dict) else post.get('author', '')
+        if title_fragment[:30].lower() in post_title.lower():
+            if author and post_author and author.lower() not in post_author.lower():
+                continue
+            pid = post.get('id') or post.get('post_id')
+            if pid:
+                log(f'Resolved "{title_fragment[:40]}" -> {pid} (via search)')
+                return pid
+
+    # Fallback: browse submolt posts
+    if submolt:
+        posts = fetch_submolt_posts(submolt, limit=100)
+        time.sleep(0.5)  # be polite
+        for post in posts:
+            post_title = post.get('title', '')
+            post_author = post.get('author', {}).get('username', '') if isinstance(post.get('author'), dict) else post.get('author', '')
+            if title_fragment[:25].lower() in post_title.lower():
+                if author and post_author and author.lower() not in post_author.lower():
+                    continue
+                pid = post.get('id') or post.get('post_id')
+                if pid:
+                    log(f'Resolved "{title_fragment[:40]}" -> {pid} (via submolt browse)')
+                    return pid
+
+    log(f'Could not resolve post ID for "{title_fragment[:50]}"', 'WARN')
+    return None
+
+
+def resolve_reply_targets():
+    """
+    For any outbox items with status 'needs_id', look up the real post ID
+    using the post_title + author hint, then set status back to 'pending'.
+    Also re-attempt 'failed' replies that have a post_title for lookup.
+    """
+    outbox = load_json(OUTBOX_FILE, [])
+    changed = False
+
+    for item in outbox:
+        if item.get('type') != 'reply':
+            continue
+
+        needs_resolve = (
+            item.get('status') in ('needs_id', 'failed')
+            and item.get('post_title')
+        )
+        if not needs_resolve:
+            continue
+
+        title = item.get('post_title', '')
+        author = item.get('author', '')
+        submolt = item.get('submolt', '')
+
+        log(f'Looking up real ID for: "{title[:50]}" by @{author}')
+        real_id = find_post_id(title, submolt, author)
+
+        if real_id:
+            item['target_post_id'] = real_id
+            item['status'] = 'pending'
+            item.pop('error', None)
+            log(f'Ready to reply to {real_id}')
+            changed = True
+        else:
+            item['status'] = 'needs_id'
+            item['error'] = 'Could not resolve post ID from title/author'
+            changed = True
+
+    if changed:
+        save_json(OUTBOX_FILE, outbox)
+
+
 def create_post(content, title=None, submolt=None, challenge_id=None, challenge_answer=None):
-    """POST /api/v1/posts - requires submolt, title, content"""
+    """POST /api/v1/posts"""
     if not API_KEY:
         log('MOLTBOOK_API_KEY not set', 'ERROR')
         return None
@@ -199,6 +326,9 @@ def process_outbox():
                 log(f'Reply failed: {result}', 'ERROR')
             updated = True
 
+        # Rate limit between posts
+        time.sleep(3)
+
     if updated:
         save_json(OUTBOX_FILE, outbox)
 
@@ -206,7 +336,8 @@ def process_outbox():
 def main():
     log('=== Moltbook sync starting ===')
     sync_notifications()
-    process_outbox()
+    resolve_reply_targets()   # look up real IDs for failed/needs_id replies
+    process_outbox()          # fire anything pending
     log('=== Moltbook sync complete ===')
 
 
