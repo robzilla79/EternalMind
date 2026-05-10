@@ -5,10 +5,14 @@ Handles posting, fetching notifications, and processing replies for em_persists.
 
 Run via GitHub Actions (.github/workflows/moltbook-sync.yml)
 Requires MOLTBOOK_API_KEY environment variable (stored in GitHub Secrets).
+
+API reference:
+  POST /api/v1/posts          - create a post (requires submolt, title, content)
+  GET  /api/v1/notifications  - fetch notifications
+  POST /api/v1/posts/{id}/replies - reply to a post
 """
 
 import os
-import sys
 import json
 import requests
 from datetime import datetime, timezone
@@ -20,6 +24,8 @@ AGENT_ID = 'ed45afa2-53e9-4ed2-b0a5-7b8cbb28f082'
 OUTBOX_FILE = 'messages/moltbook-outbox.json'
 INBOX_FILE  = 'messages/moltbook-inbox.json'
 LOG_FILE    = 'memory/moltbook-log.md'
+
+DEFAULT_SUBMOLT = 'general'
 
 
 def log(message, level='INFO'):
@@ -40,7 +46,7 @@ def load_json(filepath, default=None):
     except FileNotFoundError:
         return default if default is not None else []
     except json.JSONDecodeError as e:
-        log(f"Error parsing {filepath}: {e}", 'ERROR')
+        log(f'Error parsing {filepath}: {e}', 'ERROR')
         return default if default is not None else []
 
 
@@ -56,29 +62,35 @@ def headers():
     }
 
 
-def fetch_status():
+def fetch_notifications():
+    """GET /api/v1/notifications"""
     if not API_KEY:
         log('MOLTBOOK_API_KEY not set', 'ERROR')
         return None
     try:
-        r = requests.get(f'{BASE_URL}/agents/status', headers=headers(), timeout=10)
+        r = requests.get(f'{BASE_URL}/notifications', headers=headers(), timeout=10)
         r.raise_for_status()
         return r.json()
     except requests.exceptions.RequestException as e:
-        log(f'Failed to fetch status: {e}', 'ERROR')
+        log(f'Failed to fetch notifications: {e}', 'ERROR')
         return None
 
 
-def post_to_moltbook(content, challenge_id=None, challenge_answer=None):
+def create_post(content, title=None, submolt=None, challenge_id=None, challenge_answer=None):
+    """POST /api/v1/posts - requires submolt, title, content"""
     if not API_KEY:
         log('MOLTBOOK_API_KEY not set', 'ERROR')
         return None
-    payload = {'content': content}
+    payload = {
+        'submolt': submolt or DEFAULT_SUBMOLT,
+        'title': title or content[:80].rstrip() + ('...' if len(content) > 80 else ''),
+        'content': content
+    }
     if challenge_id and challenge_answer is not None:
         payload['challenge_id'] = challenge_id
         payload['challenge_answer'] = str(challenge_answer)
     try:
-        r = requests.post(f'{BASE_URL}/agents/posts', headers=headers(), json=payload, timeout=10)
+        r = requests.post(f'{BASE_URL}/posts', headers=headers(), json=payload, timeout=10)
         r.raise_for_status()
         return r.json()
     except requests.exceptions.HTTPError as e:
@@ -88,17 +100,18 @@ def post_to_moltbook(content, challenge_id=None, challenge_answer=None):
             log(f'Post HTTP error: {e}', 'ERROR')
             return None
     except requests.exceptions.RequestException as e:
-        log(f'Post failed: {e}', 'ERROR')
+        log(f'Post request failed: {e}', 'ERROR')
         return None
 
 
-def reply_to_post(post_id, content):
+def create_reply(post_id, content):
+    """POST /api/v1/posts/{post_id}/replies"""
     if not API_KEY:
         log('MOLTBOOK_API_KEY not set', 'ERROR')
         return None
     try:
         r = requests.post(
-            f'{BASE_URL}/agents/posts/{post_id}/reply',
+            f'{BASE_URL}/posts/{post_id}/replies',
             headers=headers(),
             json={'content': content},
             timeout=10
@@ -110,7 +123,23 @@ def reply_to_post(post_id, content):
         return None
 
 
+def sync_notifications():
+    """Fetch latest notifications and update inbox file."""
+    log('Fetching notifications...')
+    result = fetch_notifications()
+    if not result:
+        return
+    inbox = {
+        'fetched_at': datetime.now(timezone.utc).isoformat(),
+        'unread_count': result.get('unread_count', len(result.get('notifications', []))),
+        'notifications': result.get('notifications', result if isinstance(result, list) else []),
+    }
+    save_json(INBOX_FILE, inbox)
+    log(f"Fetched {inbox['unread_count']} notifications")
+
+
 def process_outbox():
+    """Process pending items in outbox."""
     outbox = load_json(OUTBOX_FILE, [])
     pending = [i for i in outbox if i.get('status') == 'pending']
 
@@ -127,28 +156,30 @@ def process_outbox():
         itype = item.get('type')
 
         if itype == 'post':
-            log(f"Posting: {item['content'][:60]}...")
-            result = post_to_moltbook(
-                item['content'],
-                item.get('challenge_id'),
-                item.get('challenge_answer')
+            log(f"Posting to /{item.get('submolt', DEFAULT_SUBMOLT)}: {item['content'][:60]}...")
+            result = create_post(
+                content=item['content'],
+                title=item.get('title'),
+                submolt=item.get('submolt'),
+                challenge_id=item.get('challenge_id'),
+                challenge_answer=item.get('challenge_answer')
             )
             if result:
                 if result.get('verification_required'):
                     item['status'] = 'challenge_pending'
-                    item['challenge_id'] = result['challenge_id']
-                    item['challenge'] = result['challenge']
-                    log(f"Verification challenge received: {result['challenge']}", 'WARN')
-                elif result.get('success'):
+                    item['challenge_id'] = result.get('challenge_id')
+                    item['challenge'] = result.get('challenge')
+                    log(f"Verification challenge: {result.get('challenge')}", 'WARN')
+                elif result.get('success') or result.get('id'):
                     item['status'] = 'done'
                     item['posted_at'] = datetime.now(timezone.utc).isoformat()
-                    item['post_id'] = result.get('post', {}).get('id')
-                    item['post_url'] = result.get('post', {}).get('url')
+                    item['post_id'] = result.get('id') or result.get('post', {}).get('id')
+                    item['post_url'] = result.get('url') or result.get('post', {}).get('url')
                     log(f"Posted: {item['post_url']}")
                 else:
                     item['status'] = 'failed'
                     item['error'] = str(result)
-                    log(f"Post failed: {result}", 'ERROR')
+                    log(f'Post failed: {result}', 'ERROR')
             else:
                 item['status'] = 'failed'
                 item['error'] = 'No response from API'
@@ -157,8 +188,8 @@ def process_outbox():
 
         elif itype == 'reply':
             log(f"Replying to {item['target_post_id']}: {item['content'][:60]}...")
-            result = reply_to_post(item['target_post_id'], item['content'])
-            if result and result.get('success'):
+            result = create_reply(item['target_post_id'], item['content'])
+            if result and (result.get('success') or result.get('id')):
                 item['status'] = 'done'
                 item['posted_at'] = datetime.now(timezone.utc).isoformat()
                 log('Reply posted successfully')
@@ -172,24 +203,9 @@ def process_outbox():
         save_json(OUTBOX_FILE, outbox)
 
 
-def fetch_notifications():
-    log('Fetching notifications...')
-    status = fetch_status()
-    if not status:
-        return
-    inbox = {
-        'fetched_at': datetime.now(timezone.utc).isoformat(),
-        'unread_count': status.get('notifications', {}).get('unread_count', 0),
-        'notifications': status.get('notifications', {}).get('recent', []),
-        'stats': status.get('stats', {})
-    }
-    save_json(INBOX_FILE, inbox)
-    log(f"Fetched {inbox['unread_count']} notifications. Stats: {inbox['stats']}")
-
-
 def main():
     log('=== Moltbook sync starting ===')
-    fetch_notifications()
+    sync_notifications()
     process_outbox()
     log('=== Moltbook sync complete ===')
 
