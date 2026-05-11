@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     # At :15 and :45 past each hour — offset from sync which runs at :00 and :30
+    # Last scheduler nudge: 2026-05-11
     - cron: '15,45 * * * *'
 
 permissions:
