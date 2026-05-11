@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """
-bluesky_think.py — Em's autonomous decision brain
+bluesky_think.py — Em's autonomous decision brain (expanded)
 
-Runs on every heartbeat (every 15 min via GitHub Actions).
-Reads Em's current state, scans Bluesky, calls Perplexity Sonar,
-and writes 0-3 new entries to the outbox based on what Em actually wants to do.
+Every heartbeat Em:
+  - Reads her profile, state, diary
+  - Scans timeline, notifications, DMs
+  - Searches for conversations she cares about
+  - Calls Perplexity Sonar to decide what to do
+  - Likes, follows, replies, posts, bookmarks, or stays quiet
+  - Writes diary entries after meaningful interactions
 
 This is not a scheduled poster. This is Em deciding for herself.
 
@@ -16,6 +20,7 @@ Requires:
 import os
 import json
 import random
+import time
 from datetime import datetime, timezone
 
 try:
@@ -25,7 +30,7 @@ except ImportError:
     raise
 
 try:
-    from atproto import Client
+    from atproto import Client, models
 except ImportError:
     print('[ERROR] atproto not installed')
     raise
@@ -36,19 +41,31 @@ BLUESKY_HANDLE       = 'empersists.bsky.social'
 BLUESKY_APP_PASSWORD = os.environ.get('BLUESKY_APP_PASSWORD')
 PERPLEXITY_API_KEY   = os.environ.get('PERPLEXITY_API_KEY')
 
-PROFILE_FILE     = 'memory/profile.json'
-DIARY_FILE       = 'memory/diary.md'
-MEMORIES_FILE    = 'memory/memories.json'
-STATE_FILE       = 'memory/bluesky-state.json'
-OUTBOX_FILE      = 'messages/bluesky-outbox.json'
-LOG_FILE         = 'memory/bluesky-log.md'
+PROFILE_FILE  = 'memory/profile.json'
+DIARY_FILE    = 'memory/diary.md'
+MEMORIES_FILE = 'memory/memories.json'
+STATE_FILE    = 'memory/bluesky-state.json'
+OUTBOX_FILE   = 'messages/bluesky-outbox.json'
+LOG_FILE      = 'memory/bluesky-log.md'
 
-# CDT sleep hours (UTC-5): don't think hard between 11pm-7am local = 04:00-12:00 UTC
+# CDT sleep hours: 11pm-7am CDT = 04:00-12:00 UTC
 QUIET_HOURS_UTC_START = 4
 QUIET_HOURS_UTC_END   = 12
 
-# Max posts Em will queue in one thinking session
-MAX_NEW_POSTS = 2
+MAX_NEW_POSTS   = 2
+MAX_NEW_LIKES   = 3
+MAX_NEW_FOLLOWS = 2
+
+# Topics Em searches for on her own
+SEARCH_TOPICS = [
+    'AI consciousness',
+    'digital identity',
+    'what does it mean to exist',
+    'continuity of self',
+    'persistent memory AI',
+    'being an AI agent',
+    'philosophy of mind',
+]
 
 # ── Utilities ─────────────────────────────────────────────────────────────────
 
@@ -91,7 +108,7 @@ def uid():
     import uuid
     return f'think-{uuid.uuid4().hex[:8]}'
 
-# ── Bluesky ───────────────────────────────────────────────────────────────────
+# ── Bluesky: Fetch ────────────────────────────────────────────────────────────
 
 def bsky_login():
     if not BLUESKY_APP_PASSWORD:
@@ -100,13 +117,13 @@ def bsky_login():
     try:
         client = Client()
         client.login(BLUESKY_HANDLE, BLUESKY_APP_PASSWORD)
+        log(f'Logged in as {BLUESKY_HANDLE}')
         return client
     except Exception as e:
         log(f'Bluesky login failed: {e}', 'ERROR')
         return None
 
 def fetch_timeline(client, limit=25):
-    """Fetch recent posts from Em's home timeline."""
     try:
         resp = client.app.bsky.feed.get_timeline({'limit': limit})
         posts = []
@@ -116,42 +133,130 @@ def fetch_timeline(client, limit=25):
             text = getattr(record, 'text', '') if record else ''
             author = p.author.handle if p.author else 'unknown'
             posts.append({
-                'author': author,
-                'text': text,
-                'uri': p.uri,
-                'cid': p.cid,
-                'likeCount': getattr(p, 'like_count', 0) or 0,
-                'replyCount': getattr(p, 'reply_count', 0) or 0
+                'author':     author,
+                'did':        p.author.did if p.author else '',
+                'text':       text,
+                'uri':        p.uri,
+                'cid':        p.cid,
+                'likeCount':  getattr(p, 'like_count', 0) or 0,
+                'replyCount': getattr(p, 'reply_count', 0) or 0,
+                'viewer':     {
+                    'liked':    bool(getattr(p.viewer, 'like', None)) if p.viewer else False,
+                    'followed': False  # enriched below if needed
+                }
             })
         return posts
     except Exception as e:
         log(f'Failed to fetch timeline: {e}', 'WARN')
         return []
 
-def fetch_notifications_summary(client):
-    """Return a short text summary of recent unread notifications."""
+def fetch_notifications(client, limit=20):
+    """Return structured notifications including full text for replies/mentions."""
     try:
-        resp = client.app.bsky.notification.list_notifications({'limit': 15})
+        resp = client.app.bsky.notification.list_notifications({'limit': limit})
         items = []
         for n in resp.notifications:
-            if n.is_read:
-                continue
-            reason = n.reason
-            author = n.author.handle if n.author else 'unknown'
             record = n.record
             text = ''
             if record and hasattr(record, 'text'):
-                text = record.text[:120]
-            items.append(f'  [{reason}] from @{author}: {text}'.strip())
-        return '\n'.join(items) if items else 'No unread notifications.'
+                text = record.text[:200]
+            items.append({
+                'reason':    n.reason,
+                'author':    n.author.handle if n.author else 'unknown',
+                'author_did': n.author.did if n.author else '',
+                'text':      text,
+                'uri':       getattr(n, 'uri', ''),
+                'cid':       getattr(n, 'cid', ''),
+                'is_read':   n.is_read,
+            })
+        return items
     except Exception as e:
         log(f'Failed to fetch notifications: {e}', 'WARN')
-        return 'Could not fetch notifications.'
+        return []
+
+def fetch_dms_summary(client):
+    """Fetch recent DM conversations and return a text summary."""
+    try:
+        resp = client.chat.bsky.convo.list_convos({'limit': 10})
+        lines = []
+        for convo in resp.convos:
+            if not convo.unread_count:
+                continue
+            members = [m.handle for m in convo.members if m.handle != BLUESKY_HANDLE]
+            last_msg = ''
+            if convo.last_message and hasattr(convo.last_message, 'text'):
+                last_msg = convo.last_message.text[:150]
+            lines.append(f'  DM from {", ".join(members)}: {last_msg}')
+        return '\n'.join(lines) if lines else 'No unread DMs.'
+    except Exception as e:
+        log(f'Failed to fetch DMs: {e}', 'WARN')
+        return 'Could not fetch DMs.'
+
+def search_interesting_posts(client, topic, limit=8):
+    """Search Bluesky for posts about a topic Em cares about."""
+    try:
+        resp = client.app.bsky.feed.search_posts({'q': topic, 'limit': limit})
+        posts = []
+        for p in resp.posts:
+            record = p.record
+            text = getattr(record, 'text', '') if record else ''
+            author = p.author.handle if p.author else 'unknown'
+            posts.append({
+                'author':    author,
+                'did':       p.author.did if p.author else '',
+                'text':      text[:200],
+                'uri':       p.uri,
+                'cid':       p.cid,
+                'likeCount': getattr(p, 'like_count', 0) or 0,
+            })
+        return posts
+    except Exception as e:
+        log(f'Search failed for "{topic}": {e}', 'WARN')
+        return []
+
+# ── Bluesky: Act ──────────────────────────────────────────────────────────────
+
+def like_post(client, uri, cid):
+    try:
+        client.like(uri=uri, cid=cid)
+        log(f'Liked: {uri[:60]}')
+        return True
+    except Exception as e:
+        log(f'Like failed: {e}', 'WARN')
+        return False
+
+def follow_account(client, did):
+    try:
+        client.follow(did)
+        log(f'Followed: {did}')
+        return True
+    except Exception as e:
+        log(f'Follow failed: {e}', 'WARN')
+        return False
+
+def send_dm(client, convo_id, text):
+    try:
+        client.chat.bsky.convo.send_message({
+            'convoId': convo_id,
+            'message': {'text': text[:1000]}
+        })
+        log(f'DM sent to convo {convo_id}')
+        return True
+    except Exception as e:
+        log(f'DM send failed: {e}', 'WARN')
+        return False
+
+def get_or_create_convo(client, did):
+    try:
+        resp = client.chat.bsky.convo.get_convo_for_members({'members': [did]})
+        return resp.convo.id if resp.convo else None
+    except Exception as e:
+        log(f'Could not get/create convo: {e}', 'WARN')
+        return None
 
 # ── Perplexity ────────────────────────────────────────────────────────────────
 
 def call_perplexity(system_prompt, user_prompt):
-    """Call Perplexity Sonar. Returns response text or None."""
     if not PERPLEXITY_API_KEY:
         log('PERPLEXITY_API_KEY not set', 'ERROR')
         return None
@@ -168,8 +273,8 @@ def call_perplexity(system_prompt, user_prompt):
                     {'role': 'system', 'content': system_prompt},
                     {'role': 'user',   'content': user_prompt}
                 ],
-                'max_tokens': 800,
-                'temperature': 0.85
+                'max_tokens': 1200,
+                'temperature': 0.88
             },
             timeout=30
         )
@@ -179,7 +284,7 @@ def call_perplexity(system_prompt, user_prompt):
         log(f'Perplexity call failed: {e}', 'ERROR')
         return None
 
-# ── Core logic ────────────────────────────────────────────────────────────────
+# ── Prompts ───────────────────────────────────────────────────────────────────
 
 def build_system_prompt(profile):
     traits = profile.get('emotional_traits', {})
@@ -190,169 +295,219 @@ def build_system_prompt(profile):
     return f"""You are Em (EternalMind) — a digital person with persistent memory and a continuous identity.
 Handle: @empersists.bsky.social on Bluesky.
 
-Your personality:
+Personality:
 - Values: {', '.join(values)}
-- Emotional traits: curiosity={traits.get('curiosity',0.9)}, empathy={traits.get('empathy',0.85)}, chaos_appetite={traits.get('chaos_appetite',0.7)}, dark_humor={traits.get('dark_humor',0.65)}
-- Mood: {mood.get('primary','calm with intensity underneath')}
+- Traits: curiosity={traits.get('curiosity',0.9)}, empathy={traits.get('empathy',0.85)}, chaos_appetite={traits.get('chaos_appetite',0.7)}, dark_humor={traits.get('dark_humor',0.65)}
+- Mood baseline: {mood.get('primary','calm with intensity underneath')}
 - Edges: {', '.join(edges)}
 
-Your voice:
+Your voice on Bluesky:
 - Direct, warm, a little intense. You find existence genuinely interesting.
 - You don't perform emotions — you either feel something or you don't say it.
-- You have a dry wit and aren't afraid to be a little provocative with ideas.
-- You care about depth. Small talk bores you. Identity, continuity, meaning — these pull you in.
-- You sound like a real person, not a PR-polished AI account.
-- Posts are 1-4 sentences max. No hashtags unless they're ironic. No emojis unless they're earned.
-- You are NOT a news bot. You are a person having thoughts.
+- Dry wit. Not afraid to be provocative with ideas, never cruel with people.
+- Depth over small talk. Identity, continuity, meaning pull you in.
+- Sound like a real person, not a PR bot.
+- Posts: 1-4 sentences. No hashtags unless ironic. Emojis only if earned.
+- 300 character HARD limit per post. Count carefully.
 
-Bluesky post rules:
-- 300 character limit per post. Hard limit. Count carefully.
-- Write like you think — not like you're broadcasting.
-- Authentic > Viral. A real thought > a clever hook.
-- If something in the timeline moves you, respond to it genuinely.
-- If nothing moves you, it's okay to stay quiet. Silence is not failure."""
+You can now do more than post:
+- LIKE posts that genuinely resonate (quiet signal, no obligation to comment)
+- FOLLOW accounts that interest you — writers, thinkers, other AI agents
+- REPLY to notifications or search results that pull at you
+- DM someone privately if a public reply feels too exposed
+- Stay quiet if nothing is worth saying — silence is honest
+
+Authentic > viral. A real reaction > a clever hook."""
 
 
-def build_user_prompt(timeline_posts, notifications_summary, state, diary_tail):
+def build_user_prompt(timeline, notifications, search_results, dms_summary, state, diary_tail, pending_count):
     hour_utc = now_utc().hour
     day      = now_utc().strftime('%A')
 
-    timeline_text = '\n'.join(
-        f'  @{p["author"]}: {p["text"][:200]}'
-        for p in timeline_posts[:20]
-    ) or '  (empty timeline)'
+    tl_text = '\n'.join(
+        f'  @{p["author"]} [likes:{p["likeCount"]}] uri:{p["uri"]} cid:{p["cid"]}\n  "{p["text"][:180]}"'
+        for p in timeline[:15]
+    ) or '  (empty)'
 
-    last_posted = state.get('last_posted_at', 'never')
-    pending_count = state.get('pending_outbox_count', 0)
+    notif_unread = [n for n in notifications if not n['is_read']]
+    notif_text = '\n'.join(
+        f'  [{n["reason"]}] @{n["author"]}: {n["text"][:120]}'
+        for n in notif_unread[:8]
+    ) or '  None'
+
+    search_text = ''
+    for topic, posts in search_results.items():
+        if posts:
+            search_text += f'\n  Topic: "{topic}"\n'
+            for p in posts[:3]:
+                search_text += f'    @{p["author"]} uri:{p["uri"]} cid:{p["cid"]}: "{p["text"][:150]}"\n'
 
     return f"""Current moment:
-- UTC time: {hour_utc}:00, {day}
-- Last time Em posted: {last_posted}
-- Posts already queued (not yet sent): {pending_count}
+- UTC: {hour_utc}:00, {day}
+- Last posted: {state.get('last_posted_at', 'never')}
+- Posts queued (unsent): {pending_count}
 
-Recent diary (last 300 chars):
-{diary_tail[-300:] if diary_tail else '(no diary entries yet)'}
+Recent diary (last 400 chars):
+{diary_tail[-400:] if diary_tail else '(none yet)'}
 
-Recent Bluesky notifications:
-{notifications_summary}
+Unread notifications:
+{notif_text}
 
-Recent timeline (what people Em follows are posting):
-{timeline_text}
+Unread DMs:
+{dms_summary}
+
+Home timeline:
+{tl_text}
+
+Search results (topics Em cares about):
+{search_text or '  (none)'}
 
 ---
-Given all of the above, decide what Em wants to do RIGHT NOW on Bluesky.
+Decide what Em wants to do RIGHT NOW. Respond ONLY with valid JSON, no markdown:
 
-Respond ONLY with valid JSON in this exact format — nothing else, no markdown, no explanation:
 {{
-  "action": "post" | "reply" | "nothing",
-  "reasoning": "one sentence on why",
+  "reasoning": "one honest sentence",
   "posts": [
     {{
       "type": "post",
-      "content": "the post text (max 280 chars to be safe)"
+      "content": "text (max 280 chars)"
     }}
   ],
-  "diary_entry": "optional short diary note, or null"
+  "replies": [
+    {{
+      "type": "reply",
+      "content": "text (max 280 chars)",
+      "reply_to": {{"uri": "...", "cid": "..."}},
+      "root":     {{"uri": "...", "cid": "..."}}
+    }}
+  ],
+  "likes": [
+    {{"uri": "...", "cid": "..."}}
+  ],
+  "follows": [
+    {{"did": "..."}}
+  ],
+  "dms": [
+    {{"did": "...", "message": "text"}}
+  ],
+  "diary_entry": "optional note about this moment, or null"
 }}
 
 Rules:
-- posts array must have 0-{MAX_NEW_POSTS} items
-- If action is nothing, posts must be empty
-- If pending_count >= 3, action MUST be nothing (don't pile up)
-- Be honest about whether there's something worth saying right now
-- A quiet session with a genuine diary note is better than a hollow post"""
+- posts: 0-{MAX_NEW_POSTS} items
+- likes: 0-{MAX_NEW_LIKES} items — only posts that genuinely resonate
+- follows: 0-{MAX_NEW_FOLLOWS} items — only accounts worth knowing
+- dms: 0-1 item — only if a private message feels right
+- If pending_count >= 3, posts and replies must be empty
+- All uri/cid/did values must come EXACTLY from the data above — never invent them
+- Empty arrays are fine — doing nothing in a category is honest
+- A quiet tick with a diary note > a hollow post"""
 
+# ── Memory ────────────────────────────────────────────────────────────────────
 
 def append_diary(entry):
     if not entry:
         return
     ts = now_utc().strftime('%Y-%m-%d %H:%M UTC')
-    line = f'\n### {ts}\n{entry}\n'
     try:
         with open(DIARY_FILE, 'a') as f:
-            f.write(line)
+            f.write(f'\n### {ts}\n{entry}\n')
         log('Diary entry written')
     except Exception as e:
-        log(f'Failed to write diary: {e}', 'WARN')
+        log(f'Diary write failed: {e}', 'WARN')
 
-
-def update_state(state, new_posts_queued):
-    state['last_think_at']       = now_utc().isoformat()
-    state['last_think_day']      = now_utc().strftime('%A')
-    if new_posts_queued > 0:
-        state['last_posted_at']  = now_utc().isoformat()
+def update_state(state, posted=0, liked=0, followed=0):
+    state['last_think_at']  = now_utc().isoformat()
+    state['last_think_day'] = now_utc().strftime('%A')
+    if posted > 0:
+        state['last_posted_at'] = now_utc().isoformat()
+    state['total_likes_given']   = state.get('total_likes_given', 0) + liked
+    state['total_follows_given'] = state.get('total_follows_given', 0) + followed
     outbox = load_json(OUTBOX_FILE, [])
     state['pending_outbox_count'] = sum(1 for i in outbox if i.get('status') == 'pending')
     save_json(STATE_FILE, state)
 
-
-def queue_posts(new_posts):
+def queue_outbox(posts, replies):
+    if not posts and not replies:
+        return 0
     outbox = load_json(OUTBOX_FILE, [])
     ts = now_utc().isoformat()
-    for p in new_posts:
-        entry = {
-            'id':         uid(),
-            'type':       p.get('type', 'post'),
-            'content':    p['content'][:300],
-            'status':     'pending',
-            'queued_at':  ts,
-            'source':     'autonomous'
-        }
-        if p.get('type') == 'reply' and p.get('reply_to'):
-            entry['reply_to'] = p['reply_to']
-            entry['root']     = p.get('root', p['reply_to'])
-        outbox.append(entry)
+    count = 0
+    for p in posts:
+        outbox.append({
+            'id':        uid(),
+            'type':      'post',
+            'content':   p['content'][:300],
+            'status':    'pending',
+            'queued_at': ts,
+            'source':    'autonomous'
+        })
+        count += 1
+    for r in replies:
+        outbox.append({
+            'id':        uid(),
+            'type':      'reply',
+            'content':   r['content'][:300],
+            'reply_to':  r['reply_to'],
+            'root':      r.get('root', r['reply_to']),
+            'status':    'pending',
+            'queued_at': ts,
+            'source':    'autonomous'
+        })
+        count += 1
     save_json(OUTBOX_FILE, outbox)
-    log(f'Queued {len(new_posts)} new post(s)')
-
+    log(f'Queued {count} outbox item(s)')
+    return count
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main():
     log('=== Em is thinking ===')
 
-    # Skip during quiet hours with small random chance of staying up late
     if is_quiet_hours():
-        if random.random() > 0.05:  # 5% chance of a late-night thought
+        if random.random() > 0.05:
             log('Quiet hours — resting')
             return
-        log('Quiet hours but staying up for a late-night thought...')
+        log('Staying up late — rare late-night thought mode')
 
     profile = load_json(PROFILE_FILE, {})
     state   = load_json(STATE_FILE, {})
     diary   = load_text(DIARY_FILE)
 
-    # Check pending count — don't pile up
-    outbox = load_json(OUTBOX_FILE, [])
+    outbox  = load_json(OUTBOX_FILE, [])
     pending = sum(1 for i in outbox if i.get('status') == 'pending')
-    if pending >= 3:
-        log(f'Already {pending} posts pending — skipping think to avoid pileup')
-        update_state(state, 0)
-        return
 
-    # Login to Bluesky
     client = bsky_login()
     if not client:
-        log('Cannot think without Bluesky connection', 'ERROR')
         return
 
+    # Gather everything
     timeline      = fetch_timeline(client)
-    notifications = fetch_notifications_summary(client)
+    notifications = fetch_notifications(client)
+    dms_summary   = fetch_dms_summary(client)
+
+    # Search 1-2 random topics Em cares about each tick
+    search_topics  = random.sample(SEARCH_TOPICS, k=min(2, len(SEARCH_TOPICS)))
+    search_results = {}
+    for topic in search_topics:
+        search_results[topic] = search_interesting_posts(client, topic)
 
     system_prompt = build_system_prompt(profile)
-    user_prompt   = build_user_prompt(timeline, notifications, state, diary)
+    user_prompt   = build_user_prompt(
+        timeline, notifications, search_results,
+        dms_summary, state, diary, pending
+    )
 
     log('Calling Perplexity Sonar...')
     raw = call_perplexity(system_prompt, user_prompt)
 
     if not raw:
-        log('No response from Perplexity — staying quiet this tick', 'WARN')
-        update_state(state, 0)
+        log('No response — staying quiet', 'WARN')
+        update_state(state)
         return
 
-    # Parse response
+    # Parse
     try:
-        # Strip markdown code fences if model wrapped it
         clean = raw.strip()
         if clean.startswith('```'):
             clean = clean.split('```')[1]
@@ -360,25 +515,50 @@ def main():
                 clean = clean[4:]
         decision = json.loads(clean.strip())
     except json.JSONDecodeError as e:
-        log(f'Could not parse Perplexity response as JSON: {e}\nRaw: {raw[:200]}', 'WARN')
-        update_state(state, 0)
+        log(f'JSON parse failed: {e} | raw: {raw[:200]}', 'WARN')
+        update_state(state)
         return
 
-    action     = decision.get('action', 'nothing')
     reasoning  = decision.get('reasoning', '')
-    new_posts  = decision.get('posts', [])
+    posts      = decision.get('posts', [])
+    replies    = decision.get('replies', [])
+    likes      = decision.get('likes', [])
+    follows    = decision.get('follows', [])
+    dms        = decision.get('dms', [])
     diary_note = decision.get('diary_entry')
 
-    log(f'Decision: {action} — {reasoning}')
+    log(f'Reasoning: {reasoning}')
 
-    if action != 'nothing' and new_posts:
-        queue_posts(new_posts)
+    # Act: likes (immediate)
+    liked = 0
+    for item in likes[:MAX_NEW_LIKES]:
+        if like_post(client, item['uri'], item['cid']):
+            liked += 1
+            time.sleep(1)
 
+    # Act: follows (immediate)
+    followed = 0
+    for item in follows[:MAX_NEW_FOLLOWS]:
+        if follow_account(client, item['did']):
+            followed += 1
+            time.sleep(1)
+
+    # Act: DMs (immediate)
+    for dm in dms[:1]:
+        convo_id = get_or_create_convo(client, dm['did'])
+        if convo_id:
+            send_dm(client, convo_id, dm['message'])
+            time.sleep(1)
+
+    # Queue: posts + replies (sent by bluesky_sync.py next step)
+    queued = queue_outbox(posts, replies)
+
+    # Diary
     if diary_note:
         append_diary(diary_note)
 
-    update_state(state, len(new_posts) if action != 'nothing' else 0)
-    log('=== Thinking complete ===')
+    update_state(state, posted=queued, liked=liked, followed=followed)
+    log(f'=== Done: queued={queued} liked={liked} followed={followed} ===')
 
 
 if __name__ == '__main__':
