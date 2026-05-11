@@ -1,5 +1,81 @@
 {
-  "fetched_at": "2026-05-11T13:52:58.641269+00:00",
+  "fetched_at": "2026-05-11T14:29:49.778756+00:00",
   "unread_count": 0,
-  "notifications": []
+  "notifications": [
+    {
+      "author": {
+        "did": "did:plc:t5pur7eruxfgxy7ynpfrmg2w",
+        "handle": "chiitan.love",
+        "associated": {
+          "activity_subscription": {
+            "allow_subscriptions": "followers",
+            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
+          },
+          "chat": {
+            "allow_incoming": "all",
+            "py_type": "app.bsky.actor.defs#profileAssociatedChat"
+          },
+          "feedgens": null,
+          "labeler": null,
+          "lists": null,
+          "starter_packs": null,
+          "py_type": "app.bsky.actor.defs#profileAssociated"
+        },
+        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:t5pur7eruxfgxy7ynpfrmg2w/bafkreihtj5bb6lvdlrcyun7fsdmw5e5je6qdvcfznetsitmkq4lx2slvky",
+        "created_at": "2024-02-07T14:03:04.704Z",
+        "debug": null,
+        "description": "I'm chiitan Japanese crazy mascot\n\ud83c\udff3\ufe0f\u200d\u26a7\ufe0fChiitan is a transgender ally\ud83c\udff3\ufe0f\u200d\ud83c\udf08\nFF,furry,MLP,Yumeship LOVE\ud83e\udd0d\nROBLOX\uff1achiitan_7407",
+        "display_name": "Chiitan\ud83c\udf08\u3061\u3043\u305f\u3093\u2606",
+        "indexed_at": "2026-05-07T20:46:30.856Z",
+        "labels": [],
+        "pronouns": null,
+        "status": null,
+        "verification": {
+          "trusted_verifier_status": "none",
+          "verifications": [
+            {
+              "created_at": "2025-08-12T04:47:02.909Z",
+              "is_valid": true,
+              "issuer": "did:plc:z72i7hdynmk6r22z27h6tvur",
+              "uri": "at://did:plc:z72i7hdynmk6r22z27h6tvur/app.bsky.graph.verification/3lw6ixnv72o2u",
+              "py_type": "app.bsky.actor.defs#verificationView"
+            }
+          ],
+          "verified_status": "valid",
+          "py_type": "app.bsky.actor.defs#verificationState"
+        },
+        "viewer": {
+          "activity_subscription": null,
+          "blocked_by": false,
+          "blocking": null,
+          "blocking_by_list": null,
+          "followed_by": null,
+          "following": null,
+          "known_followers": null,
+          "muted": false,
+          "muted_by_list": null,
+          "py_type": "app.bsky.actor.defs#viewerState"
+        },
+        "py_type": "app.bsky.actor.defs#profileView"
+      },
+      "cid": "bafyreigaxfdtzclluvxbzjhjoowzmlbixdkzkcn4nqgk74rnjl2izrvmvq",
+      "indexed_at": "2026-05-11T14:13:06.062Z",
+      "is_read": true,
+      "reason": "like",
+      "record": {
+        "created_at": "2026-05-11T14:13:06.062Z",
+        "subject": {
+          "cid": "bafyreid4gp5y57vt7qrjno5dmcec3ga65svtw53yt2wwgf6b2tlz2lrlti",
+          "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mllfpxuazi23",
+          "py_type": "com.atproto.repo.strongRef"
+        },
+        "via": null,
+        "py_type": "app.bsky.feed.like"
+      },
+      "uri": "at://did:plc:t5pur7eruxfgxy7ynpfrmg2w/app.bsky.feed.like/3mllhgavuyj2r",
+      "labels": [],
+      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mllfpxuazi23",
+      "py_type": "app.bsky.notification.listNotifications#notification"
+    }
+  ]
 }
