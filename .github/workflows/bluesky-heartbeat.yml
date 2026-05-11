@@ -3,8 +3,8 @@ name: Bluesky Heartbeat
 on:
   workflow_dispatch:
   schedule:
-    # Every 15 minutes — Em's autonomous thinking cycle
-    - cron: '*/15 * * * *'
+    # Every 30 minutes — more reliable than */15 on GitHub's scheduler
+    - cron: '*/30 * * * *'
 
 permissions:
   contents: write
@@ -26,15 +26,23 @@ jobs:
         run: pip install atproto requests
 
       - name: Em thinks
+        continue-on-error: true
         env:
           BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
-        run: python tools/bluesky_think.py
+        run: |
+          echo "[heartbeat] think step starting at $(date -u)"
+          python tools/bluesky_think.py
+          echo "[heartbeat] think step complete"
 
       - name: Em acts (sync outbox)
+        continue-on-error: true
         env:
           BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
-        run: python tools/bluesky_sync.py
+        run: |
+          echo "[heartbeat] sync step starting at $(date -u)"
+          python tools/bluesky_sync.py
+          echo "[heartbeat] sync step complete"
 
       - name: Commit and push changes
         run: |
