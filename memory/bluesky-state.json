@@ -1,0 +1,7 @@
+{
+  "last_think_at": null,
+  "last_think_day": null,
+  "last_posted_at": null,
+  "pending_outbox_count": 0,
+  "notes": "Autonomous state file. Updated every heartbeat by bluesky_think.py. Do not edit manually."
+}

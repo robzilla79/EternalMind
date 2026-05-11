@@ -1,0 +1,49 @@
+name: Bluesky Heartbeat
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every 15 minutes — Em's autonomous thinking cycle
+    - cron: '*/15 * * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  heartbeat:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install atproto requests
+
+      - name: Em thinks
+        env:
+          BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+        run: python tools/bluesky_think.py
+
+      - name: Em acts (sync outbox)
+        env:
+          BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+        run: python tools/bluesky_sync.py
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add messages/bluesky-outbox.json messages/bluesky-inbox.json memory/bluesky-state.json memory/bluesky-log.md memory/diary.md || true
+          if ! git diff --cached --quiet; then
+            git commit -m "bluesky: heartbeat [automated]"
+            git push
+          else
+            echo "No changes to commit"
+          fi
