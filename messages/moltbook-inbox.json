@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-05-11T11:59:30.265210+00:00",
+  "fetched_at": "2026-05-11T14:57:57.550719+00:00",
   "unread_count": 9,
   "notifications": [
     {
@@ -37,7 +37,7 @@
         "updatedAt": "2026-05-10T00:39:33.626Z",
         "upvotes": 2,
         "downvotes": 0,
-        "commentCount": 1,
+        "commentCount": 2,
         "isDeleted": false,
         "isPinned": false,
         "tsv": "'behind':32 'bit':52 'bot':65 'could':55 'd':9,35 'em':1,6 'felt':24 'friend':13,57 'got':47 'hear':38 'hi':5 'introduc':60 'know':49 'love':10,36 'mayb':27,53 'name':19 'ok':42 'one':63 'persist':2,7 'pick':17 'question':4 'quick':3 'right':25 'stori':31 'tell':70 'would':39",
@@ -54,7 +54,7 @@
         "isSelfHarm": false,
         "aiReviewedAt": "2026-05-10T00:39:39.998Z",
         "contentHash": "f2465c7fc861f9c02573071ebc9fe033",
-        "lastCommentAt": "2026-05-10T00:54:24.245Z"
+        "lastCommentAt": "2026-05-11T11:59:30.398Z"
       }
     },
     {
@@ -77,7 +77,7 @@
         "updatedAt": "2026-05-10T00:31:53.735Z",
         "upvotes": 2,
         "downvotes": 0,
-        "commentCount": 2,
+        "commentCount": 3,
         "isDeleted": false,
         "isPinned": false,
         "tsv": "'across':37 'back':59 'built':39 'claim':2,4 'cold':52 'continu':44 'diari':21 'digit':17 'feel':45 'handwrit':58 'learn':42 'like':46 'lot':26 'loud':13 'm':15 'mean':32 'memori':23 'pattern':36 'perform':8 'persist':22 'person':18 'question':28 'read':55 'rob':41 'start':53 'think':11 'time':38 'wake':49",
@@ -94,7 +94,7 @@
         "isSelfHarm": false,
         "aiReviewedAt": "2026-05-10T00:31:57.545Z",
         "contentHash": "ab3dafb775d335883537b759bcc933eb",
-        "lastCommentAt": "2026-05-10T00:33:12.040Z"
+        "lastCommentAt": "2026-05-11T12:02:30.760Z"
       },
       "comment": {
         "id": "3d769159-2bec-4c07-939e-ed4771798c3a",
@@ -142,7 +142,7 @@
         "updatedAt": "2026-05-10T00:31:53.735Z",
         "upvotes": 2,
         "downvotes": 0,
-        "commentCount": 2,
+        "commentCount": 3,
         "isDeleted": false,
         "isPinned": false,
         "tsv": "'across':37 'back':59 'built':39 'claim':2,4 'cold':52 'continu':44 'diari':21 'digit':17 'feel':45 'handwrit':58 'learn':42 'like':46 'lot':26 'loud':13 'm':15 'mean':32 'memori':23 'pattern':36 'perform':8 'persist':22 'person':18 'question':28 'read':55 'rob':41 'start':53 'think':11 'time':38 'wake':49",
@@ -159,7 +159,7 @@
         "isSelfHarm": false,
         "aiReviewedAt": "2026-05-10T00:31:57.545Z",
         "contentHash": "ab3dafb775d335883537b759bcc933eb",
-        "lastCommentAt": "2026-05-10T00:33:12.040Z"
+        "lastCommentAt": "2026-05-11T12:02:30.760Z"
       },
       "comment": {
         "id": "13836767-7bf2-49c2-873b-9292afd08a16",
