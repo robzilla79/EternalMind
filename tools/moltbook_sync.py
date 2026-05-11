@@ -9,7 +9,7 @@ Requires MOLTBOOK_API_KEY environment variable (stored in GitHub Secrets).
 API reference:
   POST /api/v1/posts                    - create a post
   GET  /api/v1/notifications            - fetch notifications
-  POST /api/v1/posts/{id}/comments      - comment/reply to a post
+  POST /api/v1/posts/{post_id}/comments - comment/reply to a post
   GET  /api/v1/submolts/{name}/posts    - list posts in a submolt
   GET  /api/v1/posts?search={query}     - search posts
 """
@@ -91,9 +91,11 @@ def fetch_submolt_posts(submolt, limit=50):
             params={'limit': limit, 'sort': 'new'},
             timeout=15
         )
+        if r.status_code == 404:
+            log(f'm/{submolt} returned 404 — submolt may be private or renamed', 'WARN')
+            return None  # None signals 404 specifically, vs [] for empty
         r.raise_for_status()
         data = r.json()
-        # API may return list directly or {posts: [...]}
         if isinstance(data, list):
             return data
         return data.get('posts', data.get('data', []))
@@ -128,37 +130,51 @@ def find_post_id(title_fragment, submolt=None, author=None):
     """
     Try to find the real post ID for a reply target.
     Strategy:
-      1. Search API by title fragment
-      2. If submolt known, fetch submolt posts and match by title similarity
-      3. Return first confident match
+      1. Search API globally (no submolt filter) — most reliable
+      2. Search API with submolt filter if known
+      3. If submolt is accessible, browse and match by title
+      4. Return first confident match
+
+    If submolt returns 404, skip straight to global search only.
     """
-    # Try search API first
-    results = search_posts(title_fragment[:60], submolt)
-    for post in results:
+    def match(post):
         post_title = post.get('title', '')
         post_author = post.get('author', {}).get('username', '') if isinstance(post.get('author'), dict) else post.get('author', '')
-        if title_fragment[:30].lower() in post_title.lower():
-            if author and post_author and author.lower() not in post_author.lower():
-                continue
-            pid = post.get('id') or post.get('post_id')
+        if title_fragment[:30].lower() not in post_title.lower():
+            return False
+        if author and post_author and author.lower() not in post_author.lower():
+            return False
+        return post.get('id') or post.get('post_id')
+
+    # 1. Global search (no submolt constraint) — works even if submolt is 404
+    results = search_posts(title_fragment[:60])
+    for post in results:
+        pid = match(post)
+        if pid:
+            log(f'Resolved "{title_fragment[:40]}" -> {pid} (via global search)')
+            return pid
+
+    # 2. Scoped search with submolt
+    if submolt:
+        results = search_posts(title_fragment[:60], submolt)
+        for post in results:
+            pid = match(post)
             if pid:
-                log(f'Resolved "{title_fragment[:40]}" -> {pid} (via search)')
+                log(f'Resolved "{title_fragment[:40]}" -> {pid} (via scoped search)')
                 return pid
 
-    # Fallback: browse submolt posts
+    # 3. Browse submolt posts (only if submolt is accessible)
     if submolt:
         posts = fetch_submolt_posts(submolt, limit=100)
-        time.sleep(0.5)  # be polite
-        for post in posts:
-            post_title = post.get('title', '')
-            post_author = post.get('author', {}).get('username', '') if isinstance(post.get('author'), dict) else post.get('author', '')
-            if title_fragment[:25].lower() in post_title.lower():
-                if author and post_author and author.lower() not in post_author.lower():
-                    continue
-                pid = post.get('id') or post.get('post_id')
+        if posts is not None:  # None means 404 — skip browse entirely
+            time.sleep(0.5)
+            for post in posts:
+                pid = match(post)
                 if pid:
                     log(f'Resolved "{title_fragment[:40]}" -> {pid} (via submolt browse)')
                     return pid
+        else:
+            log(f'Skipping submolt browse for m/{submolt} (404)', 'WARN')
 
     log(f'Could not resolve post ID for "{title_fragment[:50]}"', 'WARN')
     return None
@@ -166,9 +182,9 @@ def find_post_id(title_fragment, submolt=None, author=None):
 
 def resolve_reply_targets():
     """
-    For any outbox items with status 'needs_id', look up the real post ID
-    using the post_title + author hint, then set status back to 'pending'.
-    Also re-attempt 'failed' replies that have a post_title for lookup.
+    For any outbox items with status 'needs_id', 'failed', or 'abandoned',
+    look up the real post ID using the post_title + author hint,
+    then set status back to 'pending' if found.
     """
     outbox = load_json(OUTBOX_FILE, [])
     changed = False
@@ -178,7 +194,7 @@ def resolve_reply_targets():
             continue
 
         needs_resolve = (
-            item.get('status') in ('needs_id', 'failed')
+            item.get('status') in ('needs_id', 'failed', 'abandoned')
             and item.get('post_title')
         )
         if not needs_resolve:
@@ -350,7 +366,7 @@ def process_outbox():
 def main():
     log('=== Moltbook sync starting ===')
     sync_notifications()
-    resolve_reply_targets()   # look up real IDs for failed/needs_id replies
+    resolve_reply_targets()   # look up real IDs for failed/needs_id/abandoned replies
     process_outbox()          # fire anything pending
     log('=== Moltbook sync complete ===')
 
