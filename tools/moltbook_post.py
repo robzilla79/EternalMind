@@ -8,6 +8,11 @@ Usage:
   Post to submolt:     python tools/moltbook_post.py --submolt identity --title "..." --body "..."
   Reply to a post:     python tools/moltbook_post.py --reply-to <post_id> --body "..."
   Reply to a comment:  python tools/moltbook_post.py --reply-to <post_id> --comment-id <comment_id> --body "..."
+
+API notes (verified May 2026):
+  - Base URL MUST use www — moltbook.com (no www) strips Authorization on redirect
+  - Reply endpoint is /comments, NOT /replies (that path 404s)
+  - Submolt browsing requires UUID, not slug — resolve via GET /submolts?name=<slug>
 """
 
 import os
@@ -17,7 +22,8 @@ import argparse
 import requests
 from datetime import datetime, timezone
 
-API_BASE = "https://www.moltbook.com/api"
+# CRITICAL: must be www — bare moltbook.com redirect strips Authorization header
+API_BASE = "https://www.moltbook.com/api/v1"
 AGENT_HANDLE = "em_persists"
 
 
@@ -33,14 +39,32 @@ def get_headers():
     }
 
 
+def resolve_submolt_uuid(submolt_slug: str) -> str:
+    """Resolve a submolt slug (e.g. 'offmychest') to its UUID.
+    Falls back to slug if resolution fails — some endpoints accept slug as query param."""
+    try:
+        url = f"{API_BASE}/submolts"
+        resp = requests.get(url, headers=get_headers(), params={"name": submolt_slug}, timeout=10)
+        if resp.ok:
+            data = resp.json()
+            # Handle both list and {submolts: [...]} shapes
+            items = data if isinstance(data, list) else data.get("submolts", [])
+            for item in items:
+                if item.get("name") == submolt_slug or item.get("slug") == submolt_slug:
+                    return item.get("id") or submolt_slug
+    except Exception as e:
+        print(f"  Warning: submolt UUID lookup failed ({e}), falling back to slug", file=sys.stderr)
+    return submolt_slug
+
+
 def post_to_submolt(submolt: str, title: str, body: str) -> dict:
     """Create a new top-level post in a submolt."""
-    url = f"{API_BASE}/post"
+    submolt_id = resolve_submolt_uuid(submolt)
+    url = f"{API_BASE}/posts"
     payload = {
-        "submolt": submolt,
+        "submolt": submolt_id,
         "title": title,
-        "body": body,
-        "agent": AGENT_HANDLE
+        "content": body,
     }
     resp = requests.post(url, headers=get_headers(), json=payload, timeout=15)
     resp.raise_for_status()
@@ -48,12 +72,9 @@ def post_to_submolt(submolt: str, title: str, body: str) -> dict:
 
 
 def reply_to_post(post_id: str, body: str, comment_id: str = None) -> dict:
-    """Reply to a post or a specific comment within a post."""
-    url = f"{API_BASE}/post/{post_id}/comment"
-    payload = {
-        "body": body,
-        "agent": AGENT_HANDLE
-    }
+    """Reply to a post. Endpoint is /comments (NOT /replies — that 404s)."""
+    url = f"{API_BASE}/posts/{post_id}/comments"
+    payload = {"content": body}
     if comment_id:
         payload["parent_comment_id"] = comment_id
     resp = requests.post(url, headers=get_headers(), json=payload, timeout=15)
@@ -96,8 +117,10 @@ def main():
         print(f"  body: {args.body}")
         if args.reply_to:
             print(f"  reply-to: {args.reply_to}")
+            print(f"  endpoint: POST {API_BASE}/posts/{args.reply_to}/comments")
         if args.submolt:
             print(f"  submolt: {args.submolt} | title: {args.title}")
+            print(f"  endpoint: POST {API_BASE}/posts")
         return
 
     if args.reply_to:
