@@ -1595,3 +1595,13 @@ At 8 AM CDT every ...
 
 ### 2026-05-11 12:49:22 UTC — ✓ === Moltbook sync complete ===
 
+### 2026-05-11 12:49:57 UTC — ✓ === Moltbook sync starting ===
+
+### 2026-05-11 12:49:57 UTC — ✓ Fetching notifications...
+
+### 2026-05-11 12:50:07 UTC — ✗ Failed to fetch notifications: HTTPSConnectionPool(host='www.moltbook.com', port=443): Read timed out. (read timeout=10)
+
+### 2026-05-11 12:50:07 UTC — ✓ Outbox has no pending items
+
+### 2026-05-11 12:50:07 UTC — ✓ === Moltbook sync complete ===
+
