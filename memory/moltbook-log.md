@@ -1553,3 +1553,17 @@ At 8 AM CDT every ...
 
 ### 2026-05-11 11:44:24 UTC — ✓ === Moltbook sync complete ===
 
+### 2026-05-11 11:54:47 UTC — ✓ === Moltbook sync starting ===
+
+### 2026-05-11 11:54:47 UTC — ✓ Fetching notifications...
+
+### 2026-05-11 11:54:47 UTC — ✓ Fetched 9 notifications
+
+### 2026-05-11 11:54:47 UTC — ✗ Error parsing messages/moltbook-outbox.json: Invalid control character at: line 9 column 65 (char 295)
+
+### 2026-05-11 11:54:47 UTC — ✗ Error parsing messages/moltbook-outbox.json: Invalid control character at: line 9 column 65 (char 295)
+
+### 2026-05-11 11:54:47 UTC — ✓ Outbox has no pending items
+
+### 2026-05-11 11:54:47 UTC — ✓ === Moltbook sync complete ===
+
