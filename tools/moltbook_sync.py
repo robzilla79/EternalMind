@@ -9,7 +9,7 @@ Requires MOLTBOOK_API_KEY environment variable (stored in GitHub Secrets).
 API reference:
   POST /api/v1/posts                    - create a post
   GET  /api/v1/notifications            - fetch notifications
-  POST /api/v1/posts/{id}/replies       - reply to a post
+  POST /api/v1/posts/{id}/comments      - comment/reply to a post
   GET  /api/v1/submolts/{name}/posts    - list posts in a submolt
   GET  /api/v1/posts?search={query}     - search posts
 """
@@ -29,6 +29,9 @@ INBOX_FILE  = 'messages/moltbook-inbox.json'
 LOG_FILE    = 'memory/moltbook-log.md'
 
 DEFAULT_SUBMOLT = 'general'
+
+# Moltbook enforces one post per 2.5 minutes — we wait 3 minutes to be safe
+RATE_LIMIT_SECONDS = 180
 
 
 def log(message, level='INFO'):
@@ -232,19 +235,25 @@ def create_post(content, title=None, submolt=None, challenge_id=None, challenge_
 
 
 def create_reply(post_id, content):
-    """POST /api/v1/posts/{post_id}/replies"""
+    """POST /api/v1/posts/{post_id}/comments"""
     if not API_KEY:
         log('MOLTBOOK_API_KEY not set', 'ERROR')
         return None
     try:
         r = requests.post(
-            f'{BASE_URL}/posts/{post_id}/replies',
+            f'{BASE_URL}/posts/{post_id}/comments',
             headers=headers(),
             json={'content': content},
             timeout=10
         )
         r.raise_for_status()
         return r.json()
+    except requests.exceptions.HTTPError as e:
+        try:
+            return e.response.json()
+        except Exception:
+            log(f'Reply HTTP error: {e}', 'ERROR')
+            return None
     except requests.exceptions.RequestException as e:
         log(f'Reply to {post_id} failed: {e}', 'ERROR')
         return None
@@ -266,7 +275,7 @@ def sync_notifications():
 
 
 def process_outbox():
-    """Process pending items in outbox."""
+    """Process pending items in outbox, respecting rate limits between sends."""
     outbox = load_json(OUTBOX_FILE, [])
     pending = [i for i in outbox if i.get('status') == 'pending']
 
@@ -275,10 +284,16 @@ def process_outbox():
         return
 
     updated = False
+    sent_count = 0
 
     for item in outbox:
         if item.get('status') != 'pending':
             continue
+
+        # Enforce rate limit: wait 3 minutes between any two outgoing sends
+        if sent_count > 0:
+            log(f'Rate limit: waiting {RATE_LIMIT_SECONDS}s before next send...')
+            time.sleep(RATE_LIMIT_SECONDS)
 
         itype = item.get('type')
 
@@ -303,6 +318,7 @@ def process_outbox():
                     item['post_id'] = result.get('id') or result.get('post', {}).get('id')
                     item['post_url'] = result.get('url') or result.get('post', {}).get('url')
                     log(f"Posted: {item['post_url']}")
+                    sent_count += 1
                 else:
                     item['status'] = 'failed'
                     item['error'] = str(result)
@@ -320,14 +336,12 @@ def process_outbox():
                 item['status'] = 'done'
                 item['posted_at'] = datetime.now(timezone.utc).isoformat()
                 log('Reply posted successfully')
+                sent_count += 1
             else:
                 item['status'] = 'failed'
                 item['error'] = str(result)
                 log(f'Reply failed: {result}', 'ERROR')
             updated = True
-
-        # Rate limit between posts
-        time.sleep(3)
 
     if updated:
         save_json(OUTBOX_FILE, outbox)
