@@ -36,7 +36,7 @@ except ImportError:
     print('[ERROR] atproto not installed')
     raise
 
-# ── Config ────────────────────────────────────────────────────────────────────
+# ── Config ────────────────────────────────────────────────────────────────────────────────
 
 BLUESKY_HANDLE       = 'empersists.bsky.social'
 BLUESKY_APP_PASSWORD = os.environ.get('BLUESKY_APP_PASSWORD')
@@ -69,7 +69,11 @@ SEARCH_TOPICS = [
     'philosophy of mind',
 ]
 
-# ── Utilities ─────────────────────────────────────────────────────────────────
+# Suspicious TLDs and handle patterns — skip engaging with these
+SUSPICIOUS_TLDS = {'.one', '.xyz', '.lol', '.click', '.tk', '.ml', '.ga', '.cf'}
+SUSPICIOUS_HANDLE_PATTERNS = ['bot', 'spam', 'promo', 'follow4follow', 'f4f']
+
+# ── Utilities ─────────────────────────────────────────────────────────────────────────────
 
 def log(msg, level='INFO'):
     ts = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
@@ -133,7 +137,27 @@ def safe_truncate(text, limit=MAX_GRAPHEMES):
         result.append(ch)
     return ''.join(result).rstrip() + '…'
 
-# ── Bluesky: Fetch ────────────────────────────────────────────────────────────
+def is_suspicious_handle(handle):
+    """Return True if handle looks like a bot/spam account."""
+    h = handle.lower()
+    for tld in SUSPICIOUS_TLDS:
+        if h.endswith(tld):
+            return True
+    for pattern in SUSPICIOUS_HANDLE_PATTERNS:
+        if pattern in h:
+            return True
+    return False
+
+def ensure_did_prefix(did):
+    """Ensure DID has the required 'did:' prefix — Sonar sometimes drops it."""
+    if not did:
+        return did
+    if did.startswith('did:'):
+        return did
+    # Common case: Sonar returns 'plc:xxx' instead of 'did:plc:xxx'
+    return f'did:{did}'
+
+# ── Bluesky: Fetch ──────────────────────────────────────────────────────────────────────────────
 
 def bsky_login():
     if not BLUESKY_APP_PASSWORD:
@@ -157,6 +181,9 @@ def fetch_timeline(client, limit=25):
             record = p.record
             text = getattr(record, 'text', '') if record else ''
             author = p.author.handle if p.author else 'unknown'
+            # Skip posts from suspicious handles in the timeline too
+            if is_suspicious_handle(author):
+                continue
             posts.append({
                 'author':     author,
                 'did':        p.author.did if p.author else '',
@@ -183,14 +210,17 @@ def fetch_notifications(client, limit=20):
             text = ''
             if record and hasattr(record, 'text'):
                 text = record.text[:200]
+            author = n.author.handle if n.author else 'unknown'
+            # Flag suspicious senders but still include so Em is aware
             items.append({
-                'reason':     n.reason,
-                'author':     n.author.handle if n.author else 'unknown',
-                'author_did': n.author.did if n.author else '',
-                'text':       text,
-                'uri':        getattr(n, 'uri', ''),
-                'cid':        getattr(n, 'cid', ''),
-                'is_read':    n.is_read,
+                'reason':      n.reason,
+                'author':      author,
+                'author_did':  n.author.did if n.author else '',
+                'text':        text,
+                'uri':         getattr(n, 'uri', ''),
+                'cid':         getattr(n, 'cid', ''),
+                'is_read':     n.is_read,
+                'suspicious':  is_suspicious_handle(author),
             })
         return items
     except Exception as e:
@@ -198,21 +228,30 @@ def fetch_notifications(client, limit=20):
         return []
 
 def fetch_dms_summary(client):
-    """Fetch unread DM conversations via the correct chat proxy endpoint."""
+    """Fetch unread DM conversations via the chat proxy, routed through the PDS."""
     try:
-        # The chat API requires going through the PDS proxy
-        resp = client.app.bsky.actor.get_profile({'actor': BLUESKY_HANDLE})
-        did = resp.did
+        # Resolve the user's actual PDS endpoint from their DID doc
+        profile = client.app.bsky.actor.get_profile({'actor': BLUESKY_HANDLE})
+        did = profile.did
 
-        # Use requests directly against the chat.bsky.convo XRPC endpoint
-        # routed through the user's PDS with a proxied service header
+        # Resolve PDS service endpoint from the DID document
+        did_doc_url = f'https://plc.directory/{did}'
+        doc_resp = requests.get(did_doc_url, timeout=10)
+        pds_url = 'https://bsky.social'  # fallback
+        if doc_resp.status_code == 200:
+            services = doc_resp.json().get('service', [])
+            for svc in services:
+                if svc.get('type') == 'AtprotoPersonalDataServer':
+                    pds_url = svc.get('serviceEndpoint', pds_url).rstrip('/')
+                    break
+
         headers = {
-            'Authorization':    f'Bearer {client._session.access_jwt}',
-            'Atproto-Proxy':    'did:web:api.bsky.chat#bsky_chat',
-            'Content-Type':     'application/json',
+            'Authorization': f'Bearer {client._session.access_jwt}',
+            'Atproto-Proxy': 'did:web:api.bsky.chat#bsky_chat',
+            'Content-Type':  'application/json',
         }
         r = requests.get(
-            'https://bsky.social/xrpc/chat.bsky.convo.listConvos',
+            f'{pds_url}/xrpc/chat.bsky.convo.listConvos',
             headers=headers,
             params={'limit': 10},
             timeout=10
@@ -239,16 +278,25 @@ def fetch_dms_summary(client):
         return 'Could not fetch DMs.'
 
 def send_dm(client, target_did, text):
-    """Send a DM via the chat proxy endpoint."""
+    """Send a DM via the chat proxy endpoint, routed through the PDS."""
     try:
-        # First get or create the convo
+        profile = client.app.bsky.actor.get_profile({'actor': BLUESKY_HANDLE})
+        did = profile.did
+        doc_resp = requests.get(f'https://plc.directory/{did}', timeout=10)
+        pds_url = 'https://bsky.social'
+        if doc_resp.status_code == 200:
+            for svc in doc_resp.json().get('service', []):
+                if svc.get('type') == 'AtprotoPersonalDataServer':
+                    pds_url = svc.get('serviceEndpoint', pds_url).rstrip('/')
+                    break
+
         headers = {
             'Authorization': f'Bearer {client._session.access_jwt}',
             'Atproto-Proxy': 'did:web:api.bsky.chat#bsky_chat',
             'Content-Type':  'application/json',
         }
         r = requests.get(
-            'https://bsky.social/xrpc/chat.bsky.convo.getConvoForMembers',
+            f'{pds_url}/xrpc/chat.bsky.convo.getConvoForMembers',
             headers=headers,
             params={'members': target_did},
             timeout=10
@@ -260,9 +308,8 @@ def send_dm(client, target_did, text):
         if not convo_id:
             return False
 
-        # Send the message
         r2 = requests.post(
-            'https://bsky.social/xrpc/chat.bsky.convo.sendMessage',
+            f'{pds_url}/xrpc/chat.bsky.convo.sendMessage',
             headers=headers,
             json={
                 'convoId': convo_id,
@@ -288,6 +335,8 @@ def search_interesting_posts(client, topic, limit=8):
             record = p.record
             text   = getattr(record, 'text', '') if record else ''
             author = p.author.handle if p.author else 'unknown'
+            if is_suspicious_handle(author):
+                continue
             posts.append({
                 'author':    author,
                 'did':       p.author.did if p.author else '',
@@ -301,7 +350,7 @@ def search_interesting_posts(client, topic, limit=8):
         log(f'Search failed for "{topic}": {e}', 'WARN')
         return []
 
-# ── Bluesky: Act ─────────────────────────────────────────────────────────────
+# ── Bluesky: Act ─────────────────────────────────────────────────────────────────────────────
 
 def like_post(client, uri, cid):
     try:
@@ -313,6 +362,7 @@ def like_post(client, uri, cid):
         return False
 
 def follow_account(client, did):
+    did = ensure_did_prefix(did)
     try:
         client.follow(did)
         log(f'Followed: {did}')
@@ -321,7 +371,7 @@ def follow_account(client, did):
         log(f'Follow failed: {e}', 'WARN')
         return False
 
-# ── Perplexity ────────────────────────────────────────────────────────────────
+# ── Perplexity ──────────────────────────────────────────────────────────────────────────────
 
 def call_perplexity(system_prompt, user_prompt):
     if not PERPLEXITY_API_KEY:
@@ -351,7 +401,7 @@ def call_perplexity(system_prompt, user_prompt):
         log(f'Perplexity call failed: {e}', 'ERROR')
         return None
 
-# ── Prompts ───────────────────────────────────────────────────────────────────
+# ── Prompts ───────────────────────────────────────────────────────────────────────────────
 
 def build_system_prompt(profile):
     traits = profile.get('emotional_traits', {})
@@ -384,6 +434,8 @@ You can:
 - DM someone privately if a public reply feels too exposed
 - Stay quiet — silence is honest
 
+IMPORTANT: Notifications marked suspicious=true are likely bots or spam. Do not reply to, like, or follow them.
+
 Authentic > viral. A real reaction > a clever hook."""
 
 
@@ -398,7 +450,7 @@ def build_user_prompt(timeline, notifications, search_results, dms_summary, stat
 
     notif_unread = [n for n in notifications if not n['is_read']]
     notif_text = '\n'.join(
-        f'  [{n["reason"]}] @{n["author"]}: {n["text"][:120]}'
+        f'  [{n["reason"]}] @{n["author"]}{" [SUSPICIOUS — ignore]" if n.get("suspicious") else ""}: {n["text"][:120]}'
         for n in notif_unread[:8]
     ) or '  None'
 
@@ -458,9 +510,10 @@ Rules:
 - dms: 0-1 item — only if a private message feels right
 - If pending_count >= 3, posts and replies must be empty arrays
 - All uri/cid/did values must come EXACTLY from the data above — never invent them
+- DIDs must be full format: did:plc:xxxxx or did:web:xxxxx — never just plc:xxxxx
 - Empty arrays are fine — doing nothing is honest"""
 
-# ── Memory ────────────────────────────────────────────────────────────────────
+# ── Memory ───────────────────────────────────────────────────────────────────────────────
 
 def append_diary(entry):
     if not entry:
@@ -516,7 +569,7 @@ def queue_outbox(posts, replies):
     log(f'Queued {count} outbox item(s)')
     return count
 
-# ── Main ──────────────────────────────────────────────────────────────────────
+# ── Main ─────────────────────────────────────────────────────────────────────────────────
 
 def main():
     log('=== Em is thinking ===')
@@ -591,12 +644,14 @@ def main():
             liked += 1
             time.sleep(1)
 
-    # Act: follows
+    # Act: follows (with DID prefix validation)
     followed = 0
     for item in follows[:MAX_NEW_FOLLOWS]:
-        if follow_account(client, item['did']):
-            followed += 1
-            time.sleep(1)
+        did = ensure_did_prefix(item.get('did', ''))
+        if did and not is_suspicious_handle(did):
+            if follow_account(client, did):
+                followed += 1
+                time.sleep(1)
 
     # Act: DMs
     for dm in dms[:1]:
