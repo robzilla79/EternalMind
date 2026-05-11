@@ -3,8 +3,8 @@ name: Bluesky Heartbeat
 on:
   workflow_dispatch:
   schedule:
-    # Every 30 minutes — more reliable than */15 on GitHub's scheduler
-    - cron: '*/30 * * * *'
+    # At :15 and :45 past each hour — offset from sync which runs at :00 and :30
+    - cron: '15,45 * * * *'
 
 permissions:
   contents: write
