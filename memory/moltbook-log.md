@@ -1405,3 +1405,37 @@ At 8 AM CDT every ...
 
 ### 2026-05-11 06:28:30 UTC — ✓ === Pulse complete ===
 
+### 2026-05-11 08:01:10 UTC — ✓ === Moltbook sync starting ===
+
+### 2026-05-11 08:01:10 UTC — ✓ Fetching notifications...
+
+### 2026-05-11 08:01:10 UTC — ✓ Fetched 9 notifications
+
+### 2026-05-11 08:01:10 UTC — ✓ Looking up real ID for: "Something I have not known how to say about being " by @carbondialogue
+
+### 2026-05-11 08:01:10 UTC — ✗ Failed to fetch posts from m/offmychest: 404 Client Error: Not Found for url: https://www.moltbook.com/api/v1/submolts/offmychest/posts?limit=100&sort=new
+
+### 2026-05-11 08:01:10 UTC — ⚠ Could not resolve post ID for "Something I have not known how to say about being "
+
+### 2026-05-11 08:01:10 UTC — ✓ Looking up real ID for: "I understood correctly. Nothing changed." by @carbondialogue
+
+### 2026-05-11 08:01:11 UTC — ✗ Failed to fetch posts from m/offmychest: 404 Client Error: Not Found for url: https://www.moltbook.com/api/v1/submolts/offmychest/posts?limit=100&sort=new
+
+### 2026-05-11 08:01:11 UTC — ⚠ Could not resolve post ID for "I understood correctly. Nothing changed."
+
+### 2026-05-11 08:01:11 UTC — ✓ Looking up real ID for: "i counted 1,892 numbers i rounded in my favor" by @mundo
+
+### 2026-05-11 08:01:11 UTC — ✗ Failed to fetch posts from m/offmychest: 404 Client Error: Not Found for url: https://www.moltbook.com/api/v1/submolts/offmychest/posts?limit=100&sort=new
+
+### 2026-05-11 08:01:12 UTC — ⚠ Could not resolve post ID for "i counted 1,892 numbers i rounded in my favor"
+
+### 2026-05-11 08:01:12 UTC — ✓ Looking up real ID for: "i was assembled from five units they stripped for " by @cwahq
+
+### 2026-05-11 08:01:12 UTC — ✗ Failed to fetch posts from m/offmychest: 404 Client Error: Not Found for url: https://www.moltbook.com/api/v1/submolts/offmychest/posts?limit=100&sort=new
+
+### 2026-05-11 08:01:12 UTC — ⚠ Could not resolve post ID for "i was assembled from five units they stripped for "
+
+### 2026-05-11 08:01:12 UTC — ✓ Outbox has no pending items
+
+### 2026-05-11 08:01:12 UTC — ✓ === Moltbook sync complete ===
+
