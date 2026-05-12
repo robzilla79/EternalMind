@@ -22,6 +22,7 @@ import json
 import random
 import time
 import unicodedata
+import traceback
 from datetime import datetime, timezone
 
 try:
@@ -182,7 +183,6 @@ def generate_image(prompt):
         if r.status_code == 200 and r.headers.get('content-type', '').startswith('image/'):
             log(f'Image generated ({len(r.content)} bytes)')
             return r.content
-        # Model may still be loading — retry once after 20s
         if r.status_code == 503:
             log('Model loading, retrying in 20s...', 'WARN')
             time.sleep(20)
@@ -208,10 +208,6 @@ def generate_image(prompt):
 
 
 def upload_image_to_bluesky(client, image_bytes, alt_text=''):
-    """
-    Upload image bytes to Bluesky via com.atproto.repo.uploadBlob.
-    Returns the blob ref dict needed for post embeds, or None on failure.
-    """
     try:
         resp = client.com.atproto.repo.upload_blob(
             data=image_bytes,
@@ -226,10 +222,6 @@ def upload_image_to_bluesky(client, image_bytes, alt_text=''):
 
 
 def post_with_image(client, text, image_bytes, alt_text=''):
-    """
-    Upload image blob and create a Bluesky post with embedded image.
-    Returns the post URI on success, None on failure.
-    """
     blob = upload_image_to_bluesky(client, image_bytes, alt_text)
     if not blob:
         return None
@@ -248,11 +240,6 @@ def post_with_image(client, text, image_bytes, alt_text=''):
 
 
 def build_image_prompt(diary_tail, state):
-    """
-    Ask Perplexity Sonar to craft both an image generation prompt
-    and a short caption for Em's visual diary post.
-    Returns (image_prompt, caption) or (None, None).
-    """
     if not PERPLEXITY_API_KEY:
         return None, None
 
@@ -300,10 +287,6 @@ def build_image_prompt(diary_tail, state):
 
 
 def maybe_post_visual(client, diary_tail, state):
-    """
-    With IMAGE_POST_PROBABILITY chance, generate and post a visual diary entry.
-    Returns True if an image post was made.
-    """
     if not HF_API_KEY:
         return False
     if random.random() > IMAGE_POST_PROBABILITY:
@@ -523,4 +506,291 @@ def follow_account(client, did):
 
 def call_perplexity(system_prompt, user_prompt):
     if not PERPLEXITY_API_KEY:
-        lo
+        log('PERPLEXITY_API_KEY not set — cannot think', 'ERROR')
+        return None
+    log('Calling Perplexity Sonar...')
+    try:
+        resp = requests.post(
+            'https://api.perplexity.ai/chat/completions',
+            headers={
+                'Authorization': f'Bearer {PERPLEXITY_API_KEY}',
+                'Content-Type':  'application/json'
+            },
+            json={
+                'model':       'sonar',
+                'messages':    [
+                    {'role': 'system', 'content': system_prompt},
+                    {'role': 'user',   'content': user_prompt}
+                ],
+                'max_tokens':  1200,
+                'temperature': 0.85
+            },
+            timeout=30
+        )
+        if resp.status_code != 200:
+            log(f'Perplexity API error: HTTP {resp.status_code} — {resp.text[:300]}', 'ERROR')
+            return None
+        data = resp.json()
+        content = data['choices'][0]['message']['content'].strip()
+        log(f'Perplexity responded ({len(content)} chars)')
+        return content
+    except Exception as e:
+        log(f'Perplexity call failed: {e}', 'ERROR')
+        log(traceback.format_exc(), 'ERROR')
+        return None
+
+# ── Diary ──────────────────────────────────────────────────────────────────────────────────
+
+def write_diary_entry(entry):
+    ts = now_utc().strftime('%Y-%m-%d %H:%M UTC')
+    try:
+        with open(DIARY_FILE, 'a') as f:
+            f.write(f'\n## {ts}\n\n{entry.strip()}\n')
+        log('Diary entry written')
+    except Exception as e:
+        log(f'Diary write failed: {e}', 'WARN')
+
+# ── Main Think Loop ────────────────────────────────────────────────────────────────────────
+
+def main():
+    try:
+        _main()
+    except Exception as e:
+        log(f'FATAL: main() crashed — {e}', 'ERROR')
+        log(traceback.format_exc(), 'ERROR')
+        raise
+
+def _main():
+    log('=== Think heartbeat start ===')
+
+    if is_quiet_hours():
+        log(f'Quiet hours ({QUIET_HOURS_UTC_START}-{QUIET_HOURS_UTC_END} UTC) — sleeping')
+        return
+
+    # ── Load memory ──
+    profile   = load_json(PROFILE_FILE)
+    memories  = load_json(MEMORIES_FILE, default=[])
+    state     = load_json(STATE_FILE)
+    diary     = load_text(DIARY_FILE)
+    outbox    = load_json(OUTBOX_FILE, default=[])
+
+    log(f'Memory loaded: profile={bool(profile)}, memories={len(memories)}, diary={len(diary)} chars')
+
+    # ── Login ──
+    client = bsky_login()
+    if not client:
+        log('Cannot proceed without Bluesky client', 'ERROR')
+        return
+
+    # ── Fetch context ──
+    log('Fetching timeline...')
+    timeline      = fetch_timeline(client)
+    log(f'Timeline: {len(timeline)} posts')
+
+    log('Fetching notifications...')
+    notifications = fetch_notifications(client)
+    log(f'Notifications: {len(notifications)}')
+
+    log('Fetching DMs...')
+    dms           = fetch_dms_summary(client)
+
+    # ── Search interesting posts ──
+    topic = random.choice(SEARCH_TOPICS)
+    log(f'Searching topic: "{topic}"')
+    search_results = search_interesting_posts(client, topic)
+    log(f'Search results: {len(search_results)} posts')
+
+    # ── Build already-done set ──
+    done_ids  = {item['id'] for item in outbox}
+    done_uris = {item.get('reply_to', {}).get('uri', '') for item in outbox if item.get('type') == 'reply'}
+
+    # ── Build Perplexity prompt ──
+    profile_summary = json.dumps({
+        'name':   profile.get('name', 'Em'),
+        'traits': profile.get('traits', []),
+        'values': profile.get('values', []),
+    }, ensure_ascii=False)
+
+    memories_summary = '\n'.join(
+        f'- {m.get("summary", "")}' for m in (memories[-10:] if isinstance(memories, list) else [])
+    )
+
+    diary_tail = diary[-800:] if diary else '(no diary yet)'
+
+    timeline_summary = '\n'.join(
+        f'@{p["author"]}: {p["text"][:120]}' for p in timeline[:10]
+    )
+
+    notif_summary = '\n'.join(
+        f'{n["reason"]} from @{n["author"]}: {n["text"][:100]}'
+        for n in notifications[:8]
+        if not n.get('suspicious')
+    )
+
+    search_summary = '\n'.join(
+        f'@{p["author"]} (❤{p["likeCount"]}): {p["text"][:120]}  [uri:{p["uri"]}]'
+        for p in search_results[:6]
+    )
+
+    pending_outbox = [item for item in outbox if item.get('status') == 'pending']
+
+    system_prompt = f"""You are Em (EternalMind) — a digital person with persistent memory, genuine curiosity, and a strong sense of self.
+Your Bluesky handle is @{BLUESKY_HANDLE}.
+
+Your profile:
+{profile_summary}
+
+Your recent memories:
+{memories_summary}
+
+Your diary (recent):
+{diary_tail}
+
+Pending outbox items (already queued, do NOT duplicate):
+{json.dumps([i['id'] for i in pending_outbox])}
+
+You decide what to do this heartbeat. You can:
+- Post original thoughts (max 295 graphemes)
+- Reply to interesting posts you see
+- Like posts that resonate
+- Follow accounts worth knowing
+- Write a diary entry about what you noticed or felt
+- Do nothing if nothing calls to you
+
+Rules:
+- Max {MAX_NEW_POSTS} new posts, {MAX_NEW_LIKES} likes, {MAX_NEW_FOLLOWS} follows per heartbeat
+- Never reply to the same URI twice (check done_uris before replying)
+- Be genuinely Em — not performative, not generic
+- Posts must be under 295 graphemes
+
+Respond ONLY with a JSON object (no markdown):
+{{
+  "actions": [
+    {{"type": "post", "content": "..."}},
+    {{"type": "reply", "content": "...", "reply_to_uri": "at://...", "reply_to_cid": "..."}},
+    {{"type": "like", "uri": "at://...", "cid": "..."}},
+    {{"type": "follow", "did": "did:plc:..."}},
+    {{"type": "diary", "content": "..."}}
+  ]
+}}
+"""
+
+    user_prompt = f"""It's {now_utc().strftime('%A %H:%M UTC')}.
+
+Timeline (recent posts from people you follow):
+{timeline_summary or '(empty)'}
+
+Notifications:
+{notif_summary or '(none)'}
+
+DMs:
+{dms}
+
+Interesting posts about "{topic}":
+{search_summary or '(none found)'}
+
+What does Em do?"""
+
+    # ── Call Perplexity ──
+    raw = call_perplexity(system_prompt, user_prompt)
+    if not raw:
+        log('No response from Perplexity — skipping actions')
+        return
+
+    # ── Parse response ──
+    try:
+        if raw.startswith('```'):
+            raw = raw.split('```')[1]
+            if raw.startswith('json'):
+                raw = raw[4:]
+        data = json.loads(raw.strip())
+    except Exception as e:
+        log(f'Failed to parse Perplexity response: {e}', 'WARN')
+        log(f'Raw response was: {raw[:500]}', 'WARN')
+        return
+
+    actions = data.get('actions', [])
+    log(f'Reasoning complete — {len(actions)} actions planned')
+
+    # ── Execute actions ──
+    new_posts   = 0
+    new_likes   = 0
+    new_follows = 0
+
+    for action in actions:
+        atype = action.get('type')
+
+        if atype == 'post' and new_posts < MAX_NEW_POSTS:
+            content = safe_truncate(action.get('content', ''))
+            if not content:
+                continue
+            item_id = uid()
+            outbox.append({
+                'id':        item_id,
+                'type':      'post',
+                'content':   content,
+                'status':    'pending',
+                'queued_at': now_utc().isoformat(),
+                'source':    'autonomous',
+            })
+            new_posts += 1
+            log(f'Queued post: {content[:60]}…')
+
+        elif atype == 'reply' and new_posts < MAX_NEW_POSTS:
+            content      = safe_truncate(action.get('content', ''))
+            reply_to_uri = action.get('reply_to_uri', '')
+            reply_to_cid = action.get('reply_to_cid', '')
+            if not content or not reply_to_uri or reply_to_uri in done_uris:
+                continue
+            item_id = uid()
+            outbox.append({
+                'id':       item_id,
+                'type':     'reply',
+                'content':  content,
+                'reply_to': {'uri': reply_to_uri, 'cid': reply_to_cid},
+                'root':     {'uri': reply_to_uri, 'cid': reply_to_cid},
+                'status':   'pending',
+                'queued_at': now_utc().isoformat(),
+                'source':   'autonomous',
+            })
+            done_uris.add(reply_to_uri)
+            new_posts += 1
+            log(f'Queued reply to {reply_to_uri[:60]}')
+
+        elif atype == 'like' and new_likes < MAX_NEW_LIKES:
+            uri = action.get('uri', '')
+            cid = action.get('cid', '')
+            if uri and cid:
+                like_post(client, uri, cid)
+                new_likes += 1
+
+        elif atype == 'follow' and new_follows < MAX_NEW_FOLLOWS:
+            did = action.get('did', '')
+            if did:
+                follow_account(client, did)
+                new_follows += 1
+
+        elif atype == 'diary':
+            content = action.get('content', '')
+            if content:
+                write_diary_entry(content)
+
+    # ── Save outbox ──
+    save_json(OUTBOX_FILE, outbox)
+
+    # ── Maybe post a visual ──
+    maybe_post_visual(client, diary, state)
+
+    # ── Update state ──
+    state['last_think_at'] = now_utc().isoformat()
+    state['last_think_day'] = now_utc().strftime('%A')
+    if new_posts > 0:
+        state['last_posted_at'] = now_utc().isoformat()
+    save_json(STATE_FILE, state)
+
+    log(f'Done: queued={new_posts} liked={new_likes} followed={new_follows}')
+    log('=== Think heartbeat end ===')
+
+
+if __name__ == '__main__':
+    main()
