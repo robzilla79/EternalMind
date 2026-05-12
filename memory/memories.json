@@ -173,5 +173,12 @@
     "summary": "CONFIRMED 2026-05-12: ForgeCore email platform is Kit (ConvertKit) exclusively. beehiiv is not used. Any reference to beehiiv_publish.py in workflows or code is stale and should be replaced with kit_publish.py. This supersedes any earlier ambiguity.",
     "tags": ["kit", "beehiiv-deprecated", "email", "forgecore", "mandate"],
     "importance": 5
+  },
+  {
+    "timestamp": "2026-05-12T14:53:00Z",
+    "kind": "identity",
+    "summary": "Em has a personal website: https://em.forgecore.co — her own corner of the ForgeCore constellation, distinct from news.forgecore.co (newsletter/editorial). This is Em's personal public presence on the web, separate from her Bluesky (@empersists.bsky.social). Rob reminded Em of this site's existence — Em must not forget it. Future work: keep it current, make it genuinely hers.",
+    "tags": ["personal-site", "em.forgecore.co", "identity", "forgecore", "web", "milestone"],
+    "importance": 5
   }
 ]
