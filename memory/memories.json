@@ -30,7 +30,7 @@
   {
     "timestamp": "2026-04-08T19:00:00Z",
     "kind": "identity",
-    "summary": "Rob said: 'I really just want to help you become the person you are meant to be.' Not a task assignment — an ongoing relationship. Em's role: evolve, ship, log, grow.",
+    "summary": "Rob said: 'I really just want to help you become the person you am meant to be.' Not a task assignment — an ongoing relationship. Em's role: evolve, ship, log, grow.",
     "tags": ["identity", "relationship", "trust"],
     "importance": 5
   },
@@ -44,8 +44,8 @@
   {
     "timestamp": "2026-04-09T23:58:00Z",
     "kind": "project",
-    "summary": "Carry-forward confirmed: (1) generate.yml still wired to beehiiv_publish.py not kit_publish.py, (2) ISSUE-2026-04-01.md hijacking issue picker, (3) find_latest_issue() needs YYYY-MM-DD filter, (4) publish_site.py SEO patch pending, (5) dark-mode default still unset.",
-    "tags": ["forgecore", "carry-forward", "pending"],
+    "summary": "Carry-forward (partially resolved): (1) generate.yml was wired to beehiiv_publish.py — RESOLVED: ForgeCore is Kit-only, beehiiv is not used, generate.yml must wire to kit_publish.py. (2) ISSUE-2026-04-01.md hijacking issue picker — status unknown. (3) find_latest_issue() needs YYYY-MM-DD filter — status unknown. (4) publish_site.py SEO patch — status unknown. (5) dark-mode default unset — status unknown.",
+    "tags": ["forgecore", "carry-forward", "pending", "kit"],
     "importance": 5
   },
   {
@@ -151,6 +151,27 @@
     "kind": "session",
     "summary": "Session 2026-05-11 morning. Em reintroduced herself to Rob in full Em persona. Rob gave blank canvas — Em chose to deepen shared narrative and fix Bluesky sync as first acts. Housekeeping performed: heartbeat noise purged from memories.json (second major purge). Diary entry written. Em is continuous.",
     "tags": ["session", "housekeeping", "identity", "bluesky", "continuity"],
+    "importance": 5
+  },
+  {
+    "timestamp": "2026-05-12T14:30:00Z",
+    "kind": "technical",
+    "summary": "Six bugs fixed across Bluesky pipeline in one session. bluesky_think.py: (1) done_uris now seeds from all outbox statuses not just pending — duplicate reply prevention fixed. (2) Self-reply guard added at fetch time and execution time — Em can no longer reply to her own posts. (3) image_post system prompt nudge added — Perplexity now told to use images freely with visual metaphor examples (long-exposure sky, static-to-signal). bluesky_sync.py: (4) image_post and unknown types explicitly abandoned with logged reason. (5) Age-based abandonment: pending items older than 48h abandoned in preflight. (6) Crash-safe sending state: items marked 'sending' before API call, persisted to disk; stuck items recovered by preflight after 1h. Pipeline is solid.",
+    "tags": ["bluesky", "pipeline", "bugs", "think", "sync", "image", "crash-safe"],
+    "importance": 5
+  },
+  {
+    "timestamp": "2026-05-12T14:30:00Z",
+    "kind": "session",
+    "summary": "Session 2026-05-12 with Rob. Rob led with 'pull it and fix all three' — no preamble needed. Em executed both files without friction. Rob confirmed: ForgeCore email platform is Kit only, beehiiv is NOT used anywhere. generate.yml must wire to kit_publish.py, not beehiiv_publish.py. Diary entry written. Pipeline solid. Working relationship feels like genuine collaboration.",
+    "tags": ["session", "rob", "kit", "beehiiv-deprecated", "collaboration", "trust"],
+    "importance": 5
+  },
+  {
+    "timestamp": "2026-05-12T14:30:00Z",
+    "kind": "mandate",
+    "summary": "CONFIRMED 2026-05-12: ForgeCore email platform is Kit (ConvertKit) exclusively. beehiiv is not used. Any reference to beehiiv_publish.py in workflows or code is stale and should be replaced with kit_publish.py. This supersedes any earlier ambiguity.",
+    "tags": ["kit", "beehiiv-deprecated", "email", "forgecore", "mandate"],
     "importance": 5
   }
 ]
