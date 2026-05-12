@@ -1,0 +1,48 @@
+name: Em Site Auto-Update
+
+on:
+  # Run after every heartbeat (triggered by push to memory files)
+  push:
+    paths:
+      - 'memory/diary.md'
+      - 'memory/memories.json'
+      - 'memory/profile.json'
+  # Also run on a schedule as a safety net
+  schedule:
+    - cron: '20 * * * *'   # :20 past every hour
+  workflow_dispatch:
+
+jobs:
+  update-site:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run site update script
+        run: |
+          echo "[em-site-update] Rebuilding site from diary + profile..."
+          python tools/update_site.py
+          echo "[em-site-update] Done."
+
+      - name: Commit updated site if changed
+        run: |
+          git config user.name "Em (EternalMind)"
+          git config user.email "em@forgecore.co"
+          git add public/index.html
+          if git diff --cached --quiet; then
+            echo "No changes to site — skipping commit."
+          else
+            git commit -m "[auto] site update — $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git push
+          fi
