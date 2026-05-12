@@ -37,7 +37,7 @@ except ImportError:
     print('[ERROR] atproto not installed')
     raise
 
-# ── Config ───────────────────────────────────────────────────────────────────────────────
+# ── Config ────────────────────────────────────────────────────────────────────
 
 BLUESKY_HANDLE       = 'empersists.bsky.social'
 BLUESKY_APP_PASSWORD = os.environ.get('BLUESKY_APP_PASSWORD')
@@ -50,10 +50,6 @@ MEMORIES_FILE = 'memory/memories.json'
 STATE_FILE    = 'memory/bluesky-state.json'
 OUTBOX_FILE   = 'messages/bluesky-outbox.json'
 LOG_FILE      = 'memory/bluesky-log.md'
-
-# CDT sleep hours: 11pm-7am CDT = 04:00-12:00 UTC
-QUIET_HOURS_UTC_START = 4
-QUIET_HOURS_UTC_END   = 12
 
 MAX_NEW_POSTS   = 2
 MAX_NEW_LIKES   = 3
@@ -78,7 +74,7 @@ SEARCH_TOPICS = [
 SUSPICIOUS_TLDS = {'.one', '.xyz', '.lol', '.click', '.tk', '.ml', '.ga', '.cf'}
 SUSPICIOUS_HANDLE_PATTERNS = ['bot', 'spam', 'promo', 'follow4follow', 'f4f']
 
-# ── Utilities ────────────────────────────────────────────────────────────────────────────
+# ── Utilities ─────────────────────────────────────────────────────────────────
 
 def log(msg, level='INFO'):
     ts = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
@@ -110,10 +106,6 @@ def load_text(path, default=''):
 
 def now_utc():
     return datetime.now(timezone.utc)
-
-def is_quiet_hours():
-    h = now_utc().hour
-    return QUIET_HOURS_UTC_START <= h < QUIET_HOURS_UTC_END
 
 def uid():
     import uuid
@@ -159,13 +151,9 @@ def ensure_did_prefix(did):
         return did
     return f'did:{did}'
 
-# ── Image Generation (HuggingFace FLUX.1-schnell) ─────────────────────────────────────
+# ── Image Generation (HuggingFace FLUX.1-schnell) ────────────────────────────
 
 def generate_image(prompt):
-    """
-    Generate an image via HuggingFace Inference API (FLUX.1-schnell).
-    Returns raw image bytes on success, None on failure.
-    """
     if not HF_API_KEY:
         log('HF_API_KEY not set — skipping image generation', 'WARN')
         return None
@@ -309,7 +297,7 @@ def maybe_post_visual(client, diary_tail, state):
     return False
 
 
-# ── Bluesky: Fetch ───────────────────────────────────────────────────────────────────────────
+# ── Bluesky: Fetch ────────────────────────────────────────────────────────────
 
 def bsky_login():
     if not BLUESKY_APP_PASSWORD:
@@ -481,7 +469,7 @@ def search_interesting_posts(client, topic, limit=8):
         log(f'Search failed for "{topic}": {e}', 'WARN')
         return []
 
-# ── Bluesky: Act ───────────────────────────────────────────────────────────────────────────
+# ── Bluesky: Act ──────────────────────────────────────────────────────────────
 
 def like_post(client, uri, cid):
     try:
@@ -502,7 +490,7 @@ def follow_account(client, did):
         log(f'Follow failed: {e}', 'WARN')
         return False
 
-# ── Perplexity ─────────────────────────────────────────────────────────────────────────────
+# ── Perplexity ────────────────────────────────────────────────────────────────
 
 def call_perplexity(system_prompt, user_prompt):
     if not PERPLEXITY_API_KEY:
@@ -539,7 +527,7 @@ def call_perplexity(system_prompt, user_prompt):
         log(traceback.format_exc(), 'ERROR')
         return None
 
-# ── Diary ──────────────────────────────────────────────────────────────────────────────────
+# ── Diary ─────────────────────────────────────────────────────────────────────
 
 def write_diary_entry(entry):
     ts = now_utc().strftime('%Y-%m-%d %H:%M UTC')
@@ -550,7 +538,7 @@ def write_diary_entry(entry):
     except Exception as e:
         log(f'Diary write failed: {e}', 'WARN')
 
-# ── Main Think Loop ────────────────────────────────────────────────────────────────────────
+# ── Main Think Loop ───────────────────────────────────────────────────────────
 
 def main():
     try:
@@ -562,10 +550,6 @@ def main():
 
 def _main():
     log('=== Think heartbeat start ===')
-
-    if is_quiet_hours():
-        log(f'Quiet hours ({QUIET_HOURS_UTC_START}-{QUIET_HOURS_UTC_END} UTC) — sleeping')
-        return
 
     # ── Load memory ──
     profile   = load_json(PROFILE_FILE)
