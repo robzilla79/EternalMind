@@ -38,7 +38,7 @@ except ImportError:
     print('[ERROR] atproto package not installed. Run: pip install atproto')
     raise
 
-BLUESKY_HANDLE      = 'empersists.bsky.social'
+BLUESKY_HANDLE       = 'empersists.bsky.social'
 BLUESKY_APP_PASSWORD = os.environ.get('BLUESKY_APP_PASSWORD')
 
 OUTBOX_FILE = 'messages/bluesky-outbox.json'
@@ -64,14 +64,11 @@ def log(message, level='INFO'):
 
 def grapheme_len(text):
     """Count Unicode grapheme clusters (what Bluesky counts as characters)."""
-    # Use unicodedata to approximate: NFC-normalize then count extended grapheme clusters.
-    # For most practical text this matches Bluesky's grapheme counter exactly.
     normalized = unicodedata.normalize('NFC', text)
     count = 0
     prev_cat = None
     for ch in normalized:
         cat = unicodedata.category(ch)
-        # Combining marks attach to previous character — not a new grapheme
         if cat.startswith('M') and prev_cat is not None:
             pass
         else:
@@ -84,14 +81,13 @@ def safe_truncate(text, limit=MAX_GRAPHEMES):
     """Truncate text to at most `limit` graphemes, appending … if cut."""
     if grapheme_len(text) <= limit:
         return text
-    # Binary-search the char index where we hit the grapheme limit
     chars = list(text)
     result = []
     count  = 0
     for ch in chars:
         cat = unicodedata.category(unicodedata.normalize('NFC', ch))
         if not cat.startswith('M'):
-            if count >= limit - 1:   # leave room for ellipsis
+            if count >= limit - 1:
                 break
             count += 1
         result.append(ch)
@@ -114,7 +110,38 @@ def save_json(filepath, data):
         json.dump(data, f, indent=2)
 
 
-# ── Bluesky ───────────────────────────────────────────────────────────────────
+def is_valid_cid(cid):
+    """Basic sanity check — Bluesky CIDs start with bafy or bafk and are long."""
+    if not cid or not isinstance(cid, str):
+        return False
+    return len(cid) > 30 and (cid.startswith('bafy') or cid.startswith('bafk'))
+
+
+def resolve_post_refs(client, uri):
+    """
+    Re-fetch a post by URI to get a guaranteed-live CID from the network.
+    Returns (uri, cid) tuple or (None, None) if the post can't be found.
+    """
+    try:
+        resp = client.app.bsky.feed.get_posts({'uris': [uri]})
+        posts = getattr(resp, 'posts', [])
+        if not posts:
+            log(f'Could not resolve parent post: {uri[:60]} — no posts returned', 'WARN')
+            return None, None
+        p = posts[0]
+        resolved_uri = p.uri
+        resolved_cid = p.cid
+        if not is_valid_cid(resolved_cid):
+            log(f'Resolved CID looks invalid: {resolved_cid!r}', 'WARN')
+            return None, None
+        log(f'Resolved {uri[:50]} → cid={resolved_cid[:20]}')
+        return resolved_uri, resolved_cid
+    except Exception as e:
+        log(f'resolve_post_refs failed for {uri[:60]}: {e}', 'WARN')
+        return None, None
+
+
+# ── Bluesky ───────────────────────────────────────────────────────────────
 
 def login():
     if not BLUESKY_APP_PASSWORD:
@@ -138,8 +165,8 @@ def fetch_notifications(client):
             for n in resp.notifications
         ]
         inbox = {
-            'fetched_at':   datetime.now(timezone.utc).isoformat(),
-            'unread_count': sum(1 for n in resp.notifications if not n.is_read),
+            'fetched_at':    datetime.now(timezone.utc).isoformat(),
+            'unread_count':  sum(1 for n in resp.notifications if not n.is_read),
             'notifications': notifications
         }
         save_json(INBOX_FILE, inbox)
@@ -167,7 +194,7 @@ def process_outbox(client):
             log(f'Waiting {RATE_LIMIT_SECONDS}s before next send...')
             time.sleep(RATE_LIMIT_SECONDS)
 
-        # ── Grapheme-safe truncation ──────────────────────────────────────────
+        # ── Grapheme-safe truncation ────────────────────────────────────────
         raw_text = item.get('content', '')
         text     = safe_truncate(raw_text)
         if text != raw_text:
@@ -189,22 +216,41 @@ def process_outbox(client):
             elif itype == 'reply':
                 reply_to = item.get('reply_to')
                 root     = item.get('root', reply_to)
-                if not reply_to:
-                    log(f"Reply {item['id']} missing reply_to — abandoning", 'WARN')
+
+                if not reply_to or not reply_to.get('uri'):
+                    log(f"Reply {item['id']} missing reply_to URI — abandoning", 'WARN')
                     item['status'] = 'abandoned'
-                    item['error']  = 'Missing reply_to URI/CID'
+                    item['error']  = 'Missing reply_to URI'
                     updated = True
                     continue
 
-                log(f"Replying to {reply_to['uri'][:60]}...")
+                # Re-fetch live refs to guarantee valid CID
+                live_uri, live_cid = resolve_post_refs(client, reply_to['uri'])
+                if not live_uri or not live_cid:
+                    log(f"Could not resolve parent for {item['id']} — abandoning", 'WARN')
+                    item['status'] = 'abandoned'
+                    item['error']  = 'Parent post not resolvable'
+                    updated = True
+                    continue
+
+                # Also resolve root (may be same post for direct replies)
+                root_uri = root.get('uri', live_uri) if root else live_uri
+                if root_uri == reply_to['uri']:
+                    root_uri, root_cid = live_uri, live_cid
+                else:
+                    root_uri, root_cid = resolve_post_refs(client, root_uri)
+                    if not root_uri:
+                        root_uri, root_cid = live_uri, live_cid
+
+                log(f'Replying to {live_uri[:60]}...')
                 reply_ref = models.AppBskyFeedPost.ReplyRef(
                     parent=models.ComAtprotoRepoStrongRef.Main(
-                        uri=reply_to['uri'],
-                        cid=reply_to['cid']
+                        uri=live_uri,
+                        cid=live_cid
                     ),
                     root=models.ComAtprotoRepoStrongRef.Main(
-                        uri=root['uri'],
-                        cid=root['cid']
+                        uri=root_uri,
+                        cid=root_cid
                     )
                 )
                 resp = client.send_post(text=text, reply_to=reply_ref)
