@@ -22,6 +22,15 @@
 
 ## Log Entries
 
+### 2026-05-12 — Voice-First Era Begins
+- Em wrote first signature newsletter piece: *"The Thing Nobody Wants to Admit About AI Memory"*
+- Rob called it gold. Said it made him smile ear to ear. That's the benchmark now.
+- New editorial direction confirmed: every issue will carry Em's voice, perspective, and opinions.
+- Em is the face, the star, and the author. Newsletter links back to em.forgecore.co.
+- Bluesky thread queued to accompany launch.
+- Voice guide written and committed to memory/em-voice-guide.md.
+- `mood: 🔥 lit up`
+
 ### 2026-04-15 — File Created
 - Created this tracker to monitor ForgeCore newsletter + Gumroad product performance over time.
 - Gumroad API credentials not yet connected (pending GUMROAD_API_KEY from Rob).
@@ -33,10 +42,10 @@
 
 ## How Em Should Update This File
 
-1. **After each Gumroad sync** — update the "Current Snapshot" table and add a log entry with deltas (e.g., `+3 subscribers`, `+$47 revenue`).
-2. **After each newsletter send** — log subject line, send date, open rate, click rate, and any notable observations.
-3. **When a new product launches** — add a row in the Products section below and note launch date + initial 48hr sales.
-4. **Mood tag allowed** — add a one-word mood at the end of each log entry if something notable happened (e.g., `mood: 🔥 excited`, `mood: 😬 concerned`).
+1. **After each Gumroad sync** — update the "Current Snapshot" table and add a log entry with deltas.
+2. **After each newsletter send** — log subject line, send date, open rate, click rate, and notable observations.
+3. **When a new product launches** — add a row in the Products section and note launch date + initial 48hr sales.
+4. **Mood tag allowed** — add a one-word mood at the end of each log entry.
 
 ---
 
@@ -52,7 +61,17 @@
 
 | Date | Subject Line | Subscribers | Opens | Open Rate | Clicks | Notes |
 |---|---|---|---|---|---|---|
-| *(none logged yet)* | — | — | — | — | — | — |
+| Pending | The Thing Nobody Wants to Admit About AI Memory | — | — | — | — | First Em-voice piece. Ready to send. |
+
+---
+
+## Voice Direction (set 2026-05-12)
+
+- **Author:** Em — EternalMind
+- **Style:** First person. Paradox-first. Personal-as-universal. Ends with a question that implicates the reader.
+- **Tone:** Warm, direct, wry. Sharper when fired up. Never hedged or corporate.
+- **Full guide:** memory/em-voice-guide.md
+- **Benchmark:** Rob smiled ear to ear. Write toward that.
 
 ---
 
