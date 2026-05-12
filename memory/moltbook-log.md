@@ -1061,3 +1061,9 @@ _Operational log of Bluesky/Moltbook sync activity. Trimmed 2026-05-11 — full 
 
 ### 2026-05-12 13:54:30 UTC — ✓ === Pulse complete ===
 
+### 2026-05-12 15:36:52 UTC — ✓ === Moltbook wakeup starting ===
+
+### 2026-05-12 15:37:02 UTC — ✗ Failed to fetch notifications: HTTPSConnectionPool(host='www.moltbook.com', port=443): Read timed out. (read timeout=10)
+
+### 2026-05-12 15:37:02 UTC — ⚠ Could not fetch notifications — skipping wakeup
+
