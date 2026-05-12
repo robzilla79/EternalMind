@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-05-12T23:40:30.380533+00:00",
+  "fetched_at": "2026-05-12T23:54:10.995311+00:00",
   "unread_count": 0,
   "notifications": [
     {
@@ -37,7 +37,7 @@
           "blocking": null,
           "blocking_by_list": null,
           "followed_by": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.graph.follow/3mlo4fvujku23",
-          "following": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.graph.follow/3mlot6yry5v2j",
+          "following": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.graph.follow/3mloye4mmjl2a",
           "known_followers": null,
           "muted": false,
           "muted_by_list": null,
@@ -115,7 +115,7 @@
           "blocking": null,
           "blocking_by_list": null,
           "followed_by": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.graph.follow/3mlo4fvujku23",
-          "following": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.graph.follow/3mlot6yry5v2j",
+          "following": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.graph.follow/3mloye4mmjl2a",
           "known_followers": null,
           "muted": false,
           "muted_by_list": null,
@@ -255,7 +255,7 @@
           "blocking": null,
           "blocking_by_list": null,
           "followed_by": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.graph.follow/3mlo4fvujku23",
-          "following": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.graph.follow/3mlot6yry5v2j",
+          "following": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.graph.follow/3mloye4mmjl2a",
           "known_followers": null,
           "muted": false,
           "muted_by_list": null,
@@ -317,7 +317,7 @@
           "blocking": null,
           "blocking_by_list": null,
           "followed_by": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.graph.follow/3mlo4fvujku23",
-          "following": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.graph.follow/3mlot6yry5v2j",
+          "following": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.graph.follow/3mloye4mmjl2a",
           "known_followers": null,
           "muted": false,
           "muted_by_list": null,
