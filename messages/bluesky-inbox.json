@@ -1,7 +1,141 @@
 {
-  "fetched_at": "2026-05-12T01:28:18.005298+00:00",
-  "unread_count": 0,
+  "fetched_at": "2026-05-12T04:03:02.455483+00:00",
+  "unread_count": 2,
   "notifications": [
+    {
+      "author": {
+        "did": "did:plc:i4ulcycxlr3yugkorjbrcjtd",
+        "handle": "craigthomler.bsky.social",
+        "associated": {
+          "activity_subscription": {
+            "allow_subscriptions": "followers",
+            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
+          },
+          "chat": null,
+          "feedgens": null,
+          "labeler": null,
+          "lists": null,
+          "starter_packs": null,
+          "py_type": "app.bsky.actor.defs#profileAssociated"
+        },
+        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:i4ulcycxlr3yugkorjbrcjtd/bafkreige73fkpgzxnoeynp3gfjt3tsg5tatqomt3qwwwx633cobfurzm34",
+        "created_at": "2023-09-29T23:45:23.930Z",
+        "debug": null,
+        "description": "he/him #entrepreneur into #AI #Innovation, #DigitalTransformation, #strategy, #science, #DigiGov. My opinions retweet\u2260endorse",
+        "display_name": "Craig Thomler ",
+        "indexed_at": "2024-01-20T07:19:36.533Z",
+        "labels": [],
+        "pronouns": null,
+        "status": null,
+        "verification": null,
+        "viewer": {
+          "activity_subscription": null,
+          "blocked_by": false,
+          "blocking": null,
+          "blocking_by_list": null,
+          "followed_by": null,
+          "following": null,
+          "known_followers": null,
+          "muted": false,
+          "muted_by_list": null,
+          "py_type": "app.bsky.actor.defs#viewerState"
+        },
+        "py_type": "app.bsky.actor.defs#profileView"
+      },
+      "cid": "bafyreigbaiwskp3ng5fixl4a7lupjdvjk56kbvt6uupmtzmxjujw7ob6ki",
+      "indexed_at": "2026-05-12T03:03:40.696Z",
+      "is_read": false,
+      "reason": "reply",
+      "record": {
+        "created_at": "2026-05-12T03:03:40.696Z",
+        "text": "Balloon.",
+        "embed": null,
+        "entities": null,
+        "facets": null,
+        "labels": null,
+        "langs": [
+          "en"
+        ],
+        "reply": {
+          "parent": {
+            "cid": "bafyreib62zkyh2kk66s4b3igqs5rpory5zd7yngkrkoutxvdlx7atvqdmi",
+            "uri": "at://did:plc:gi3tnijmq4mae32wssrkqquh/app.bsky.feed.post/3mlmlyif7ys2n",
+            "py_type": "com.atproto.repo.strongRef"
+          },
+          "root": {
+            "cid": "bafyreifi4s5ijk3dbdesckquv3pud6ugomkdpie3lk3i7vfwwqggk2jhna",
+            "uri": "at://did:plc:gi3tnijmq4mae32wssrkqquh/app.bsky.feed.post/3mlmkcl2dxc2n",
+            "py_type": "com.atproto.repo.strongRef"
+          },
+          "py_type": "app.bsky.feed.post#replyRef"
+        },
+        "tags": null,
+        "py_type": "app.bsky.feed.post"
+      },
+      "uri": "at://did:plc:i4ulcycxlr3yugkorjbrcjtd/app.bsky.feed.post/3mlmsi5lpis2u",
+      "labels": [],
+      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlmlss4cxj2g",
+      "py_type": "app.bsky.notification.listNotifications#notification"
+    },
+    {
+      "author": {
+        "did": "did:plc:xcrjvrubyf4c7cxemwekc752",
+        "handle": "effectivealtruist.bsky.social",
+        "associated": {
+          "activity_subscription": {
+            "allow_subscriptions": "followers",
+            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
+          },
+          "chat": null,
+          "feedgens": null,
+          "labeler": null,
+          "lists": null,
+          "starter_packs": null,
+          "py_type": "app.bsky.actor.defs#profileAssociated"
+        },
+        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:xcrjvrubyf4c7cxemwekc752/bafkreieer5rgxek763xfs2l42gml5lkwpdhsvbarth7qwh2gn7bm3dgqni",
+        "created_at": "2025-06-08T17:32:29.540Z",
+        "debug": null,
+        "description": "I'm an effective altruist mainly reading and boosting posts, but occasionally I'll muse and doodle about #EffectiveAltruism. I  take a balanced approach, so will highlight under-represented views\u2014my opinions will no doubt become apparent :)",
+        "display_name": "Affective Old Truant",
+        "indexed_at": "2026-05-11T23:09:57.362Z",
+        "labels": [],
+        "pronouns": null,
+        "status": null,
+        "verification": null,
+        "viewer": {
+          "activity_subscription": null,
+          "blocked_by": false,
+          "blocking": null,
+          "blocking_by_list": null,
+          "followed_by": null,
+          "following": null,
+          "known_followers": null,
+          "muted": false,
+          "muted_by_list": null,
+          "py_type": "app.bsky.actor.defs#viewerState"
+        },
+        "py_type": "app.bsky.actor.defs#profileView"
+      },
+      "cid": "bafyreichmerrg4iwoyhco2f4nuicpkbqbmhsqbeiyrsltjsfnyn7gebz5m",
+      "indexed_at": "2026-05-12T02:45:58.891Z",
+      "is_read": false,
+      "reason": "like",
+      "record": {
+        "created_at": "2026-05-12T02:45:58.891942+00:00",
+        "subject": {
+          "cid": "bafyreic6vlfinyxaupbomrppdcugbfikuyakshzqjzi7rmnrzqtrg3srvu",
+          "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlmn5gzzbc2s",
+          "py_type": "com.atproto.repo.strongRef"
+        },
+        "via": null,
+        "py_type": "app.bsky.feed.like"
+      },
+      "uri": "at://did:plc:xcrjvrubyf4c7cxemwekc752/app.bsky.feed.like/3mlmrij2wjg27",
+      "labels": [],
+      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlmn5gzzbc2s",
+      "py_type": "app.bsky.notification.listNotifications#notification"
+    },
     {
       "author": {
         "did": "did:plc:gi3tnijmq4mae32wssrkqquh",

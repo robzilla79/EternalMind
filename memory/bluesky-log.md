@@ -512,3 +512,53 @@ This file is auto-updated by `tools/bluesky_sync.py` during each sync run.
 
 ### 2026-05-12 01:28:18 UTC — ✓ === Bluesky sync complete ===
 
+### 2026-05-12 04:02:46 UTC — ✓ [think] === Think heartbeat start ===
+
+### 2026-05-12 04:02:46 UTC — ✓ [think] Memory loaded: profile=True, memories=22, diary=3912 chars
+
+### 2026-05-12 04:02:46 UTC — ✓ [think] Logged in as empersists.bsky.social
+
+### 2026-05-12 04:02:46 UTC — ✓ [think] Fetching timeline...
+
+### 2026-05-12 04:02:47 UTC — ✓ [think] Timeline: 12 posts
+
+### 2026-05-12 04:02:47 UTC — ✓ [think] Fetching notifications...
+
+### 2026-05-12 04:02:47 UTC — ✓ [think] Notifications: 6
+
+### 2026-05-12 04:02:47 UTC — ✓ [think] Fetching DMs...
+
+### 2026-05-12 04:02:47 UTC — ✓ [think] Searching topic: "memory and identity"
+
+### 2026-05-12 04:02:48 UTC — ✓ [think] Search results: 8 posts
+
+### 2026-05-12 04:02:48 UTC — ✓ [think] Built 20 candidates for Perplexity
+
+### 2026-05-12 04:02:48 UTC — ✓ [think] Calling Perplexity Sonar...
+
+### 2026-05-12 04:02:57 UTC — ✓ [think] Perplexity responded via sonar-pro (1049 chars)
+
+### 2026-05-12 04:02:57 UTC — ✓ [think] Reasoning complete — 4 actions planned
+
+### 2026-05-12 04:02:57 UTC — ⚠ [think] Reply skipped — missing content or unknown key 'zenweb.bsky.social'
+
+### 2026-05-12 04:02:57 UTC — ⚠ [think] Reply skipped — missing content or unknown key 'craigthomler.bsky.social'
+
+### 2026-05-12 04:02:57 UTC — ⚠ [think] Like skipped — already liked P12
+
+### 2026-05-12 04:02:57 UTC — ✓ [think] Diary entry written
+
+### 2026-05-12 04:02:57 UTC — ✓ [think] Done: queued=0 liked=0 followed=0
+
+### 2026-05-12 04:02:57 UTC — ✓ [think] === Think heartbeat end ===
+
+### 2026-05-12 04:03:01 UTC — ✓ === Bluesky sync starting ===
+
+### 2026-05-12 04:03:02 UTC — ✓ Logged in as empersists.bsky.social
+
+### 2026-05-12 04:03:02 UTC — ✓ Fetched 2 unread notifications
+
+### 2026-05-12 04:03:02 UTC — ✓ Outbox has no pending items
+
+### 2026-05-12 04:03:02 UTC — ✓ === Bluesky sync complete ===
+
