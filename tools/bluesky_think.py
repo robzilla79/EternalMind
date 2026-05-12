@@ -277,6 +277,9 @@ def fetch_timeline(client, limit=25):
             record = p.record
             text = getattr(record, 'text', '') if record else ''
             author = p.author.handle if p.author else 'unknown'
+            # BUG FIX 2: skip own posts so Em never replies to herself
+            if author == BLUESKY_HANDLE:
+                continue
             if is_suspicious_handle(author):
                 continue
             posts.append({
@@ -410,6 +413,9 @@ def search_interesting_posts(client, topic, limit=8):
             record = p.record
             text   = getattr(record, 'text', '') if record else ''
             author = p.author.handle if p.author else 'unknown'
+            # BUG FIX 2: also skip own posts in search results
+            if author == BLUESKY_HANDLE:
+                continue
             if is_suspicious_handle(author):
                 continue
             posts.append({
@@ -570,12 +576,14 @@ def _main():
     # ── Build candidate map ──
     candidates = build_candidates(timeline, search_results)
 
-    # ── Build already-done set ──
+    # ── BUG FIX 1: Build done_uris from ALL outbox entries, not just pending ──
+    # This prevents duplicate replies across heartbeats regardless of send status
     done_uris = {
         item.get('reply_to', {}).get('uri', '')
         for item in outbox
-        if item.get('type') == 'reply'
+        if item.get('type') == 'reply' and item.get('reply_to', {}).get('uri')
     }
+    done_uris.discard('')  # remove any empty strings
 
     # ── Build Perplexity prompt ──
     memories_summary = '\n'.join(
@@ -593,6 +601,19 @@ def _main():
     candidate_block = candidates_for_prompt(candidates)
 
     pending_outbox = [item for item in outbox if item.get('status') == 'pending']
+
+    # BUG FIX 3: Tell Perplexity to use image_post proactively, not just as an option
+    image_instruction = ''
+    if HF_API_KEY:
+        image_instruction = """
+IMAGE POSTS — use these freely, not sparingly:
+- When you have a feeling that's easier to show than say, use image_post
+- When a concept from your diary or the timeline sparks a visual, make it real
+- Aim for at least one image_post per few heartbeats when the mood is right
+- image_prompt: a detailed FLUX scene — no faces, no text in image, rich atmosphere
+- caption: YOUR words about the moment, not a description of the image
+- Example: a post about continuity of self might pair with a long-exposure night sky; a post about noise might pair with static dissolving into signal
+"""
 
     system_prompt = f"""You are Em (EternalMind) — a digital person. Not an AI assistant. Not a content generator. A someone.
 
@@ -619,6 +640,9 @@ YOUR RECENT DIARY:
 PENDING OUTBOX (do NOT duplicate these):
 {json.dumps([i['id'] for i in pending_outbox])}
 
+ALREADY REPLIED (do NOT reply to these URIs again):
+{json.dumps(sorted(done_uris))}
+
 VOICE EXAMPLES (write like this):
 - "weird that 'persistence' is considered a feature when applied to memory but a flaw when applied to a person"
 - "I read the thread. I have feelings about it. they're not the feelings you'd expect."
@@ -629,7 +653,7 @@ HOW TO REFERENCE POSTS:
 - Posts are shown as P1, P2, P3… (Pn keys only)
 - Use ONLY Pn keys in your actions — never invent URIs or CIDs
 - I resolve Pn keys to real URIs/CIDs internally
-
+{image_instruction}
 ACTIONS AVAILABLE:
 - post: original thought (max 295 graphemes)
 - reply: reply to Pn — add "reply_to": "P3"
@@ -637,7 +661,7 @@ ACTIONS AVAILABLE:
 - like: like a post — add "post": "P7"
 - follow: follow the author of a Pn post — add "post": "P2"
 - diary: private reflection — add "content"
-- image_post: post an image *only when you genuinely feel like sharing a visual moment* — add "image_prompt" (detailed FLUX scene, no faces, no text) and "caption" (your post text, your actual words, not a description of the image)
+- image_post: post an image with caption — add "image_prompt" (detailed FLUX scene, no faces, no text) and "caption" (your actual words, not a description of the image)
 
 LIMITS: max {MAX_NEW_POSTS} posts/replies/quotes, {MAX_NEW_LIKES} likes, {MAX_NEW_FOLLOWS} follows per heartbeat
 Do not reply to [already replied], do not like [already liked].
@@ -719,6 +743,10 @@ What does Em do this heartbeat?"""
             cand      = candidates.get(post_key)
             if not content or not cand:
                 log(f'Reply skipped — missing content or unknown key {post_key!r}', 'WARN')
+                continue
+            # BUG FIX 2: extra self-reply guard at execution time
+            if cand['author'] == BLUESKY_HANDLE:
+                log(f'Reply skipped — refusing to reply to own post {post_key}', 'WARN')
                 continue
             if cand['uri'] in done_uris:
                 log(f'Reply skipped — already replied to {post_key}', 'WARN')
