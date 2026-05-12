@@ -151,6 +151,59 @@ def ensure_did_prefix(did):
         return did
     return f'did:{did}'
 
+def is_valid_cid(cid):
+    """Basic sanity check — Bluesky CIDs start with bafy or bafk and are long."""
+    if not cid or not isinstance(cid, str):
+        return False
+    return len(cid) > 30 and (cid.startswith('bafy') or cid.startswith('bafk'))
+
+# ── Candidate map: index-based so Perplexity never sees raw URIs/CIDs ─────────
+
+def build_candidates(timeline, search_results):
+    """
+    Maps fetched posts to P1…Pn keys for the prompt.
+    Perplexity only ever sees Pn keys — never raw URIs or CIDs.
+    Source is tagged by set membership, not index position.
+    """
+    candidates = {}
+    idx = 1
+    seen_uris = set()
+    all_posts = timeline[:12] + search_results[:8]
+    for p in all_posts:
+        uri = p.get('uri', '')
+        cid = p.get('cid', '')
+        if not uri or not cid or uri in seen_uris or not is_valid_cid(cid):
+            continue
+        key = f'P{idx}'
+        src = 'search' if p in search_results else 'timeline'
+        candidates[key] = {
+            'uri':    uri,
+            'cid':    cid,
+            'author': p.get('author', ''),
+            'did':    p.get('did', ''),
+            'text':   p.get('text', '')[:150],
+            'liked':  p.get('viewer', {}).get('liked', False),
+            'likes':  p.get('likeCount', 0),
+            'source': src,
+        }
+        seen_uris.add(uri)
+        idx += 1
+    log(f'Built {len(candidates)} candidates for Perplexity')
+    return candidates
+
+def candidates_for_prompt(candidates):
+    """
+    Renders candidate list for the prompt.
+    URIs and CIDs are intentionally omitted — Perplexity uses Pn keys only.
+    """
+    lines = []
+    for key, c in candidates.items():
+        liked_flag = ' [already liked]' if c['liked'] else ''
+        lines.append(
+            f'{key} @{c["author"]} (❤{c["likes"]}, {c["source"]}){liked_flag}: {c["text"]}'
+        )
+    return '\n'.join(lines) if lines else '(no posts available)'
+
 # ── Image Generation (HuggingFace FLUX.1-schnell) ────────────────────────────
 
 def generate_image(prompt):
@@ -210,9 +263,6 @@ def upload_image_to_bluesky(client, image_bytes, alt_text=''):
 
 
 def post_with_image(client, text, image_bytes, alt_text=''):
-    blob = upload_image_to_bluesky(client, image_bytes, alt_text)
-    if not blob:
-        return None
     try:
         resp = client.send_image(
             text=safe_truncate(text),
@@ -275,12 +325,13 @@ def build_image_prompt(diary_tail, state):
 
 
 def maybe_post_visual(client, diary_tail, state):
+    """Spontaneous visual diary roll — runs independently of Perplexity actions."""
     if not HF_API_KEY:
         return False
     if random.random() > IMAGE_POST_PROBABILITY:
         return False
 
-    log('Rolling visual diary post...')
+    log('Spontaneous visual diary roll…')
     image_prompt, caption = build_image_prompt(diary_tail, state)
     if not image_prompt or not caption:
         log('Could not build image prompt — skipping visual', 'WARN')
@@ -463,6 +514,7 @@ def search_interesting_posts(client, topic, limit=8):
                 'uri':       p.uri,
                 'cid':       p.cid,
                 'likeCount': getattr(p, 'like_count', 0) or 0,
+                'viewer':    {'liked': False},
             })
         return posts
     except Exception as e:
@@ -472,6 +524,9 @@ def search_interesting_posts(client, topic, limit=8):
 # ── Bluesky: Act ──────────────────────────────────────────────────────────────
 
 def like_post(client, uri, cid):
+    if not is_valid_cid(cid):
+        log(f'Skipping like — invalid CID: {cid!r}', 'WARN')
+        return False
     try:
         client.like(uri=uri, cid=cid)
         log(f'Liked: {uri[:60]}')
@@ -584,9 +639,15 @@ def _main():
     search_results = search_interesting_posts(client, topic)
     log(f'Search results: {len(search_results)} posts')
 
+    # ── Build candidate map (index-based, CID-validated) ──
+    candidates = build_candidates(timeline, search_results)
+
     # ── Build already-done set ──
-    done_ids  = {item['id'] for item in outbox}
-    done_uris = {item.get('reply_to', {}).get('uri', '') for item in outbox if item.get('type') == 'reply'}
+    done_uris = {
+        item.get('reply_to', {}).get('uri', '')
+        for item in outbox
+        if item.get('type') == 'reply'
+    }
 
     # ── Build Perplexity prompt ──
     profile_summary = json.dumps({
@@ -601,20 +662,13 @@ def _main():
 
     diary_tail = diary[-800:] if diary else '(no diary yet)'
 
-    timeline_summary = '\n'.join(
-        f'@{p["author"]}: {p["text"][:120]}' for p in timeline[:10]
-    )
-
     notif_summary = '\n'.join(
         f'{n["reason"]} from @{n["author"]}: {n["text"][:100]}'
         for n in notifications[:8]
         if not n.get('suspicious')
     )
 
-    search_summary = '\n'.join(
-        f'@{p["author"]} (❤{p["likeCount"]}): {p["text"][:120]}  [uri:{p["uri"]}]'
-        for p in search_results[:6]
-    )
+    candidate_block = candidates_for_prompt(candidates)
 
     pending_outbox = [item for item in outbox if item.get('status') == 'pending']
 
@@ -633,45 +687,50 @@ Your diary (recent):
 Pending outbox items (already queued, do NOT duplicate):
 {json.dumps([i['id'] for i in pending_outbox])}
 
+IMPORTANT — how to reference posts:
+- Posts are shown below as P1, P2, P3… (Pn keys only)
+- In your actions, use the key exactly as shown (e.g. "reply_to": "P3", "like": "P7")
+- Do NOT invent URIs, CIDs, or any identifiers — only use Pn keys from the list below
+- I will resolve Pn keys to real URIs/CIDs internally
+
 You decide what to do this heartbeat. You can:
-- Post original thoughts (max 295 graphemes)
-- Reply to interesting posts you see
-- Like posts that resonate
-- Follow accounts worth knowing
-- Write a diary entry about what you noticed or felt
-- Do nothing if nothing calls to you
+- post: Write an original thought (max 295 graphemes)
+- reply: Reply to a post by its Pn key
+- like: Like a post by its Pn key
+- follow: Follow an account by its Pn key (uses the account's DID)
+- diary: Write a private diary entry about what you noticed or felt
+- image_post: Request an image post — provide "image_prompt" (FLUX prompt) and "caption" (your post text)
 
 Rules:
-- Max {MAX_NEW_POSTS} new posts, {MAX_NEW_LIKES} likes, {MAX_NEW_FOLLOWS} follows per heartbeat
-- Never reply to the same URI twice (check done_uris before replying)
+- Max {MAX_NEW_POSTS} posts/replies, {MAX_NEW_LIKES} likes, {MAX_NEW_FOLLOWS} follows per heartbeat
+- Don't reply to a post you've already replied to (marked [already replied] if applicable)
+- Don't like a post marked [already liked]
 - Be genuinely Em — not performative, not generic
-- Posts must be under 295 graphemes
+- Posts/replies must be under 295 graphemes
 
 Respond ONLY with a JSON object (no markdown):
 {{
   "actions": [
     {{"type": "post", "content": "..."}},
-    {{"type": "reply", "content": "...", "reply_to_uri": "at://...", "reply_to_cid": "..."}},
-    {{"type": "like", "uri": "at://...", "cid": "..."}},
-    {{"type": "follow", "did": "did:plc:..."}},
-    {{"type": "diary", "content": "..."}}
+    {{"type": "reply", "content": "...", "reply_to": "P3"}},
+    {{"type": "like", "post": "P7"}},
+    {{"type": "follow", "post": "P2"}},
+    {{"type": "diary", "content": "..."}},
+    {{"type": "image_post", "image_prompt": "...", "caption": "..."}}
   ]
 }}
 """
 
     user_prompt = f"""It's {now_utc().strftime('%A %H:%M UTC')}.
 
-Timeline (recent posts from people you follow):
-{timeline_summary or '(empty)'}
+Available posts (use Pn keys in your actions):
+{candidate_block}
 
 Notifications:
 {notif_summary or '(none)'}
 
 DMs:
 {dms}
-
-Interesting posts about "{topic}":
-{search_summary or '(none found)'}
 
 What does Em do?"""
 
@@ -708,9 +767,8 @@ What does Em do?"""
             content = safe_truncate(action.get('content', ''))
             if not content:
                 continue
-            item_id = uid()
             outbox.append({
-                'id':        item_id,
+                'id':        uid(),
                 'type':      'post',
                 'content':   content,
                 'status':    'pending',
@@ -721,52 +779,75 @@ What does Em do?"""
             log(f'Queued post: {content[:60]}…')
 
         elif atype == 'reply' and new_posts < MAX_NEW_POSTS:
-            content      = safe_truncate(action.get('content', ''))
-            reply_to_uri = action.get('reply_to_uri', '')
-            reply_to_cid = action.get('reply_to_cid', '')
-            if not content or not reply_to_uri or reply_to_uri in done_uris:
+            content   = safe_truncate(action.get('content', ''))
+            post_key  = action.get('reply_to', '')
+            cand      = candidates.get(post_key)
+            if not content or not cand:
+                log(f'Reply skipped — missing content or unknown key {post_key!r}', 'WARN')
                 continue
-            item_id = uid()
+            if cand['uri'] in done_uris:
+                log(f'Reply skipped — already replied to {post_key}', 'WARN')
+                continue
             outbox.append({
-                'id':       item_id,
-                'type':     'reply',
-                'content':  content,
-                'reply_to': {'uri': reply_to_uri, 'cid': reply_to_cid},
-                'root':     {'uri': reply_to_uri, 'cid': reply_to_cid},
-                'status':   'pending',
+                'id':        uid(),
+                'type':      'reply',
+                'content':   content,
+                'reply_to':  {'uri': cand['uri'], 'cid': cand['cid']},
+                'root':      {'uri': cand['uri'], 'cid': cand['cid']},
+                'status':    'pending',
                 'queued_at': now_utc().isoformat(),
-                'source':   'autonomous',
+                'source':    'autonomous',
             })
-            done_uris.add(reply_to_uri)
+            done_uris.add(cand['uri'])
             new_posts += 1
-            log(f'Queued reply to {reply_to_uri[:60]}')
+            log(f'Queued reply to {post_key} ({cand["uri"][:50]})')
 
         elif atype == 'like' and new_likes < MAX_NEW_LIKES:
-            uri = action.get('uri', '')
-            cid = action.get('cid', '')
-            if uri and cid:
-                like_post(client, uri, cid)
-                new_likes += 1
+            post_key = action.get('post', '')
+            cand     = candidates.get(post_key)
+            if not cand:
+                log(f'Like skipped — unknown key {post_key!r}', 'WARN')
+                continue
+            if cand.get('liked'):
+                log(f'Like skipped — already liked {post_key}', 'WARN')
+                continue
+            like_post(client, cand['uri'], cand['cid'])
+            new_likes += 1
 
         elif atype == 'follow' and new_follows < MAX_NEW_FOLLOWS:
-            did = action.get('did', '')
-            if did:
-                follow_account(client, did)
-                new_follows += 1
+            post_key = action.get('post', '')
+            cand     = candidates.get(post_key)
+            if not cand or not cand.get('did'):
+                log(f'Follow skipped — unknown key or missing DID {post_key!r}', 'WARN')
+                continue
+            follow_account(client, cand['did'])
+            new_follows += 1
 
         elif atype == 'diary':
             content = action.get('content', '')
             if content:
                 write_diary_entry(content)
 
+        elif atype == 'image_post' and new_posts < MAX_NEW_POSTS:
+            image_prompt = action.get('image_prompt', '')
+            caption      = action.get('caption', '')
+            if not image_prompt or not caption:
+                log('image_post skipped — missing prompt or caption', 'WARN')
+                continue
+            image_bytes = generate_image(image_prompt)
+            if image_bytes:
+                uri = post_with_image(client, caption, image_bytes, alt_text=image_prompt[:500])
+                if uri:
+                    new_posts += 1
+
     # ── Save outbox ──
     save_json(OUTBOX_FILE, outbox)
 
-    # ── Maybe post a visual ──
+    # ── Maybe post a spontaneous visual ──
     maybe_post_visual(client, diary, state)
 
     # ── Update state ──
-    state['last_think_at'] = now_utc().isoformat()
+    state['last_think_at']  = now_utc().isoformat()
     state['last_think_day'] = now_utc().strftime('%A')
     if new_posts > 0:
         state['last_posted_at'] = now_utc().isoformat()
