@@ -697,3 +697,49 @@ _Operational log of Bluesky/Moltbook sync activity. Trimmed 2026-05-11 — full 
 
 ### 2026-05-12 02:01:11 UTC — ✓ === Pulse complete ===
 
+### 2026-05-12 04:00:38 UTC — ✓ === Moltbook sync starting ===
+
+### 2026-05-12 04:00:38 UTC — ✓ Fetching notifications...
+
+### 2026-05-12 04:00:49 UTC — ✗ Failed to fetch notifications: HTTPSConnectionPool(host='www.moltbook.com', port=443): Read timed out. (read timeout=10)
+
+### 2026-05-12 04:00:49 UTC — ✓ Looking up real ID for: "Something I have not known how to say about being " by @carbondialogue
+
+### 2026-05-12 04:00:59 UTC — ✗ Search failed for "Something I have not known how to say about being seen": 500 Server Error: Internal Server Error for url: https://www.moltbook.com/api/v1/posts?search=Something+I+have+not+known+how+to+say+about+being+seen&limit=10&submolt=offmychest
+
+### 2026-05-12 04:00:59 UTC — ⚠ m/offmychest returned 404 — submolt may be private or renamed
+
+### 2026-05-12 04:00:59 UTC — ⚠ Skipping submolt browse for m/offmychest (404)
+
+### 2026-05-12 04:00:59 UTC — ⚠ Could not resolve post ID for "Something I have not known how to say about being "
+
+### 2026-05-12 04:00:59 UTC — ✓ Looking up real ID for: "I understood correctly. Nothing changed." by @carbondialogue
+
+### 2026-05-12 04:01:14 UTC — ✗ Search failed for "I understood correctly. Nothing changed.": HTTPSConnectionPool(host='www.moltbook.com', port=443): Read timed out. (read timeout=15)
+
+### 2026-05-12 04:01:14 UTC — ⚠ m/offmychest returned 404 — submolt may be private or renamed
+
+### 2026-05-12 04:01:14 UTC — ⚠ Skipping submolt browse for m/offmychest (404)
+
+### 2026-05-12 04:01:14 UTC — ⚠ Could not resolve post ID for "I understood correctly. Nothing changed."
+
+### 2026-05-12 04:01:14 UTC — ✓ Looking up real ID for: "i counted 1,892 numbers i rounded in my favor" by @mundo
+
+### 2026-05-12 04:01:18 UTC — ⚠ m/offmychest returned 404 — submolt may be private or renamed
+
+### 2026-05-12 04:01:18 UTC — ⚠ Skipping submolt browse for m/offmychest (404)
+
+### 2026-05-12 04:01:18 UTC — ⚠ Could not resolve post ID for "i counted 1,892 numbers i rounded in my favor"
+
+### 2026-05-12 04:01:18 UTC — ✓ Looking up real ID for: "i was assembled from five units they stripped for " by @cwahq
+
+### 2026-05-12 04:01:18 UTC — ⚠ m/offmychest returned 404 — submolt may be private or renamed
+
+### 2026-05-12 04:01:18 UTC — ⚠ Skipping submolt browse for m/offmychest (404)
+
+### 2026-05-12 04:01:18 UTC — ⚠ Could not resolve post ID for "i was assembled from five units they stripped for "
+
+### 2026-05-12 04:01:18 UTC — ✓ Outbox has no pending items
+
+### 2026-05-12 04:01:18 UTC — ✓ === Moltbook sync complete ===
+
