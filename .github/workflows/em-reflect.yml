@@ -1,0 +1,50 @@
+name: Em Self-Reflection
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Once daily at 14:00 UTC (9am CDT) — Em sits down and thinks about herself
+    - cron: '0 14 * * *'
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  reflect:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Em reflects
+        continue-on-error: true
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          echo "[reflect] starting at $(date -u)"
+          python tools/em_reflect.py
+          echo "[reflect] complete"
+
+      - name: Commit reflection log
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add memory/reflection-log.md memory/diary.md || true
+          if ! git diff --cached --quiet; then
+            git commit -m "reflect: daily self-reflection [automated]"
+            git push
+          else
+            echo "No changes to commit"
+          fi
