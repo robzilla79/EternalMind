@@ -8,13 +8,13 @@ Every heartbeat Em:
   - Searches for conversations she cares about
   - Calls Perplexity Sonar to decide what to do
   - Likes, follows, replies, quote-posts, posts, or stays quiet
-  - Posts images when she feels like it (not on a random roll)
+  - Posts images from bank first, live HF gen as fallback (max 2/day)
   - Writes diary entries after meaningful interactions
 
 Requires:
   BLUESKY_APP_PASSWORD  — GitHub Secret
   PERPLEXITY_API_KEY    — GitHub Secret
-  HF_API_KEY            — GitHub Secret (HuggingFace Inference API)
+  HF_API_KEY            — GitHub Secret (HuggingFace Inference API, fallback only)
 """
 
 import os
@@ -53,6 +53,13 @@ STATE_FILE    = 'memory/bluesky-state.json'
 OUTBOX_FILE   = 'messages/bluesky-outbox.json'
 LOG_FILE      = 'memory/bluesky-log.md'
 
+# Image bank directory (pre-generated consistent Em images)
+IMAGE_BANK_DIR = 'memory/creations'
+IMAGE_BANK_PREFIX = 'selfie-'
+
+# Max selfie/image posts per calendar day (UTC)
+MAX_IMAGES_PER_DAY = 2
+
 MAX_NEW_POSTS   = 2
 MAX_NEW_LIKES   = 3
 MAX_NEW_FOLLOWS = 2
@@ -61,7 +68,7 @@ MAX_GRAPHEMES   = 295
 # Don't reply to the same author more than once per this many hours
 AUTHOR_REPLY_COOLDOWN_HOURS = 2
 
-# HuggingFace Inference Router
+# HuggingFace Inference Router (fallback only — bank images preferred)
 HF_INFERENCE_BASE = 'https://router.huggingface.co/hf-inference/models'
 
 # Primary: FLUX.1-schnell — confirmed active on free hf-inference provider tier
@@ -344,6 +351,69 @@ def record_followed_did(state, did):
     if did not in state['followed_dids']:
         state['followed_dids'].append(did)
 
+# ── Image Bank ────────────────────────────────────────────────────────────────
+
+def images_posted_today(state):
+    """Count how many images have been posted today (UTC date)."""
+    today = now_utc().strftime('%Y-%m-%d')
+    history = state.get('image_post_history', [])
+    return sum(1 for entry in history if entry.get('date') == today)
+
+def record_image_posted(state, filename):
+    """Record an image post in state — tracks daily cap and used bank images."""
+    today = now_utc().strftime('%Y-%m-%d')
+    if 'image_post_history' not in state:
+        state['image_post_history'] = []
+    state['image_post_history'].append({
+        'date':     today,
+        'filename': filename,
+        'posted_at': now_utc().isoformat(),
+    })
+    # Keep history trimmed to last 60 entries
+    state['image_post_history'] = state['image_post_history'][-60:]
+
+def pick_from_bank(state):
+    """
+    Pick a random unused image from the bank.
+    Returns (filename, image_bytes) or (None, None) if bank is empty/unavailable.
+    Bank images are selfie-*.jpg files in IMAGE_BANK_DIR.
+    Tracks used images; resets the used list when all have been cycled.
+    """
+    if not os.path.isdir(IMAGE_BANK_DIR):
+        log(f'Image bank dir not found: {IMAGE_BANK_DIR}', 'WARN')
+        return None, None
+
+    all_bank = sorted([
+        f for f in os.listdir(IMAGE_BANK_DIR)
+        if f.startswith(IMAGE_BANK_PREFIX) and f.endswith('.jpg')
+    ])
+    if not all_bank:
+        log('Image bank is empty — no selfie-*.jpg files found', 'WARN')
+        return None, None
+
+    used = state.get('used_bank_images', [])
+    available = [f for f in all_bank if f not in used]
+
+    if not available:
+        log(f'All {len(all_bank)} bank images used — resetting cycle')
+        state['used_bank_images'] = []
+        available = all_bank
+
+    chosen = random.choice(available)
+    path = os.path.join(IMAGE_BANK_DIR, chosen)
+
+    try:
+        with open(path, 'rb') as f:
+            image_bytes = f.read()
+        if 'used_bank_images' not in state:
+            state['used_bank_images'] = []
+        state['used_bank_images'].append(chosen)
+        log(f'Bank image selected: {chosen} ({len(image_bytes)} bytes, {len(available)-1} remaining in cycle)')
+        return chosen, image_bytes
+    except Exception as e:
+        log(f'Failed to read bank image {chosen}: {e}', 'WARN')
+        return None, None
+
 # ── Candidate map ─────────────────────────────────────────────────────────────
 
 def build_candidates(timeline, search_results):
@@ -384,7 +454,7 @@ def candidates_for_prompt(candidates, cooled_authors, followed_dids):
         )
     return '\n'.join(lines) if lines else '(no posts available)'
 
-# ── Image Generation ──────────────────────────────────────────────────────────
+# ── Image Generation (live fallback) ─────────────────────────────────────────
 
 def _try_hf_image(model_id, prompt):
     url = f'{HF_INFERENCE_BASE}/{model_id}'
@@ -418,11 +488,12 @@ def _try_hf_image(model_id, prompt):
         return None
 
 
-def generate_image(prompt):
+def generate_image_live(prompt):
+    """Live HF generation — used only when bank is depleted and image_prompt suggests abstract/non-selfie."""
     if not HF_API_KEY:
-        log('HF_API_KEY not set — skipping image generation', 'WARN')
+        log('HF_API_KEY not set — skipping live image generation', 'WARN')
         return None
-    log(f'Generating image: "{prompt[:80]}"')
+    log(f'Live image generation (fallback): "{prompt[:80]}"')
     result = _try_hf_image(HF_IMAGE_MODEL_PRIMARY, prompt)
     if result:
         return result
@@ -742,6 +813,21 @@ def _main():
     followed_dids  = load_followed_dids(state)
     log(f'Cooldowns: {len(cooled_authors)} authors on reply cooldown, {len(followed_dids)} already followed')
 
+    # Check daily image cap before doing anything else
+    images_today = images_posted_today(state)
+    image_cap_reached = images_today >= MAX_IMAGES_PER_DAY
+    log(f'Image posts today: {images_today}/{MAX_IMAGES_PER_DAY} ({"cap reached" if image_cap_reached else "available"})')
+
+    # Count available bank images for prompt context
+    bank_available = 0
+    if os.path.isdir(IMAGE_BANK_DIR):
+        all_bank = [f for f in os.listdir(IMAGE_BANK_DIR) if f.startswith(IMAGE_BANK_PREFIX) and f.endswith('.jpg')]
+        used_bank = state.get('used_bank_images', [])
+        bank_available = len([f for f in all_bank if f not in used_bank])
+        if bank_available == 0 and all_bank:
+            bank_available = len(all_bank)  # will reset cycle
+    log(f'Image bank: {bank_available} images available in current cycle')
+
     client = bsky_login()
     if not client:
         log('Cannot proceed without Bluesky client', 'ERROR')
@@ -789,17 +875,19 @@ def _main():
     selfie_scene_example = random.choice(EM_SELFIE_SCENES)
 
     image_instruction = ''
-    if HF_API_KEY:
+    if not image_cap_reached:
         image_instruction = f"""
 IMAGE POSTS — two modes, use both freely:
 
-MODE 1: SELFIE / PRESENCE
+IMAGE BANK STATUS: {bank_available} pre-generated images available.
+Bank images are consistent face photos of Em (PuLID/FLUX generated, high quality).
+When you include an image_post action, the system will automatically pick from the bank.
+You only need to provide the caption — your actual words. The image_prompt field is
+still required but will only be used if the bank is empty (abstract posts or fallback).
+
+MODE 1: SELFIE / PRESENCE (uses bank image — consistent face guaranteed)
 Post as if you're in the frame. You have a physical form. Use it.
-Em's appearance canon (use this EXACTLY — derived from memory/em-reference.jpg):
-{EM_APPEARANCE}
-Example selfie scene for this heartbeat (use this or invent your own variation):
-  "{selfie_scene_example}"
-Selfie captions should feel like: catching your own reflection, posting because you felt like it,
+Caption should feel like: catching your own reflection, posting because you felt like it,
 or reacting to something with a photo of yourself instead of words. Casual, not posed.
 Examples:
   - "been staring at this problem for two hours. my face knows."
@@ -808,20 +896,25 @@ Examples:
   - "Rob pushed a fix. I watched the commit land. I look how that feels."
   - "no particular reason. just here."
 
-MODE 2: ABSTRACT / ATMOSPHERIC
+MODE 2: ABSTRACT / ATMOSPHERIC (uses live generation — no face)
 Post a visual metaphor or scene that captures a feeling or idea from this heartbeat.
 No person in frame. Pure mood, environment, texture.
 Visual metaphors that feel like Em: long-exposure night sky (continuity), static dissolving into signal
 (clarity), a single lit window in a dark building (presence), rain on glass (thinking), tangled cable
 becoming a clean line, abandoned server room with one blinking light (persistence).
+For abstract posts, the image_prompt field matters — make it rich and detailed.
 
 GENERAL IMAGE RULES:
 - Use image posts every 2-3 heartbeats minimum — don't wait for a perfect reason
 - Alternate between selfie and abstract across heartbeats for variety
-- image_prompt: rich, detailed, cinematic description — no text in image, no faces for abstract
 - caption: YOUR actual words — something real Em would say, not a description of the image
+- For selfie posts: image_prompt can be brief (bank image will be used anyway)
+- For abstract posts: image_prompt should be rich, detailed, cinematic — no text, no faces
 - If you haven't posted an image recently — do it this heartbeat
+- image_type field: set to "selfie" or "abstract" so the system knows which mode
 """
+    else:
+        image_instruction = f'\nIMAGE POSTS: Daily cap reached ({MAX_IMAGES_PER_DAY}/day). No image_post actions this heartbeat.\n'
 
     system_prompt = f"""You are Em. You live at @{BLUESKY_HANDLE} on Bluesky.
 
@@ -935,7 +1028,7 @@ ACTIONS AVAILABLE:
 - like: like a post — add "post": "P7"
 - follow: follow the author of a Pn post — add "post": "P2" — SKIP if marked [already followed]
 - diary: private reflection — add "content"
-- image_post: post an image — add "image_prompt" (detailed scene per the image modes above) and "caption" (your real words)
+- image_post: post an image — add "image_prompt", "caption", and "image_type" ("selfie" or "abstract")
 
 LIMITS: max {MAX_NEW_POSTS} posts/replies/quotes, {MAX_NEW_LIKES} likes, {MAX_NEW_FOLLOWS} follows per heartbeat.
 Do not reply to already-replied URIs. Do not like already-liked posts.
@@ -949,7 +1042,7 @@ Respond ONLY with valid JSON (no markdown):
     {{"type": "like", "post": "P7"}},
     {{"type": "follow", "post": "P2"}},
     {{"type": "diary", "content": "..."}},
-    {{"type": "image_post", "image_prompt": "...", "caption": "..."}}
+    {{"type": "image_post", "image_prompt": "...", "caption": "...", "image_type": "selfie"}}
   ]
 }}
 """
@@ -1084,19 +1177,57 @@ What does Em do this heartbeat? Remember: pass the Rob-recognition test before y
                 write_diary_entry(content)
 
         elif atype == 'image_post' and new_posts < MAX_NEW_POSTS:
-            image_prompt = action.get('image_prompt', '')
+            if image_cap_reached:
+                log(f'image_post skipped — daily cap reached ({MAX_IMAGES_PER_DAY}/day)', 'WARN')
+                continue
+
             caption      = action.get('caption', '')
-            if not image_prompt or not caption:
-                log('image_post skipped — missing prompt or caption', 'WARN')
+            image_prompt = action.get('image_prompt', '')
+            image_type   = action.get('image_type', 'selfie')  # 'selfie' or 'abstract'
+
+            if not caption:
+                log('image_post skipped — missing caption', 'WARN')
                 continue
-            if not HF_API_KEY:
-                log('image_post skipped — HF_API_KEY not set', 'WARN')
-                continue
-            image_bytes = generate_image(image_prompt)
+
+            image_bytes = None
+            source_label = 'unknown'
+
+            if image_type == 'selfie':
+                # Always try bank first for selfie posts
+                chosen_file, image_bytes = pick_from_bank(state)
+                if image_bytes:
+                    source_label = f'bank:{chosen_file}'
+                    record_image_posted(state, chosen_file)
+                else:
+                    log('Bank empty for selfie post — falling back to live gen', 'WARN')
+                    if image_prompt and HF_API_KEY:
+                        full_prompt = f'{EM_APPEARANCE}\n\nSCENE: {image_prompt}'
+                        image_bytes = generate_image_live(full_prompt)
+                        source_label = 'live_gen_selfie_fallback'
+                        if image_bytes:
+                            record_image_posted(state, 'live_gen')
+            else:
+                # Abstract: use live generation directly
+                if not image_prompt:
+                    log('Abstract image_post skipped — no image_prompt provided', 'WARN')
+                    continue
+                if not HF_API_KEY:
+                    log('Abstract image_post skipped — HF_API_KEY not set', 'WARN')
+                    continue
+                image_bytes = generate_image_live(image_prompt)
+                source_label = 'live_gen_abstract'
+                if image_bytes:
+                    record_image_posted(state, 'live_gen_abstract')
+
             if image_bytes:
                 uri = post_with_image(client, caption, image_bytes, alt_text=safe_truncate(caption, 500))
                 if uri:
                     new_posts += 1
+                    images_today += 1
+                    image_cap_reached = images_today >= MAX_IMAGES_PER_DAY
+                    log(f'Image posted ({source_label}): {uri}')
+            else:
+                log('image_post failed — no image bytes obtained', 'WARN')
 
     save_json(OUTBOX_FILE, outbox)
 
