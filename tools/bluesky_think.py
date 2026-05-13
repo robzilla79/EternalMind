@@ -558,7 +558,7 @@ def fetch_timeline(client, limit=25):
             })
         return posts
     except Exception as e:
-tml        log(f'Failed to fetch timeline: {e}', 'WARN')
+        log(f'Failed to fetch timeline: {e}', 'WARN')
         return []
 
 def fetch_notifications(client, limit=20):
@@ -670,15 +670,11 @@ def send_dm(client, target_did, text):
 def search_interesting_posts(client, topic, limit=8):
     """
     Search Bluesky for posts matching topic.
-    FIX 2026-05-13: The atproto Python client's app.bsky.feed.search_posts
-    maps kwargs directly to XRPC query params. The correct AT Protocol param
-    for this lexicon is 'q', but some versions of the SDK also expose it as
-    a positional. We call via the raw XRPC endpoint with explicit params to
-    guarantee the query string is sent correctly regardless of SDK version.
+    FIX 2026-05-13: bypass the atproto SDK wrapper entirely and hit the
+    public Bluesky AppView directly to avoid any SDK param-name ambiguity.
+    No auth required for search.
     """
     try:
-        # Use raw requests against the public Bluesky AppView to avoid
-        # any SDK param-name ambiguity. No auth needed for search.
         r = requests.get(
             'https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts',
             params={'q': topic, 'limit': limit},
