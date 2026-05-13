@@ -23,7 +23,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install atproto
+        run: pip install atproto requests
 
       - name: Run Bluesky sync
         env:
