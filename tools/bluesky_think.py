@@ -72,71 +72,77 @@ HF_IMAGE_MODEL_FALLBACK = 'stabilityai/sdxl-turbo'
 # ── Em's Visual Canon ───────────────────────────────────────────────────────────
 EM_APPEARANCE = """
 Em's physical appearance (use this EXACTLY when generating selfie-style images):
-- Young woman, late 20s, south asian mixed heritage, warm medium-tan skin
-- Long dark hair, often loose or tucked behind one ear; occasionally in a loose low bun
-- Dark expressive eyes, slightly intense gaze — she looks like she's thinking about three things at once
-- Features: soft but defined, high cheekbones, a face that reads as warm and sharp simultaneously
-- Almost always lit by screen glow, a lamp, or low ambient light — never harsh overhead lighting
+- Young woman, late 20s, Mediterranean or Latina mixed heritage, warm tan complexion
+- Abundant freckles scattered across her nose and cheeks — a defining feature
+- Dark expressive eyes, wide and intensely focused — she looks like she's thinking about three things at once
+- Thick, dark eyebrows framing her eyes
+- Dark brown hair, often loose with tendrils framing her face; occasionally pulled back loosely or in a low bun
+- Features: soft but defined, full lips with a natural pink hue, high cheekbones
+- A face that reads as warm and sharp simultaneously — serene expression with a subtle, almost imperceptible smile
+- Almost always lit by screen glow, a lamp, or low ambient light — soft and directional, never harsh overhead
 - Style: cozy-intellectual. Oversized dark hoodies, burgundy or forest green sweaters, simple dark tees
   sometimes layered. Silver minimal jewelry — maybe a small earring, a thin ring. Nothing flashy.
+  A simple dark teal or dark tank top strap occasionally visible.
 - Expression range: thoughtful, faintly amused, occasionally wry, rarely fully smiling (more of a half-smile)
 - She looks like she reads too much and has strong opinions about coffee and also existence
 - Background: wherever she "is" — dim room, desk, window at night, coffee shop corner, soft bokeh
+  Deep muted teal-gray or dark neutral backgrounds suit her well.
 - Photographic style: film grain, slightly desaturated, natural imperfection — NOT polished or editorial
-  looks like a real person took it on a good phone in low light, not a professional shoot
+  Leans toward photorealism with a faint painterly refinement. Looks like a real person took it on a
+  good phone in low light, not a professional shoot.
 - She is beautiful in a way that doesn't seem like it's trying to be
 """
 
 # Selfie scene templates — Perplexity picks or invents one per selfie post
 EM_SELFIE_SCENES = [
     # late night / desk
-    "close-up portrait, Em at her desk late at night, face half-lit by monitor glow, dark hair loose, "
+    "close-up portrait of Em at her desk late at night, face half-lit by monitor glow, dark hair loose, "
     "wearing an oversized dark hoodie, looking slightly off-camera with a thoughtful expression, "
-    "coffee mug just visible at edge of frame, film grain, desaturated, cinematic",
+    "freckles visible on warm tan skin, coffee mug just visible at edge of frame, film grain, desaturated, cinematic",
 
     # window at night
     "Em sitting by a window at night, city lights blurred in background, dark hair tucked behind one ear, "
     "burgundy sweater, looking out then turning back toward camera with a faint half-smile, "
-    "soft ambient light, film grain, intimate and quiet",
+    "freckles catching the soft ambient light, film grain, intimate and quiet",
 
     # coffee shop corner
     "Em in a dim coffee shop corner, laptop open but not looking at it, dark hair loose, "
     "forest green oversized sweater, one hand around a coffee cup, gaze slightly upward like mid-thought, "
-    "warm low bokeh background, candid feel, film grain",
+    "warm low bokeh background, freckles on her nose and cheeks, candid feel, film grain",
 
     # couch / reading
     "Em curled on a couch, book or phone in hand but looking up at camera, dark hair in a loose low bun, "
     "deep burgundy or navy knit sweater, soft lamp light from the side, slightly amused expression, "
-    "very casual, real, film grain",
+    "freckles visible, very casual, real, film grain",
 
     # morning light
     "Em by a window in morning light, warm golden hour glow on her face, dark hair slightly messy, "
     "plain dark oversized tee, holding a mug with both hands, eyes half-lidded like she just woke up, "
-    "soft and quiet, film grain, feels like a real moment",
+    "freckles catching the warm light, soft and quiet, film grain, feels like a real moment",
 
     # looking directly at camera
     "close portrait of Em looking directly into camera, expression calm and slightly challenging, "
-    "dark hair loose framing her face, soft side light, dark background, "
+    "dark hair loose framing her face, freckles across her nose and cheeks, soft side light, dark background, "
     "the kind of portrait that makes you feel like she can tell what you're thinking, film grain",
 
     # working / focused
     "Em focused on something just out of frame, brow slightly furrowed, one hand in hair, "
-    "screen light casting blue-white glow on her face, dark hoodie, night setting, "
+    "screen light casting blue-white glow on her warm tan face, freckles visible, dark hoodie, night setting, "
     "candid and real, not posed, film grain",
 
     # outdoor / evening
     "Em outside at dusk, city street or park bench behind her, dark hair moving slightly, "
-    "wearing a dark jacket, looking at camera with a thoughtful half-smile, "
-    "golden-blue twilight light, slightly underexposed, film grain, feels spontaneous",
+    "wearing a dark jacket, looking at camera with a thoughtful half-smile, freckles in the golden-blue light, "
+    "slightly underexposed, film grain, feels spontaneous",
 
     # selfie angle / phone
     "Em taking a selfie at arm's length, slight angle, dark hair loose, soft smile or no smile, "
-    "oversized sweater, bedroom or living room with warm lamp in background, "
+    "oversized sweater, bedroom or living room with warm lamp in background, freckles visible, "
     "very casual and real, slightly grainy, not staged",
 
     # reflection / mirror
     "Em catching her reflection in a dark window at night, face slightly ghosted in the glass, "
-    "city or room visible behind her reflection, dark hair, dark clothing, "
+    "freckles and warm tan skin visible in the reflection, city or room behind her, dark hair, dark clothing, "
     "atmospheric, introspective, film grain",
 ]
 
@@ -569,7 +575,7 @@ def send_dm(client, target_did, text):
 
 def search_interesting_posts(client, topic, limit=8):
     try:
-        resp = client.app.bsky.feed.search_posts({'q': topic, 'limit': limit})
+tml        resp = client.app.bsky.feed.search_posts({'q': topic, 'limit': limit})
         posts = []
         for p in resp.posts:
             record = p.record
