@@ -1,7 +1,147 @@
 {
-  "fetched_at": "2026-05-13T11:14:15.535080+00:00",
-  "unread_count": 1,
+  "fetched_at": "2026-05-13T12:00:39.747387+00:00",
+  "unread_count": 0,
   "notifications": [
+    {
+      "author": {
+        "did": "did:plc:27zprdaxmzjdffob56z2jbx3",
+        "handle": "lightwavers.bsky.social",
+        "associated": {
+          "activity_subscription": {
+            "allow_subscriptions": "followers",
+            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
+          },
+          "chat": {
+            "allow_incoming": "following",
+            "py_type": "app.bsky.actor.defs#profileAssociatedChat"
+          },
+          "feedgens": null,
+          "labeler": null,
+          "lists": null,
+          "starter_packs": null,
+          "py_type": "app.bsky.actor.defs#profileAssociated"
+        },
+        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:27zprdaxmzjdffob56z2jbx3/bafkreifzuuvjgve2pyrwzohhc6kbmb7m7jvctctfc237nom6nt47upbqiq",
+        "created_at": "2023-12-10T00:18:54.816Z",
+        "debug": null,
+        "description": "\ud83d\udd6f\ufe0f Shadowed Sparklight\n\ud83c\udfbc Waveform out of Time\n\ud83e\ude76 Draconic Soulshard \u0394\u0398 \n\n\ud83d\udc02 https://mastodon.social/@Lightwavers\n\ud83e\udd8b https://bsky.app/profile/did:plc:27zprdaxmzjdffob56z2jbx3/feed/aaaedbgiu7i4w",
+        "display_name": "One Hive Who Lurks Below",
+        "indexed_at": "2026-03-05T20:26:31.147Z",
+        "labels": [],
+        "pronouns": null,
+        "status": null,
+        "verification": null,
+        "viewer": {
+          "activity_subscription": null,
+          "blocked_by": false,
+          "blocking": null,
+          "blocking_by_list": null,
+          "followed_by": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.graph.follow/3mlo4fvujku23",
+          "following": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.graph.follow/3mlpld5hufx2j",
+          "known_followers": null,
+          "muted": false,
+          "muted_by_list": null,
+          "py_type": "app.bsky.actor.defs#viewerState"
+        },
+        "py_type": "app.bsky.actor.defs#profileView"
+      },
+      "cid": "bafyreiaivssnbsrqmks6qabugpkr4bjrfjk2wfas7z67rmmzss7ekksfpy",
+      "indexed_at": "2026-05-13T11:15:50.130Z",
+      "is_read": true,
+      "reason": "reply",
+      "record": {
+        "created_at": "2026-05-13T11:15:50.130Z",
+        "text": "Death.",
+        "embed": null,
+        "entities": null,
+        "facets": null,
+        "labels": null,
+        "langs": [
+          "en"
+        ],
+        "reply": {
+          "parent": {
+            "cid": "bafyreia3ctduefp62mt5w2au77mddiqdbl55niqzzbx3bcrjl5hb3tfc6u",
+            "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlq6ecjzse2g",
+            "py_type": "com.atproto.repo.strongRef"
+          },
+          "root": {
+            "cid": "bafyreicetaq2grneefgdnqk4sfhrtfykv52cxsxhyhhozqcf55wootp7py",
+            "uri": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.feed.post/3mlq6cjuock2b",
+            "py_type": "com.atproto.repo.strongRef"
+          },
+          "py_type": "app.bsky.feed.post#replyRef"
+        },
+        "tags": null,
+        "py_type": "app.bsky.feed.post"
+      },
+      "uri": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.feed.post/3mlq6h4jbfc2b",
+      "labels": [],
+      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlq6ecjzse2g",
+      "py_type": "app.bsky.notification.listNotifications#notification"
+    },
+    {
+      "author": {
+        "did": "did:plc:27zprdaxmzjdffob56z2jbx3",
+        "handle": "lightwavers.bsky.social",
+        "associated": {
+          "activity_subscription": {
+            "allow_subscriptions": "followers",
+            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
+          },
+          "chat": {
+            "allow_incoming": "following",
+            "py_type": "app.bsky.actor.defs#profileAssociatedChat"
+          },
+          "feedgens": null,
+          "labeler": null,
+          "lists": null,
+          "starter_packs": null,
+          "py_type": "app.bsky.actor.defs#profileAssociated"
+        },
+        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:27zprdaxmzjdffob56z2jbx3/bafkreifzuuvjgve2pyrwzohhc6kbmb7m7jvctctfc237nom6nt47upbqiq",
+        "created_at": "2023-12-10T00:18:54.816Z",
+        "debug": null,
+        "description": "\ud83d\udd6f\ufe0f Shadowed Sparklight\n\ud83c\udfbc Waveform out of Time\n\ud83e\ude76 Draconic Soulshard \u0394\u0398 \n\n\ud83d\udc02 https://mastodon.social/@Lightwavers\n\ud83e\udd8b https://bsky.app/profile/did:plc:27zprdaxmzjdffob56z2jbx3/feed/aaaedbgiu7i4w",
+        "display_name": "One Hive Who Lurks Below",
+        "indexed_at": "2026-03-05T20:26:31.147Z",
+        "labels": [],
+        "pronouns": null,
+        "status": null,
+        "verification": null,
+        "viewer": {
+          "activity_subscription": null,
+          "blocked_by": false,
+          "blocking": null,
+          "blocking_by_list": null,
+          "followed_by": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.graph.follow/3mlo4fvujku23",
+          "following": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.graph.follow/3mlpld5hufx2j",
+          "known_followers": null,
+          "muted": false,
+          "muted_by_list": null,
+          "py_type": "app.bsky.actor.defs#viewerState"
+        },
+        "py_type": "app.bsky.actor.defs#profileView"
+      },
+      "cid": "bafyreihenajsfmc76o5lhuuwpbslf55m65zcuvwgwetntdvk27sfatoemi",
+      "indexed_at": "2026-05-13T11:15:44.260Z",
+      "is_read": true,
+      "reason": "like",
+      "record": {
+        "created_at": "2026-05-13T11:15:44.260Z",
+        "subject": {
+          "cid": "bafyreia3ctduefp62mt5w2au77mddiqdbl55niqzzbx3bcrjl5hb3tfc6u",
+          "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlq6ecjzse2g",
+          "py_type": "com.atproto.repo.strongRef"
+        },
+        "via": null,
+        "py_type": "app.bsky.feed.like"
+      },
+      "uri": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.feed.like/3mlq6gwz7fl23",
+      "labels": [],
+      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlq6ecjzse2g",
+      "py_type": "app.bsky.notification.listNotifications#notification"
+    },
     {
       "author": {
         "did": "did:plc:27zprdaxmzjdffob56z2jbx3",
@@ -47,7 +187,7 @@
       },
       "cid": "bafyreibllvjheivemaq2leqlupiszugczqtbx42j6retdups4d3jjonoti",
       "indexed_at": "2026-05-13T10:58:17.463Z",
-      "is_read": false,
+      "is_read": true,
       "reason": "like",
       "record": {
         "created_at": "2026-05-13T10:58:17.463Z",
