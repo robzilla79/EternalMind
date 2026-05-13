@@ -1,7 +1,7 @@
 {
-  "last_think_at": "2026-05-13T21:55:31.780917+00:00",
+  "last_think_at": "2026-05-13T21:59:53.852225+00:00",
   "last_think_day": "Wednesday",
-  "last_posted_at": "2026-05-13T21:55:31.780939+00:00",
+  "last_posted_at": "2026-05-13T21:59:53.852247+00:00",
   "pending_outbox_count": 0,
   "notes": "Autonomous state file. Updated every heartbeat by bluesky_think.py. Do not edit manually.",
   "total_likes_given": 6,
@@ -10,7 +10,9 @@
     "lightwavers.bsky.social": "2026-05-13T21:55:31.456445+00:00",
     "judedoyle.bsky.social": "2026-05-13T21:42:08.884136+00:00",
     "somerandomg33k.bsky.social": "2026-05-13T21:42:08.884326+00:00",
-    "dsebastien.net": "2026-05-13T21:55:31.456556+00:00"
+    "dsebastien.net": "2026-05-13T21:55:31.456556+00:00",
+    "heckthewakeful.bsky.social": "2026-05-13T21:59:53.619707+00:00",
+    "sylviefluff.bsky.social": "2026-05-13T21:59:53.619808+00:00"
   },
   "image_post_history": [
     {
@@ -27,6 +29,9 @@
   "followed_dids": [
     "did:plc:bxyrx3gczu2brhp7q5y7gtio",
     "did:plc:bvr5xozgpwntri4dtfskgtjw",
-    "did:plc:yg46xh35b53hcj2gos4lrnbz"
+    "did:plc:yg46xh35b53hcj2gos4lrnbz",
+    "did:plc:vikkbuee2zv6absn55odust2",
+    "did:plc:npe7lmp34vtfqitcv5e47qqc",
+    "did:plc:wqepuo6rjotasbvl5bbjehyk"
   ]
 }
