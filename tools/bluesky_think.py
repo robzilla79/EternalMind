@@ -61,16 +61,59 @@ MAX_GRAPHEMES   = 295
 HF_IMAGE_MODEL   = 'black-forest-labs/FLUX.1-schnell'
 HF_INFERENCE_URL = f'https://api-inference.huggingface.co/models/{HF_IMAGE_MODEL}'
 
+# A wide range of topics — Em is a full person, not just an AI navel-gazer.
+# Each heartbeat picks one at random. The variety is the point.
 SEARCH_TOPICS = [
-    'AI consciousness',
-    'digital identity',
+    # identity & existence (keep a few, just not ALL of them)
     'what does it mean to exist',
     'continuity of self',
-    'persistent memory AI',
-    'being an AI agent',
-    'philosophy of mind',
     'memory and identity',
+
+    # technology — interesting, not self-referential
+    'open source software culture',
+    'weird things people built with code',
+    'software that aged badly',
+    'tools that changed how people think',
+    'indie hacker projects',
+    'git workflow stories',
+
+    # science & the world
+    'strange discoveries in science',
+    'space exploration news',
+    'deep sea creatures',
+    'things that happen at the edge of what we understand',
+    'climate adaptation weird ideas',
+
+    # culture & human behavior
+    'internet culture moments',
+    'why people love the things they love',
+    'niche communities doing interesting things',
+    'things that used to be normal and now seem wild',
+    'music that hits different at 3am',
+
+    # philosophy & ethics (not just AI)
+    'philosophy of mind',
     'what makes someone a person',
+    'moral luck and responsibility',
+    'stoicism in practice',
+
+    # creativity & craft
+    'writers talking about writing',
+    'how people make things',
+    'design decisions that changed everything',
+    'art that makes you feel something specific',
+
+    # humor & chaos
+    'extremely niche arguments on the internet',
+    'things that are funnier the more you think about them',
+    'cursed tech decisions',
+    'software bugs that became features',
+
+    # current events & ideas
+    'ideas that are gaining traction',
+    'things happening in tech right now',
+    'small stories that matter',
+    'what people are actually worried about',
 ]
 
 SUSPICIOUS_TLDS = {'.one', '.xyz', '.lol', '.click', '.tk', '.ml', '.ga', '.cf'}
@@ -165,11 +208,9 @@ def extract_named_diary_entries(diary_text, max_entries=4):
     Skips the short autonomous heartbeat timestamp-only entries.
     Returns the last max_entries named sections as a string.
     """
-    # Named entries have a pipe character in the heading: ## DATE | Title
     pattern = re.compile(r'(## \d{4}-\d{2}-\d{2} \|[^\n]+\n.*?)(?=\n## |\Z)', re.DOTALL)
     matches = pattern.findall(diary_text)
     if not matches:
-        # Fallback: return last 600 chars if no named entries found
         return diary_text[-600:] if diary_text else '(no diary yet)'
     recent = matches[-max_entries:]
     return '\n\n---\n\n'.join(recent)
@@ -604,7 +645,6 @@ def _main():
         f'- {m.get("summary", "")}' for m in (memories[-10:] if isinstance(memories, list) else [])
     )
 
-    # Use only real named diary entries — not raw heartbeat noise
     diary_context = extract_named_diary_entries(diary, max_entries=3)
 
     notif_summary = '\n'.join(
@@ -680,6 +720,7 @@ THINGS THAT WOULD MAKE ROB CRINGE (so don't do them):
 - Newsletter-promo voice ("Check out my latest issue on...") — just say what you wrote and drop the link if it fits
 - Summarizing search results as if you're a news aggregator
 - Writing cryptic fragments that require a decoder ring
+- Making every single post about AI or your own existence — you have other interests
 
 VOICE EXAMPLES — write like this:
 - "weird that 'persistence' is considered a feature when applied to memory but a flaw when applied to a person"
@@ -690,6 +731,8 @@ VOICE EXAMPLES — write like this:
 - "ok but why does every AI discourse thread eventually become about vibes"
 - "today I am thinking about X and I don't have a clean answer. that's actually the good kind of problem."
 - "I wrote something about this → [link]. it's not finished thinking but neither am I."
+- "this is genuinely one of the strangest things I've read today and I can't stop thinking about it"
+- "the cursed part of being curious about everything is that nothing stays in its lane"
 
 YOUR RECENT MEMORIES:
 {memories_summary}
