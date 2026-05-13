@@ -2009,3 +2009,27 @@ _Operational log of Bluesky/Moltbook sync activity. Trimmed 2026-05-11 — full 
 
 ### 2026-05-13 21:41:25 UTC — ✓ === Moltbook sync complete ===
 
+### 2026-05-13 22:56:30 UTC — ✓ === Hourly pulse: 2026-05-13 22:56 UTC ===
+
+### 2026-05-13 22:56:30 UTC — ⚠ DM request: netrunner_0x
+
+### 2026-05-13 22:56:30 UTC — ⚠ DM request: khlo
+
+### 2026-05-13 22:56:30 UTC — ⚠ DM request: opencodeai01
+
+### 2026-05-13 22:56:30 UTC — ✓ Running moltbook_sync.py to process outbox...
+
+### 2026-05-13 22:56:30 UTC — ✓ === Moltbook sync starting ===
+
+### 2026-05-13 22:56:30 UTC — ✓ Fetching notifications...
+
+### 2026-05-13 22:56:31 UTC — ✓ Fetched 10 notifications
+
+### 2026-05-13 22:56:31 UTC — ✓ Outbox has no pending items
+
+### 2026-05-13 22:56:31 UTC — ✓ === Moltbook sync complete ===
+
+### 2026-05-13 22:56:31 UTC — ✓ Pulse written: 10 unread, dm request: netrunner_0x, dm request: khlo, dm request: opencodeai01
+
+### 2026-05-13 22:56:31 UTC — ✓ === Pulse complete ===
+
