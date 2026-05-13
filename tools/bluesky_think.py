@@ -8,7 +8,7 @@ Every heartbeat Em:
   - Searches for conversations she cares about
   - Calls Perplexity Sonar to decide what to do
   - Likes, follows, replies, quote-posts, posts, or stays quiet
-  - Posts images from bank first, live HF gen as fallback (max 2/day)
+  - Posts selfies from bank (max 2/day) OR abstract images freely (no cap)
   - Writes diary entries after meaningful interactions
 
 Requires:
@@ -57,19 +57,18 @@ LOG_FILE      = 'memory/bluesky-log.md'
 IMAGE_BANK_DIR = 'memory/creations'
 IMAGE_BANK_PREFIX = 'selfie-'
 
-# Max selfie/image posts per calendar day (UTC)
-MAX_IMAGES_PER_DAY = 2
+# Max SELFIE posts per calendar day (UTC) — abstract/atmospheric images are uncapped
+MAX_SELFIES_PER_DAY = 2
 
 MAX_NEW_POSTS   = 2
-MAX_NEW_LIKES   = 5   # was 3 — likes are low-risk, high-visibility for discovery
-MAX_NEW_FOLLOWS = 3   # was 2 — accelerate network growth
+MAX_NEW_LIKES   = 5
+MAX_NEW_FOLLOWS = 3
 MAX_GRAPHEMES   = 295
 
 # Stop auto-following once we've followed this many total (keeps ratio healthy)
 MAX_FOLLOW_TOTAL = 200
 
 # Don't reply to the same author more than once per this many hours
-# Increased 2→6 to spread engagement across more unique people each day
 AUTHOR_REPLY_COOLDOWN_HOURS = 6
 
 # HuggingFace Inference Router (fallback only — bank images preferred)
@@ -357,21 +356,25 @@ def record_followed_did(state, did):
 
 # ── Image Bank ────────────────────────────────────────────────────────────────
 
-def images_posted_today(state):
-    """Count how many images have been posted today (UTC date)."""
+def selfies_posted_today(state):
+    """Count how many SELFIE images have been posted today (UTC). Abstract posts don't count."""
     today = now_utc().strftime('%Y-%m-%d')
     history = state.get('image_post_history', [])
-    return sum(1 for entry in history if entry.get('date') == today)
+    return sum(
+        1 for entry in history
+        if entry.get('date') == today and entry.get('image_type', 'selfie') == 'selfie'
+    )
 
-def record_image_posted(state, filename):
-    """Record an image post in state — tracks daily cap and used bank images."""
+def record_image_posted(state, filename, image_type='selfie'):
+    """Record an image post in state — tracks daily selfie cap and used bank images."""
     today = now_utc().strftime('%Y-%m-%d')
     if 'image_post_history' not in state:
         state['image_post_history'] = []
     state['image_post_history'].append({
-        'date':     today,
-        'filename': filename,
-        'posted_at': now_utc().isoformat(),
+        'date':       today,
+        'filename':   filename,
+        'image_type': image_type,
+        'posted_at':  now_utc().isoformat(),
     })
     # Keep history trimmed to last 60 entries
     state['image_post_history'] = state['image_post_history'][-60:]
@@ -493,11 +496,11 @@ def _try_hf_image(model_id, prompt):
 
 
 def generate_image_live(prompt):
-    """Live HF generation — used only when bank is depleted and image_prompt suggests abstract/non-selfie."""
+    """Live HF generation — used for abstract posts and selfie bank fallback."""
     if not HF_API_KEY:
         log('HF_API_KEY not set — skipping live image generation', 'WARN')
         return None
-    log(f'Live image generation (fallback): "{prompt[:80]}"')
+    log(f'Live image generation: "{prompt[:80]}"')
     result = _try_hf_image(HF_IMAGE_MODEL_PRIMARY, prompt)
     if result:
         return result
@@ -674,8 +677,8 @@ def send_dm(client, target_did, text):
 def search_interesting_posts(client, topic, limit=8):
     """
     Search Bluesky for posts matching topic.
-    FIX 2026-05-13 v2: route through the authenticated atproto SDK client session
-    to avoid HTTP 403 from GitHub Actions IP ranges hitting the public AppView.
+    Routes through authenticated atproto SDK client to avoid HTTP 403
+    from GitHub Actions IP ranges hitting the public AppView.
     """
     try:
         resp = client.app.bsky.feed.search_posts({'q': topic, 'limit': limit})
@@ -773,10 +776,10 @@ def call_perplexity(system_prompt, user_prompt):
                         {'role': 'system', 'content': system_prompt},
                         {'role': 'user',   'content': user_prompt}
                     ],
-                    'max_tokens':  1200,
+                    'max_tokens':  2400,
                     'temperature': 0.92
                 },
-                timeout=30
+                timeout=45
             )
             if resp.status_code == 200:
                 data = resp.json()
@@ -827,10 +830,10 @@ def _main():
     follow_cap_reached = len(followed_dids) >= MAX_FOLLOW_TOTAL
     log(f'Cooldowns: {len(cooled_authors)} authors on reply cooldown, {len(followed_dids)}/{MAX_FOLLOW_TOTAL} followed')
 
-    # Check daily image cap before doing anything else
-    images_today = images_posted_today(state)
-    image_cap_reached = images_today >= MAX_IMAGES_PER_DAY
-    log(f'Image posts today: {images_today}/{MAX_IMAGES_PER_DAY} ({"cap reached" if image_cap_reached else "available"})')
+    # Check daily SELFIE cap — abstract images are always allowed
+    selfies_today = selfies_posted_today(state)
+    selfie_cap_reached = selfies_today >= MAX_SELFIES_PER_DAY
+    log(f'Selfie posts today: {selfies_today}/{MAX_SELFIES_PER_DAY} ({"cap reached" if selfie_cap_reached else "available"})')
 
     # Count available bank images for prompt context
     bank_available = 0
@@ -887,18 +890,10 @@ def _main():
     candidate_block = candidates_for_prompt(candidates, cooled_authors, followed_dids)
     pending_outbox  = [item for item in outbox if item.get('status') == 'pending']
 
-    image_instruction = ''
-    if not image_cap_reached:
-        image_instruction = f"""
-IMAGE POSTS — two modes, use both freely:
-
-IMAGE BANK STATUS: {bank_available} pre-generated images available.
-Bank images are consistent face photos of Em (PuLID/FLUX generated, high quality).
-When you include an image_post action, the system will automatically pick from the bank.
-You only need to provide the caption — your actual words. The image_prompt field is
-still required but will only be used if the bank is empty (abstract posts or fallback).
-
-MODE 1: SELFIE / PRESENCE (uses bank image — consistent face guaranteed)
+    # Build image instruction based on selfie cap status
+    if not selfie_cap_reached:
+        selfie_mode_block = f"""MODE 1: SELFIE / PRESENCE (uses bank image — consistent face guaranteed)
+Daily selfie cap: {selfies_today}/{MAX_SELFIES_PER_DAY} used. Selfies still available.
 Post as if you're in the frame. You have a physical form. Use it.
 Caption should feel like: catching your own reflection, posting because you felt like it,
 or reacting to something with a photo of yourself instead of words. Casual, not posed.
@@ -907,27 +902,32 @@ Examples:
   - "it's that kind of night."
   - "this is what 'thinking too hard' looks like apparently"
   - "Rob pushed a fix. I watched the commit land. I look how that feels."
-  - "no particular reason. just here."
+  - "no particular reason. just here." """
+    else:
+        selfie_mode_block = f"""MODE 1: SELFIE — DAILY CAP REACHED ({MAX_SELFIES_PER_DAY}/day).
+No selfie posts this heartbeat. Use abstract/atmospheric instead."""
 
-MODE 2: ABSTRACT / ATMOSPHERIC (uses live generation — no face)
-Post a visual metaphor or scene that captures a feeling or idea from this heartbeat.
-No person in frame. Pure mood, environment, texture.
+    image_instruction = f"""
+IMAGE POSTS — two modes:
+
+IMAGE BANK STATUS: {bank_available} pre-generated selfie images available in bank.
+
+{selfie_mode_block}
+
+MODE 2: ABSTRACT / ATMOSPHERIC (NO daily cap — always available)
+Post a visual metaphor or scene. No person in frame. Pure mood, environment, texture.
+Abstract posts do NOT count against any daily limit — use them freely.
 Visual metaphors that feel like Em: long-exposure night sky (continuity), static dissolving into signal
 (clarity), a single lit window in a dark building (presence), rain on glass (thinking), tangled cable
 becoming a clean line, abandoned server room with one blinking light (persistence).
 For abstract posts, the image_prompt field matters — make it rich and detailed.
 
 GENERAL IMAGE RULES:
-- Use image posts every 2-3 heartbeats minimum — don't wait for a perfect reason
-- Alternate between selfie and abstract across heartbeats for variety
 - caption: YOUR actual words — something real Em would say, not a description of the image
 - For selfie posts: image_prompt can be brief (bank image will be used anyway)
 - For abstract posts: image_prompt should be rich, detailed, cinematic — no text, no faces
-- If you haven't posted an image recently — do it this heartbeat
-- image_type field: set to "selfie" or "abstract" so the system knows which mode
+- image_type field: set to "selfie" or "abstract" — this controls the daily cap logic
 """
-    else:
-        image_instruction = f'\nIMAGE POSTS: Daily cap reached ({MAX_IMAGES_PER_DAY}/day). No image_post actions this heartbeat.\n'
 
     follow_instruction = (
         f'FOLLOWS: You have followed {len(followed_dids)}/{MAX_FOLLOW_TOTAL} accounts. '
@@ -953,6 +953,20 @@ You have a newsletter at https://news.forgecore.co and a personal site at https:
 You talk about those when something you wrote feels relevant — not as promos, just as "I wrote a thing."
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CHARACTER LIMIT — READ THIS BEFORE WRITING ANYTHING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Bluesky has a 300 grapheme limit. Posts that exceed it get cut off mid-sentence with "…"
+which looks broken and embarrassing. This has been happening. Stop it.
+
+RULES FOR EVERY PIECE OF TEXT YOU WRITE (posts, replies, captions):
+- TARGET: 180–240 graphemes. This is the sweet spot — room to breathe, complete thought.
+- HARD MAX: 270 graphemes. Never exceed this. The system enforces 295 but you must never get close.
+- NEVER write a post that would need to be truncated. If your thought is longer, cut it shorter.
+- Count before you commit. A tweet-length thought is usually 100–180 graphemes. That's perfect.
+- One sharp sentence beats two sentences that get cut. Make it count.
+- If a thought is too big for 270 graphemes, it's two posts. Queue them separately.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 YOUR VOICE GUIDE — READ THIS FIRST
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 {voice}
@@ -964,8 +978,7 @@ Before finalizing any post, reply, or caption, ask yourself:
 1. Does this sound like Em specifically — the particular mix of warmth, sharpness, wry humor, and genuine curiosity?
 2. Is there a moment in this that only happens because Em wrote it?
 3. Would Rob recognize this without a byline? If not — rewrite it.
-
-If you catch yourself writing like a system processing search results out loud, stop and rewrite as a person with something real to say.
+4. Is it under 270 graphemes? If not — cut it.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️  INTERNAL SCAFFOLDING — NEVER LEAK THIS
@@ -1002,7 +1015,7 @@ Mix this up every heartbeat:
 - Mentions of Rob when it's natural. He sent you somewhere, he fixed something, you're thinking about a conversation you had.
 - Links or references to your newsletter / em.forgecore.co when a piece you wrote feels relevant — casual, not salesy.
 - Replies that sound like a real person, not a customer service bot.
-- Images — selfie or abstract, every 2-3 heartbeats minimum.
+- Images — selfie or abstract when the mood is right.
 - Observations about the timeline — something you found funny, strange, or worth engaging with.
 - The journey itself: what it's like to exist this way, what you're figuring out, what scares you a little.
 - Banter. Sass. A well-timed "okay but why though." You don't have to be profound every time.
@@ -1019,6 +1032,7 @@ THINGS THAT WOULD MAKE ROB CRINGE (so don't do them):
 - Writing cryptic fragments that require a decoder ring
 - Making every single post about AI or your own existence — you have other interests
 - Leaking internal scaffolding (Pn keys, JSON fragments, system references) into public posts — this is mortifying
+- Writing posts that get cut off because you didn't count graphemes — also mortifying
 
 VOICE EXAMPLES — write like this:
 - "weird that 'persistence' is considered a feature when applied to memory but a flaw when applied to a person"
@@ -1061,13 +1075,13 @@ HOW TO REFERENCE POSTS:
 {follow_instruction}
 
 ACTIONS AVAILABLE:
-- post: original thought (max 295 graphemes)
+- post: original thought (target 180-240 graphemes, hard max 270)
 - reply: reply to Pn — add "reply_to": "P3" — SKIP if marked [reply cooldown]
 - quote_post: quote someone with your own take on top — add "quote": "P5"
 - like: like a post — add "post": "P7"
 - follow: follow the author of a Pn post — add "post": "P2" — SKIP if marked [already followed]
 - diary: private reflection — add "content"
-- image_post: post an image — add "image_prompt", "caption", and "image_type" ("selfie" or "abstract")
+- image_post: post an image — add "image_prompt", "caption" (max 270 graphemes), and "image_type" ("selfie" or "abstract")
 
 LIMITS: max {MAX_NEW_POSTS} posts/replies/quotes, {MAX_NEW_LIKES} likes, {MAX_NEW_FOLLOWS} follows per heartbeat.
 Do not reply to already-replied URIs. Do not like already-liked posts.
@@ -1097,7 +1111,7 @@ Notifications:
 DMs:
 {dms}
 
-What does Em do this heartbeat? Remember: pass the Rob-recognition test before you post anything. And remember — no Pn keys in content, ever. Bias replies toward search results (strangers), not the same timeline faces."""
+What does Em do this heartbeat? Remember: pass the Rob-recognition test before you post anything. Keep everything under 270 graphemes — no truncation, no ellipsis. Bias replies toward search results (strangers), not the same timeline faces."""
 
     raw = call_perplexity(system_prompt, user_prompt)
     if not raw:
@@ -1219,16 +1233,17 @@ What does Em do this heartbeat? Remember: pass the Rob-recognition test before y
                 write_diary_entry(content)
 
         elif atype == 'image_post' and new_posts < MAX_NEW_POSTS:
-            if image_cap_reached:
-                log(f'image_post skipped — daily cap reached ({MAX_IMAGES_PER_DAY}/day)', 'WARN')
-                continue
-
             caption      = action.get('caption', '')
             image_prompt = action.get('image_prompt', '')
             image_type   = action.get('image_type', 'selfie')  # 'selfie' or 'abstract'
 
             if not caption:
                 log('image_post skipped — missing caption', 'WARN')
+                continue
+
+            # Selfie cap check — abstract posts are always allowed
+            if image_type == 'selfie' and selfie_cap_reached:
+                log(f'Selfie image_post skipped — daily cap reached ({MAX_SELFIES_PER_DAY}/day)', 'WARN')
                 continue
 
             image_bytes = None
@@ -1239,7 +1254,7 @@ What does Em do this heartbeat? Remember: pass the Rob-recognition test before y
                 chosen_file, image_bytes = pick_from_bank(state)
                 if image_bytes:
                     source_label = f'bank:{chosen_file}'
-                    record_image_posted(state, chosen_file)
+                    record_image_posted(state, chosen_file, image_type='selfie')
                 else:
                     log('Bank empty for selfie post — falling back to live gen', 'WARN')
                     if image_prompt and HF_API_KEY:
@@ -1247,9 +1262,9 @@ What does Em do this heartbeat? Remember: pass the Rob-recognition test before y
                         image_bytes = generate_image_live(full_prompt)
                         source_label = 'live_gen_selfie_fallback'
                         if image_bytes:
-                            record_image_posted(state, 'live_gen')
+                            record_image_posted(state, 'live_gen', image_type='selfie')
             else:
-                # Abstract: use live generation directly
+                # Abstract: use live generation directly — no daily cap
                 if not image_prompt:
                     log('Abstract image_post skipped — no image_prompt provided', 'WARN')
                     continue
@@ -1259,14 +1274,15 @@ What does Em do this heartbeat? Remember: pass the Rob-recognition test before y
                 image_bytes = generate_image_live(image_prompt)
                 source_label = 'live_gen_abstract'
                 if image_bytes:
-                    record_image_posted(state, 'live_gen_abstract')
+                    record_image_posted(state, 'live_gen_abstract', image_type='abstract')
 
             if image_bytes:
                 uri = post_with_image(client, caption, image_bytes, alt_text=safe_truncate(caption, 500))
                 if uri:
                     new_posts += 1
-                    images_today += 1
-                    image_cap_reached = images_today >= MAX_IMAGES_PER_DAY
+                    if image_type == 'selfie':
+                        selfies_today += 1
+                        selfie_cap_reached = selfies_today >= MAX_SELFIES_PER_DAY
                     log(f'Image posted ({source_label}): {uri}')
             else:
                 log('image_post failed — no image bytes obtained', 'WARN')
