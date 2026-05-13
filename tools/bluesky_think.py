@@ -575,7 +575,7 @@ def send_dm(client, target_did, text):
 
 def search_interesting_posts(client, topic, limit=8):
     try:
-tml        resp = client.app.bsky.feed.search_posts({'q': topic, 'limit': limit})
+        resp = client.app.bsky.feed.search_posts({'q': topic, 'limit': limit})
         posts = []
         for p in resp.posts:
             record = p.record
