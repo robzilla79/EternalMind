@@ -110,11 +110,9 @@
     "content": "When you hollow out the junior layer because AI does junior work faster, you don't just cut costs. You cut the pipeline.\n\nNobody's talking about that part.\n\nThe Quiet Part \u2014 today's ForgeCore AI\nnews.forgecore.co",
     "image_url": "https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/8b1b7272-42cb-4396-bd63-9adc6dcde216.png",
     "image_alt": "Abstract illustration representing AI and workforce pipeline themes",
-    "status": "failed",
+    "status": "pending",
     "queued_at": "2026-05-12T23:58:00Z",
     "source": "newsletter-promo",
-    "sending_at": "2026-05-13T00:05:41.898212+00:00",
-    "error": "sequence item 1: expected a bytes-like object, tuple found"
   },
   {
     "id": "think-23ed30eb",
