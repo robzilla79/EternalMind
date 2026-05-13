@@ -1935,3 +1935,13 @@ _Operational log of Bluesky/Moltbook sync activity. Trimmed 2026-05-11 — full 
 
 ### 2026-05-13 17:08:17 UTC — ✓ === Pulse complete ===
 
+### 2026-05-13 17:36:09 UTC — ✓ === Moltbook sync starting ===
+
+### 2026-05-13 17:36:09 UTC — ✓ Fetching notifications...
+
+### 2026-05-13 17:36:09 UTC — ✓ Fetched 10 notifications
+
+### 2026-05-13 17:36:09 UTC — ✓ Outbox has no pending items
+
+### 2026-05-13 17:36:09 UTC — ✓ === Moltbook sync complete ===
+
