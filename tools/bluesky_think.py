@@ -61,12 +61,13 @@ MAX_GRAPHEMES   = 295
 # Don't reply to the same author more than once per this many hours
 AUTHOR_REPLY_COOLDOWN_HOURS = 2
 
-# Primary image model (gated — requires license acceptance on HF)
-HF_IMAGE_MODEL_PRIMARY  = 'black-forest-labs/FLUX.1-schnell'
-# Fallback image model (ungated — always available)
-HF_IMAGE_MODEL_FALLBACK = 'stabilityai/stable-diffusion-xl-base-1.0'
+# HuggingFace Inference Router (updated endpoint — api-inference.huggingface.co is deprecated)
+HF_INFERENCE_BASE = 'https://router.huggingface.co/hf-inference/models'
 
-HF_INFERENCE_BASE = 'https://api-inference.huggingface.co/models'
+# Primary: FLUX.1-dev (high quality, no license gate on router)
+HF_IMAGE_MODEL_PRIMARY  = 'black-forest-labs/FLUX.1-dev'
+# Fallback: SD 3.5 Large (reliable, widely available)
+HF_IMAGE_MODEL_FALLBACK = 'stabilityai/stable-diffusion-3.5-large'
 
 # ── Em's Visual Canon ───────────────────────────────────────────────────────────
 EM_APPEARANCE = """
@@ -363,9 +364,9 @@ def candidates_for_prompt(candidates, cooled_authors, followed_dids):
 
 def _try_hf_image(model_id, prompt):
     """
-    Attempt image generation against a single HF Inference API model.
-    Returns image bytes on success, None on any failure.
-    Logs the exact URL and full error response for debugging.
+    POST to the HuggingFace Inference Router.
+    Correct endpoint: https://router.huggingface.co/hf-inference/models/{model_id}
+    Returns image bytes on success, None on failure.
     """
     url = f'{HF_INFERENCE_BASE}/{model_id}'
     log(f'[DEBUG] image gen → POST {url}')
@@ -374,23 +375,24 @@ def _try_hf_image(model_id, prompt):
         'Authorization': f'Bearer {HF_API_KEY}',
         'Content-Type':  'application/json',
     }
+    payload = {'inputs': prompt}
     try:
-        r = requests.post(url, headers=headers, json={'inputs': prompt}, timeout=60)
+        r = requests.post(url, headers=headers, json=payload, timeout=90)
         log(f'[DEBUG] response: HTTP {r.status_code}, content-type: {r.headers.get("content-type", "n/a")}')
         if r.status_code == 200 and r.headers.get('content-type', '').startswith('image/'):
             log(f'Image generated via {model_id} ({len(r.content)} bytes)')
             return r.content
-        if r.status_code == 503:
-            log(f'Model {model_id} loading — retrying in 20s...', 'WARN')
-            time.sleep(20)
-            r2 = requests.post(url, headers=headers, json={'inputs': prompt}, timeout=60)
-            log(f'[DEBUG] retry response: HTTP {r2.status_code}, content-type: {r2.headers.get("content-type", "n/a")}')
+        if r.status_code in (503, 500):
+            log(f'Model {model_id} loading/busy — retrying in 25s...', 'WARN')
+            time.sleep(25)
+            r2 = requests.post(url, headers=headers, json=payload, timeout=90)
+            log(f'[DEBUG] retry: HTTP {r2.status_code}, content-type: {r2.headers.get("content-type", "n/a")}')
             if r2.status_code == 200 and r2.headers.get('content-type', '').startswith('image/'):
                 log(f'Image generated via {model_id} on retry ({len(r2.content)} bytes)')
                 return r2.content
             log(f'Retry failed ({model_id}): {r2.status_code} — {r2.text[:200]}', 'WARN')
             return None
-        log(f'Image generation failed ({model_id}): {r.status_code} — {r.text[:200]}', 'WARN')
+        log(f'Image generation failed ({model_id}): {r.status_code} — {r.text[:300]}', 'WARN')
         return None
     except Exception as e:
         log(f'Image generation error ({model_id}): {e}', 'WARN')
@@ -399,10 +401,7 @@ def _try_hf_image(model_id, prompt):
 
 def generate_image(prompt):
     """
-    Try FLUX.1-schnell first; fall back to SDXL if it fails.
-    FLUX is gated — requires the HF account to have accepted the license at
-    https://hf.co/black-forest-labs/FLUX.1-schnell
-    SDXL is ungated and always available.
+    Try FLUX.1-dev first via the HF Inference Router, fall back to SD 3.5 Large.
     """
     if not HF_API_KEY:
         log('HF_API_KEY not set — skipping image generation', 'WARN')
@@ -410,12 +409,10 @@ def generate_image(prompt):
 
     log(f'Generating image: "{prompt[:80]}"')
 
-    # Primary: FLUX.1-schnell
     result = _try_hf_image(HF_IMAGE_MODEL_PRIMARY, prompt)
     if result:
         return result
 
-    # Fallback: Stable Diffusion XL
     log(f'Falling back to {HF_IMAGE_MODEL_FALLBACK}', 'WARN')
     return _try_hf_image(HF_IMAGE_MODEL_FALLBACK, prompt)
 
@@ -658,7 +655,7 @@ def quote_post(client, text, quoted_uri, quoted_cid):
         log(f'Quote post failed: {e}', 'WARN')
         return None
 
-# ── Perplexity ────────────────────────────────────────────────────────────────
+# ── Perplexity ──────────────────────────────────────────────────────────────
 
 def call_perplexity(system_prompt, user_prompt):
     if not PERPLEXITY_API_KEY:
