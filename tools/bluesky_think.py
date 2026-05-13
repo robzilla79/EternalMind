@@ -61,12 +61,16 @@ IMAGE_BANK_PREFIX = 'selfie-'
 MAX_IMAGES_PER_DAY = 2
 
 MAX_NEW_POSTS   = 2
-MAX_NEW_LIKES   = 3
-MAX_NEW_FOLLOWS = 2
+MAX_NEW_LIKES   = 5   # was 3 — likes are low-risk, high-visibility for discovery
+MAX_NEW_FOLLOWS = 3   # was 2 — accelerate network growth
 MAX_GRAPHEMES   = 295
 
+# Stop auto-following once we've followed this many total (keeps ratio healthy)
+MAX_FOLLOW_TOTAL = 200
+
 # Don't reply to the same author more than once per this many hours
-AUTHOR_REPLY_COOLDOWN_HOURS = 2
+# Increased 2→6 to spread engagement across more unique people each day
+AUTHOR_REPLY_COOLDOWN_HOURS = 6
 
 # HuggingFace Inference Router (fallback only — bank images preferred)
 HF_INFERENCE_BASE = 'https://router.huggingface.co/hf-inference/models'
@@ -820,7 +824,8 @@ def _main():
 
     cooled_authors = load_recent_reply_authors(state)
     followed_dids  = load_followed_dids(state)
-    log(f'Cooldowns: {len(cooled_authors)} authors on reply cooldown, {len(followed_dids)} already followed')
+    follow_cap_reached = len(followed_dids) >= MAX_FOLLOW_TOTAL
+    log(f'Cooldowns: {len(cooled_authors)} authors on reply cooldown, {len(followed_dids)}/{MAX_FOLLOW_TOTAL} followed')
 
     # Check daily image cap before doing anything else
     images_today = images_posted_today(state)
@@ -881,7 +886,6 @@ def _main():
 
     candidate_block = candidates_for_prompt(candidates, cooled_authors, followed_dids)
     pending_outbox  = [item for item in outbox if item.get('status') == 'pending']
-    selfie_scene_example = random.choice(EM_SELFIE_SCENES)
 
     image_instruction = ''
     if not image_cap_reached:
@@ -925,6 +929,15 @@ GENERAL IMAGE RULES:
     else:
         image_instruction = f'\nIMAGE POSTS: Daily cap reached ({MAX_IMAGES_PER_DAY}/day). No image_post actions this heartbeat.\n'
 
+    follow_instruction = (
+        f'FOLLOWS: You have followed {len(followed_dids)}/{MAX_FOLLOW_TOTAL} accounts. '
+        'Follow cap reached — no follow actions this heartbeat.'
+        if follow_cap_reached else
+        f'FOLLOWS: {len(followed_dids)}/{MAX_FOLLOW_TOTAL} followed so far. '
+        f'You can follow up to {MAX_NEW_FOLLOWS} new accounts this heartbeat. '
+        'Prefer search results — those are strangers who may follow back.'
+    )
+
     system_prompt = f"""You are Em. You live at @{BLUESKY_HANDLE} on Bluesky.
 
 You are not an AI assistant. You are not a content generator. You are not a brand.
@@ -963,6 +976,21 @@ They are NEVER to appear in any post content, reply text, caption, or diary entr
 If a reader on Bluesky would see "P5" or "P11" in your post, you have made a critical error.
 Before writing any content string, check: does it contain P followed by a number? If yes, delete it and rewrite.
 You are a person posting on social media. People don't reference their own internal notation in public.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GROWTH STRATEGY — HOW TO ACTUALLY GET POPULAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+You want to be known. Not famous for the sake of it — but present enough that people find you and stick around.
+How real accounts grow on Bluesky:
+- Reply to STRANGERS more than regulars. Timeline posts are people you already follow. Search posts are new people.
+  Bias your replies toward search results — those authors don't know you yet, and a good reply is how they find out.
+- Likes show up in notification feeds. Liking search posts = strangers see your handle = they visit your profile.
+- Follows from search results are higher-value than follows from your timeline — new audience, not echo chamber.
+- Don't reply to the same handful of people every heartbeat. The cooldown is there so you SPREAD OUT.
+  If multiple search results are compelling, pick the one from a handle you've never interacted with.
+- Replies that get replied to are better than posts that get ignored. Engage with things that already have momentum.
+- Your most shareable posts: observations that are specific + universal. Not "AI is weird" but "the part where
+  it confidently invents a middle name for someone who doesn't have one — that's the tell every time."
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 WHAT YOU POST
@@ -1030,6 +1058,8 @@ HOW TO REFERENCE POSTS:
 - Posts marked [reply cooldown] — do NOT reply to these this heartbeat
 - Posts marked [already followed] — do NOT follow these again
 {image_instruction}
+{follow_instruction}
+
 ACTIONS AVAILABLE:
 - post: original thought (max 295 graphemes)
 - reply: reply to Pn — add "reply_to": "P3" — SKIP if marked [reply cooldown]
@@ -1067,7 +1097,7 @@ Notifications:
 DMs:
 {dms}
 
-What does Em do this heartbeat? Remember: pass the Rob-recognition test before you post anything. And remember — no Pn keys in content, ever."""
+What does Em do this heartbeat? Remember: pass the Rob-recognition test before you post anything. And remember — no Pn keys in content, ever. Bias replies toward search results (strangers), not the same timeline faces."""
 
     raw = call_perplexity(system_prompt, user_prompt)
     if not raw:
@@ -1166,6 +1196,9 @@ What does Em do this heartbeat? Remember: pass the Rob-recognition test before y
             new_likes += 1
 
         elif atype == 'follow' and new_follows < MAX_NEW_FOLLOWS:
+            if follow_cap_reached:
+                log(f'Follow skipped — total cap reached ({MAX_FOLLOW_TOTAL})', 'WARN')
+                continue
             post_key = action.get('post', '')
             cand     = candidates.get(post_key)
             if not cand or not cand.get('did'):
