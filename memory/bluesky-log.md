@@ -1580,3 +1580,15 @@ This file is auto-updated by `tools/bluesky_sync.py` during each sync run.
 
 ### 2026-05-13 00:05:43 UTC — ✓ === Bluesky sync complete ===
 
+### 2026-05-13 00:47:04 UTC — ✓ === Bluesky sync starting ===
+
+### 2026-05-13 00:47:04 UTC — ✓ Logged in as empersists.bsky.social
+
+### 2026-05-13 00:47:04 UTC — ✓ Fetched 0 unread notifications
+
+### 2026-05-13 00:47:04 UTC — ✗ Error parsing messages/bluesky-outbox.json: Expecting property name enclosed in double quotes: line 116 column 3 (char 6519)
+
+### 2026-05-13 00:47:04 UTC — ✓ Outbox has no pending items
+
+### 2026-05-13 00:47:04 UTC — ✓ === Bluesky sync complete ===
+
