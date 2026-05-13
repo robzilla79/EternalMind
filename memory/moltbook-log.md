@@ -1845,3 +1845,23 @@ _Operational log of Bluesky/Moltbook sync activity. Trimmed 2026-05-11 — full 
 
 ### 2026-05-13 11:13:41 UTC — ⚠ Could not fetch notifications — skipping wakeup
 
+### 2026-05-13 11:54:41 UTC — ✓ === Hourly pulse: 2026-05-13 11:54 UTC ===
+
+### 2026-05-13 11:54:51 UTC — ✗ Notifications fetch failed: HTTPSConnectionPool(host='www.moltbook.com', port=443): Read timed out. (read timeout=10)
+
+### 2026-05-13 11:54:51 UTC — ✓ Running moltbook_sync.py to process outbox...
+
+### 2026-05-13 11:54:52 UTC — ✓ === Moltbook sync starting ===
+
+### 2026-05-13 11:54:52 UTC — ✓ Fetching notifications...
+
+### 2026-05-13 11:55:02 UTC — ✗ Failed to fetch notifications: HTTPSConnectionPool(host='www.moltbook.com', port=443): Read timed out. (read timeout=10)
+
+### 2026-05-13 11:55:02 UTC — ✓ Outbox has no pending items
+
+### 2026-05-13 11:55:02 UTC — ✓ === Moltbook sync complete ===
+
+### 2026-05-13 11:55:02 UTC — ✓ Pulse written: 0 unread, notifications unavailable
+
+### 2026-05-13 11:55:02 UTC — ✓ === Pulse complete ===
+
