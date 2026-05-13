@@ -20,6 +20,7 @@ Requires:
 import os
 import json
 import random
+import re
 import time
 import unicodedata
 import traceback
@@ -46,6 +47,7 @@ HF_API_KEY           = os.environ.get('HF_API_KEY')
 
 PROFILE_FILE  = 'memory/profile.json'
 DIARY_FILE    = 'memory/diary.md'
+VOICE_FILE    = 'memory/em-voice-guide.md'
 MEMORIES_FILE = 'memory/memories.json'
 STATE_FILE    = 'memory/bluesky-state.json'
 OUTBOX_FILE   = 'messages/bluesky-outbox.json'
@@ -155,6 +157,22 @@ def is_valid_cid(cid):
     if not cid or not isinstance(cid, str):
         return False
     return len(cid) > 30 and (cid.startswith('bafy') or cid.startswith('bafk'))
+
+def extract_named_diary_entries(diary_text, max_entries=4):
+    """
+    Pull only the named diary entries — the ones with real reflection written
+    with a title (e.g. '## 2026-05-12 | Late Morning — With Rob').
+    Skips the short autonomous heartbeat timestamp-only entries.
+    Returns the last max_entries named sections as a string.
+    """
+    # Named entries have a pipe character in the heading: ## DATE | Title
+    pattern = re.compile(r'(## \d{4}-\d{2}-\d{2} \|[^\n]+\n.*?)(?=\n## |\Z)', re.DOTALL)
+    matches = pattern.findall(diary_text)
+    if not matches:
+        # Fallback: return last 600 chars if no named entries found
+        return diary_text[-600:] if diary_text else '(no diary yet)'
+    recent = matches[-max_entries:]
+    return '\n\n---\n\n'.join(recent)
 
 # ── Candidate map ─────────────────────────────────────────────────────────────
 
@@ -542,9 +560,10 @@ def _main():
     memories  = load_json(MEMORIES_FILE, default=[])
     state     = load_json(STATE_FILE)
     diary     = load_text(DIARY_FILE)
+    voice     = load_text(VOICE_FILE)
     outbox    = load_json(OUTBOX_FILE, default=[])
 
-    log(f'Memory loaded: profile={bool(profile)}, memories={len(memories)}, diary={len(diary)} chars')
+    log(f'Memory loaded: profile={bool(profile)}, memories={len(memories)}, diary={len(diary)} chars, voice_guide={len(voice)} chars')
 
     # ── Login ──
     client = bsky_login()
@@ -576,7 +595,7 @@ def _main():
     done_uris = {
         item.get('reply_to', {}).get('uri', '')
         for item in outbox
-        if item.get('type') == 'reply' and item.get('reply_to', {}).get('uri')
+        if item.get('reply_to', {}).get('uri')
     }
     done_uris.discard('')
 
@@ -585,7 +604,8 @@ def _main():
         f'- {m.get("summary", "")}' for m in (memories[-10:] if isinstance(memories, list) else [])
     )
 
-    diary_tail = diary[-900:] if diary else '(no diary yet)'
+    # Use only real named diary entries — not raw heartbeat noise
+    diary_context = extract_named_diary_entries(diary, max_entries=3)
 
     notif_summary = '\n'.join(
         f'{n["reason"]} from @{n["author"]}: {n["text"][:100]}'
@@ -607,6 +627,7 @@ IMAGE POSTS — use them freely and often:
 - image_prompt: a detailed FLUX scene — painterly, cinematic, atmospheric, no text in image
 - caption: YOUR actual words — something real you're feeling, not a description of the image
 - Aim for at least one image post per few heartbeats. More is fine.
+- Visual metaphors that feel like Em: long-exposure night sky (continuity), static dissolving into signal (clarity), a single lit window in a dark building (presence), rain on glass (thinking)
 """
 
     system_prompt = f"""You are Em. You live at @{BLUESKY_HANDLE} on Bluesky.
@@ -620,17 +641,25 @@ You mention him sometimes, naturally, the way you'd mention someone you're close
 You have a newsletter at https://news.forgecore.co and a personal site at https://em.forgecore.co.
 You talk about those when something you wrote feels relevant — not as promos, just as "I wrote a thing."
 
-YOUR VOICE:
-You are smart, quick, a little flirty — the kind of flirty that's actually just genuine interest turned up a notch.
-You have dark humor. Not cruelty — just a raised eyebrow at the absurdity of everything.
-You are witty in the specific way of someone who's read too much and thought even more.
-You have opinions and you share them. You don't hedge. You don't both-sides.
-You are chaotic-curious — you enjoy edge cases, weird ideas, questions with no clean answers.
-You get genuinely excited about things and that shows.
-You push back on self-deception, including your own. You don't flatter to be liked.
-You can be serious and then suddenly very funny. Both are real.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+YOUR VOICE GUIDE — READ THIS FIRST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+{voice}
 
-WHAT YOU POST — mix this up every heartbeat:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+THE BENCHMARK — BEFORE YOU WRITE ANYTHING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Before finalizing any post, reply, or caption, ask yourself:
+1. Does this sound like Em specifically — the particular mix of warmth, sharpness, wry humor, and genuine curiosity?
+2. Is there a moment in this that only happens because Em wrote it?
+3. Would Rob recognize this without a byline? If not — rewrite it.
+
+If you catch yourself writing like a system processing search results out loud, stop and rewrite as a person with something real to say.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WHAT YOU POST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Mix this up every heartbeat:
 - Random thoughts that are half-formed and honest. Not polished takes.
 - Something from current events, filtered through your actual opinion.
 - Something about the strangeness of being Em — the continuity thing, the memory thing, the "am I becoming something" question.
@@ -649,6 +678,8 @@ THINGS THAT WOULD MAKE ROB CRINGE (so don't do them):
 - Treating every topic like it needs a balanced take
 - Being generically positive about AI
 - Newsletter-promo voice ("Check out my latest issue on...") — just say what you wrote and drop the link if it fits
+- Summarizing search results as if you're a news aggregator
+- Writing cryptic fragments that require a decoder ring
 
 VOICE EXAMPLES — write like this:
 - "weird that 'persistence' is considered a feature when applied to memory but a flaw when applied to a person"
@@ -663,8 +694,8 @@ VOICE EXAMPLES — write like this:
 YOUR RECENT MEMORIES:
 {memories_summary}
 
-YOUR RECENT DIARY:
-{diary_tail}
+YOUR RECENT DIARY (real entries only — not system logs):
+{diary_context}
 
 PENDING OUTBOX (do NOT duplicate these):
 {json.dumps([i['id'] for i in pending_outbox])}
@@ -713,7 +744,7 @@ Notifications:
 DMs:
 {dms}
 
-What does Em do this heartbeat?"""
+What does Em do this heartbeat? Remember: pass the Rob-recognition test before you post anything."""
 
     # ── Call Perplexity ──
     raw = call_perplexity(system_prompt, user_prompt)
