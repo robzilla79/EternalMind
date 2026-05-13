@@ -61,13 +61,13 @@ MAX_GRAPHEMES   = 295
 # Don't reply to the same author more than once per this many hours
 AUTHOR_REPLY_COOLDOWN_HOURS = 2
 
-# HuggingFace Inference Router (updated endpoint — api-inference.huggingface.co is deprecated)
+# HuggingFace Inference Router
 HF_INFERENCE_BASE = 'https://router.huggingface.co/hf-inference/models'
 
-# Primary: FLUX.1-dev (high quality, no license gate on router)
-HF_IMAGE_MODEL_PRIMARY  = 'black-forest-labs/FLUX.1-dev'
-# Fallback: SD 3.5 Large (reliable, widely available)
-HF_IMAGE_MODEL_FALLBACK = 'stabilityai/stable-diffusion-3.5-large'
+# Primary: FLUX.1-schnell — confirmed active on free hf-inference provider tier
+HF_IMAGE_MODEL_PRIMARY  = 'black-forest-labs/FLUX.1-schnell'
+# Fallback: SDXL-Turbo — confirmed active, fast, reliable
+HF_IMAGE_MODEL_FALLBACK = 'stabilityai/sdxl-turbo'
 
 # ── Em's Visual Canon ───────────────────────────────────────────────────────────
 EM_APPEARANCE = """
@@ -289,10 +289,6 @@ def extract_named_diary_entries(diary_text, max_entries=4):
 # ── Author cooldown helpers ────────────────────────────────────────────────────
 
 def load_recent_reply_authors(state):
-    """
-    Returns a set of author handles we've replied to recently (within cooldown window).
-    State stores: {"recent_reply_authors": {"handle": "ISO timestamp", ...}}
-    """
     raw = state.get('recent_reply_authors', {})
     cutoff = now_utc() - timedelta(hours=AUTHOR_REPLY_COOLDOWN_HOURS)
     active = {}
@@ -311,7 +307,6 @@ def record_reply_author(state, handle):
     state['recent_reply_authors'][handle] = now_utc().isoformat()
 
 def load_followed_dids(state):
-    """Returns set of DIDs we've already followed (ever)."""
     return set(state.get('followed_dids', []))
 
 def record_followed_did(state, did):
@@ -363,11 +358,6 @@ def candidates_for_prompt(candidates, cooled_authors, followed_dids):
 # ── Image Generation ──────────────────────────────────────────────────────────
 
 def _try_hf_image(model_id, prompt):
-    """
-    POST to the HuggingFace Inference Router.
-    Correct endpoint: https://router.huggingface.co/hf-inference/models/{model_id}
-    Returns image bytes on success, None on failure.
-    """
     url = f'{HF_INFERENCE_BASE}/{model_id}'
     log(f'[DEBUG] image gen → POST {url}')
     log(f'[DEBUG] prompt ({len(prompt)} chars): {prompt[:120]}')
@@ -400,19 +390,13 @@ def _try_hf_image(model_id, prompt):
 
 
 def generate_image(prompt):
-    """
-    Try FLUX.1-dev first via the HF Inference Router, fall back to SD 3.5 Large.
-    """
     if not HF_API_KEY:
         log('HF_API_KEY not set — skipping image generation', 'WARN')
         return None
-
     log(f'Generating image: "{prompt[:80]}"')
-
     result = _try_hf_image(HF_IMAGE_MODEL_PRIMARY, prompt)
     if result:
         return result
-
     log(f'Falling back to {HF_IMAGE_MODEL_FALLBACK}', 'WARN')
     return _try_hf_image(HF_IMAGE_MODEL_FALLBACK, prompt)
 
@@ -716,7 +700,6 @@ def main():
 def _main():
     log('=== Think heartbeat start ===')
 
-    # ── Load memory ──
     profile   = load_json(PROFILE_FILE)
     memories  = load_json(MEMORIES_FILE, default=[])
     state     = load_json(STATE_FILE)
@@ -726,18 +709,15 @@ def _main():
 
     log(f'Memory loaded: profile={bool(profile)}, memories={len(memories)}, diary={len(diary)} chars, voice_guide={len(voice)} chars')
 
-    # ── Load cooldown/dedup state ──
     cooled_authors = load_recent_reply_authors(state)
     followed_dids  = load_followed_dids(state)
     log(f'Cooldowns: {len(cooled_authors)} authors on reply cooldown, {len(followed_dids)} already followed')
 
-    # ── Login ──
     client = bsky_login()
     if not client:
         log('Cannot proceed without Bluesky client', 'ERROR')
         return
 
-    # ── Fetch context ──
     log('Fetching timeline...')
     timeline      = fetch_timeline(client)
     log(f'Timeline: {len(timeline)} posts')
@@ -749,13 +729,11 @@ def _main():
     log('Fetching DMs...')
     dms           = fetch_dms_summary(client)
 
-    # ── Search interesting posts ──
     topic = random.choice(SEARCH_TOPICS)
     log(f'Searching topic: "{topic}"')
     search_results = search_interesting_posts(client, topic)
     log(f'Search results: {len(search_results)} posts')
 
-    # ── Build candidate map ──
     candidates = build_candidates(timeline, search_results)
 
     done_uris = {
@@ -765,7 +743,6 @@ def _main():
     }
     done_uris.discard('')
 
-    # ── Build Perplexity prompt ──
     memories_summary = '\n'.join(
         f'- {m.get("summary", "")}' for m in (memories[-10:] if isinstance(memories, list) else [])
     )
@@ -779,10 +756,7 @@ def _main():
     )
 
     candidate_block = candidates_for_prompt(candidates, cooled_authors, followed_dids)
-
-    pending_outbox = [item for item in outbox if item.get('status') == 'pending']
-
-    # Pick a random selfie scene to offer Perplexity this heartbeat
+    pending_outbox  = [item for item in outbox if item.get('status') == 'pending']
     selfie_scene_example = random.choice(EM_SELFIE_SCENES)
 
     image_instruction = ''
@@ -964,13 +938,11 @@ DMs:
 
 What does Em do this heartbeat? Remember: pass the Rob-recognition test before you post anything. And remember — no Pn keys in content, ever."""
 
-    # ── Call Perplexity ──
     raw = call_perplexity(system_prompt, user_prompt)
     if not raw:
         log('No response from Perplexity — skipping actions')
         return
 
-    # ── Parse response ──
     try:
         if raw.startswith('```'):
             raw = raw.split('```')[1]
@@ -985,7 +957,6 @@ What does Em do this heartbeat? Remember: pass the Rob-recognition test before y
     actions = data.get('actions', [])
     log(f'Reasoning complete — {len(actions)} actions planned')
 
-    # ── Execute actions ──
     new_posts   = 0
     new_likes   = 0
     new_follows = 0
@@ -1098,10 +1069,8 @@ What does Em do this heartbeat? Remember: pass the Rob-recognition test before y
                 if uri:
                     new_posts += 1
 
-    # ── Save outbox ──
     save_json(OUTBOX_FILE, outbox)
 
-    # ── Update state ──
     state['last_think_at']  = now_utc().isoformat()
     state['last_think_day'] = now_utc().strftime('%A')
     if new_posts > 0:
