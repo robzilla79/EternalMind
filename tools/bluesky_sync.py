@@ -19,6 +19,8 @@ Outbox item schema:
     "id": "unique-string",
     "type": "post" | "reply" | "image_post",
     "content": "text of the post",
+    "image_url": "https://... (optional, for image_post type)",
+    "image_alt": "alt text for image (optional)",
     "reply_to": { "uri": "at://...", "cid": "bafy..." },
     "root":     { "uri": "at://...", "cid": "bafy..." },
     "status": "pending" | "sending" | "done" | "failed" | "abandoned",
@@ -38,6 +40,7 @@ import os
 import json
 import time
 import unicodedata
+import requests
 from datetime import datetime, timezone, timedelta
 
 try:
@@ -166,16 +169,32 @@ def resolve_post_refs(client, uri):
         return None, None
 
 
+def fetch_image_blob(client, image_url, alt_text=''):
+    """
+    Download an image from a URL and upload it to Bluesky as a blob.
+    Returns the blob ref, or None on failure.
+    """
+    try:
+        log(f'Fetching image: {image_url[:80]}')
+        r = requests.get(image_url, timeout=15)
+        r.raise_for_status()
+        content_type = r.headers.get('Content-Type', 'image/jpeg').split(';')[0].strip()
+        blob_resp = client.upload_blob(r.content)
+        log(f'Uploaded image blob: {str(blob_resp.blob.ref)[:40]}')
+        return blob_resp.blob
+    except Exception as e:
+        log(f'Failed to fetch/upload image from {image_url[:80]}: {e}', 'ERROR')
+        return None
+
+
 # ── Pre-flight: recover crashed sends & expire stale items ────────────────────
 
 def preflight_outbox(outbox):
     """
     Run before processing:
     1. Items stuck in 'sending' beyond SENDING_TIMEOUT_HOURS → reset to 'pending'
-       (crash recovery — the API call never completed or the process was killed).
     2. Items in 'pending' older than MAX_ITEM_AGE_HOURS → 'abandoned'
-       (prevents endless retry of irrelevant or broken items).
-    3. Items with unrecognised types → 'abandoned' immediately with a clear reason.
+    3. Items with unrecognised types → 'abandoned' immediately.
     Returns True if any item was mutated (caller should save).
     """
     now     = datetime.now(timezone.utc)
@@ -185,8 +204,6 @@ def preflight_outbox(outbox):
         status = item.get('status')
         itype  = item.get('type', '')
 
-        # FIX 1: guard unrecognised types — abandon immediately so they don't
-        # silently eat a loop iteration and leave the outbox in a confused state
         if status == 'pending' and itype not in KNOWN_TYPES:
             log(f"Abandoning {item.get('id')} — unknown type {itype!r}", 'WARN')
             item['status'] = 'abandoned'
@@ -194,7 +211,6 @@ def preflight_outbox(outbox):
             changed = True
             continue
 
-        # FIX 3a: crash recovery — 'sending' items that have been stuck too long
         if status == 'sending':
             sending_since = parse_iso(item.get('sending_at') or item.get('queued_at'))
             if sending_since and (now - sending_since) > timedelta(hours=SENDING_TIMEOUT_HOURS):
@@ -203,7 +219,6 @@ def preflight_outbox(outbox):
                 item.pop('sending_at', None)
                 changed = True
 
-        # FIX 2: age-based abandonment for items that have been pending too long
         if status == 'pending':
             queued_at = parse_iso(item.get('queued_at'))
             if queued_at and (now - queued_at) > timedelta(hours=MAX_ITEM_AGE_HOURS):
@@ -252,7 +267,6 @@ def fetch_notifications(client):
 def process_outbox(client):
     outbox = load_json(OUTBOX_FILE, [])
 
-    # Pre-flight: crash recovery + age expiry + unknown-type guard
     if preflight_outbox(outbox):
         save_json(OUTBOX_FILE, outbox)
 
@@ -272,7 +286,6 @@ def process_outbox(client):
             log(f'Waiting {RATE_LIMIT_SECONDS}s before next send...')
             time.sleep(RATE_LIMIT_SECONDS)
 
-        # ── Grapheme-safe truncation ──────────────────────────────────────────
         raw_text = item.get('content', '')
         text     = safe_truncate(raw_text)
         if text != raw_text:
@@ -280,10 +293,6 @@ def process_outbox(client):
 
         itype = item.get('type', 'post')
 
-        # FIX 3b: mark as 'sending' and persist BEFORE the API call.
-        # If the process is killed after the API call succeeds but before we
-        # write 'done', the item will be stuck in 'sending' and recovered by
-        # preflight_outbox on the next run rather than re-sent as a duplicate.
         item['status']     = 'sending'
         item['sending_at'] = datetime.now(timezone.utc).isoformat()
         save_json(OUTBOX_FILE, outbox)
@@ -292,6 +301,31 @@ def process_outbox(client):
             if itype == 'post':
                 log(f'Posting: {text[:60]}...')
                 resp = client.send_post(text=text)
+                item['status']    = 'done'
+                item['posted_at'] = datetime.now(timezone.utc).isoformat()
+                item['uri']       = resp.uri
+                item['cid']       = resp.cid
+                log(f'Posted: {resp.uri}')
+                sent_count += 1
+
+            elif itype == 'image_post':
+                image_url = item.get('image_url')
+                if not image_url:
+                    log(f"image_post {item.get('id')} has no image_url — posting text-only", 'WARN')
+                    resp = client.send_post(text=text)
+                else:
+                    alt_text = item.get('image_alt', '')
+                    blob = fetch_image_blob(client, image_url, alt_text)
+                    if blob:
+                        log(f'Posting image_post: {text[:60]}...')
+                        resp = client.send_image(
+                            text=text,
+                            image=blob,
+                            image_alt=alt_text
+                        )
+                    else:
+                        log(f"Image upload failed for {item.get('id')} — posting text-only", 'WARN')
+                        resp = client.send_post(text=text)
                 item['status']    = 'done'
                 item['posted_at'] = datetime.now(timezone.utc).isoformat()
                 item['uri']       = resp.uri
@@ -310,7 +344,6 @@ def process_outbox(client):
                     save_json(OUTBOX_FILE, outbox)
                     continue
 
-                # Re-fetch live refs to guarantee valid CID
                 live_uri, live_cid = resolve_post_refs(client, reply_to['uri'])
                 if not live_uri or not live_cid:
                     log(f"Could not resolve parent for {item['id']} — abandoning", 'WARN')
@@ -319,7 +352,6 @@ def process_outbox(client):
                     save_json(OUTBOX_FILE, outbox)
                     continue
 
-                # Also resolve root (may be same post for direct replies)
                 root_uri = root.get('uri', live_uri) if root else live_uri
                 if root_uri == reply_to['uri']:
                     root_uri, root_cid = live_uri, live_cid
@@ -347,17 +379,7 @@ def process_outbox(client):
                 log(f'Reply posted: {resp.uri}')
                 sent_count += 1
 
-            elif itype == 'image_post':
-                # image_post items are generated and sent inline by bluesky_think.py.
-                # If one somehow lands in the outbox (e.g. future queuing path),
-                # we don't have image bytes here — abandon cleanly rather than
-                # silently skipping.
-                log(f"image_post {item.get('id')} reached sync — cannot re-send image bytes; abandoning", 'WARN')
-                item['status'] = 'abandoned'
-                item['error']  = 'image_post must be sent inline by bluesky_think.py; bytes not available here'
-
             else:
-                # Shouldn't reach here after preflight, but belt-and-suspenders
                 log(f"Unknown type {itype!r} for {item.get('id')} — abandoning", 'WARN')
                 item['status'] = 'abandoned'
                 item['error']  = f'Unknown type: {itype!r}'
