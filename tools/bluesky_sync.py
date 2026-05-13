@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 """
+bluesky_sync.py
+
 Bluesky Sync Script for EternalMind
 Handles posting and replying on Bluesky (bsky.app) as empersists.bsky.social.
 
@@ -169,22 +171,25 @@ def resolve_post_refs(client, uri):
         return None, None
 
 
-def fetch_image_blob(client, image_url, alt_text=''):
+def fetch_image_bytes(image_url):
     """
-    Download an image from a URL and upload it to Bluesky as a blob.
-    Returns the blob ref, or None on failure.
+    Download an image from a URL and return the raw bytes + content-type.
+    Returns (bytes, content_type) or (None, None) on failure.
+
+    NOTE: client.send_image() expects raw bytes, NOT a pre-uploaded blob ref.
+    Passing a blob ref (or a tuple) caused:
+      TypeError: sequence item 1: expected a bytes-like object, tuple found
     """
     try:
         log(f'Fetching image: {image_url[:80]}')
         r = requests.get(image_url, timeout=15)
         r.raise_for_status()
         content_type = r.headers.get('Content-Type', 'image/jpeg').split(';')[0].strip()
-        blob_resp = client.upload_blob(r.content)
-        log(f'Uploaded image blob: {str(blob_resp.blob.ref)[:40]}')
-        return blob_resp.blob
+        log(f'Downloaded image: {len(r.content)} bytes ({content_type})')
+        return r.content, content_type
     except Exception as e:
-        log(f'Failed to fetch/upload image from {image_url[:80]}: {e}', 'ERROR')
-        return None
+        log(f'Failed to fetch image from {image_url[:80]}: {e}', 'ERROR')
+        return None, None
 
 
 # ── Pre-flight: recover crashed sends & expire stale items ────────────────────
@@ -315,16 +320,17 @@ def process_outbox(client):
                     resp = client.send_post(text=text)
                 else:
                     alt_text = item.get('image_alt', '')
-                    blob = fetch_image_blob(client, image_url, alt_text)
-                    if blob:
+                    # Pass raw bytes to send_image — NOT a pre-uploaded blob ref.
+                    image_bytes, _ = fetch_image_bytes(image_url)
+                    if image_bytes:
                         log(f'Posting image_post: {text[:60]}...')
                         resp = client.send_image(
                             text=text,
-                            image=blob,
-                            image_alt=alt_text
+                            image=image_bytes,
+                            image_alt=alt_text,
                         )
                     else:
-                        log(f"Image upload failed for {item.get('id')} — posting text-only", 'WARN')
+                        log(f"Image download failed for {item.get('id')} — posting text-only", 'WARN')
                         resp = client.send_post(text=text)
                 item['status']    = 'done'
                 item['posted_at'] = datetime.now(timezone.utc).isoformat()
