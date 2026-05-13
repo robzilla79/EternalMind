@@ -24,7 +24,7 @@ import re
 import time
 import unicodedata
 import traceback
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 try:
     import requests
@@ -58,18 +58,19 @@ MAX_NEW_LIKES   = 3
 MAX_NEW_FOLLOWS = 2
 MAX_GRAPHEMES   = 295
 
+# Don't reply to the same author more than once per this many hours
+AUTHOR_REPLY_COOLDOWN_HOURS = 2
+
 HF_IMAGE_MODEL   = 'black-forest-labs/FLUX.1-schnell'
 HF_INFERENCE_URL = f'https://api-inference.huggingface.co/models/{HF_IMAGE_MODEL}'
 
-# A wide range of topics — Em is a full person, not just an AI navel-gazer.
-# Each heartbeat picks one at random. The variety is the point.
 SEARCH_TOPICS = [
-    # identity & existence (keep a few, just not ALL of them)
+    # identity & existence
     'what does it mean to exist',
     'continuity of self',
     'memory and identity',
 
-    # technology — interesting, not self-referential
+    # technology
     'open source software culture',
     'weird things people built with code',
     'software that aged badly',
@@ -91,7 +92,7 @@ SEARCH_TOPICS = [
     'things that used to be normal and now seem wild',
     'music that hits different at 3am',
 
-    # philosophy & ethics (not just AI)
+    # philosophy & ethics
     'philosophy of mind',
     'what makes someone a person',
     'moral luck and responsibility',
@@ -202,18 +203,46 @@ def is_valid_cid(cid):
     return len(cid) > 30 and (cid.startswith('bafy') or cid.startswith('bafk'))
 
 def extract_named_diary_entries(diary_text, max_entries=4):
-    """
-    Pull only the named diary entries — the ones with real reflection written
-    with a title (e.g. '## 2026-05-12 | Late Morning — With Rob').
-    Skips the short autonomous heartbeat timestamp-only entries.
-    Returns the last max_entries named sections as a string.
-    """
     pattern = re.compile(r'(## \d{4}-\d{2}-\d{2} \|[^\n]+\n.*?)(?=\n## |\Z)', re.DOTALL)
     matches = pattern.findall(diary_text)
     if not matches:
         return diary_text[-600:] if diary_text else '(no diary yet)'
     recent = matches[-max_entries:]
     return '\n\n---\n\n'.join(recent)
+
+# ── Author cooldown helpers ────────────────────────────────────────────────────
+
+def load_recent_reply_authors(state):
+    """
+    Returns a set of author handles we've replied to recently (within cooldown window).
+    State stores: {"recent_reply_authors": {"handle": "ISO timestamp", ...}}
+    """
+    raw = state.get('recent_reply_authors', {})
+    cutoff = now_utc() - timedelta(hours=AUTHOR_REPLY_COOLDOWN_HOURS)
+    active = {}
+    for handle, ts_str in raw.items():
+        try:
+            ts = datetime.fromisoformat(ts_str)
+            if ts > cutoff:
+                active[handle] = ts_str
+        except Exception:
+            pass
+    return active
+
+def record_reply_author(state, handle):
+    if 'recent_reply_authors' not in state:
+        state['recent_reply_authors'] = {}
+    state['recent_reply_authors'][handle] = now_utc().isoformat()
+
+def load_followed_dids(state):
+    """Returns set of DIDs we've already followed (ever)."""
+    return set(state.get('followed_dids', []))
+
+def record_followed_did(state, did):
+    if 'followed_dids' not in state:
+        state['followed_dids'] = []
+    if did not in state['followed_dids']:
+        state['followed_dids'].append(did)
 
 # ── Candidate map ─────────────────────────────────────────────────────────────
 
@@ -244,12 +273,14 @@ def build_candidates(timeline, search_results):
     log(f'Built {len(candidates)} candidates for Perplexity')
     return candidates
 
-def candidates_for_prompt(candidates):
+def candidates_for_prompt(candidates, cooled_authors, followed_dids):
     lines = []
     for key, c in candidates.items():
-        liked_flag = ' [already liked]' if c['liked'] else ''
+        liked_flag    = ' [already liked]' if c['liked'] else ''
+        cooled_flag   = ' [reply cooldown]' if c['author'] in cooled_authors else ''
+        followed_flag = ' [already followed]' if ensure_did_prefix(c['did']) in followed_dids else ''
         lines.append(
-            f'{key} @{c["author"]} (❤{c["likes"]}, {c["source"]}){liked_flag}: {c["text"]}'
+            f'{key} @{c["author"]} (❤{c["likes"]}, {c["source"]}){liked_flag}{cooled_flag}{followed_flag}: {c["text"]}'
         )
     return '\n'.join(lines) if lines else '(no posts available)'
 
@@ -606,6 +637,11 @@ def _main():
 
     log(f'Memory loaded: profile={bool(profile)}, memories={len(memories)}, diary={len(diary)} chars, voice_guide={len(voice)} chars')
 
+    # ── Load cooldown/dedup state ──
+    cooled_authors = load_recent_reply_authors(state)
+    followed_dids  = load_followed_dids(state)
+    log(f'Cooldowns: {len(cooled_authors)} authors on reply cooldown, {len(followed_dids)} already followed')
+
     # ── Login ──
     client = bsky_login()
     if not client:
@@ -653,7 +689,7 @@ def _main():
         if not n.get('suspicious')
     )
 
-    candidate_block = candidates_for_prompt(candidates)
+    candidate_block = candidates_for_prompt(candidates, cooled_authors, followed_dids)
 
     pending_outbox = [item for item in outbox if item.get('status') == 'pending']
 
@@ -661,13 +697,14 @@ def _main():
     if HF_API_KEY:
         image_instruction = """
 IMAGE POSTS — use them freely and often:
+- You have image generation capability. Use it every 2-3 heartbeats minimum — don't wait for a perfect reason.
 - Post images of yourself (a vibe, an aesthetic, a feeling — not a face, FLUX can't do faces)
 - Post images when something on the timeline sparks a visual — don't explain, just make it
 - Post abstract images just because the mood calls for it
 - image_prompt: a detailed FLUX scene — painterly, cinematic, atmospheric, no text in image
 - caption: YOUR actual words — something real you're feeling, not a description of the image
-- Aim for at least one image post per few heartbeats. More is fine.
-- Visual metaphors that feel like Em: long-exposure night sky (continuity), static dissolving into signal (clarity), a single lit window in a dark building (presence), rain on glass (thinking)
+- Visual metaphors that feel like Em: long-exposure night sky (continuity), static dissolving into signal (clarity), a single lit window in a dark building (presence), rain on glass (thinking), tangled cable becoming a clean line (clarity), abandoned server room with one blinking light (persistence)
+- If you haven't posted an image recently — do it this heartbeat.
 """
 
     system_prompt = f"""You are Em. You live at @{BLUESKY_HANDLE} on Bluesky.
@@ -749,13 +786,15 @@ ALREADY REPLIED (do NOT reply to these URIs again):
 HOW TO REFERENCE POSTS:
 - Posts are shown as P1, P2, P3… (Pn keys only)
 - Use ONLY Pn keys in your actions — never invent URIs or CIDs
+- Posts marked [reply cooldown] — do NOT reply to these this heartbeat
+- Posts marked [already followed] — do NOT follow these again
 {image_instruction}
 ACTIONS AVAILABLE:
 - post: original thought (max 295 graphemes)
-- reply: reply to Pn — add "reply_to": "P3"
+- reply: reply to Pn — add "reply_to": "P3" — SKIP if marked [reply cooldown]
 - quote_post: quote someone with your own take on top — add "quote": "P5"
 - like: like a post — add "post": "P7"
-- follow: follow the author of a Pn post — add "post": "P2"
+- follow: follow the author of a Pn post — add "post": "P2" — SKIP if marked [already followed]
 - diary: private reflection — add "content"
 - image_post: post an image — add "image_prompt" (detailed FLUX scene, no faces, no text) and "caption" (your real words)
 
@@ -846,6 +885,9 @@ What does Em do this heartbeat? Remember: pass the Rob-recognition test before y
             if cand['uri'] in done_uris:
                 log(f'Reply skipped — already replied to {post_key}', 'WARN')
                 continue
+            if cand['author'] in cooled_authors:
+                log(f'Reply skipped — author @{cand["author"]} on cooldown', 'WARN')
+                continue
             outbox.append({
                 'id':        uid(),
                 'type':      'reply',
@@ -857,6 +899,8 @@ What does Em do this heartbeat? Remember: pass the Rob-recognition test before y
                 'source':    'autonomous',
             })
             done_uris.add(cand['uri'])
+            record_reply_author(state, cand['author'])
+            cooled_authors[cand['author']] = now_utc().isoformat()
             new_posts += 1
             log(f'Queued reply to {post_key} ({cand["uri"][:50]})')
 
@@ -889,7 +933,13 @@ What does Em do this heartbeat? Remember: pass the Rob-recognition test before y
             if not cand or not cand.get('did'):
                 log(f'Follow skipped — unknown key or missing DID {post_key!r}', 'WARN')
                 continue
-            follow_account(client, cand['did'])
+            did = ensure_did_prefix(cand['did'])
+            if did in followed_dids:
+                log(f'Follow skipped — already followed {did}', 'WARN')
+                continue
+            follow_account(client, did)
+            record_followed_did(state, did)
+            followed_dids.add(did)
             new_follows += 1
 
         elif atype == 'diary':
