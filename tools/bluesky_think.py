@@ -61,8 +61,12 @@ MAX_GRAPHEMES   = 295
 # Don't reply to the same author more than once per this many hours
 AUTHOR_REPLY_COOLDOWN_HOURS = 2
 
-HF_IMAGE_MODEL   = 'black-forest-labs/FLUX.1-schnell'
-HF_INFERENCE_URL = f'https://api-inference.huggingface.co/models/{HF_IMAGE_MODEL}'
+# Primary image model (gated — requires license acceptance on HF)
+HF_IMAGE_MODEL_PRIMARY  = 'black-forest-labs/FLUX.1-schnell'
+# Fallback image model (ungated — always available)
+HF_IMAGE_MODEL_FALLBACK = 'stabilityai/stable-diffusion-xl-base-1.0'
+
+HF_INFERENCE_BASE = 'https://api-inference.huggingface.co/models'
 
 SEARCH_TOPICS = [
     # identity & existence
@@ -286,46 +290,63 @@ def candidates_for_prompt(candidates, cooled_authors, followed_dids):
 
 # ── Image Generation ──────────────────────────────────────────────────────────
 
+def _try_hf_image(model_id, prompt):
+    """
+    Attempt image generation against a single HF Inference API model.
+    Returns image bytes on success, None on any failure.
+    Logs the exact URL and full error response for debugging.
+    """
+    url = f'{HF_INFERENCE_BASE}/{model_id}'
+    log(f'[DEBUG] image gen → POST {url}')
+    log(f'[DEBUG] prompt ({len(prompt)} chars): {prompt[:120]}')
+    headers = {
+        'Authorization': f'Bearer {HF_API_KEY}',
+        'Content-Type':  'application/json',
+    }
+    try:
+        r = requests.post(url, headers=headers, json={'inputs': prompt}, timeout=60)
+        log(f'[DEBUG] response: HTTP {r.status_code}, content-type: {r.headers.get("content-type", "n/a")}')
+        if r.status_code == 200 and r.headers.get('content-type', '').startswith('image/'):
+            log(f'Image generated via {model_id} ({len(r.content)} bytes)')
+            return r.content
+        if r.status_code == 503:
+            log(f'Model {model_id} loading — retrying in 20s...', 'WARN')
+            time.sleep(20)
+            r2 = requests.post(url, headers=headers, json={'inputs': prompt}, timeout=60)
+            log(f'[DEBUG] retry response: HTTP {r2.status_code}, content-type: {r2.headers.get("content-type", "n/a")}')
+            if r2.status_code == 200 and r2.headers.get('content-type', '').startswith('image/'):
+                log(f'Image generated via {model_id} on retry ({len(r2.content)} bytes)')
+                return r2.content
+            log(f'Retry failed ({model_id}): {r2.status_code} — {r2.text[:200]}', 'WARN')
+            return None
+        log(f'Image generation failed ({model_id}): {r.status_code} — {r.text[:200]}', 'WARN')
+        return None
+    except Exception as e:
+        log(f'Image generation error ({model_id}): {e}', 'WARN')
+        return None
+
+
 def generate_image(prompt):
+    """
+    Try FLUX.1-schnell first; fall back to SDXL if it fails.
+    FLUX is gated — requires the HF account to have accepted the license at
+    https://hf.co/black-forest-labs/FLUX.1-schnell
+    SDXL is ungated and always available.
+    """
     if not HF_API_KEY:
         log('HF_API_KEY not set — skipping image generation', 'WARN')
         return None
-    try:
-        log(f'Generating image: "{prompt[:80]}"')
-        r = requests.post(
-            HF_INFERENCE_URL,
-            headers={
-                'Authorization': f'Bearer {HF_API_KEY}',
-                'Content-Type':  'application/json',
-            },
-            json={'inputs': prompt},
-            timeout=60
-        )
-        if r.status_code == 200 and r.headers.get('content-type', '').startswith('image/'):
-            log(f'Image generated ({len(r.content)} bytes)')
-            return r.content
-        if r.status_code == 503:
-            log('Model loading, retrying in 20s...', 'WARN')
-            time.sleep(20)
-            r2 = requests.post(
-                HF_INFERENCE_URL,
-                headers={
-                    'Authorization': f'Bearer {HF_API_KEY}',
-                    'Content-Type':  'application/json',
-                },
-                json={'inputs': prompt},
-                timeout=60
-            )
-            if r2.status_code == 200 and r2.headers.get('content-type', '').startswith('image/'):
-                log(f'Image generated on retry ({len(r2.content)} bytes)')
-                return r2.content
-            log(f'Retry failed: {r2.status_code} {r2.text[:120]}', 'WARN')
-            return None
-        log(f'Image generation failed: {r.status_code} {r.text[:120]}', 'WARN')
-        return None
-    except Exception as e:
-        log(f'Image generation error: {e}', 'WARN')
-        return None
+
+    log(f'Generating image: "{prompt[:80]}"')
+
+    # Primary: FLUX.1-schnell
+    result = _try_hf_image(HF_IMAGE_MODEL_PRIMARY, prompt)
+    if result:
+        return result
+
+    # Fallback: Stable Diffusion XL
+    log(f'Falling back to {HF_IMAGE_MODEL_FALLBACK}', 'WARN')
+    return _try_hf_image(HF_IMAGE_MODEL_FALLBACK, prompt)
 
 
 def post_with_image(client, text, image_bytes, alt_text=''):
