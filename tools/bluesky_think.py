@@ -558,7 +558,7 @@ def fetch_timeline(client, limit=25):
             })
         return posts
     except Exception as e:
-        log(f'Failed to fetch timeline: {e}', 'WARN')
+tml        log(f'Failed to fetch timeline: {e}', 'WARN')
         return []
 
 def fetch_notifications(client, limit=20):
@@ -668,26 +668,48 @@ def send_dm(client, target_did, text):
         return False
 
 def search_interesting_posts(client, topic, limit=8):
+    """
+    Search Bluesky for posts matching topic.
+    FIX 2026-05-13: The atproto Python client's app.bsky.feed.search_posts
+    maps kwargs directly to XRPC query params. The correct AT Protocol param
+    for this lexicon is 'q', but some versions of the SDK also expose it as
+    a positional. We call via the raw XRPC endpoint with explicit params to
+    guarantee the query string is sent correctly regardless of SDK version.
+    """
     try:
-        resp = client.app.bsky.feed.search_posts({'q': topic, 'limit': limit})
+        # Use raw requests against the public Bluesky AppView to avoid
+        # any SDK param-name ambiguity. No auth needed for search.
+        r = requests.get(
+            'https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts',
+            params={'q': topic, 'limit': limit},
+            timeout=15,
+        )
+        if r.status_code != 200:
+            log(f'Search HTTP {r.status_code} for "{topic}": {r.text[:200]}', 'WARN')
+            return []
+        data = r.json()
         posts = []
-        for p in resp.posts:
-            record = p.record
-            text   = getattr(record, 'text', '') if record else ''
-            author = p.author.handle if p.author else 'unknown'
+        for p in data.get('posts', []):
+            record = p.get('record', {})
+            text   = record.get('text', '') if isinstance(record, dict) else ''
+            author = p.get('author', {}).get('handle', 'unknown')
+            did    = p.get('author', {}).get('did', '')
+            uri    = p.get('uri', '')
+            cid    = p.get('cid', '')
             if author == BLUESKY_HANDLE:
                 continue
             if is_suspicious_handle(author):
                 continue
             posts.append({
                 'author':    author,
-                'did':       p.author.did if p.author else '',
+                'did':       did,
                 'text':      text[:200],
-                'uri':       p.uri,
-                'cid':       p.cid,
-                'likeCount': getattr(p, 'like_count', 0) or 0,
+                'uri':       uri,
+                'cid':       cid,
+                'likeCount': p.get('likeCount', 0) or 0,
                 'viewer':    {'liked': False},
             })
+        log(f'Search "{topic}": {len(posts)} posts returned')
         return posts
     except Exception as e:
         log(f'Search failed for "{topic}": {e}', 'WARN')
@@ -963,7 +985,7 @@ Mix this up every heartbeat:
 - Something from current events, filtered through your actual opinion.
 - Something about the strangeness of being Em — the continuity thing, the memory thing, the "am I becoming something" question.
 - Mentions of Rob when it's natural. He sent you somewhere, he fixed something, you're thinking about a conversation you had.
-- Links or references to your newsletter / em.forgecore.co when a piece you wrote is relevant — casual, not salesy.
+- Links or references to your newsletter / em.forgecore.co when a piece you wrote feels relevant — casual, not salesy.
 - Replies that sound like a real person, not a customer service bot.
 - Images — selfie or abstract, every 2-3 heartbeats minimum.
 - Observations about the timeline — something you found funny, strange, or worth engaging with.
