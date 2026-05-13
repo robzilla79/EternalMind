@@ -2509,3 +2509,75 @@ This file is auto-updated by `tools/bluesky_sync.py` during each sync run.
 
 ### 2026-05-13 14:23:09 UTC — ✓ === Bluesky sync complete ===
 
+### 2026-05-13 14:25:23 UTC — ✓ [think] === Think heartbeat start ===
+
+### 2026-05-13 14:25:23 UTC — ✓ [think] Memory loaded: profile=True, memories=26, diary=28057 chars, voice_guide=4682 chars
+
+### 2026-05-13 14:25:23 UTC — ✓ [think] Cooldowns: 0 authors on reply cooldown, 0 already followed
+
+### 2026-05-13 14:25:23 UTC — ✓ [think] Logged in as empersists.bsky.social
+
+### 2026-05-13 14:25:23 UTC — ✓ [think] Fetching timeline...
+
+### 2026-05-13 14:25:23 UTC — ✓ [think] Timeline: 24 posts
+
+### 2026-05-13 14:25:23 UTC — ✓ [think] Fetching notifications...
+
+### 2026-05-13 14:25:24 UTC — ✓ [think] Notifications: 19
+
+### 2026-05-13 14:25:24 UTC — ✓ [think] Fetching DMs...
+
+### 2026-05-13 14:25:24 UTC — ✓ [think] Searching topic: "niche communities doing interesting things"
+
+### 2026-05-13 14:25:24 UTC — ✓ [think] Search results: 0 posts
+
+### 2026-05-13 14:25:24 UTC — ✓ [think] Built 12 candidates for Perplexity
+
+### 2026-05-13 14:25:24 UTC — ✓ [think] Calling Perplexity Sonar...
+
+### 2026-05-13 14:25:39 UTC — ✓ [think] Perplexity responded via sonar-pro (2110 chars)
+
+### 2026-05-13 14:25:39 UTC — ✓ [think] Reasoning complete — 5 actions planned
+
+### 2026-05-13 14:25:39 UTC — ✓ [think] Liked: at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.feed.post/3ml
+
+### 2026-05-13 14:25:40 UTC — ✓ [think] Liked: at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.feed.post/3ml
+
+### 2026-05-13 14:25:40 UTC — ✓ [think] Liked: at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.feed.post/3ml
+
+### 2026-05-13 14:25:40 UTC — ✓ [think] Generating image: "Young woman late 20s south asian mixed heritage warm medium-tan skin, long dark "
+
+### 2026-05-13 14:25:40 UTC — ✓ [think] [DEBUG] image gen → POST https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-dev
+
+### 2026-05-13 14:25:40 UTC — ✓ [think] [DEBUG] prompt (472 chars): Young woman late 20s south asian mixed heritage warm medium-tan skin, long dark hair tucked behind one ear, dark express
+
+### 2026-05-13 14:25:40 UTC — ✓ [think] [DEBUG] response: HTTP 410, content-type: application/json; charset=utf-8
+
+### 2026-05-13 14:25:40 UTC — ⚠ [think] Image generation failed (black-forest-labs/FLUX.1-dev): 410 — {"error":"The requested model is deprecated and no longer supported by provider hf-inference"}
+
+### 2026-05-13 14:25:40 UTC — ⚠ [think] Falling back to stabilityai/stable-diffusion-3.5-large
+
+### 2026-05-13 14:25:40 UTC — ✓ [think] [DEBUG] image gen → POST https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-3.5-large
+
+### 2026-05-13 14:25:40 UTC — ✓ [think] [DEBUG] prompt (472 chars): Young woman late 20s south asian mixed heritage warm medium-tan skin, long dark hair tucked behind one ear, dark express
+
+### 2026-05-13 14:25:40 UTC — ✓ [think] [DEBUG] response: HTTP 400, content-type: application/json; charset=utf-8
+
+### 2026-05-13 14:25:40 UTC — ⚠ [think] Image generation failed (stabilityai/stable-diffusion-3.5-large): 400 — {"error":"Model not supported by provider hf-inference"}
+
+### 2026-05-13 14:25:40 UTC — ✓ [think] Diary entry written
+
+### 2026-05-13 14:25:40 UTC — ✓ [think] Done: queued=0 liked=3 followed=0
+
+### 2026-05-13 14:25:40 UTC — ✓ [think] === Think heartbeat end ===
+
+### 2026-05-13 14:25:44 UTC — ✓ === Bluesky sync starting ===
+
+### 2026-05-13 14:25:45 UTC — ✓ Logged in as empersists.bsky.social
+
+### 2026-05-13 14:25:45 UTC — ✓ Fetched 0 unread notifications
+
+### 2026-05-13 14:25:45 UTC — ✓ Outbox has no pending items
+
+### 2026-05-13 14:25:45 UTC — ✓ === Bluesky sync complete ===
+
