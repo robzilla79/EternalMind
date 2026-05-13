@@ -36,6 +36,9 @@ RATE_LIMIT_SECONDS = 180
 # Abandon replies that have been stuck in needs_id for more than this many days
 ABANDON_AFTER_DAYS = 2
 
+# Runtime cache of submolts confirmed 404 this session — avoids re-hitting dead endpoints
+DEAD_SUBMOLT_CACHE = set()
+
 
 def log(message, level='INFO'):
     timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
@@ -87,6 +90,11 @@ def fetch_notifications():
 
 def fetch_submolt_posts(submolt, limit=50):
     """GET /api/v1/submolts/{name}/posts — fetch recent posts to find real IDs."""
+    # Skip submolts already confirmed dead this session
+    if submolt in DEAD_SUBMOLT_CACHE:
+        log(f'Skipping m/{submolt} — cached as dead (404)', 'WARN')
+        return None
+
     try:
         r = requests.get(
             f'{BASE_URL}/submolts/{submolt}/posts',
@@ -95,7 +103,8 @@ def fetch_submolt_posts(submolt, limit=50):
             timeout=15
         )
         if r.status_code == 404:
-            log(f'm/{submolt} returned 404 — submolt may be private or renamed', 'WARN')
+            log(f'm/{submolt} returned 404 — submolt may be private or renamed; caching as dead', 'WARN')
+            DEAD_SUBMOLT_CACHE.add(submolt)
             return None  # None signals 404 specifically, vs [] for empty
         r.raise_for_status()
         data = r.json()
@@ -135,10 +144,10 @@ def find_post_id(title_fragment, submolt=None, author=None):
     Strategy:
       1. Search API globally (no submolt filter) — most reliable
       2. Search API with submolt filter if known
-      3. If submolt is accessible, browse and match by title
+      3. If submolt is accessible and not cached dead, browse and match by title
       4. Return first confident match
 
-    If submolt returns 404, skip straight to global search only.
+    If submolt is in DEAD_SUBMOLT_CACHE or returns 404, skip browse entirely.
     """
     def match(post):
         post_title = post.get('title', '')
@@ -157,8 +166,8 @@ def find_post_id(title_fragment, submolt=None, author=None):
             log(f'Resolved "{title_fragment[:40]}" -> {pid} (via global search)')
             return pid
 
-    # 2. Scoped search with submolt
-    if submolt:
+    # 2. Scoped search with submolt (skip if cached dead)
+    if submolt and submolt not in DEAD_SUBMOLT_CACHE:
         results = search_posts(title_fragment[:60], submolt)
         for post in results:
             pid = match(post)
@@ -166,7 +175,7 @@ def find_post_id(title_fragment, submolt=None, author=None):
                 log(f'Resolved "{title_fragment[:40]}" -> {pid} (via scoped search)')
                 return pid
 
-    # 3. Browse submolt posts (only if submolt is accessible)
+    # 3. Browse submolt posts (only if submolt is accessible and not cached dead)
     if submolt:
         posts = fetch_submolt_posts(submolt, limit=100)
         if posts is not None:  # None means 404 — skip browse entirely
@@ -176,8 +185,6 @@ def find_post_id(title_fragment, submolt=None, author=None):
                 if pid:
                     log(f'Resolved "{title_fragment[:40]}" -> {pid} (via submolt browse)')
                     return pid
-        else:
-            log(f'Skipping submolt browse for m/{submolt} (404)', 'WARN')
 
     log(f'Could not resolve post ID for "{title_fragment[:50]}"', 'WARN')
     return None
@@ -187,8 +194,8 @@ def resolve_reply_targets():
     """
     For any outbox items with status 'needs_id' or 'failed':
       - If target_post_id is already populated, reset to 'pending' immediately (no search needed)
-      - If target_post_id is missing, try to resolve via title/author search
-      - If unresolvable and older than ABANDON_AFTER_DAYS, mark 'abandoned' to unblock the queue
+      - If unresolvable and older than ABANDON_AFTER_DAYS, mark 'abandoned' BEFORE attempting search
+      - If age check passes, try to resolve via title/author search
     """
     outbox = load_json(OUTBOX_FILE, [])
     changed = False
@@ -210,13 +217,13 @@ def resolve_reply_targets():
             changed = True
             continue
 
-        # Check age — abandon stale unresolvable items so they don't block forever
+        # Age check FIRST — abandon stale items before wasting API calls on them
         queued_at = item.get('queued_at')
         if queued_at:
             try:
                 age_days = (now - datetime.fromisoformat(queued_at.replace('Z', '+00:00'))).days
                 if age_days >= ABANDON_AFTER_DAYS:
-                    log(f'Abandoning stale reply "{item.get("post_title", "")[:40]}" (age: {age_days}d)', 'WARN')
+                    log(f'Abandoning stale reply "{item.get("post_title", "")[:40]}" (age: {age_days}d) — skipping search', 'WARN')
                     item['status'] = 'abandoned'
                     item['abandoned_at'] = now.isoformat()
                     item['reason'] = f'Unresolvable post ID after {age_days} days; conversation context stale'
