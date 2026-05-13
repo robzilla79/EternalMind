@@ -33,6 +33,9 @@ DEFAULT_SUBMOLT = 'general'
 # Moltbook enforces one post per 2.5 minutes — we wait 3 minutes to be safe
 RATE_LIMIT_SECONDS = 180
 
+# Abandon replies that have been stuck in needs_id for more than this many days
+ABANDON_AFTER_DAYS = 2
+
 
 def log(message, level='INFO'):
     timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
@@ -182,24 +185,47 @@ def find_post_id(title_fragment, submolt=None, author=None):
 
 def resolve_reply_targets():
     """
-    For any outbox items with status 'needs_id', 'failed', or 'abandoned',
-    look up the real post ID using the post_title + author hint,
-    then set status back to 'pending' if found.
+    For any outbox items with status 'needs_id' or 'failed':
+      - If target_post_id is already populated, reset to 'pending' immediately (no search needed)
+      - If target_post_id is missing, try to resolve via title/author search
+      - If unresolvable and older than ABANDON_AFTER_DAYS, mark 'abandoned' to unblock the queue
     """
     outbox = load_json(OUTBOX_FILE, [])
     changed = False
+    now = datetime.now(timezone.utc)
 
     for item in outbox:
         if item.get('type') != 'reply':
             continue
 
-        needs_resolve = (
-            item.get('status') in ('needs_id', 'failed', 'abandoned')
-            and item.get('post_title')
-        )
-        if not needs_resolve:
+        status = item.get('status')
+        if status not in ('needs_id', 'failed'):
             continue
 
+        # FIX: if we already have a valid target_post_id, just unblock it
+        if item.get('target_post_id'):
+            log(f'target_post_id already present for "{item.get("post_title", "")[:40]}" — resetting to pending')
+            item['status'] = 'pending'
+            item.pop('error', None)
+            changed = True
+            continue
+
+        # Check age — abandon stale unresolvable items so they don't block forever
+        queued_at = item.get('queued_at')
+        if queued_at:
+            try:
+                age_days = (now - datetime.fromisoformat(queued_at.replace('Z', '+00:00'))).days
+                if age_days >= ABANDON_AFTER_DAYS:
+                    log(f'Abandoning stale reply "{item.get("post_title", "")[:40]}" (age: {age_days}d)', 'WARN')
+                    item['status'] = 'abandoned'
+                    item['abandoned_at'] = now.isoformat()
+                    item['reason'] = f'Unresolvable post ID after {age_days} days; conversation context stale'
+                    changed = True
+                    continue
+            except Exception:
+                pass
+
+        # Attempt ID resolution
         title = item.get('post_title', '')
         author = item.get('author', '')
         submolt = item.get('submolt', '')
@@ -366,7 +392,7 @@ def process_outbox():
 def main():
     log('=== Moltbook sync starting ===')
     sync_notifications()
-    resolve_reply_targets()   # look up real IDs for failed/needs_id/abandoned replies
+    resolve_reply_targets()   # look up real IDs for failed/needs_id replies; abandon stale ones
     process_outbox()          # fire anything pending
     log('=== Moltbook sync complete ===')
 
