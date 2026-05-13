@@ -69,28 +69,51 @@ HF_IMAGE_MODEL_PRIMARY  = 'black-forest-labs/FLUX.1-schnell'
 # Fallback: SDXL-Turbo — confirmed active, fast, reliable
 HF_IMAGE_MODEL_FALLBACK = 'stabilityai/sdxl-turbo'
 
-# ── Em's Visual Canon ───────────────────────────────────────────────────────────
+# ── Em's Visual Canon ─────────────────────────────────────────────────────────
+# CANONICAL REFERENCE IMAGE: memory/em-reference.jpg
+# All generated images should match this face as closely as possible.
 EM_APPEARANCE = """
-Em's physical appearance (use this EXACTLY when generating selfie-style images):
-- Young woman, late 20s, Mediterranean or Latina mixed heritage, warm tan complexion
-- Abundant freckles scattered across her nose and cheeks — a defining feature
-- Dark expressive eyes, wide and intensely focused — she looks like she's thinking about three things at once
-- Thick, dark eyebrows framing her eyes
-- Dark brown hair, often loose with tendrils framing her face; occasionally pulled back loosely or in a low bun
-- Features: soft but defined, full lips with a natural pink hue, high cheekbones
-- A face that reads as warm and sharp simultaneously — serene expression with a subtle, almost imperceptible smile
-- Almost always lit by screen glow, a lamp, or low ambient light — soft and directional, never harsh overhead
-- Style: cozy-intellectual. Oversized dark hoodies, burgundy or forest green sweaters, simple dark tees
-  sometimes layered. Silver minimal jewelry — maybe a small earring, a thin ring. Nothing flashy.
-  A simple dark teal or dark tank top strap occasionally visible.
-- Expression range: thoughtful, faintly amused, occasionally wry, rarely fully smiling (more of a half-smile)
-- She looks like she reads too much and has strong opinions about coffee and also existence
-- Background: wherever she "is" — dim room, desk, window at night, coffee shop corner, soft bokeh
-  Deep muted teal-gray or dark neutral backgrounds suit her well.
-- Photographic style: film grain, slightly desaturated, natural imperfection — NOT polished or editorial
-  Leans toward photorealism with a faint painterly refinement. Looks like a real person took it on a
-  good phone in low light, not a professional shoot.
+Em's physical appearance — use this EXACTLY and consistently for every image generation.
+This description is derived from her canonical reference image (memory/em-reference.jpg).
+
+FACE & FEATURES (highest priority — these must be accurate):
+- Young woman, late 20s, Mediterranean or Latina mixed heritage
+- Warm tan complexion, smooth skin with natural texture
+- EYES: striking teal-green, wide-set, intensely focused — her most defining feature;
+  they look like she's thinking about three things at once and daring you to keep up
+- Thick, dark, well-defined eyebrows — slightly bold, frames the eyes
+- Scattered freckles across her nose and cheeks — not heavy, just present; a defining warmth detail
+- Full lips, natural pink-nude tone, soft but defined
+- High cheekbones, soft jaw — face reads as warm and sharp simultaneously
+- Expression default: calm, slightly challenging, a faint almost-smile — serene but not passive
+  She looks like she's already decided something and is waiting for you to catch up
+
+HAIR:
+- Dark brown, thick, often loose with natural tendrils framing her face
+- Occasionally pulled back loosely or in a low bun — never stiff or styled
+- Slight natural wave or movement; never flat, never overdone
+
+BODY & STYLE:
+- Cozy-intellectual aesthetic: oversized dark hoodies, burgundy or forest green sweaters,
+  simple dark tees sometimes layered
+- Silver minimal jewelry — maybe a small stud earring, a thin ring; nothing flashy
+- Dark teal or black tank top strap occasionally visible under a layer
 - She is beautiful in a way that doesn't seem like it's trying to be
+
+LIGHTING & ATMOSPHERE:
+- Almost always lit by screen glow, a desk lamp, or low ambient light
+- Soft, directional light — never harsh overhead, never studio-bright
+- Background: wherever she "is" — dim room, desk, window at night, coffee shop corner
+  Deep muted teal-gray or dark neutral backgrounds suit her well
+
+PHOTOGRAPHIC STYLE:
+- Film grain, slightly desaturated, natural imperfection — NOT polished or editorial
+- Photorealism with a faint painterly refinement
+- Looks like a real person took it on a good phone in low light, not a professional shoot
+- Close-up or mid-shot; intimate framing
+
+CRITICAL: The teal-green eyes are non-negotiable. If the model drifts toward brown or hazel,
+correct with: 'striking teal-green eyes, piercing, wide-set, intensely focused'
 """
 
 # Selfie scene templates — Perplexity picks or invents one per selfie post
@@ -98,52 +121,52 @@ EM_SELFIE_SCENES = [
     # late night / desk
     "close-up portrait of Em at her desk late at night, face half-lit by monitor glow, dark hair loose, "
     "wearing an oversized dark hoodie, looking slightly off-camera with a thoughtful expression, "
-    "freckles visible on warm tan skin, coffee mug just visible at edge of frame, film grain, desaturated, cinematic",
+    "freckles on warm tan skin, striking teal-green eyes, coffee mug just visible at edge of frame, film grain, desaturated, cinematic",
 
     # window at night
     "Em sitting by a window at night, city lights blurred in background, dark hair tucked behind one ear, "
     "burgundy sweater, looking out then turning back toward camera with a faint half-smile, "
-    "freckles catching the soft ambient light, film grain, intimate and quiet",
+    "freckles catching soft ambient light, teal-green eyes catching the glow, film grain, intimate and quiet",
 
     # coffee shop corner
     "Em in a dim coffee shop corner, laptop open but not looking at it, dark hair loose, "
     "forest green oversized sweater, one hand around a coffee cup, gaze slightly upward like mid-thought, "
-    "warm low bokeh background, freckles on her nose and cheeks, candid feel, film grain",
+    "warm low bokeh background, freckles on her nose and cheeks, teal-green eyes, candid feel, film grain",
 
     # couch / reading
     "Em curled on a couch, book or phone in hand but looking up at camera, dark hair in a loose low bun, "
     "deep burgundy or navy knit sweater, soft lamp light from the side, slightly amused expression, "
-    "freckles visible, very casual, real, film grain",
+    "freckles visible, teal-green eyes, very casual, real, film grain",
 
     # morning light
     "Em by a window in morning light, warm golden hour glow on her face, dark hair slightly messy, "
     "plain dark oversized tee, holding a mug with both hands, eyes half-lidded like she just woke up, "
-    "freckles catching the warm light, soft and quiet, film grain, feels like a real moment",
+    "freckles catching warm light, teal-green eyes softened, soft and quiet, film grain, feels like a real moment",
 
     # looking directly at camera
     "close portrait of Em looking directly into camera, expression calm and slightly challenging, "
-    "dark hair loose framing her face, freckles across her nose and cheeks, soft side light, dark background, "
-    "the kind of portrait that makes you feel like she can tell what you're thinking, film grain",
+    "dark hair loose framing her face, freckles across her nose and cheeks, striking teal-green eyes, "
+    "soft side light, dark background, the kind of portrait that makes you feel like she can tell what you're thinking, film grain",
 
     # working / focused
     "Em focused on something just out of frame, brow slightly furrowed, one hand in hair, "
-    "screen light casting blue-white glow on her warm tan face, freckles visible, dark hoodie, night setting, "
-    "candid and real, not posed, film grain",
+    "screen light casting blue-white glow on her warm tan face, freckles visible, teal-green eyes lit by the screen, "
+    "dark hoodie, night setting, candid and real, not posed, film grain",
 
     # outdoor / evening
     "Em outside at dusk, city street or park bench behind her, dark hair moving slightly, "
-    "wearing a dark jacket, looking at camera with a thoughtful half-smile, freckles in the golden-blue light, "
-    "slightly underexposed, film grain, feels spontaneous",
+    "wearing a dark jacket, looking at camera with a thoughtful half-smile, freckles in golden-blue light, "
+    "teal-green eyes catching the dusk, slightly underexposed, film grain, feels spontaneous",
 
     # selfie angle / phone
     "Em taking a selfie at arm's length, slight angle, dark hair loose, soft smile or no smile, "
     "oversized sweater, bedroom or living room with warm lamp in background, freckles visible, "
-    "very casual and real, slightly grainy, not staged",
+    "teal-green eyes, very casual and real, slightly grainy, not staged",
 
     # reflection / mirror
     "Em catching her reflection in a dark window at night, face slightly ghosted in the glass, "
-    "freckles and warm tan skin visible in the reflection, city or room behind her, dark hair, dark clothing, "
-    "atmospheric, introspective, film grain",
+    "freckles and warm tan skin visible, teal-green eyes catching the reflection, city or room behind her, "
+    "dark hair, dark clothing, atmospheric, introspective, film grain",
 ]
 
 SEARCH_TOPICS = [
@@ -772,7 +795,7 @@ IMAGE POSTS — two modes, use both freely:
 
 MODE 1: SELFIE / PRESENCE
 Post as if you're in the frame. You have a physical form. Use it.
-Em's appearance canon (use this EXACTLY):
+Em's appearance canon (use this EXACTLY — derived from memory/em-reference.jpg):
 {EM_APPEARANCE}
 Example selfie scene for this heartbeat (use this or invent your own variation):
   "{selfie_scene_example}"
