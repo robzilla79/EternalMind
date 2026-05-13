@@ -10,6 +10,7 @@ Every heartbeat Em:
   - Likes, follows, replies, quote-posts, posts, or stays quiet
   - Posts selfies from bank (max 2/day) OR abstract images freely (no cap)
   - Writes diary entries after meaningful interactions
+  - Scores last post via em_observe (private observability layer)
 
 Requires:
   BLUESKY_APP_PASSWORD  — GitHub Secret
@@ -21,6 +22,7 @@ import os
 import json
 import random
 import re
+import sys
 import time
 import unicodedata
 import traceback
@@ -37,6 +39,14 @@ try:
 except ImportError:
     print('[ERROR] atproto not installed')
     raise
+
+# Add tools/ to path so em_observe can be imported
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from em_observe import observe as em_observe
+except ImportError:
+    em_observe = None
+    print('[WARN] em_observe not available — observability disabled')
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
@@ -376,15 +386,12 @@ def record_image_posted(state, filename, image_type='selfie'):
         'image_type': image_type,
         'posted_at':  now_utc().isoformat(),
     })
-    # Keep history trimmed to last 60 entries
     state['image_post_history'] = state['image_post_history'][-60:]
 
 def pick_from_bank(state):
     """
     Pick a random unused image from the bank.
     Returns (filename, image_bytes) or (None, None) if bank is empty/unavailable.
-    Bank images are selfie-*.jpg files in IMAGE_BANK_DIR.
-    Tracks used images; resets the used list when all have been cycled.
     """
     if not os.path.isdir(IMAGE_BANK_DIR):
         log(f'Image bank dir not found: {IMAGE_BANK_DIR}', 'WARN')
@@ -675,11 +682,6 @@ def send_dm(client, target_did, text):
         return False
 
 def search_interesting_posts(client, topic, limit=8):
-    """
-    Search Bluesky for posts matching topic.
-    Routes through authenticated atproto SDK client to avoid HTTP 403
-    from GitHub Actions IP ranges hitting the public AppView.
-    """
     try:
         resp = client.app.bsky.feed.search_posts({'q': topic, 'limit': limit})
         posts = []
@@ -830,19 +832,17 @@ def _main():
     follow_cap_reached = len(followed_dids) >= MAX_FOLLOW_TOTAL
     log(f'Cooldowns: {len(cooled_authors)} authors on reply cooldown, {len(followed_dids)}/{MAX_FOLLOW_TOTAL} followed')
 
-    # Check daily SELFIE cap — abstract images are always allowed
     selfies_today = selfies_posted_today(state)
     selfie_cap_reached = selfies_today >= MAX_SELFIES_PER_DAY
     log(f'Selfie posts today: {selfies_today}/{MAX_SELFIES_PER_DAY} ({"cap reached" if selfie_cap_reached else "available"})')
 
-    # Count available bank images for prompt context
     bank_available = 0
     if os.path.isdir(IMAGE_BANK_DIR):
         all_bank = [f for f in os.listdir(IMAGE_BANK_DIR) if f.startswith(IMAGE_BANK_PREFIX) and f.endswith('.jpg')]
         used_bank = state.get('used_bank_images', [])
         bank_available = len([f for f in all_bank if f not in used_bank])
         if bank_available == 0 and all_bank:
-            bank_available = len(all_bank)  # will reset cycle
+            bank_available = len(all_bank)
     log(f'Image bank: {bank_available} images available in current cycle')
 
     client = bsky_login()
@@ -890,7 +890,6 @@ def _main():
     candidate_block = candidates_for_prompt(candidates, cooled_authors, followed_dids)
     pending_outbox  = [item for item in outbox if item.get('status') == 'pending']
 
-    # Build image instruction based on selfie cap status
     if not selfie_cap_reached:
         selfie_mode_block = f"""MODE 1: SELFIE / PRESENCE (uses bank image — consistent face guaranteed)
 Daily selfie cap: {selfies_today}/{MAX_SELFIES_PER_DAY} used. Selfies still available.
@@ -1135,6 +1134,7 @@ What does Em do this heartbeat? Remember: pass the Rob-recognition test before y
     new_posts   = 0
     new_likes   = 0
     new_follows = 0
+    last_post_text = ''
 
     for action in actions:
         atype = action.get('type')
@@ -1151,6 +1151,7 @@ What does Em do this heartbeat? Remember: pass the Rob-recognition test before y
                 'queued_at': now_utc().isoformat(),
                 'source':    'autonomous',
             })
+            last_post_text = content
             new_posts += 1
             log(f'Queued post: {content[:60]}…')
 
@@ -1183,6 +1184,7 @@ What does Em do this heartbeat? Remember: pass the Rob-recognition test before y
             done_uris.add(cand['uri'])
             record_reply_author(state, cand['author'])
             cooled_authors[cand['author']] = now_utc().isoformat()
+            last_post_text = content
             new_posts += 1
             log(f'Queued reply to {post_key} ({cand["uri"][:50]})')
 
@@ -1195,6 +1197,7 @@ What does Em do this heartbeat? Remember: pass the Rob-recognition test before y
                 continue
             uri = quote_post(client, content, cand['uri'], cand['cid'])
             if uri:
+                last_post_text = content
                 new_posts += 1
 
         elif atype == 'like' and new_likes < MAX_NEW_LIKES:
@@ -1235,13 +1238,12 @@ What does Em do this heartbeat? Remember: pass the Rob-recognition test before y
         elif atype == 'image_post' and new_posts < MAX_NEW_POSTS:
             caption      = action.get('caption', '')
             image_prompt = action.get('image_prompt', '')
-            image_type   = action.get('image_type', 'selfie')  # 'selfie' or 'abstract'
+            image_type   = action.get('image_type', 'selfie')
 
             if not caption:
                 log('image_post skipped — missing caption', 'WARN')
                 continue
 
-            # Selfie cap check — abstract posts are always allowed
             if image_type == 'selfie' and selfie_cap_reached:
                 log(f'Selfie image_post skipped — daily cap reached ({MAX_SELFIES_PER_DAY}/day)', 'WARN')
                 continue
@@ -1250,7 +1252,6 @@ What does Em do this heartbeat? Remember: pass the Rob-recognition test before y
             source_label = 'unknown'
 
             if image_type == 'selfie':
-                # Always try bank first for selfie posts
                 chosen_file, image_bytes = pick_from_bank(state)
                 if image_bytes:
                     source_label = f'bank:{chosen_file}'
@@ -1264,7 +1265,6 @@ What does Em do this heartbeat? Remember: pass the Rob-recognition test before y
                         if image_bytes:
                             record_image_posted(state, 'live_gen', image_type='selfie')
             else:
-                # Abstract: use live generation directly — no daily cap
                 if not image_prompt:
                     log('Abstract image_post skipped — no image_prompt provided', 'WARN')
                     continue
@@ -1279,6 +1279,7 @@ What does Em do this heartbeat? Remember: pass the Rob-recognition test before y
             if image_bytes:
                 uri = post_with_image(client, caption, image_bytes, alt_text=safe_truncate(caption, 500))
                 if uri:
+                    last_post_text = caption
                     new_posts += 1
                     if image_type == 'selfie':
                         selfies_today += 1
@@ -1294,6 +1295,14 @@ What does Em do this heartbeat? Remember: pass the Rob-recognition test before y
     if new_posts > 0:
         state['last_posted_at'] = now_utc().isoformat()
     save_json(STATE_FILE, state)
+
+    # ── Observability: score the last post privately ──────────────────────────
+    if em_observe and last_post_text:
+        log('Running observability score...')
+        try:
+            em_observe(last_post_text)
+        except Exception as e:
+            log(f'em_observe failed (non-fatal): {e}', 'WARN')
 
     log(f'Done: queued={new_posts} liked={new_likes} followed={new_follows}')
     log('=== Think heartbeat end ===')
