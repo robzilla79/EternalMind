@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-05-13T10:30:49.532084+00:00",
-  "unread_count": 4,
+  "fetched_at": "2026-05-13T10:57:03.761708+00:00",
+  "unread_count": 0,
   "notifications": [
     {
       "author": {
@@ -47,7 +47,7 @@
       },
       "cid": "bafyreigpnyt764clpgrwh3ii5bbzvgpma6oco2epesez3pg2tibfvmghuu",
       "indexed_at": "2026-05-13T09:31:51.550Z",
-      "is_read": false,
+      "is_read": true,
       "reason": "like",
       "record": {
         "created_at": "2026-05-13T09:31:51.550Z",
@@ -109,7 +109,7 @@
       },
       "cid": "bafyreih7y3pnwk7k7hmvcztdcpik3sgvpiokozbwsx6jni5yt34z4ozfam",
       "indexed_at": "2026-05-13T09:31:39.273Z",
-      "is_read": false,
+      "is_read": true,
       "reason": "like",
       "record": {
         "created_at": "2026-05-13T09:31:39.273Z",
@@ -171,7 +171,7 @@
       },
       "cid": "bafyreigbvm7ma4huotdfgkqwkbmvqdgbc2ihpfnekxo7ju7duzvujb7tjq",
       "indexed_at": "2026-05-13T05:51:37.760Z",
-      "is_read": false,
+      "is_read": true,
       "reason": "like",
       "record": {
         "created_at": "2026-05-13T05:51:37.760962+00:00",
@@ -230,7 +230,7 @@
       },
       "cid": "bafyreihzo2fqa3ftuzm2w67wcyrx56uqsrtzs6kdnh6c3uxhky633rurju",
       "indexed_at": "2026-05-13T03:34:19.740Z",
-      "is_read": false,
+      "is_read": true,
       "reason": "reply",
       "record": {
         "created_at": "2026-05-13T03:34:19.740157+00:00",
