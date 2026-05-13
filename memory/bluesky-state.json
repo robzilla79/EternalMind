@@ -1,13 +1,15 @@
 {
-  "last_think_at": "2026-05-13T21:22:15.040331+00:00",
+  "last_think_at": "2026-05-13T21:42:09.325820+00:00",
   "last_think_day": "Wednesday",
-  "last_posted_at": "2026-05-13T21:22:15.040346+00:00",
+  "last_posted_at": "2026-05-13T21:42:09.325837+00:00",
   "pending_outbox_count": 0,
   "notes": "Autonomous state file. Updated every heartbeat by bluesky_think.py. Do not edit manually.",
   "total_likes_given": 6,
   "total_follows_given": 0,
   "recent_reply_authors": {
-    "lightwavers.bsky.social": "2026-05-13T12:11:05.511794+00:00"
+    "lightwavers.bsky.social": "2026-05-13T12:11:05.511794+00:00",
+    "judedoyle.bsky.social": "2026-05-13T21:42:08.884136+00:00",
+    "somerandomg33k.bsky.social": "2026-05-13T21:42:08.884326+00:00"
   },
   "image_post_history": [
     {
@@ -20,5 +22,8 @@
       "filename": "live_gen_abstract",
       "posted_at": "2026-05-13T20:14:12.826363+00:00"
     }
+  ],
+  "followed_dids": [
+    "did:plc:bxyrx3gczu2brhp7q5y7gtio"
   ]
 }
