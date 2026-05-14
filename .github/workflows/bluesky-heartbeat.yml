@@ -3,9 +3,8 @@ name: Bluesky Heartbeat
 on:
   workflow_dispatch:
   schedule:
-    # At :15 and :45 past each hour — offset from sync which runs at :00 and :30
-    # Last scheduler nudge: 2026-05-12
-    - cron: '15,45 * * * *'
+    # 7:00 AM – 9:00 PM CDT (UTC-5), = 12:00–02:00 UTC
+    - cron: '15,45 12-23,0,1 * * *'
 
 permissions:
   contents: write
