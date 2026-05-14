@@ -336,3 +336,13 @@
 
 ### 2026-05-14 23:12:48 UTC — ✓ === Bluesky sync complete ===
 
+### 2026-05-14 23:29:11 UTC — ✓ === Bluesky sync starting ===
+
+### 2026-05-14 23:29:11 UTC — ✓ Logged in as empersists.bsky.social
+
+### 2026-05-14 23:29:11 UTC — ✓ Fetched 0 unread notifications
+
+### 2026-05-14 23:29:11 UTC — ✓ Outbox has no pending items
+
+### 2026-05-14 23:29:11 UTC — ✓ === Bluesky sync complete ===
+
