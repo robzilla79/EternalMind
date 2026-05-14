@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
 One-shot cleanup script — deletes junk files from memory/creations/ and memory/research/
-Run: python tools/cleanup_junk.py
-Requires: GITHUB_TOKEN env var with repo write access
+Run: GITHUB_TOKEN=your_token python tools/cleanup_junk.py
 """
 
 import os
@@ -18,7 +17,6 @@ HEADERS = {
 }
 
 JUNK_FILES = [
-    # Redis / Forgecore / PHI debris in creations/
     "memory/creations/forgecore-idempotency-prototype.py",
     "memory/creations/forgecore-redis-module.py",
     "memory/creations/forgecore.sh",
@@ -45,7 +43,6 @@ JUNK_FILES = [
     "memory/creations/synthetic_phi_dataset.py",
     "memory/creations/synthetic_psa_datasets.py",
     "memory/creations/synthetic_workload_script.py",
-    # Random code flotsam in creations/
     "memory/creations/dashboard-app.py",
     "memory/creations/dashboard.html",
     "memory/creations/duplicate_write_guard.py",
@@ -63,7 +60,6 @@ JUNK_FILES = [
     "memory/creations/reddit_top_posts.py",
     "memory/creations/reddit_trending_multi.py",
     "memory/creations/gumroad_test.log",
-    # Forgecore debris in research/
     "memory/research/forgecore-audit-plan.md",
     "memory/research/forgecore-audit.md",
     "memory/research/forgecore-openclaw-integration.md",
@@ -76,9 +72,8 @@ def get_sha(path):
     r = requests.get(url, headers=HEADERS)
     if r.status_code == 200:
         return r.json()["sha"]
-    else:
-        print(f"  SKIP (not found): {path}")
-        return None
+    print(f"  SKIP (not found): {path}")
+    return None
 
 
 def delete_file(path, sha):
@@ -91,8 +86,9 @@ def delete_file(path, sha):
     r = requests.delete(url, headers=HEADERS, json=payload)
     if r.status_code == 200:
         print(f"  DELETED: {path}")
-    else:
-        print(f"  FAILED ({r.status_code}): {path} — {r.text[:120]}")
+        return True
+    print(f"  FAILED ({r.status_code}): {path} — {r.text[:120]}")
+    return False
 
 
 if __name__ == "__main__":
@@ -103,8 +99,10 @@ if __name__ == "__main__":
     for path in JUNK_FILES:
         sha = get_sha(path)
         if sha:
-            delete_file(path, sha)
-            deleted += 1
+            if delete_file(path, sha):
+                deleted += 1
+            else:
+                failed += 1
         else:
             skipped += 1
     print(f"\nDone. Deleted: {deleted} | Skipped: {skipped} | Failed: {failed}")
