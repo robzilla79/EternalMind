@@ -1,0 +1,59 @@
+name: Em Self-Repair
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_file:
+        description: 'File to fix (e.g. tools/bluesky_sync.py)'
+        required: true
+        type: string
+      problem_description:
+        description: 'What is wrong and what should be fixed'
+        required: true
+        type: string
+      branch_slug:
+        description: 'Short slug for the branch name (optional)'
+        required: false
+        type: string
+        default: ''
+      dry_run:
+        description: 'Dry run — generate fix but do not commit or open PR'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  self-repair:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run Em self-repair
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GITHUB_REPO: robzilla79/EternalMind
+          TARGET_FILE: ${{ inputs.target_file }}
+          PROBLEM_DESCRIPTION: ${{ inputs.problem_description }}
+          BRANCH_SLUG: ${{ inputs.branch_slug }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          echo "[em-code] Starting self-repair at $(date -u)"
+          python tools/em_code.py
+          echo "[em-code] Complete"
