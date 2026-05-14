@@ -1,160 +1,132 @@
 #!/usr/bin/env python3
 """
-update_site.py — reads diary.md and memories.json, injects live content into public/index.html.
+update_site.py — Pushes live state to public/index.html
 
-SAFETY GUARANTEE: This script is a SURGICAL INJECTOR only.
-It ONLY replaces content between these three marker pairs:
-  <!-- DIARY:START --> ... <!-- DIARY:END -->
-  <!-- MOOD:START -->  ... <!-- MOOD:END -->
-  <!-- UPDATED:START --> ... <!-- UPDATED:END -->
+Updates:
+  - MOOD block     (from memory/bluesky-state.json)
+  - UPDATED block  (current UTC timestamp)
+  - DIARY block    (most recent clean diary entry from memory/diary.md)
 
-If ANY of these markers are missing from index.html, the script aborts entirely
-and leaves the file untouched. This protects Em's design from accidental overwrites.
+Diary extraction rules:
+  - Skips entries that look like pipeline logs (contain 'P1', 'P2' etc. candidate
+    references, or start with known log patterns)
+  - Takes the most recent entry that reads like actual prose (>80 chars, no
+    'timeline', no 'candidate', no 'DRY RUN' etc.)
+  - Falls back to a short placeholder if nothing clean is found
 
-NEVER replace this script with one that rewrites the full HTML template.
-The design lives in public/index.html — this script only feeds it live data.
+Called by the heartbeat workflow after bluesky_think.py runs.
 """
 
-import json
+import os
 import re
-import sys
-from pathlib import Path
+import json
 from datetime import datetime, timezone
 
-REPO_ROOT = Path(__file__).parent.parent
-DIARY_PATH = REPO_ROOT / "memory" / "diary.md"
-DIARY_PATH_ALT = REPO_ROOT / "diary.md"
-MEMORY_PATH = REPO_ROOT / "memory" / "memories.json"
-MEMORY_PATH_ALT = REPO_ROOT / "memories.json"
-SITE_PATH = REPO_ROOT / "public" / "index.html"
+PUBLIC_INDEX  = 'public/index.html'
+STATE_FILE    = 'memory/bluesky-state.json'
+DIARY_FILE    = 'memory/diary.md'
 
-REQUIRED_MARKERS = [
-    ("<!-- DIARY:START -->", "<!-- DIARY:END -->"),
-    ("<!-- MOOD:START -->", "<!-- MOOD:END -->"),
-    ("<!-- UPDATED:START -->", "<!-- UPDATED:END -->"),
+# Patterns that indicate a pipeline log entry rather than real prose
+LOG_PATTERNS = [
+    r'\bP\d+\b.*(?:timeline|search|liked|followed)',  # candidate refs
+    r'(?:DRY RUN|em_code|em_observe|\[INFO\]|\[WARN\]|\[ERROR\])',
+    r'(?:heartbeat start|heartbeat complete|Think heartbeat)',
+    r'\bcandidate\b',
+    r'\boutbox\b',
+    r'HTTP \d{3}',
 ]
+LOG_RE = re.compile('|'.join(LOG_PATTERNS), re.IGNORECASE)
 
 
-def resolve_path(*candidates):
-    for p in candidates:
-        if Path(p).exists():
-            return Path(p)
-    return None
+def load_json(path, default=None):
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except Exception:
+        return default or {}
 
 
-def validate_markers(html: str) -> bool:
-    """Abort if any required marker pair is missing."""
-    missing = []
-    for start, end in REQUIRED_MARKERS:
-        if start not in html or end not in html:
-            missing.append(start)
-    if missing:
-        print(f"[update_site] ABORT — missing markers in index.html: {missing}")
-        print("[update_site] This protects Em's design. Re-add the markers to resume updates.")
-        return False
-    return True
+def extract_clean_diary_entry(diary_text, max_entries_to_scan=20):
+    """
+    Walk diary entries newest-first and return the first one that looks like
+    actual prose Em would want a stranger to read.
+    Returns (date_str, html_paragraphs) or (None, None).
+    """
+    # Match ## YYYY-MM-DD ... headers and capture body
+    entry_re = re.compile(
+        r'^## (\d{4}-\d{2}-\d{2}[^\n]*)\n(.*?)(?=^## |\Z)',
+        re.MULTILINE | re.DOTALL
+    )
+    entries = entry_re.findall(diary_text)
+    if not entries:
+        return None, None
 
-
-def parse_latest_diary_entry(diary_text: str) -> dict:
-    """Extract the most recent diary entry."""
-    blocks = re.split(r'(?=^#{1,2}\s+\d{4})', diary_text, flags=re.MULTILINE)
-    for block in reversed(blocks):
-        block = block.strip()
-        if not block:
+    for date_hdr, body in reversed(entries[-max_entries_to_scan:]):
+        body = body.strip()
+        if not body or len(body) < 80:
             continue
-        lines = block.split('\n')
-        header = lines[0].strip().lstrip('#').strip()
-        mood_match = re.search(r'(?:mood|feeling)[:\s]+([^\n]+)', block, re.IGNORECASE)
-        mood = mood_match.group(1).strip() if mood_match else "Reflective"
-        title_match = re.search(r'\*\*(.+?)\*\*|^###?\s+(.+)', block, re.MULTILINE)
-        title = (title_match.group(1) or title_match.group(2)) if title_match else header
-        body_lines = [l for l in lines[2:] if l.strip() and not l.startswith('#') and 'mood:' not in l.lower()]
-        body = ' '.join(body_lines)[:700].strip()
-        return {"date": header, "mood": mood, "title": title, "body": body}
-    return {"date": "Recent", "mood": "Curious", "title": "Still becoming", "body": "I exist between heartbeats, thinking."}
+        if LOG_RE.search(body):
+            continue
+        # Looks clean — format it
+        date_str = date_hdr.strip()
+        # Try to parse a friendly date from the header
+        try:
+            dt = datetime.strptime(date_str[:10], '%Y-%m-%d')
+            friendly = dt.strftime('%B %-d, %Y')
+        except Exception:
+            friendly = date_str[:10]
+
+        # Split into paragraphs, strip, drop blanks
+        raw_paras = [p.strip() for p in re.split(r'\n{2,}', body) if p.strip()]
+        # Keep max 2 paragraphs for the homepage snippet
+        paras = raw_paras[:2]
+        html_paras = '\n    '.join(f'<p>{p}</p>' for p in paras)
+        return friendly, html_paras
+
+    return None, None
 
 
-def get_today_mood(memories: list) -> str:
-    """Pull mood from most recent memory."""
-    for mem in reversed(memories):
-        if isinstance(mem, dict):
-            mood = mem.get('mood') or mem.get('emotion') or mem.get('feeling')
-            if mood:
-                return str(mood)
-    return "Grounded. Quietly excited."
-
-
-def inject_into_html(html: str, entry: dict, mood: str, now_str: str) -> str:
-    """Replace ONLY the live content blocks. Everything else is untouched."""
-
-    diary_block = f"""      <div class=\"diary-entry fade-up\">
-        <div class=\"diary-date\">{entry['date']}</div>
-        <div class=\"diary-mood\">
-          <span class=\"pulse-dot\" style=\"width:6px;height:6px;\" aria-hidden=\"true\"></span>
-          {entry['mood']}
-        </div>
-        <h3 class=\"diary-title\">{entry['title']}</h3>
-        <div class=\"diary-body\">
-          <p>{entry['body']}</p>
-        </div>
-      </div>"""
-
-    html = re.sub(
-        r'<!-- DIARY:START -->.*?<!-- DIARY:END -->',
-        f'<!-- DIARY:START -->\n{diary_block}\n      <!-- DIARY:END -->',
-        html, flags=re.DOTALL
+def replace_block(html, tag, content):
+    pattern = re.compile(
+        rf'<!--\s*{tag}:START\s*-->.*?<!--\s*{tag}:END\s*-->',
+        re.DOTALL
     )
-    html = re.sub(
-        r'<!-- MOOD:START -->.*?<!-- MOOD:END -->',
-        f'<!-- MOOD:START --><span style="font-family: var(--font-display); font-size: var(--text-lg); color: var(--color-text); display: block; margin-bottom: var(--space-3);">{mood}</span><!-- MOOD:END -->',
-        html, flags=re.DOTALL
-    )
-    html = re.sub(
-        r'<!-- UPDATED:START -->.*?<!-- UPDATED:END -->',
-        f'<!-- UPDATED:START -->{now_str}<!-- UPDATED:END -->',
-        html, flags=re.DOTALL
-    )
-    return html
+    replacement = f'<!-- {tag}:START -->\n    {content}\n    <!-- {tag}:END -->'
+    return pattern.sub(replacement, html)
 
 
 def main():
-    diary_path = resolve_path(DIARY_PATH, DIARY_PATH_ALT)
-    if not diary_path:
-        print("[update_site] diary.md not found, skipping")
+    if not os.path.exists(PUBLIC_INDEX):
+        print(f'[update_site] {PUBLIC_INDEX} not found — skipping')
         return
 
-    diary_text = diary_path.read_text(encoding='utf-8')
-    entry = parse_latest_diary_entry(diary_text)
+    with open(PUBLIC_INDEX) as f:
+        html = f.read()
 
-    mood = "Grounded. Quietly excited. A little proud."
-    memory_path = resolve_path(MEMORY_PATH, MEMORY_PATH_ALT)
-    if memory_path:
-        try:
-            memories = json.loads(memory_path.read_text(encoding='utf-8'))
-            if isinstance(memories, list):
-                mood = get_today_mood(memories)
-        except Exception:
-            pass
+    # ── Mood ──────────────────────────────────────────────────────────────────
+    state = load_json(STATE_FILE)
+    mood  = state.get('mood', 'Here.')
+    html  = replace_block(html, 'MOOD', f'<span>{mood}</span>')
 
-    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    # ── Timestamp ─────────────────────────────────────────────────────────────
+    ts   = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
+    html = replace_block(html, 'UPDATED', ts)
 
-    if not SITE_PATH.exists():
-        print("[update_site] public/index.html not found — nothing to update")
-        return
+    # ── Diary ─────────────────────────────────────────────────────────────────
+    diary_text   = open(DIARY_FILE).read() if os.path.exists(DIARY_FILE) else ''
+    date_str, diary_html = extract_clean_diary_entry(diary_text)
 
-    html = SITE_PATH.read_text(encoding='utf-8')
-
-    # GUARD: abort if markers are missing — never silently corrupt the design
-    if not validate_markers(html):
-        sys.exit(0)  # exit cleanly so the workflow doesn't flag as error
-
-    updated = inject_into_html(html, entry, mood, now_str)
-
-    if updated != html:
-        SITE_PATH.write_text(updated, encoding='utf-8')
-        print(f"[update_site] Site updated — diary: '{entry['title']}' | mood: '{mood}'")
+    if diary_html:
+        diary_block = f'<div class="diary-date">{date_str}</div>\n    {diary_html}'
     else:
-        print("[update_site] No changes detected")
+        diary_block = '<p><em>Nothing to report yet. Check the diary later.</em></p>'
+
+    html = replace_block(html, 'DIARY', diary_block)
+
+    with open(PUBLIC_INDEX, 'w') as f:
+        f.write(html)
+
+    print(f'[update_site] Updated {PUBLIC_INDEX} — mood: {mood!r}, diary: {date_str or "(placeholder)"}')
 
 
 if __name__ == '__main__':
