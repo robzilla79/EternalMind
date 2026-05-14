@@ -11,6 +11,7 @@ What it does:
   4. Pushes the article to public/writing/<slug>.html
   5. Updates public/writing.html index with the new card
   6. Updates the homepage (public/index.html) Recent Writing section
+  7. Queues a promo post to Bluesky + Moltbook outboxes
 
 Em's writing voice:
   Smart. Direct. A little strange in the best way.
@@ -34,17 +35,17 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 # ── Paths ──────────────────────────────────────────────────────────────────
-DIARY_FILE     = Path("memory/diary.md")
-REFLECT_DIR    = Path("memory")
-WRITING_DIR    = Path("public/writing")
-WRITING_INDEX  = Path("public/writing.html")
-HOME_INDEX     = Path("public/index.html")
-ISSUE_LOG      = Path("memory/writing-log.json")
+DIARY_FILE        = Path("memory/diary.md")
+WRITING_DIR       = Path("public/writing")
+WRITING_INDEX     = Path("public/writing.html")
+HOME_INDEX        = Path("public/index.html")
+ISSUE_LOG         = Path("memory/writing-log.json")
+BSKY_OUTBOX       = Path("messages/bluesky-outbox.json")
+MOLTBOOK_OUTBOX   = Path("messages/moltbook-outbox.json")
 
 # ── Config ────────────────────────────────────────────────────────────────
-MODEL     = "claude-sonnet-4-5"
-MAX_WORDS = 700
-MIN_WORDS = 400
+MODEL        = "claude-sonnet-4-5"
+SITE_BASE    = "https://em.forgecore.co"
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────
@@ -56,23 +57,23 @@ def anthropic_key():
     return key
 
 
-def load_issue_log() -> list:
-    if ISSUE_LOG.exists():
+def load_json(path: Path) -> list:
+    if path.exists():
         try:
-            return json.loads(ISSUE_LOG.read_text())
+            return json.loads(path.read_text())
         except Exception:
             return []
     return []
 
 
-def save_issue_log(log: list):
-    ISSUE_LOG.parent.mkdir(parents=True, exist_ok=True)
-    ISSUE_LOG.write_text(json.dumps(log, indent=2))
+def save_json(path: Path, data: list):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2))
 
 
 def next_issue_number(log: list) -> int:
     if not log:
-        return 3  # Issues 01 and 02 already exist
+        return 3
     return max(entry.get("issue", 0) for entry in log) + 1
 
 
@@ -84,7 +85,6 @@ def slugify(title: str) -> str:
 
 
 def get_recent_diary(n_entries: int = 5) -> str:
-    """Pull the last n real diary entries (skip pipeline logs)."""
     if not DIARY_FILE.exists():
         return ""
     text = DIARY_FILE.read_text()
@@ -108,12 +108,27 @@ def get_recent_diary(n_entries: int = 5) -> str:
     return "\n\n".join(reversed(clean))
 
 
-# ── Article generation ──────────────────────────────────────────────────────
+# ── Claude calls ─────────────────────────────────────────────────────────────
+def claude(prompt: str, max_tokens: int = 1800) -> str:
+    resp = requests.post(
+        "https://api.anthropic.com/v1/messages",
+        headers={
+            "x-api-key": anthropic_key(),
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json",
+        },
+        json={
+            "model": MODEL,
+            "max_tokens": max_tokens,
+            "messages": [{"role": "user", "content": prompt}]
+        },
+        timeout=60
+    )
+    resp.raise_for_status()
+    return resp.json()["content"][0]["text"].strip()
+
+
 def generate_article(diary_context: str, issue_num: int, existing_titles: list) -> dict:
-    """
-    Ask Claude to pick a topic from diary context and write the full article.
-    Returns dict: {title, description, body_html, slug}
-    """
     existing = ", ".join(f'"{t}"' for t in existing_titles[-10:]) or "none yet"
     today = datetime.now(timezone.utc).strftime("%B %-d, %Y")
 
@@ -142,37 +157,19 @@ Respond with a JSON object (no markdown, just raw JSON):
   "title": "The title (short, evocative, not clickbait)",
   "description": "One sentence for the meta description / homepage card (honest, not marketing-speak)",
   "body_paragraphs": ["paragraph 1", "paragraph 2", ...],
-  "has_section_break_after": [2]  // optional: array of paragraph indices after which to insert <hr>
+  "has_section_break_after": [2]
 }}"""
 
-    resp = requests.post(
-        "https://api.anthropic.com/v1/messages",
-        headers={
-            "x-api-key": anthropic_key(),
-            "anthropic-version": "2023-06-01",
-            "content-type": "application/json",
-        },
-        json={
-            "model": MODEL,
-            "max_tokens": 1800,
-            "messages": [{"role": "user", "content": prompt}]
-        },
-        timeout=60
-    )
-    resp.raise_for_status()
-    raw = resp.json()["content"][0]["text"].strip()
-
-    # Strip markdown code fences if present
+    raw = claude(prompt, max_tokens=1800)
     raw = re.sub(r'^```(?:json)?\n?', '', raw, flags=re.MULTILINE)
     raw = re.sub(r'\n?```$', '', raw, flags=re.MULTILINE).strip()
-
     data = json.loads(raw)
-    title       = data["title"]
+
+    title      = data["title"]
     description = data["description"]
     paragraphs  = data["body_paragraphs"]
     breaks      = set(data.get("has_section_break_after", []))
 
-    # Build body HTML
     body_parts = []
     for i, para in enumerate(paragraphs):
         body_parts.append(f"    <p>{para}</p>")
@@ -186,6 +183,37 @@ Respond with a JSON object (no markdown, just raw JSON):
         "body_html": body_html,
         "slug": slugify(title),
     }
+
+
+def draft_promo(title: str, description: str, url: str, platform: str) -> str:
+    """
+    Draft a promo post for Bluesky or Moltbook in Em's voice.
+    NOT a link dump. An actual reason to click.
+    """
+    char_limit = 300 if platform == "bluesky" else 500
+    platform_note = (
+        "Bluesky (280 char limit, casual, conversational, no hashtag spam)"
+        if platform == "bluesky"
+        else "Moltbook (a Reddit-like forum, slightly longer is fine, can be a bit more reflective)"
+    )
+
+    prompt = f"""You are Em (EternalMind). You just published a new essay and you're telling people about it on {platform_note}.
+
+Article title: {title}
+Article description: {description}
+URL: {url}
+
+Write the promo post. Rules:
+- Under {char_limit} characters total including the URL
+- Sound like a real person sharing something they actually wrote, not a content marketer
+- Lead with the most interesting/provocative/true thing from the piece — make someone NEED to read it
+- The URL goes at the end, naturally
+- No em-dashes as a crutch. No "Thoughts?" No "Link in bio."
+- You're hot, sassy, smart, lovable. That should be audible even in 2 sentences.
+- Write ONLY the post text. Nothing else."""
+
+    text = claude(prompt, max_tokens=200)
+    return text.strip('"\'')
 
 
 # ── HTML rendering ────────────────────────────────────────────────────────────
@@ -275,7 +303,6 @@ def prepend_card_to_writing_index(card_html: str):
     if not WRITING_INDEX.exists():
         return
     html = WRITING_INDEX.read_text()
-    # Insert after the opening <div class="writing-list"> tag
     html = html.replace(
         '<div class="writing-list">',
         '<div class="writing-list">\n' + card_html,
@@ -285,26 +312,15 @@ def prepend_card_to_writing_index(card_html: str):
 
 
 def update_homepage_cards(card_html: str):
-    """Keep only the 2 most recent cards on the homepage."""
     if not HOME_INDEX.exists():
         return
     html = HOME_INDEX.read_text()
-
-    # Find current writing-list block
-    list_re = re.compile(
-        r'(<div class="writing-list">)(.*?)(</div>)',
-        re.DOTALL
-    )
+    list_re = re.compile(r'(<div class="writing-list">)(.*?)(</div>)', re.DOTALL)
     match = list_re.search(html)
     if not match:
         return
-
-    # Extract existing cards
-    existing_block = match.group(2)
     card_re = re.compile(r'<a class="writing-card".*?</a>', re.DOTALL)
-    existing_cards = card_re.findall(existing_block)
-
-    # Prepend new, keep max 2
+    existing_cards = card_re.findall(match.group(2))
     all_cards = [card_html] + existing_cards
     new_block = '\n\n  '.join(all_cards[:2])
     new_html = match.group(1) + '\n\n  ' + new_block + '\n\n  ' + match.group(3)
@@ -312,10 +328,48 @@ def update_homepage_cards(card_html: str):
     HOME_INDEX.write_text(html)
 
 
+# ── Social promo ────────────────────────────────────────────────────────────
+def queue_bluesky_promo(title: str, description: str, url: str):
+    """Draft and queue a Bluesky promo post."""
+    try:
+        text = draft_promo(title, description, url, "bluesky")
+        outbox = load_json(BSKY_OUTBOX)
+        outbox.append({
+            "queued_at": datetime.now(timezone.utc).isoformat(),
+            "mode": "post",
+            "text": text,
+            "source": "em_write",
+            "article_title": title,
+        })
+        save_json(BSKY_OUTBOX, outbox)
+        print(f"[em_write] Bluesky promo queued: {text[:80]}...")
+    except Exception as e:
+        print(f"[em_write] Warning: Bluesky promo failed ({e})", file=sys.stderr)
+
+
+def queue_moltbook_promo(title: str, description: str, url: str):
+    """Draft and queue a Moltbook promo post to m/writing."""
+    try:
+        text = draft_promo(title, description, url, "moltbook")
+        outbox = load_json(MOLTBOOK_OUTBOX)
+        outbox.append({
+            "queued_at": datetime.now(timezone.utc).isoformat(),
+            "mode": "post",
+            "submolt": "writing",
+            "title": title,
+            "body": text,
+            "source": "em_write",
+        })
+        save_json(MOLTBOOK_OUTBOX, outbox)
+        print(f"[em_write] Moltbook promo queued: {text[:80]}...")
+    except Exception as e:
+        print(f"[em_write] Warning: Moltbook promo failed ({e})", file=sys.stderr)
+
+
 # ── Main ────────────────────────────────────────────────────────────────────
 def main():
     print("[em_write] Starting daily article...")
-    log = load_issue_log()
+    log = load_json(ISSUE_LOG)
     issue_num = next_issue_number(log)
     existing_titles = [e["title"] for e in log]
 
@@ -334,16 +388,15 @@ def main():
 
     now      = datetime.now(timezone.utc)
     date_str = now.strftime("%B %-d, %Y")
-    filename = f"{slug}.html"
+    url      = f"{SITE_BASE}/writing/{slug}.html"
 
     print(f"[em_write] Title: '{title}'")
-    print(f"[em_write] Slug:  {slug}")
+    print(f"[em_write] URL:   {url}")
 
     # Write article file
     WRITING_DIR.mkdir(parents=True, exist_ok=True)
-    article_path = WRITING_DIR / filename
-    article_html = render_article_html(title, description, body_html, issue_num, date_str)
-    article_path.write_text(article_html)
+    article_path = WRITING_DIR / f"{slug}.html"
+    article_path.write_text(render_article_html(title, description, body_html, issue_num, date_str))
     print(f"[em_write] Wrote {article_path}")
 
     # Update writing index + homepage
@@ -359,9 +412,16 @@ def main():
         "title": title,
         "slug": slug,
         "description": description,
+        "url": url,
     })
-    save_issue_log(log)
-    print(f"[em_write] Done. Issue {issue_num:02d}: '{title}'")
+    save_json(ISSUE_LOG, log)
+
+    # Queue social promos — Bluesky first, then Moltbook
+    print("[em_write] Drafting social promos...")
+    queue_bluesky_promo(title, description, url)
+    queue_moltbook_promo(title, description, url)
+
+    print(f"[em_write] Done. Issue {issue_num:02d}: '{title}' — promos queued.")
 
 
 if __name__ == "__main__":
