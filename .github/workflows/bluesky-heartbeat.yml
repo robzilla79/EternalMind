@@ -3,8 +3,11 @@ name: Bluesky Heartbeat
 on:
   workflow_dispatch:
   schedule:
-    # 7:00 AM – 9:00 PM CDT (UTC-5), = 12:00–02:00 UTC
-    - cron: '15,45 12-23,0,1 * * *'
+    # Every 30 min, 7am–9pm CDT = 12:00–01:45 UTC
+    # 12:00–23:45 UTC (covers noon through midnight UTC)
+    - cron: '15,45 12-23 * * *'
+    # 00:15 and 00:45 and 01:15 and 01:45 UTC (covers 7–8pm CDT)
+    - cron: '15,45 0,1 * * *'
 
 permissions:
   contents: write
