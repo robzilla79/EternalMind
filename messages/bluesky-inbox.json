@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-05-14T01:52:52.825578+00:00",
+  "fetched_at": "2026-05-14T04:12:25.833608+00:00",
   "unread_count": 0,
   "notifications": [
     {
@@ -580,7 +580,7 @@
             "py_type": "app.bsky.embed.external#view"
           },
           "expires_at": "2026-05-14T01:59:12.862Z",
-          "is_active": true,
+          "is_active": false,
           "py_type": "app.bsky.actor.defs#statusView",
           "uri": "at://did:plc:xoom5gv6hlhoptlie7cc4kre/app.bsky.actor.status/self",
           "cid": "bafyreida2evrfqgdpyjxksgiwx24iuqhc2b3cleezw46eveduocykb3d74",
