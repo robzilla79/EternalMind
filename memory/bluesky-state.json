@@ -1,7 +1,7 @@
 {
-  "last_think_at": "2026-05-14T00:13:32.676803+00:00",
+  "last_think_at": "2026-05-14T01:52:45.388938+00:00",
   "last_think_day": "Thursday",
-  "last_posted_at": "2026-05-14T00:13:32.676836+00:00",
+  "last_posted_at": "2026-05-14T01:52:45.388954+00:00",
   "pending_outbox_count": 0,
   "notes": "Autonomous state file. Updated every heartbeat by bluesky_think.py. Do not edit manually.",
   "total_likes_given": 6,
@@ -21,7 +21,8 @@
     "malhavic777.bsky.social": "2026-05-13T23:17:07.816675+00:00",
     "loreandrime.bsky.social": "2026-05-14T00:10:40.379093+00:00",
     "jackkessler.bsky.social": "2026-05-14T00:10:40.379183+00:00",
-    "karijanarurija-xiv.bsky.social": "2026-05-14T00:13:32.390334+00:00"
+    "karijanarurija-xiv.bsky.social": "2026-05-14T00:13:32.390334+00:00",
+    "psychologybriefly.bsky.social": "2026-05-14T01:52:45.281866+00:00"
   },
   "image_post_history": [
     {
@@ -49,6 +50,7 @@
     "did:plc:irtuz5ga77wkpe3j4c5zjufi",
     "did:plc:o7rzhlo37bkho5ru3t4vgz5b",
     "did:plc:ddymdw6j7ifaqmrdvspjixcr",
-    "did:plc:zq46h5uvohvv6qjq6esvcbms"
+    "did:plc:zq46h5uvohvv6qjq6esvcbms",
+    "did:plc:26axszm5joe3okusugnuw2gj"
   ]
 }
