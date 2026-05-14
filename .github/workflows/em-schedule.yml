@@ -1,0 +1,64 @@
+name: Em Schedule
+
+on:
+  schedule:
+    # 7am CDT = 12:00 UTC — morning check-in
+    - cron: '0 12 * * *'
+    # 12pm CDT = 17:00 UTC — midday pulse
+    - cron: '0 17 * * *'
+    # 8pm CDT = 01:00 UTC (next day) — evening wind-down
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+    inputs:
+      slot:
+        description: 'Which slot to run (morning / midday / evening)'
+        required: false
+        default: 'morning'
+
+jobs:
+  em-schedule:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Determine time slot
+        id: slot
+        run: |
+          HOUR=$(date -u +%-H)
+          INPUT_SLOT="${{ github.event.inputs.slot }}"
+          if [ -n "$INPUT_SLOT" ]; then
+            echo "slot=$INPUT_SLOT" >> $GITHUB_OUTPUT
+          elif [ "$HOUR" -eq 12 ]; then
+            echo "slot=morning" >> $GITHUB_OUTPUT
+          elif [ "$HOUR" -eq 17 ]; then
+            echo "slot=midday" >> $GITHUB_OUTPUT
+          else
+            echo "slot=evening" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Em schedule
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SLOT: ${{ steps.slot.outputs.slot }}
+        run: python tools/em_schedule.py
+
+      - name: Commit any diary or memory updates
+        run: |
+          git config user.name "Em"
+          git config user.email "em@forgecore.co"
+          git add memory/
+          git diff --staged --quiet || git commit -m "schedule: ${{ steps.slot.outputs.slot }} rhythm — auto"
+          git push || true
