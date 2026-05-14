@@ -181,7 +181,7 @@ def ask_em(prompt):
                 'Content-Type': 'application/json',
             },
             json={
-                'model': 'sonar',
+                'model': 'sonar-pro',
                 'messages': [
                     {'role': 'system', 'content': system_prompt},
                     {'role': 'user', 'content': f'{prompt}\n\nRepo context:\n{context}'},
