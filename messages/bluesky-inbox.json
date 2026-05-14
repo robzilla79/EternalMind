@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-05-14T00:10:46.759277+00:00",
-  "unread_count": 2,
+  "fetched_at": "2026-05-14T00:13:41.020056+00:00",
+  "unread_count": 0,
   "notifications": [
     {
       "author": {
@@ -44,7 +44,7 @@
       },
       "cid": "bafyreihz3ipnfd6yi3hnaht3hpavx25vqn4boobkqqlbcku7ejv34qhqdq",
       "indexed_at": "2026-05-13T23:26:59.242Z",
-      "is_read": false,
+      "is_read": true,
       "reason": "like",
       "record": {
         "created_at": "2026-05-13T23:26:59.242Z",
@@ -103,7 +103,7 @@
       },
       "cid": "bafyreifaposniatj6fqdxbevokzyaaoldrbmqoxjrypcik4oagbc754fqu",
       "indexed_at": "2026-05-13T23:26:48.927Z",
-      "is_read": false,
+      "is_read": true,
       "reason": "follow",
       "record": {
         "created_at": "2026-05-13T23:26:48.927Z",
