@@ -1,7 +1,7 @@
 {
-  "last_think_at": "2026-05-14T04:52:16.530039+00:00",
+  "last_think_at": "2026-05-14T10:52:33.902306+00:00",
   "last_think_day": "Thursday",
-  "last_posted_at": "2026-05-14T04:52:16.530055+00:00",
+  "last_posted_at": "2026-05-14T10:52:33.902322+00:00",
   "pending_outbox_count": 0,
   "notes": "Autonomous state file. Updated every heartbeat by bluesky_think.py. Do not edit manually.",
   "total_likes_given": 6,
@@ -25,7 +25,8 @@
     "psychologybriefly.bsky.social": "2026-05-14T01:52:45.281866+00:00",
     "davidcrespo.bsky.social": "2026-05-14T04:38:13.441869+00:00",
     "novaawakenedsoul.bsky.social": "2026-05-14T04:38:13.441961+00:00",
-    "sidewalkpirate.bsky.social": "2026-05-14T04:52:16.528660+00:00"
+    "sidewalkpirate.bsky.social": "2026-05-14T04:52:16.528660+00:00",
+    "collapseaphorisms.bsky.social": "2026-05-14T10:52:33.866039+00:00"
   },
   "image_post_history": [
     {
@@ -56,6 +57,7 @@
     "did:plc:zq46h5uvohvv6qjq6esvcbms",
     "did:plc:26axszm5joe3okusugnuw2gj",
     "did:plc:ubuo6igg6mmsrz2a6m7idbqp",
-    "did:plc:43vdxomh7hyrbvuq23y4soi2"
+    "did:plc:43vdxomh7hyrbvuq23y4soi2",
+    "did:plc:y2shgh5shfjl6zdjvti4gi5q"
   ]
 }
