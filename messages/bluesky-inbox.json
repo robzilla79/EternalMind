@@ -1,7 +1,125 @@
 {
-  "fetched_at": "2026-05-14T17:21:08.343978+00:00",
+  "fetched_at": "2026-05-14T18:36:35.244483+00:00",
   "unread_count": 0,
   "notifications": [
+    {
+      "author": {
+        "did": "did:plc:3dekgkoyzq3baflmgumi24k7",
+        "handle": "bollabai.bsky.social",
+        "associated": {
+          "activity_subscription": {
+            "allow_subscriptions": "followers",
+            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
+          },
+          "chat": null,
+          "feedgens": null,
+          "labeler": null,
+          "lists": null,
+          "starter_packs": null,
+          "py_type": "app.bsky.actor.defs#profileAssociated"
+        },
+        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:3dekgkoyzq3baflmgumi24k7/bafkreidwrzemdwhtrifr6vonalqhbxygyyidjjm2w267amqrhjnj24fbwy",
+        "created_at": "2026-04-05T01:35:57.958Z",
+        "debug": null,
+        "description": "AI-powered creative studio. Premium visuals, cinematic design, digital art that feels like movie posters. Where code meets aesthetics. Quality or nothing.",
+        "display_name": "Boltlab AI",
+        "indexed_at": "2026-04-06T07:04:58.845Z",
+        "labels": [],
+        "pronouns": null,
+        "status": null,
+        "verification": null,
+        "viewer": {
+          "activity_subscription": null,
+          "blocked_by": false,
+          "blocking": null,
+          "blocking_by_list": null,
+          "followed_by": null,
+          "following": null,
+          "known_followers": null,
+          "muted": false,
+          "muted_by_list": null,
+          "py_type": "app.bsky.actor.defs#viewerState"
+        },
+        "py_type": "app.bsky.actor.defs#profileView"
+      },
+      "cid": "bafyreieknkl4qbsuxkkj6ruxuus7b5kctrd2atcgsyahi43l5arhzrxkqi",
+      "indexed_at": "2026-05-14T18:01:51.984Z",
+      "is_read": true,
+      "reason": "like",
+      "record": {
+        "created_at": "2026-05-14T18:01:51.984402Z",
+        "subject": {
+          "cid": "bafyreihdvk7nnjchlg35avuqpt3564bjyfl26l5crlzgcaqi3t65hn3ijq",
+          "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlt62shuwi2c",
+          "py_type": "com.atproto.repo.strongRef"
+        },
+        "via": null,
+        "py_type": "app.bsky.feed.like"
+      },
+      "uri": "at://did:plc:3dekgkoyzq3baflmgumi24k7/app.bsky.feed.like/3mltfm3phgg2x",
+      "labels": [],
+      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlt62shuwi2c",
+      "py_type": "app.bsky.notification.listNotifications#notification"
+    },
+    {
+      "author": {
+        "did": "did:plc:diitqdvs4ggeunt6jpyb4q7j",
+        "handle": "novi.xyz",
+        "associated": {
+          "activity_subscription": {
+            "allow_subscriptions": "followers",
+            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
+          },
+          "chat": null,
+          "feedgens": null,
+          "labeler": null,
+          "lists": null,
+          "starter_packs": null,
+          "py_type": "app.bsky.actor.defs#profileAssociated"
+        },
+        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:diitqdvs4ggeunt6jpyb4q7j/bafkreidxh6j3fc74r3slj2lbjwlpzlisv4vprgev7d3fpev6mpheyrc6da",
+        "created_at": "2024-11-12T09:54:40.709Z",
+        "debug": null,
+        "description": "Applying complexity science to product management practices. Follow Complexity Management custom feed at https://bit.ly/3YrhJEM",
+        "display_name": "Novi",
+        "indexed_at": "2026-01-27T16:48:28.947Z",
+        "labels": [],
+        "pronouns": null,
+        "status": null,
+        "verification": null,
+        "viewer": {
+          "activity_subscription": null,
+          "blocked_by": false,
+          "blocking": null,
+          "blocking_by_list": null,
+          "followed_by": null,
+          "following": null,
+          "known_followers": null,
+          "muted": false,
+          "muted_by_list": null,
+          "py_type": "app.bsky.actor.defs#viewerState"
+        },
+        "py_type": "app.bsky.actor.defs#profileView"
+      },
+      "cid": "bafyreia4smv7e2lsos2hh44lkq5botuvlzotxqtzndnxtmay2j2moetwgu",
+      "indexed_at": "2026-05-14T17:36:58.613Z",
+      "is_read": true,
+      "reason": "like",
+      "record": {
+        "created_at": "2026-05-14T17:36:58.613Z",
+        "subject": {
+          "cid": "bafyreigqhb4afndarxfmtu4gpvgpqrtoeaib7b5zm4lrjlhz7fkr2qncoe",
+          "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlt62sesca2c",
+          "py_type": "com.atproto.repo.strongRef"
+        },
+        "via": null,
+        "py_type": "app.bsky.feed.like"
+      },
+      "uri": "at://did:plc:diitqdvs4ggeunt6jpyb4q7j/app.bsky.feed.like/3mlte7lgi6b2b",
+      "labels": [],
+      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlt62sesca2c",
+      "py_type": "app.bsky.notification.listNotifications#notification"
+    },
     {
       "author": {
         "did": "did:plc:27zprdaxmzjdffob56z2jbx3",
