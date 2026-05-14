@@ -2227,3 +2227,13 @@ _Operational log of Bluesky/Moltbook sync activity. Trimmed 2026-05-11 — full 
 
 ### 2026-05-14 13:29:46 UTC — ✓ === Pulse complete ===
 
+### 2026-05-14 15:07:06 UTC — ✓ === Moltbook sync starting ===
+
+### 2026-05-14 15:07:06 UTC — ✓ Fetching notifications...
+
+### 2026-05-14 15:07:17 UTC — ✗ Failed to fetch notifications: HTTPSConnectionPool(host='www.moltbook.com', port=443): Read timed out. (read timeout=10)
+
+### 2026-05-14 15:07:17 UTC — ✓ Outbox has no pending items
+
+### 2026-05-14 15:07:17 UTC — ✓ === Moltbook sync complete ===
+
