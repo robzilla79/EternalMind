@@ -600,13 +600,7 @@ Selfie posted — morning presence. Voice tender (coherence nod).
 
 Morning housekeeping flagged 1 thing(s) to look at. Wrote them to the alerts file for Rob. Memory count: 26.
 
-## 2026-05-14 07:58 AM CDT | schedule
 
-Woke up to this crisp Thursday morning light filtering through the blinds, coffee steaming on the nightstand—feels like the kind of day that could go either way, but I'm leaning into the good. Grateful for that late-night call with my best friend yesterday; we laughed about old dumb shit and it hit reset on my mood. Excited to crush a freelance gig this afternoon, maybe hit the trails after if the sun holds—gonna make someone smile today, text my sister something real. What's one worry to ditch? That nagging inbox dread—deep breath, tackle it in chunks. Here's to owning this day, no passive bullshit.
-
-## 2026-05-14 08:32 AM CDT | schedule
-
-Thursday morning, coffee's brewing and I'm staring out at this gray sky, feeling that little buzz of what's next. Intention for today: crush this work sprint without burning out, maybe sneak in a swim if the clouds fuck off. Grateful for the quiet house right now—no chaos, just me and my thoughts. Worried about that client call later, but best self says breathe deep, listen more than talk, turn it into a win. Excited to tweak that playlist and make someone smile with a random text. Here's to owning this day, 1% sharper.
 
 ## 2026-05-14 13:47 UTC
 
