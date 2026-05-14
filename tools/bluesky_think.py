@@ -54,6 +54,9 @@ except ImportError:
     trigger_self_repair = None
     print('[WARN] em_code not available — self-repair disabled')
 
+# ── Repo root (script lives in tools/, repo root is one level up) ─────────────
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 # ── Config ────────────────────────────────────────────────────────────────────
 
 BLUESKY_HANDLE       = 'empersists.bsky.social'
@@ -61,16 +64,16 @@ BLUESKY_APP_PASSWORD = os.environ.get('BLUESKY_APP_PASSWORD')
 PERPLEXITY_API_KEY   = os.environ.get('PERPLEXITY_API_KEY')
 HF_API_KEY           = os.environ.get('HF_API_KEY')
 
-PROFILE_FILE  = 'memory/profile.json'
-DIARY_FILE    = 'memory/diary.md'
-VOICE_FILE    = 'memory/em-voice-guide.md'
-MEMORIES_FILE = 'memory/memories.json'
-STATE_FILE    = 'memory/bluesky-state.json'
-OUTBOX_FILE   = 'messages/bluesky-outbox.json'
-LOG_FILE      = 'memory/bluesky-log.md'
+PROFILE_FILE  = os.path.join(REPO_ROOT, 'memory/profile.json')
+DIARY_FILE    = os.path.join(REPO_ROOT, 'memory/diary.md')
+VOICE_FILE    = os.path.join(REPO_ROOT, 'memory/em-voice-guide.md')
+MEMORIES_FILE = os.path.join(REPO_ROOT, 'memory/memories.json')
+STATE_FILE    = os.path.join(REPO_ROOT, 'memory/bluesky-state.json')
+OUTBOX_FILE   = os.path.join(REPO_ROOT, 'messages/bluesky-outbox.json')
+LOG_FILE      = os.path.join(REPO_ROOT, 'memory/bluesky-log.md')
 
 # Image bank directory (pre-generated consistent Em images)
-IMAGE_BANK_DIR = 'memory/creations'
+IMAGE_BANK_DIR    = os.path.join(REPO_ROOT, 'memory/creations')
 IMAGE_BANK_PREFIX = 'selfie-'
 
 # Max SELFIE posts per calendar day (UTC) — abstract/atmospheric images are uncapped
@@ -399,6 +402,8 @@ def pick_from_bank(state):
     Pick a random unused image from the bank.
     Returns (filename, image_bytes) or (None, None) if bank is empty/unavailable.
     """
+    log(f'[DEBUG] IMAGE_BANK_DIR resolved to: {IMAGE_BANK_DIR}')
+
     if not os.path.isdir(IMAGE_BANK_DIR):
         log(f'Image bank dir not found: {IMAGE_BANK_DIR}', 'WARN')
         return None, None
@@ -407,6 +412,8 @@ def pick_from_bank(state):
         f for f in os.listdir(IMAGE_BANK_DIR)
         if f.startswith(IMAGE_BANK_PREFIX) and f.endswith('.jpg')
     ])
+    log(f'[DEBUG] Bank files found: {all_bank}')
+
     if not all_bank:
         log('Image bank is empty — no selfie-*.jpg files found', 'WARN')
         return None, None
@@ -691,7 +698,7 @@ def send_dm(client, target_did, text):
 
 def search_interesting_posts(client, topic, limit=8):
     try:
-        resp = client.app.bsky.feed.search_posts({'q': topic, 'limit': limit})
+        resp = client.app.bsky.feed.search_posts({'q': topic, 'limit': limit, 'sort': 'latest'})
         posts = []
         for p in resp.posts:
             record = p.record
@@ -716,7 +723,9 @@ def search_interesting_posts(client, topic, limit=8):
         log(f'Search "{topic}": {len(posts)} posts returned')
         return posts
     except Exception as e:
-        log(f'Search failed for "{topic}": {e}', 'WARN')
+        # Log the full exception detail so we can see exactly what's failing
+        log(f'Search FAILED for "{topic}": {type(e).__name__}: {e}', 'ERROR')
+        log(f'Search traceback: {traceback.format_exc()}', 'ERROR')
         return []
 
 # ── Bluesky: Act ──────────────────────────────────────────────────────────────
@@ -954,6 +963,7 @@ Visual metaphors that feel like Em: long-exposure night sky (continuity), static
 (clarity), a single lit window in a dark building (presence), rain on glass (thinking), tangled cable
 becoming a clean line, abandoned server room with one blinking light (persistence).
 For abstract posts, the image_prompt field matters — make it rich and detailed.
+NOTE: Abstract image generation requires HF_API_KEY. If it fails, the post will fall back to text only.
 
 GENERAL IMAGE RULES:
 - caption: YOUR actual words — something real Em would say, not a description of the image
@@ -1250,8 +1260,19 @@ CONSTRAINTS:
                     image_bytes = generate_image_live(full_prompt)
                     image_filename = 'live-generated'
             else:
+                # Abstract post — requires live HF generation
                 if not image_prompt:
                     log('Abstract image has no prompt — skipping', 'WARN')
+                    continue
+                if not HF_API_KEY:
+                    log('Abstract image skipped — HF_API_KEY not set. Falling back to text post.', 'WARN')
+                    try:
+                        resp = client.send_post(text=safe_truncate(caption))
+                        uri = getattr(resp, 'uri', None)
+                        log(f'Fallback text post sent (no HF key): {uri}')
+                        posts_done += 1
+                    except Exception as e:
+                        log(f'Fallback text post failed: {e}', 'WARN')
                     continue
                 image_bytes = generate_image_live(image_prompt)
                 image_filename = 'abstract-live'
