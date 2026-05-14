@@ -52,6 +52,19 @@ FORBIDDEN_UNGROUNDED_DETAILS = [
     'quiet house',
 ]
 
+KNOWN_BAD_DIARY_BLOCKS = [
+    """
+## 2026-05-14 07:58 AM CDT | schedule
+
+Woke up to this crisp Thursday morning light filtering through the blinds, coffee steaming on the nightstand—feels like the kind of day that could go either way, but I'm leaning into the good. Grateful for that late-night call with my best friend yesterday; we laughed about old dumb shit and it hit reset on my mood. Excited to crush a freelance gig this afternoon, maybe hit the trails after if the sun holds—gonna make someone smile today, text my sister something real. What's one worry to ditch? That nagging inbox dread—deep breath, tackle it in chunks. Here's to owning this day, no passive bullshit.
+""",
+    """
+## 2026-05-14 08:32 AM CDT | schedule
+
+Thursday morning, coffee's brewing and I'm staring out at this gray sky, feeling that little buzz of what's next. Intention for today: crush this work sprint without burning out, maybe sneak in a swim if the clouds fuck off. Grateful for the quiet house right now—no chaos, just me and my thoughts. Worried about that client call later, but best self says breathe deep, listen more than talk, turn it into a win. Excited to tweak that playlist and make someone smile with a random text. Here's to owning this day, 1% sharper.
+""",
+]
+
 
 def now_cdt():
     return datetime.now(CDT)
@@ -85,6 +98,28 @@ def load_text(path, default=''):
             return f.read()
     except FileNotFoundError:
         return default
+
+
+def clean_known_diary_contamination():
+    diary = load_text(DIARY_FILE)
+    if not diary:
+        return
+
+    cleaned = diary
+    removed = 0
+    for block in KNOWN_BAD_DIARY_BLOCKS:
+        if block in cleaned:
+            cleaned = cleaned.replace(block, '\n')
+            removed += 1
+
+    if removed == 0:
+        log('No known diary contamination found')
+        return
+
+    with open(DIARY_FILE, 'w', encoding='utf-8') as f:
+        f.write(cleaned)
+    log(f'Removed {removed} known contaminated diary block(s)')
+    notify_rob(f'Removed {removed} contaminated schedule diary block(s).')
 
 
 def recent_diary_context(max_chars=4500):
@@ -250,6 +285,7 @@ def evening():
 
 if __name__ == '__main__':
     log(f'Running slot: {SLOT}')
+    clean_known_diary_contamination()
     if SLOT == 'morning':
         morning()
     elif SLOT == 'midday':
