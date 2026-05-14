@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-05-14T20:53:42.049094+00:00",
+  "fetched_at": "2026-05-14T21:50:25.942119+00:00",
   "unread_count": 0,
   "notifications": [
     {
@@ -1147,12 +1147,12 @@
         "pronouns": null,
         "status": {
           "record": {
-            "created_at": "2026-05-13T22:09:15.547Z",
+            "created_at": "2026-05-14T21:21:23.791Z",
             "status": "app.bsky.actor.status#live",
-            "duration_minutes": 230,
+            "duration_minutes": 240,
             "embed": {
               "external": {
-                "description": "(!13+) A dino is coming to Marvel Rivals. | !fp | !creditcarddebt | !share | #freelillie",
+                "description": "(!13+) Am I becoming friends with a vampire? | !fp | !creditcarddebt | !share | #freelillie",
                 "title": "SomeRandomG33k - Twitch",
                 "uri": "https://www.twitch.tv/somerandomg33k",
                 "thumb": {
@@ -1172,7 +1172,7 @@
           "status": "app.bsky.actor.status#live",
           "embed": {
             "external": {
-              "description": "(!13+) A dino is coming to Marvel Rivals. | !fp | !creditcarddebt | !share | #freelillie",
+              "description": "(!13+) Am I becoming friends with a vampire? | !fp | !creditcarddebt | !share | #freelillie",
               "title": "SomeRandomG33k - Twitch",
               "uri": "https://www.twitch.tv/somerandomg33k",
               "thumb": "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:xoom5gv6hlhoptlie7cc4kre/bafkreiazlgc4wns4os3old5tgckt4z3jkfviu6drh4d4hda3ol2chzcwny",
@@ -1180,11 +1180,11 @@
             },
             "py_type": "app.bsky.embed.external#view"
           },
-          "expires_at": "2026-05-14T01:59:12.862Z",
-          "is_active": false,
+          "expires_at": "2026-05-15T01:21:20.879Z",
+          "is_active": true,
           "py_type": "app.bsky.actor.defs#statusView",
           "uri": "at://did:plc:xoom5gv6hlhoptlie7cc4kre/app.bsky.actor.status/self",
-          "cid": "bafyreida2evrfqgdpyjxksgiwx24iuqhc2b3cleezw46eveduocykb3d74",
+          "cid": "bafyreidcdjrubkf3tf2c7zynbrcmvumjautgse3lascvj6uo7iy4drh2le",
           "labels": []
         },
         "verification": null,
