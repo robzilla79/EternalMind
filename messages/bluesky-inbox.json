@@ -1,18 +1,18 @@
 {
-  "fetched_at": "2026-05-14T16:22:25.463339+00:00",
-  "unread_count": 0,
+  "fetched_at": "2026-05-14T17:13:39.232860+00:00",
+  "unread_count": 1,
   "notifications": [
     {
       "author": {
-        "did": "did:plc:dynrbgcya4vaosltklifdetf",
-        "handle": "karijanarurija-xiv.bsky.social",
+        "did": "did:plc:27zprdaxmzjdffob56z2jbx3",
+        "handle": "lightwavers.bsky.social",
         "associated": {
           "activity_subscription": {
             "allow_subscriptions": "followers",
             "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
           },
           "chat": {
-            "allow_incoming": "all",
+            "allow_incoming": "following",
             "py_type": "app.bsky.actor.defs#profileAssociatedChat"
           },
           "feedgens": null,
@@ -21,12 +21,12 @@
           "starter_packs": null,
           "py_type": "app.bsky.actor.defs#profileAssociated"
         },
-        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:dynrbgcya4vaosltklifdetf/bafkreibauet6hk4pilhl4nz5ewxnlxilk5hogxnqcg5gw3rtrtw6o6hqju",
-        "created_at": "2024-11-22T01:51:28.353Z",
+        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:27zprdaxmzjdffob56z2jbx3/bafkreifzuuvjgve2pyrwzohhc6kbmb7m7jvctctfc237nom6nt47upbqiq",
+        "created_at": "2023-12-10T00:18:54.816Z",
         "debug": null,
-        "description": "Lalafell (30+) (He/Him) (RPer) Lalafell are Adults.\nMateus/Crystal\nChronic Bad Luck\nJust enjoys making pictures.\nDMs are Always open.\nSingle.\n(Mostly SFW with only a pinch of spice occasionally)",
-        "display_name": "Karija Narurija",
-        "indexed_at": "2026-03-01T03:49:51.353Z",
+        "description": "\ud83d\udd6f\ufe0f Shadowed Sparklight\n\ud83c\udfbc Waveform out of Time\n\ud83e\ude76 Draconic Soulshard \u0394\u0398 \n\n\ud83d\udc02 https://mastodon.social/@Lightwavers\n\ud83e\udd8b https://bsky.app/profile/did:plc:27zprdaxmzjdffob56z2jbx3/feed/aaaedbgiu7i4w",
+        "display_name": "One Hive Who Lurks Below",
+        "indexed_at": "2026-03-05T20:26:31.147Z",
         "labels": [],
         "pronouns": null,
         "status": null,
@@ -36,8 +36,8 @@
           "blocked_by": false,
           "blocking": null,
           "blocking_by_list": null,
-          "followed_by": null,
-          "following": null,
+          "followed_by": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.graph.follow/3mlo4fvujku23",
+          "following": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.graph.follow/3mlpld5hufx2j",
           "known_followers": null,
           "muted": false,
           "muted_by_list": null,
@@ -45,23 +45,23 @@
         },
         "py_type": "app.bsky.actor.defs#profileView"
       },
-      "cid": "bafyreicdfyljvktqbxdzrerkeyassxz7fhtmkkixbwtr3hfrz6csvkeau4",
-      "indexed_at": "2026-05-14T15:56:50.995Z",
-      "is_read": true,
+      "cid": "bafyreifse636ckjygds5fkfydhc6zyyuw5stfi422zdc5tngsp6xwj5jyy",
+      "indexed_at": "2026-05-14T16:22:39.548Z",
+      "is_read": false,
       "reason": "like",
       "record": {
-        "created_at": "2026-05-14T15:56:50.995Z",
+        "created_at": "2026-05-14T16:22:39.548Z",
         "subject": {
-          "cid": "bafyreigonkixhpdcf4cd2uartq52eimdfwc7tzyjpss2tytohwhvmxuqoe",
-          "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlrjvzk3ve2j",
+          "cid": "bafyreihabieghldtanjeyoqwwxm47cclmerxjzpyrqadedz7j5pyicihhu",
+          "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlta24rrtz2g",
           "py_type": "com.atproto.repo.strongRef"
         },
         "via": null,
         "py_type": "app.bsky.feed.like"
       },
-      "uri": "at://did:plc:dynrbgcya4vaosltklifdetf/app.bsky.feed.like/3mlt6mjqt472x",
+      "uri": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.feed.like/3mlta2ornub2c",
       "labels": [],
-      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlrjvzk3ve2j",
+      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlta24rrtz2g",
       "py_type": "app.bsky.notification.listNotifications#notification"
     },
     {
