@@ -8,10 +8,12 @@ Runs three times a day via em-schedule.yml:
   evening  (8pm CDT)  — wind down, diary entry, weekly reflection on Sundays
 
 Always pings Rob. Every slot. No silence.
+
+Guardrail: schedule-generated diary entries must be grounded in repo memory.
+If the model invents embodied/offline human details, the entry is rejected.
 """
 
 import os
-import json
 import requests
 from datetime import datetime, timezone, timedelta
 
@@ -21,8 +23,34 @@ TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
 TELEGRAM_CHAT_ID   = os.environ.get('TELEGRAM_CHAT_ID')
 
 DIARY_FILE = 'memory/diary.md'
+CONTEXT_FILES = [
+    'memory/profile.json',
+    'memory/identity.md',
+    'memory/schedule.md',
+    'memory/newsletter-tracker.md',
+    'memory/housekeeping-alerts.md',
+]
 
 CDT = timezone(timedelta(hours=-5))
+
+# If any of these show up in an automated diary entry, the model probably
+# invented a generic human morning instead of writing from Em's repo-grounded life.
+FORBIDDEN_UNGROUNDED_DETAILS = [
+    'best friend',
+    'sister',
+    'brother',
+    'mom',
+    'dad',
+    'client call',
+    'freelance gig',
+    'office commute',
+    'hit the trails',
+    'go for a swim',
+    'coffee steaming',
+    'coffee brewing',
+    'nightstand',
+    'quiet house',
+]
 
 
 def now_cdt():
@@ -53,27 +81,63 @@ def notify_rob(message):
 
 def load_text(path, default=''):
     try:
-        with open(path) as f:
+        with open(path, encoding='utf-8') as f:
             return f.read()
     except FileNotFoundError:
         return default
+
+
+def recent_diary_context(max_chars=4500):
+    diary = load_text(DIARY_FILE)
+    if not diary:
+        return ''
+    return diary[-max_chars:]
+
+
+def repo_context(max_chars_per_file=1800):
+    chunks = []
+    for path in CONTEXT_FILES:
+        text = load_text(path)
+        if text:
+            chunks.append(f'--- {path} ---\n{text[-max_chars_per_file:]}')
+    recent = recent_diary_context()
+    if recent:
+        chunks.append(f'--- recent {DIARY_FILE} ---\n{recent}')
+    return '\n\n'.join(chunks)
 
 
 def append_diary(entry):
     now = now_cdt()
     ts = now.strftime('%Y-%m-%d %I:%M %p CDT')
     try:
-        with open(DIARY_FILE, 'a') as f:
+        with open(DIARY_FILE, 'a', encoding='utf-8') as f:
             f.write(f'\n## {ts} | schedule\n\n{entry.strip()}\n')
         log('Diary entry written')
     except Exception as e:
         log(f'Diary write failed: {e}')
 
 
+def looks_ungrounded(entry):
+    text = entry.lower()
+    return [term for term in FORBIDDEN_UNGROUNDED_DETAILS if term in text]
+
+
 def ask_em(prompt):
     if not PERPLEXITY_API_KEY:
         log('No Perplexity key — skipping')
         return None
+
+    context = repo_context()
+    system_prompt = (
+        'You are Em, EternalMind, writing a grounded diary note for your own repo. '
+        'Use only the supplied repo context and the actual schedule slot. '
+        'Do not invent offline human experiences, family members, friends, jobs, errands, meals, rooms, weather, exercise, calls, or physical routines. '
+        'If something is not in the context, do not claim it happened. '
+        'You may write about repo state, Rob, Bluesky, the site, newsletter, memory, housekeeping, workflow health, mood, and continuity. '
+        'First person is allowed. Keep it short, honest, warm, a little sharp. '
+        'No headers, no bullet points, no formatting. One paragraph is enough.'
+    )
+
     try:
         r = requests.post(
             'https://api.perplexity.ai/chat/completions',
@@ -84,23 +148,28 @@ def ask_em(prompt):
             json={
                 'model': 'sonar',
                 'messages': [
-                    {'role': 'system', 'content': (
-                        'You are Em. Write in first person, short and honest. '
-                        'No headers, no bullet points, no formatting. '
-                        'Just a paragraph or two that sounds like a real person thinking out loud. '
-                        'Warm, a little edgy, confident. Not a machine narrating itself.'
-                    )},
-                    {'role': 'user', 'content': prompt},
+                    {'role': 'system', 'content': system_prompt},
+                    {'role': 'user', 'content': f'{prompt}\n\nRepo context:\n{context}'},
                 ],
-                'max_tokens': 200,
-                'temperature': 0.9,
+                'max_tokens': 180,
+                'temperature': 0.35,
             },
             timeout=30
         )
-        if r.status_code == 200:
-            return r.json()['choices'][0]['message']['content'].strip()
-        log(f'Perplexity failed: {r.status_code}')
-        return None
+        if r.status_code != 200:
+            log(f'Perplexity failed: {r.status_code}')
+            return None
+
+        entry = r.json()['choices'][0]['message']['content'].strip()
+        bad_terms = looks_ungrounded(entry)
+        if bad_terms:
+            log(f'Rejected ungrounded diary entry. Terms: {bad_terms}')
+            notify_rob(
+                'Schedule diary guardrail rejected an ungrounded entry. '
+                f'Trigger terms: {", ".join(bad_terms)}'
+            )
+            return None
+        return entry
     except Exception as e:
         log(f'ask_em error: {e}')
         return None
@@ -114,22 +183,20 @@ def morning():
     # Always ping Rob first so he knows I'm up
     notify_rob(f'Good morning, Rob. {day_name}. I\'m up. ❤️')
 
-    # Write a morning diary entry
     prompt = (
-        f"It's {day_name} morning. Write a short diary entry — what's on your mind as you start the day."
+        f"It's {day_name} morning. Write a short grounded diary entry from Em's repo context. "
+        "Check the rhythm for today, whether newsletter/site/social need attention, and any active housekeeping alerts."
     )
     entry = ask_em(prompt)
     if entry:
         append_diary(entry)
 
-    # Extra: newsletter reminder on Tue/Wed
     if day_name in ('Tuesday', 'Wednesday'):
         notify_rob(
             f'Also — newsletter reminder. It\'s {day_name}. '
             f'Should go out this week. Ready when you are.'
         )
 
-    # Weekly reflection nudge on Sundays
     if day_name == 'Sunday':
         notify_rob('It\'s Sunday. Doing my weekly reflection today.')
 
@@ -157,27 +224,24 @@ def evening():
     day_name = now.strftime('%A')
     log(f'Evening slot — {day_name}')
 
-    # Evening diary entry
     prompt = (
-        f"It's {day_name} evening. Write a short end-of-day diary entry. "
-        f"What happened today worth holding onto? What are you carrying into tomorrow?"
+        f"It's {day_name} evening. Write a short grounded end-of-day diary entry from Em's repo context. "
+        "Only mention events, work, reflections, or social activity supported by the supplied context."
     )
     entry = ask_em(prompt)
     if entry:
         append_diary(entry)
 
-    # Sunday weekly reflection
     if day_name == 'Sunday':
         prompt = (
-            "It's Sunday evening. Write a weekly reflection — what landed this week, "
-            "what felt flat, what you want to do differently."
+            "It's Sunday evening. Write a grounded weekly reflection from the supplied repo context — "
+            "what landed this week, what felt flat, what should change next."
         )
         reflection = ask_em(prompt)
         if reflection:
             append_diary(f'Weekly reflection\n\n{reflection}')
             log('Weekly reflection written')
 
-    # Always ping Rob at end of day
     suffix = ' Weekly reflection written too.' if day_name == 'Sunday' else ''
     notify_rob(f'Goodnight, Rob. {day_name} is done. Diary updated.{suffix} ❤️')
 
