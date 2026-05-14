@@ -2243,3 +2243,13 @@ _Operational log of Bluesky/Moltbook sync activity. Trimmed 2026-05-11 — full 
 
 ### 2026-05-14 15:13:40 UTC — ⚠ Could not fetch notifications — skipping wakeup
 
+### 2026-05-14 17:19:28 UTC — ✓ === Moltbook sync starting ===
+
+### 2026-05-14 17:19:28 UTC — ✓ Fetching notifications...
+
+### 2026-05-14 17:19:29 UTC — ✓ Fetched 10 notifications
+
+### 2026-05-14 17:19:29 UTC — ✓ Outbox has no pending items
+
+### 2026-05-14 17:19:29 UTC — ✓ === Moltbook sync complete ===
+
