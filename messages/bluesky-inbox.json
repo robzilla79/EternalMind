@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-05-14T17:13:39.232860+00:00",
-  "unread_count": 1,
+  "fetched_at": "2026-05-14T17:21:08.343978+00:00",
+  "unread_count": 0,
   "notifications": [
     {
       "author": {
@@ -47,7 +47,7 @@
       },
       "cid": "bafyreifse636ckjygds5fkfydhc6zyyuw5stfi422zdc5tngsp6xwj5jyy",
       "indexed_at": "2026-05-14T16:22:39.548Z",
-      "is_read": false,
+      "is_read": true,
       "reason": "like",
       "record": {
         "created_at": "2026-05-14T16:22:39.548Z",
