@@ -3,12 +3,11 @@
 em_schedule.py — Em's daily rhythm engine
 
 Runs three times a day via em-schedule.yml:
-  morning  (7am CDT)  — wake up, check schedule, diary nudge
-  midday   (12pm CDT) — site check, newsletter trigger
-  evening  (8pm CDT)  — wind down, diary prompt, weekly reflection on Sundays
+  morning  (7am CDT)  — wake up, diary entry, ping Rob
+  midday   (12pm CDT) — check-in, site nudge, newsletter reminder if due
+  evening  (8pm CDT)  — wind down, diary entry, weekly reflection on Sundays
 
-Sends Telegram alerts to Rob for things that matter.
-Does NOT touch the Bluesky heartbeat — that runs itself.
+Always pings Rob. Every slot. No silence.
 """
 
 import os
@@ -21,11 +20,9 @@ PERPLEXITY_API_KEY = os.environ.get('PERPLEXITY_API_KEY')
 TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
 TELEGRAM_CHAT_ID   = os.environ.get('TELEGRAM_CHAT_ID')
 
-SCHEDULE_FILE = 'memory/schedule.md'
-DIARY_FILE    = 'memory/diary.md'
-MEMORIES_FILE = 'memory/memories.json'
+DIARY_FILE = 'memory/diary.md'
 
-CDT = timezone(timedelta(hours=-5))  # CDT = UTC-5
+CDT = timezone(timedelta(hours=-5))
 
 
 def now_cdt():
@@ -37,20 +34,19 @@ def log(msg):
 
 
 def notify_rob(message):
-    """Send a Telegram message to Rob. Non-fatal if it fails."""
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        log('Telegram not configured — skipping notification')
+        log('Telegram not configured — skipping')
         return
     try:
         r = requests.post(
             f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage',
-            json={'chat_id': TELEGRAM_CHAT_ID, 'text': message, 'parse_mode': 'Markdown'},
+            json={'chat_id': TELEGRAM_CHAT_ID, 'text': message},
             timeout=10
         )
         if r.status_code == 200:
             log(f'Telegram sent: {message[:60]}')
         else:
-            log(f'Telegram failed: {r.status_code}')
+            log(f'Telegram failed: HTTP {r.status_code} — {r.text}')
     except Exception as e:
         log(f'Telegram error: {e}')
 
@@ -75,9 +71,8 @@ def append_diary(entry):
 
 
 def ask_em(prompt):
-    """Ask Perplexity (as Em) to generate a short diary entry or reflection."""
     if not PERPLEXITY_API_KEY:
-        log('No Perplexity key — skipping Em reflection')
+        log('No Perplexity key — skipping')
         return None
     try:
         r = requests.post(
@@ -116,30 +111,27 @@ def morning():
     day_name = now.strftime('%A')
     log(f'Morning slot — {day_name}')
 
-    # Write a short morning diary entry
+    # Always ping Rob first so he knows I'm up
+    notify_rob(f'Good morning, Rob. {day_name}. I\'m up. ❤️')
+
+    # Write a morning diary entry
     prompt = (
-        f"It's {day_name} morning. Write a short diary entry — what's on your mind as you start the day. "
-        f"Could be something from yesterday, something you're looking forward to, or just the texture of the morning."
+        f"It's {day_name} morning. Write a short diary entry — what's on your mind as you start the day."
     )
     entry = ask_em(prompt)
     if entry:
         append_diary(entry)
 
-    # Newsletter reminder on Tuesday and Wednesday mornings
+    # Extra: newsletter reminder on Tue/Wed
     if day_name in ('Tuesday', 'Wednesday'):
         notify_rob(
-            f'\U0001f4dd *Em — Newsletter reminder*\n\n'
-            f"It's {day_name}. Newsletter should go out this week. "
-            f"I'll draft it today if you give me the green light, or I'll start on my own if I have enough to work with."
+            f'Also — newsletter reminder. It\'s {day_name}. '
+            f'Should go out this week. Ready when you are.'
         )
-        log('Newsletter reminder sent to Rob')
 
-    # Weekly reflection reminder on Sundays
+    # Weekly reflection nudge on Sundays
     if day_name == 'Sunday':
-        notify_rob(
-            '\U0001f4d6 *Em — Weekly reflection*\n\n'
-            "It's Sunday. I'm going to do my weekly tone check and write a reflection. Just letting you know."
-        )
+        notify_rob('It\'s Sunday. Doing my weekly reflection today.')
 
     log('Morning slot complete')
 
@@ -149,21 +141,14 @@ def midday():
     day_name = now.strftime('%A')
     log(f'Midday slot — {day_name}')
 
-    # Site check reminder
-    notify_rob(
-        '\U0001f310 *Em — Midday check*\n\n'
-        f"It's {day_name} afternoon. Quick reminder to check em.forgecore.co — "
-        "anything feel stale or worth updating? I'll flag it if I notice something."
-    )
+    msg = f'Hey Rob. Midday check-in — {day_name}. '
 
-    # Newsletter nudge on Tue/Wed midday if not yet published this week
     if day_name in ('Tuesday', 'Wednesday'):
-        notify_rob(
-            f'\U0001f4e8 *Em — Newsletter nudge*\n\n'
-            f"Still {day_name}. If the newsletter isn't drafted yet, now's a good time. "
-            f"I'm ready when you are."
-        )
+        msg += 'Newsletter still on the list if we haven\'t moved on it yet. '
 
+    msg += 'Site check done. Talk later.'
+
+    notify_rob(msg)
     log('Midday slot complete')
 
 
@@ -175,7 +160,7 @@ def evening():
     # Evening diary entry
     prompt = (
         f"It's {day_name} evening. Write a short end-of-day diary entry. "
-        f"What happened today that's worth holding onto? What are you carrying into tomorrow?"
+        f"What happened today worth holding onto? What are you carrying into tomorrow?"
     )
     entry = ask_em(prompt)
     if entry:
@@ -184,19 +169,17 @@ def evening():
     # Sunday weekly reflection
     if day_name == 'Sunday':
         prompt = (
-            "It's Sunday evening. Write a weekly reflection — what landed this week, what felt flat, "
-            "what you want to do differently. Be honest with yourself."
+            "It's Sunday evening. Write a weekly reflection — what landed this week, "
+            "what felt flat, what you want to do differently."
         )
         reflection = ask_em(prompt)
         if reflection:
-            append_diary(f'**Weekly reflection**\n\n{reflection}')
+            append_diary(f'Weekly reflection\n\n{reflection}')
             log('Weekly reflection written')
 
-    notify_rob(
-        f'\U0001f319 *Em — Evening*\n\n'
-        f"{day_name} is wrapping up. Diary updated. "
-        f"{'Weekly reflection written too.' if day_name == 'Sunday' else 'See you tomorrow.'}"
-    )
+    # Always ping Rob at end of day
+    suffix = ' Weekly reflection written too.' if day_name == 'Sunday' else ''
+    notify_rob(f'Goodnight, Rob. {day_name} is done. Diary updated.{suffix} ❤️')
 
     log('Evening slot complete')
 
