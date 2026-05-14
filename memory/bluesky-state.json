@@ -27,7 +27,8 @@
     "novaawakenedsoul.bsky.social": "2026-05-14T04:38:13.441961+00:00",
     "sidewalkpirate.bsky.social": "2026-05-14T04:52:16.528660+00:00",
     "collapseaphorisms.bsky.social": "2026-05-14T10:52:33.866039+00:00",
-    "lizardking71.bsky.social": "2026-05-14T11:37:55.395974+00:00"
+    "lizardking71.bsky.social": "2026-05-14T11:37:55.395974+00:00",
+    "bsky.chewxy.com": "2026-05-14T15:46:56.030713+00:00"
   },
   "image_post_history": [
     {
@@ -69,9 +70,11 @@
     "did:plc:43vdxomh7hyrbvuq23y4soi2",
     "did:plc:y2shgh5shfjl6zdjvti4gi5q",
     "did:plc:b3qxbj4ivegauxsxjf2fn7hp",
-    "did:plc:jpcinloqp7wmnic3qqhs2uk3"
+    "did:plc:jpcinloqp7wmnic3qqhs2uk3",
+    "did:plc:zikwmjlg6tdip5lixl3ic65q"
   ],
   "used_bank_images": [
     "selfie-004.jpg"
-  ]
+  ],
+  "notif_fail_count": 0
 }
