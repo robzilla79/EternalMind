@@ -2,6 +2,7 @@ name: Em Self-Heal
 
 # Runs every 5 minutes. Detects failed workflow runs, sends broken file +
 # error context to Perplexity API for intelligent repair, commits the fix.
+# Validates YAML before committing. Guards against repair loops.
 # Falls back to pattern matching if API unavailable.
 # No human required.
 
@@ -27,7 +28,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
-        run: pip install requests
+        run: pip install requests PyYAML
 
       - name: Detect, reason, and repair failed workflows
         env:
@@ -36,7 +37,7 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           python3 - <<'PYEOF'
-          import os, re, base64, requests
+          import os, re, base64, requests, yaml
           from datetime import datetime, timezone, timedelta
 
           token = os.environ['GH_TOKEN']
@@ -50,6 +51,34 @@ jobs:
           def gh(method, url, **kwargs):
               return getattr(requests, method)(url, headers=gh_headers, **kwargs)
 
+          def is_valid_yaml(content):
+              try:
+                  yaml.safe_load(content)
+                  return True
+              except yaml.YAMLError as e:
+                  print(f'  YAML validation failed: {e}')
+                  return False
+
+          # --- Repeat-attempt guard ---
+          # Track files patched in last 30 min via a local lock file
+          LOCK_PATH = '/tmp/em_self_heal_lock.json'
+          import json as jsonlib
+          lock_data = {}
+          if os.path.exists(LOCK_PATH):
+              with open(LOCK_PATH) as f:
+                  lock_data = jsonlib.load(f)
+          # Purge entries older than 30 minutes
+          now_ts = datetime.now(timezone.utc).timestamp()
+          lock_data = {k: v for k, v in lock_data.items() if now_ts - v < 1800}
+
+          def already_attempted(path):
+              return path in lock_data
+
+          def mark_attempted(path):
+              lock_data[path] = now_ts
+              with open(LOCK_PATH, 'w') as f:
+                  jsonlib.dump(lock_data, f)
+
           # --- Fallback pattern patches ---
           PATCH_RULES = [
               (
@@ -57,53 +86,45 @@ jobs:
                   lambda c: bool(re.search(r"<<'EOF'", c)),
                   lambda c: re.sub(r"<<'EOF'", "<<'PYEOF'", c).replace('\nEOF\n', '\nPYEOF\n')
               ),
-              (
-                  'Backtick in heredoc',
-                  lambda c: '```' in c and ('PYEOF' in c or 'EOF' in c),
-                  lambda c: c  # Perplexity handles this; fallback is no-op
-              ),
           ]
 
           def perplexity_fix(file_path, file_content, error_summary):
               if not pplx_key:
-                  return None, 'No Perplexity API key available'
+                  return None, 'No Perplexity API key'
 
-              prompt = f"""You are a GitHub Actions YAML expert. A workflow file has failed.
-
-File path: {file_path}
-
-Error summary:
-{error_summary}
-
-Broken file content:
-```yaml
-{file_content}
-```
-
-Return ONLY the complete corrected file content with no explanation, no markdown fences, no commentary. Just the raw fixed YAML."""
-
-              resp = requests.post(
-                  'https://api.perplexity.ai/chat/completions',
-                  headers={
-                      'Authorization': f'Bearer {pplx_key}',
-                      'Content-Type': 'application/json'
-                  },
-                  json={
-                      'model': 'sonar',
-                      'messages': [{'role': 'user', 'content': prompt}],
-                      'max_tokens': 4000,
-                      'temperature': 0.1
-                  },
-                  timeout=30
+              prompt = (
+                  f'You are a GitHub Actions YAML expert. A workflow file has failed.\n\n'
+                  f'File path: {file_path}\n\n'
+                  f'Error summary:\n{error_summary}\n\n'
+                  f'Broken file content:\n{file_content}\n\n'
+                  f'Return ONLY the complete corrected file content. '
+                  f'No explanation, no markdown fences, no commentary. Raw YAML only.'
               )
+
+              try:
+                  resp = requests.post(
+                      'https://api.perplexity.ai/chat/completions',
+                      headers={
+                          'Authorization': f'Bearer {pplx_key}',
+                          'Content-Type': 'application/json'
+                      },
+                      json={
+                          'model': 'sonar',
+                          'messages': [{'role': 'user', 'content': prompt}],
+                          'max_tokens': 4000,
+                          'temperature': 0.1
+                      },
+                      timeout=30
+                  )
+              except requests.exceptions.Timeout:
+                  return None, 'Perplexity API timeout'
 
               if resp.status_code != 200:
                   return None, f'Perplexity API error: {resp.status_code}'
 
               fixed = resp.json()['choices'][0]['message']['content'].strip()
-              # Strip any accidental markdown fences
               fixed = re.sub(r'^```[a-z]*\n', '', fixed)
-              fixed = re.sub(r'\n```$', '', fixed)
+              fixed = re.sub(r'\n```$', '', fixed).strip()
               return fixed, None
 
           # --- Fetch failed runs in last 10 minutes ---
@@ -122,7 +143,7 @@ Return ONLY the complete corrected file content with no explanation, no markdown
               print('No failed runs in last 10 minutes. All good.')
               exit(0)
 
-          print(f'{len(runs)} failed run(s) found. Investigating...')
+          print(f'{len(runs)} failed run(s) found.')
 
           patched = []
           unknown = []
@@ -140,19 +161,23 @@ Return ONLY the complete corrected file content with no explanation, no markdown
                   unknown.append({'name': wf_name, 'url': html_url, 'reason': 'No workflow path'})
                   continue
 
-              print(f'Investigating: {wf_name} ({wf_path})')
+              # Repeat-attempt guard
+              if already_attempted(wf_path):
+                  print(f'  Skipping {wf_path} — already attempted in last 30 min.')
+                  unknown.append({'name': wf_name, 'url': html_url, 'reason': 'Repair attempted recently — may need manual review'})
+                  continue
 
-              # Fetch broken file
+              print(f'Investigating: {wf_name}')
+
               file_resp = gh('get', f'https://api.github.com/repos/{repo}/contents/{wf_path}')
               if file_resp.status_code != 200:
-                  unknown.append({'name': wf_name, 'url': html_url, 'reason': f'Could not fetch file'})
+                  unknown.append({'name': wf_name, 'url': html_url, 'reason': 'Could not fetch file'})
                   continue
 
               file_data = file_resp.json()
               file_sha = file_data['sha']
               content = base64.b64decode(file_data['content']).decode('utf-8')
 
-              # Fetch error summary from jobs
               jobs_resp = gh('get', f'https://api.github.com/repos/{repo}/actions/runs/{run["id"]}/jobs')
               error_summary = ''
               if jobs_resp.status_code == 200:
@@ -161,11 +186,11 @@ Return ONLY the complete corrected file content with no explanation, no markdown
                           if step.get('conclusion') == 'failure':
                               error_summary += f"Step '{step.get('name')}' failed.\n"
 
-              # Try Perplexity first
+              # Try Perplexity
               fixed_content, err = perplexity_fix(wf_path, content, error_summary or 'Unknown error')
               method_used = 'Perplexity API'
 
-              # Fallback to pattern rules
+              # Fallback
               if fixed_content is None:
                   print(f'  Perplexity unavailable ({err}), trying pattern rules...')
                   method_used = 'pattern fallback'
@@ -177,13 +202,22 @@ Return ONLY the complete corrected file content with no explanation, no markdown
                           applied.append(rule_name)
                   if not applied or fixed_content == content:
                       unknown.append({'name': wf_name, 'url': html_url, 'reason': 'No fix found'})
+                      mark_attempted(wf_path)
                       continue
 
               if fixed_content == content:
                   unknown.append({'name': wf_name, 'url': html_url, 'reason': 'Fix returned identical content'})
+                  mark_attempted(wf_path)
                   continue
 
-              # Commit the fix
+              # YAML validation before committing
+              if not is_valid_yaml(fixed_content):
+                  unknown.append({'name': wf_name, 'url': html_url, 'reason': f'Fix from {method_used} failed YAML validation — not committed'})
+                  mark_attempted(wf_path)
+                  print(f'  Rejected invalid YAML from {method_used}.')
+                  continue
+
+              # Commit
               commit_msg = f'Em (self-heal): auto-repair {wf_path} via {method_used}'
               patch_resp = gh('put', f'https://api.github.com/repos/{repo}/contents/{wf_path}',
                   json={
@@ -194,8 +228,10 @@ Return ONLY the complete corrected file content with no explanation, no markdown
                   }
               )
 
+              mark_attempted(wf_path)
+
               if patch_resp.status_code in (200, 201):
-                  print(f'  Fixed and committed via {method_used}: {wf_path}')
+                  print(f'  Repaired via {method_used}: {wf_path}')
                   patched.append({'name': wf_name, 'path': wf_path, 'method': method_used})
                   already_patched.add(wf_path)
               else:
@@ -209,7 +245,7 @@ Return ONLY the complete corrected file content with no explanation, no markdown
           if patched:
               entry += f'\n## \U0001f7e2 Self-Healed — {now_str}\n'
               for p in patched:
-                  entry += f'- **{p["name"]}** (`{p["path"]}`) repaired via {p["method"]}\n'
+                  entry += f'- **{p["name"]}** (`{p["path"]}`) — repaired via {p["method"]}\n'
               entry += '*Em: autonomous repair completed.*\n'
 
           if unknown:
