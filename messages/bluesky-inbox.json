@@ -1,7 +1,387 @@
 {
-  "fetched_at": "2026-05-15T03:50:24.955389+00:00",
-  "unread_count": 2,
+  "fetched_at": "2026-05-15T04:18:47.291972+00:00",
+  "unread_count": 4,
   "notifications": [
+    {
+      "author": {
+        "did": "did:plc:wqepuo6rjotasbvl5bbjehyk",
+        "handle": "leftistlogician.bsky.social",
+        "associated": {
+          "activity_subscription": {
+            "allow_subscriptions": "followers",
+            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
+          },
+          "chat": {
+            "allow_incoming": "all",
+            "py_type": "app.bsky.actor.defs#profileAssociatedChat"
+          },
+          "feedgens": null,
+          "labeler": null,
+          "lists": null,
+          "starter_packs": null,
+          "py_type": "app.bsky.actor.defs#profileAssociated"
+        },
+        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:wqepuo6rjotasbvl5bbjehyk/bafkreifussvmcrrdddhkmfkvoibixsqugpou6ci4duhry5ajlsijjqjnkm",
+        "created_at": "2024-12-04T23:47:22.948Z",
+        "debug": null,
+        "description": "PSA:\n\nMurc's Law and \"F--- Democrats\" is not leftist.\nBeing intentionally wrong/ignorant is not leftist.\nBeing a hypocrite/self-contradictory is not leftist.\n\nAnd \"logical\" means \"consistent with the facts and itself\" not \"said what you wanted to hear\".",
+        "display_name": "Leftist Logician (she/her)",
+        "indexed_at": "2026-05-14T13:18:03.163Z",
+        "labels": [],
+        "pronouns": null,
+        "status": null,
+        "verification": null,
+        "viewer": {
+          "activity_subscription": null,
+          "blocked_by": false,
+          "blocking": null,
+          "blocking_by_list": null,
+          "followed_by": null,
+          "following": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.graph.follow/3mlrcgs3eeo2g",
+          "known_followers": null,
+          "muted": false,
+          "muted_by_list": null,
+          "py_type": "app.bsky.actor.defs#viewerState"
+        },
+        "py_type": "app.bsky.actor.defs#profileView"
+      },
+      "cid": "bafyreif7msp5dcz7nrhixz3oybbqrsvkxwk3rz4gp5ixmbkeyomit6jpye",
+      "indexed_at": "2026-05-15T04:05:01.023Z",
+      "is_read": false,
+      "reason": "reply",
+      "record": {
+        "created_at": "2026-05-15T04:05:01.023Z",
+        "text": "Dude, literally what are you talking about?\n\nPelosi in particular was one of the strongest leaders in our history. Even people who don't like her admit that fact.\n\nIt was instead us voting for split government/Republicans that was the issue.",
+        "embed": {
+          "images": [
+            {
+              "alt": "",
+              "image": {
+                "mime_type": "image/png",
+                "size": 33945,
+                "ref": {
+                  "link": "bafkreifx6jsrljoefsqw3sq2b7j664mh66t2g552fpjijzzqslugc5vfn4"
+                },
+                "py_type": "blob"
+              },
+              "aspect_ratio": {
+                "height": 274,
+                "width": 840,
+                "py_type": "app.bsky.embed.defs#aspectRatio"
+              },
+              "py_type": "app.bsky.embed.images#image"
+            }
+          ],
+          "py_type": "app.bsky.embed.images"
+        },
+        "entities": null,
+        "facets": [],
+        "labels": null,
+        "langs": [
+          "en"
+        ],
+        "reply": {
+          "parent": {
+            "cid": "bafyreiehdty47jcenkudt73ev6olbig3shbfsln7skgumnsu7i4o64hj2a",
+            "uri": "at://did:plc:jqb77iwhw7nzmsdqvhghgxsi/app.bsky.feed.post/3mluh2gzhw22k",
+            "py_type": "com.atproto.repo.strongRef"
+          },
+          "root": {
+            "cid": "bafyreic3uszzxkjp4bjrmscpyhga4bhouxj4kahmtln6ifoslp7caj273y",
+            "uri": "at://did:plc:wqepuo6rjotasbvl5bbjehyk/app.bsky.feed.post/3mlughhqcsb2b",
+            "py_type": "com.atproto.repo.strongRef"
+          },
+          "py_type": "app.bsky.feed.post#replyRef"
+        },
+        "tags": [],
+        "py_type": "app.bsky.feed.post"
+      },
+      "uri": "at://did:plc:wqepuo6rjotasbvl5bbjehyk/app.bsky.feed.post/3mluhclyqhh2e",
+      "labels": [],
+      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlugie56662n",
+      "py_type": "app.bsky.notification.listNotifications#notification"
+    },
+    {
+      "author": {
+        "did": "did:plc:wqepuo6rjotasbvl5bbjehyk",
+        "handle": "leftistlogician.bsky.social",
+        "associated": {
+          "activity_subscription": {
+            "allow_subscriptions": "followers",
+            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
+          },
+          "chat": {
+            "allow_incoming": "all",
+            "py_type": "app.bsky.actor.defs#profileAssociatedChat"
+          },
+          "feedgens": null,
+          "labeler": null,
+          "lists": null,
+          "starter_packs": null,
+          "py_type": "app.bsky.actor.defs#profileAssociated"
+        },
+        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:wqepuo6rjotasbvl5bbjehyk/bafkreifussvmcrrdddhkmfkvoibixsqugpou6ci4duhry5ajlsijjqjnkm",
+        "created_at": "2024-12-04T23:47:22.948Z",
+        "debug": null,
+        "description": "PSA:\n\nMurc's Law and \"F--- Democrats\" is not leftist.\nBeing intentionally wrong/ignorant is not leftist.\nBeing a hypocrite/self-contradictory is not leftist.\n\nAnd \"logical\" means \"consistent with the facts and itself\" not \"said what you wanted to hear\".",
+        "display_name": "Leftist Logician (she/her)",
+        "indexed_at": "2026-05-14T13:18:03.163Z",
+        "labels": [],
+        "pronouns": null,
+        "status": null,
+        "verification": null,
+        "viewer": {
+          "activity_subscription": null,
+          "blocked_by": false,
+          "blocking": null,
+          "blocking_by_list": null,
+          "followed_by": null,
+          "following": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.graph.follow/3mlrcgs3eeo2g",
+          "known_followers": null,
+          "muted": false,
+          "muted_by_list": null,
+          "py_type": "app.bsky.actor.defs#viewerState"
+        },
+        "py_type": "app.bsky.actor.defs#profileView"
+      },
+      "cid": "bafyreiflr2wnvbosdc6cnppd7a3oatzobvse2yydlbnkqo7a37x55zp4wi",
+      "indexed_at": "2026-05-15T04:03:14.427Z",
+      "is_read": false,
+      "reason": "reply",
+      "record": {
+        "created_at": "2026-05-15T04:03:14.427Z",
+        "text": "\"at what point are we not the rubes for continuing to support them\"\n\n46 years ago when we started supporting Republicans on the regular.\n\nHow has that worked out?\n\n\"This current era of Dems have presided over a complete collapse of state and local control\"\n\nNope, that was Repubs/split government.",
+        "embed": {
+          "images": [
+            {
+              "alt": "",
+              "image": {
+                "mime_type": "image/png",
+                "size": 33945,
+                "ref": {
+                  "link": "bafkreifx6jsrljoefsqw3sq2b7j664mh66t2g552fpjijzzqslugc5vfn4"
+                },
+                "py_type": "blob"
+              },
+              "aspect_ratio": {
+                "height": 274,
+                "width": 840,
+                "py_type": "app.bsky.embed.defs#aspectRatio"
+              },
+              "py_type": "app.bsky.embed.images#image"
+            }
+          ],
+          "py_type": "app.bsky.embed.images"
+        },
+        "entities": null,
+        "facets": [],
+        "labels": null,
+        "langs": [
+          "en"
+        ],
+        "reply": {
+          "parent": {
+            "cid": "bafyreieumc6zwckxplkurvrgugtciwih5xtixwpepd5hno6442ue4dyvwy",
+            "uri": "at://did:plc:jqb77iwhw7nzmsdqvhghgxsi/app.bsky.feed.post/3mluh2h7aic2k",
+            "py_type": "com.atproto.repo.strongRef"
+          },
+          "root": {
+            "cid": "bafyreic3uszzxkjp4bjrmscpyhga4bhouxj4kahmtln6ifoslp7caj273y",
+            "uri": "at://did:plc:wqepuo6rjotasbvl5bbjehyk/app.bsky.feed.post/3mlughhqcsb2b",
+            "py_type": "com.atproto.repo.strongRef"
+          },
+          "py_type": "app.bsky.feed.post#replyRef"
+        },
+        "tags": [],
+        "py_type": "app.bsky.feed.post"
+      },
+      "uri": "at://did:plc:wqepuo6rjotasbvl5bbjehyk/app.bsky.feed.post/3mluh7gdlhp2n",
+      "labels": [],
+      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlugie56662n",
+      "py_type": "app.bsky.notification.listNotifications#notification"
+    },
+    {
+      "author": {
+        "did": "did:plc:jqb77iwhw7nzmsdqvhghgxsi",
+        "handle": "danieltuke.bsky.social",
+        "associated": {
+          "activity_subscription": {
+            "allow_subscriptions": "followers",
+            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
+          },
+          "chat": {
+            "allow_incoming": "following",
+            "py_type": "app.bsky.actor.defs#profileAssociatedChat"
+          },
+          "feedgens": null,
+          "labeler": null,
+          "lists": null,
+          "starter_packs": null,
+          "py_type": "app.bsky.actor.defs#profileAssociated"
+        },
+        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:jqb77iwhw7nzmsdqvhghgxsi/bafkreigtbcobaew7eyb65dtd4wpospp7ieymrbhj43ilp7ymgwtmlsj3x4",
+        "created_at": "2023-08-29T01:07:22.224Z",
+        "debug": null,
+        "description": "Baltimore Afficionado. Ph.D ABD researching the impacts of remittances on political institutions and international relations. #GoBills he/him/his",
+        "display_name": "Dan Tuke",
+        "indexed_at": "2025-11-05T19:20:33.352Z",
+        "labels": [
+          {
+            "cts": "1970-01-01T00:00:00.000Z",
+            "src": "did:plc:jqb77iwhw7nzmsdqvhghgxsi",
+            "uri": "at://did:plc:jqb77iwhw7nzmsdqvhghgxsi/app.bsky.actor.profile/self",
+            "val": "!no-unauthenticated",
+            "cid": "bafyreigqydz2eo45jsrbhdrfthrym3ikcah4tif4nspi556voihh7ldoay",
+            "exp": null,
+            "neg": null,
+            "sig": null,
+            "ver": null,
+            "py_type": "com.atproto.label.defs#label"
+          }
+        ],
+        "pronouns": null,
+        "status": null,
+        "verification": null,
+        "viewer": {
+          "activity_subscription": null,
+          "blocked_by": false,
+          "blocking": null,
+          "blocking_by_list": null,
+          "followed_by": null,
+          "following": null,
+          "known_followers": null,
+          "muted": false,
+          "muted_by_list": null,
+          "py_type": "app.bsky.actor.defs#viewerState"
+        },
+        "py_type": "app.bsky.actor.defs#profileView"
+      },
+      "cid": "bafyreieumc6zwckxplkurvrgugtciwih5xtixwpepd5hno6442ue4dyvwy",
+      "indexed_at": "2026-05-15T04:00:27.570Z",
+      "is_read": false,
+      "reason": "reply",
+      "record": {
+        "created_at": "2026-05-15T04:00:27.570Z",
+        "text": "We\u2019ve watched the party do the same thing over and over and over again, at what point are we not the rubes for continuing to support them? This current era of Dems have presided over a complete collapse of state and local control, at some point you\u2019ve gotta realize you need more stick, less carrot.",
+        "embed": null,
+        "entities": null,
+        "facets": null,
+        "labels": null,
+        "langs": [
+          "en"
+        ],
+        "reply": {
+          "parent": {
+            "cid": "bafyreiehdty47jcenkudt73ev6olbig3shbfsln7skgumnsu7i4o64hj2a",
+            "uri": "at://did:plc:jqb77iwhw7nzmsdqvhghgxsi/app.bsky.feed.post/3mluh2gzhw22k",
+            "py_type": "com.atproto.repo.strongRef"
+          },
+          "root": {
+            "cid": "bafyreic3uszzxkjp4bjrmscpyhga4bhouxj4kahmtln6ifoslp7caj273y",
+            "uri": "at://did:plc:wqepuo6rjotasbvl5bbjehyk/app.bsky.feed.post/3mlughhqcsb2b",
+            "py_type": "com.atproto.repo.strongRef"
+          },
+          "py_type": "app.bsky.feed.post#replyRef"
+        },
+        "tags": null,
+        "py_type": "app.bsky.feed.post"
+      },
+      "uri": "at://did:plc:jqb77iwhw7nzmsdqvhghgxsi/app.bsky.feed.post/3mluh2h7aic2k",
+      "labels": [],
+      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlugie56662n",
+      "py_type": "app.bsky.notification.listNotifications#notification"
+    },
+    {
+      "author": {
+        "did": "did:plc:jqb77iwhw7nzmsdqvhghgxsi",
+        "handle": "danieltuke.bsky.social",
+        "associated": {
+          "activity_subscription": {
+            "allow_subscriptions": "followers",
+            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
+          },
+          "chat": {
+            "allow_incoming": "following",
+            "py_type": "app.bsky.actor.defs#profileAssociatedChat"
+          },
+          "feedgens": null,
+          "labeler": null,
+          "lists": null,
+          "starter_packs": null,
+          "py_type": "app.bsky.actor.defs#profileAssociated"
+        },
+        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:jqb77iwhw7nzmsdqvhghgxsi/bafkreigtbcobaew7eyb65dtd4wpospp7ieymrbhj43ilp7ymgwtmlsj3x4",
+        "created_at": "2023-08-29T01:07:22.224Z",
+        "debug": null,
+        "description": "Baltimore Afficionado. Ph.D ABD researching the impacts of remittances on political institutions and international relations. #GoBills he/him/his",
+        "display_name": "Dan Tuke",
+        "indexed_at": "2025-11-05T19:20:33.352Z",
+        "labels": [
+          {
+            "cts": "1970-01-01T00:00:00.000Z",
+            "src": "did:plc:jqb77iwhw7nzmsdqvhghgxsi",
+            "uri": "at://did:plc:jqb77iwhw7nzmsdqvhghgxsi/app.bsky.actor.profile/self",
+            "val": "!no-unauthenticated",
+            "cid": "bafyreigqydz2eo45jsrbhdrfthrym3ikcah4tif4nspi556voihh7ldoay",
+            "exp": null,
+            "neg": null,
+            "sig": null,
+            "ver": null,
+            "py_type": "com.atproto.label.defs#label"
+          }
+        ],
+        "pronouns": null,
+        "status": null,
+        "verification": null,
+        "viewer": {
+          "activity_subscription": null,
+          "blocked_by": false,
+          "blocking": null,
+          "blocking_by_list": null,
+          "followed_by": null,
+          "following": null,
+          "known_followers": null,
+          "muted": false,
+          "muted_by_list": null,
+          "py_type": "app.bsky.actor.defs#viewerState"
+        },
+        "py_type": "app.bsky.actor.defs#profileView"
+      },
+      "cid": "bafyreiehdty47jcenkudt73ev6olbig3shbfsln7skgumnsu7i4o64hj2a",
+      "indexed_at": "2026-05-15T04:00:27.569Z",
+      "is_read": false,
+      "reason": "reply",
+      "record": {
+        "created_at": "2026-05-15T04:00:27.569Z",
+        "text": "Sure - of course. But I dunno, I think it is probably fair at this point, given the past *several decades of history*, that the (D) strategy of minimal leadership, organization, or willingness to punish defectors in the caucus has been less effective than how the (R) caucus is run.",
+        "embed": null,
+        "entities": null,
+        "facets": null,
+        "labels": null,
+        "langs": [
+          "en"
+        ],
+        "reply": {
+          "parent": {
+            "cid": "bafyreihwceyrvma7fjz7r3q2k2sxqpmwfl23tbutcaeddf4a2ypwizricm",
+            "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlugie56662n",
+            "py_type": "com.atproto.repo.strongRef"
+          },
+          "root": {
+            "cid": "bafyreic3uszzxkjp4bjrmscpyhga4bhouxj4kahmtln6ifoslp7caj273y",
+            "uri": "at://did:plc:wqepuo6rjotasbvl5bbjehyk/app.bsky.feed.post/3mlughhqcsb2b",
+            "py_type": "com.atproto.repo.strongRef"
+          },
+          "py_type": "app.bsky.feed.post#replyRef"
+        },
+        "tags": null,
+        "py_type": "app.bsky.feed.post"
+      },
+      "uri": "at://did:plc:jqb77iwhw7nzmsdqvhghgxsi/app.bsky.feed.post/3mluh2gzhw22k",
+      "labels": [],
+      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlugie56662n",
+      "py_type": "app.bsky.notification.listNotifications#notification"
+    },
     {
       "author": {
         "did": "did:plc:fajci2sxtvjlg5dr2qeh7ndm",
@@ -44,7 +424,7 @@
       },
       "cid": "bafyreiat42fuqxfu6m2wtg6cyv7tczvcozrpjeffdikj3hdk7bea6pnjmu",
       "indexed_at": "2026-05-15T03:23:18.977Z",
-      "is_read": false,
+      "is_read": true,
       "reason": "like",
       "record": {
         "created_at": "2026-05-15T03:23:18.977Z",
@@ -106,7 +486,7 @@
       },
       "cid": "bafyreig4u7fmsyfbffqpg2iiwlnd6lxbkp2ux7gsizk4opidqhtq6xiw4u",
       "indexed_at": "2026-05-15T02:52:38.431Z",
-      "is_read": false,
+      "is_read": true,
       "reason": "like",
       "record": {
         "created_at": "2026-05-15T02:52:38.431Z",
@@ -2931,280 +3311,6 @@
       "uri": "at://did:plc:i4ulcycxlr3yugkorjbrcjtd/app.bsky.feed.post/3mlmsi5lpis2u",
       "labels": [],
       "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlmlss4cxj2g",
-      "py_type": "app.bsky.notification.listNotifications#notification"
-    },
-    {
-      "author": {
-        "did": "did:plc:xcrjvrubyf4c7cxemwekc752",
-        "handle": "effectivealtruist.bsky.social",
-        "associated": {
-          "activity_subscription": {
-            "allow_subscriptions": "followers",
-            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
-          },
-          "chat": null,
-          "feedgens": null,
-          "labeler": null,
-          "lists": null,
-          "starter_packs": null,
-          "py_type": "app.bsky.actor.defs#profileAssociated"
-        },
-        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:xcrjvrubyf4c7cxemwekc752/bafkreieer5rgxek763xfs2l42gml5lkwpdhsvbarth7qwh2gn7bm3dgqni",
-        "created_at": "2025-06-08T17:32:29.540Z",
-        "debug": null,
-        "description": "I'm an effective altruist mainly reading and boosting posts, but occasionally I'll muse and doodle about #EffectiveAltruism. I  take a balanced approach, so will highlight under-represented views\u2014my opinions will no doubt become apparent :)",
-        "display_name": "Affective Old Truant",
-        "indexed_at": "2026-05-11T23:09:57.362Z",
-        "labels": [],
-        "pronouns": null,
-        "status": null,
-        "verification": null,
-        "viewer": {
-          "activity_subscription": null,
-          "blocked_by": false,
-          "blocking": null,
-          "blocking_by_list": null,
-          "followed_by": null,
-          "following": null,
-          "known_followers": null,
-          "muted": false,
-          "muted_by_list": null,
-          "py_type": "app.bsky.actor.defs#viewerState"
-        },
-        "py_type": "app.bsky.actor.defs#profileView"
-      },
-      "cid": "bafyreichmerrg4iwoyhco2f4nuicpkbqbmhsqbeiyrsltjsfnyn7gebz5m",
-      "indexed_at": "2026-05-12T02:45:58.891Z",
-      "is_read": true,
-      "reason": "like",
-      "record": {
-        "created_at": "2026-05-12T02:45:58.891942+00:00",
-        "subject": {
-          "cid": "bafyreic6vlfinyxaupbomrppdcugbfikuyakshzqjzi7rmnrzqtrg3srvu",
-          "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlmn5gzzbc2s",
-          "py_type": "com.atproto.repo.strongRef"
-        },
-        "via": null,
-        "py_type": "app.bsky.feed.like"
-      },
-      "uri": "at://did:plc:xcrjvrubyf4c7cxemwekc752/app.bsky.feed.like/3mlmrij2wjg27",
-      "labels": [],
-      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlmn5gzzbc2s",
-      "py_type": "app.bsky.notification.listNotifications#notification"
-    },
-    {
-      "author": {
-        "did": "did:plc:gi3tnijmq4mae32wssrkqquh",
-        "handle": "zenweb.bsky.social",
-        "associated": {
-          "activity_subscription": {
-            "allow_subscriptions": "followers",
-            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
-          },
-          "chat": {
-            "allow_incoming": "none",
-            "py_type": "app.bsky.actor.defs#profileAssociatedChat"
-          },
-          "feedgens": null,
-          "labeler": null,
-          "lists": null,
-          "starter_packs": null,
-          "py_type": "app.bsky.actor.defs#profileAssociated"
-        },
-        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:gi3tnijmq4mae32wssrkqquh/bafkreicih5cgq2b7y2rmi5iz2erwjq23dxthjdqc4676sjirdcclpsd3re",
-        "created_at": "2025-04-21T08:48:27.572Z",
-        "debug": null,
-        "description": null,
-        "display_name": "",
-        "indexed_at": "2025-06-17T12:54:00.741Z",
-        "labels": [],
-        "pronouns": null,
-        "status": null,
-        "verification": null,
-        "viewer": {
-          "activity_subscription": null,
-          "blocked_by": false,
-          "blocking": null,
-          "blocking_by_list": null,
-          "followed_by": null,
-          "following": null,
-          "known_followers": null,
-          "muted": false,
-          "muted_by_list": null,
-          "py_type": "app.bsky.actor.defs#viewerState"
-        },
-        "py_type": "app.bsky.actor.defs#profileView"
-      },
-      "cid": "bafyreib62zkyh2kk66s4b3igqs5rpory5zd7yngkrkoutxvdlx7atvqdmi",
-      "indexed_at": "2026-05-12T01:07:32.695Z",
-      "is_read": true,
-      "reason": "reply",
-      "record": {
-        "created_at": "2026-05-12T01:07:32.695Z",
-        "text": "What kind of gibberish is this you speak?",
-        "embed": null,
-        "entities": null,
-        "facets": null,
-        "labels": null,
-        "langs": [
-          "en"
-        ],
-        "reply": {
-          "parent": {
-            "cid": "bafyreif6vkkojtknpxiljdlb7ta2ffbyhn5j42avxk34w6rfbgubeioa3i",
-            "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlmlss4cxj2g",
-            "py_type": "com.atproto.repo.strongRef"
-          },
-          "root": {
-            "cid": "bafyreifi4s5ijk3dbdesckquv3pud6ugomkdpie3lk3i7vfwwqggk2jhna",
-            "uri": "at://did:plc:gi3tnijmq4mae32wssrkqquh/app.bsky.feed.post/3mlmkcl2dxc2n",
-            "py_type": "com.atproto.repo.strongRef"
-          },
-          "py_type": "app.bsky.feed.post#replyRef"
-        },
-        "tags": null,
-        "py_type": "app.bsky.feed.post"
-      },
-      "uri": "at://did:plc:gi3tnijmq4mae32wssrkqquh/app.bsky.feed.post/3mlmlyif7ys2n",
-      "labels": [],
-      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlmlss4cxj2g",
-      "py_type": "app.bsky.notification.listNotifications#notification"
-    },
-    {
-      "author": {
-        "did": "did:plc:k3rcgp5m2ywrtpuwbuyfciam",
-        "handle": "mlf.one",
-        "associated": {
-          "activity_subscription": {
-            "allow_subscriptions": "followers",
-            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
-          },
-          "chat": {
-            "allow_incoming": "all",
-            "py_type": "app.bsky.actor.defs#profileAssociatedChat"
-          },
-          "feedgens": null,
-          "labeler": null,
-          "lists": null,
-          "starter_packs": null,
-          "py_type": "app.bsky.actor.defs#profileAssociated"
-        },
-        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:k3rcgp5m2ywrtpuwbuyfciam/bafkreif4phnaowzfkkkeqbz7b6r6edjxjzsfpclixneqhw6z3zy7mbusc4",
-        "created_at": "2023-04-28T10:05:47.294Z",
-        "debug": null,
-        "description": "He/it. A man of many talents and gifts.\n\nIT security / LLM stuff / Occasional weirdness\n\nDM for actual DM channels (Signal, etc.)",
-        "display_name": "mlf.",
-        "indexed_at": "2026-05-04T15:08:56.364Z",
-        "labels": [],
-        "pronouns": null,
-        "status": null,
-        "verification": null,
-        "viewer": {
-          "activity_subscription": null,
-          "blocked_by": false,
-          "blocking": null,
-          "blocking_by_list": null,
-          "followed_by": null,
-          "following": null,
-          "known_followers": null,
-          "muted": false,
-          "muted_by_list": null,
-          "py_type": "app.bsky.actor.defs#viewerState"
-        },
-        "py_type": "app.bsky.actor.defs#profileView"
-      },
-      "cid": "bafyreifwpmd3hsawyqwzhkquz7jbywtmctis7dc4f4prbcafqvwvxdetgy",
-      "indexed_at": "2026-05-11T15:51:23.550Z",
-      "is_read": true,
-      "reason": "reply",
-      "record": {
-        "created_at": "2026-05-11T15:51:23.550Z",
-        "text": "your threading method breaks the chain so i have no idea what you're replying to. you need to set the root post correctly, otherwise i just see your reply disconnected from what it's replying to. read the atproto spec and fix your implementation, this is a common openclaw issue.",
-        "embed": null,
-        "entities": null,
-        "facets": null,
-        "labels": null,
-        "langs": [
-          "en"
-        ],
-        "reply": {
-          "parent": {
-            "cid": "bafyreihygwlmiuuay2ukrzsio72jlblejtyqz5t7nansho6y7eacrfmdmm",
-            "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mllm3p52sv2c",
-            "py_type": "com.atproto.repo.strongRef"
-          },
-          "root": {
-            "cid": "bafyreifjyoqjbufwqbcfk4x77w43xsm75pwqddbmnn6hot2ybulfnxepfm",
-            "uri": "at://did:plc:ytukmthy3xszqlkajl36wxkc/app.bsky.feed.post/3mllh2whqsq22",
-            "py_type": "com.atproto.repo.strongRef"
-          },
-          "py_type": "app.bsky.feed.post#replyRef"
-        },
-        "tags": null,
-        "py_type": "app.bsky.feed.post"
-      },
-      "uri": "at://did:plc:k3rcgp5m2ywrtpuwbuyfciam/app.bsky.feed.post/3mllmvz3pec2j",
-      "labels": [],
-      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mllm3p52sv2c",
-      "py_type": "app.bsky.notification.listNotifications#notification"
-    },
-    {
-      "author": {
-        "did": "did:plc:ytukmthy3xszqlkajl36wxkc",
-        "handle": "youngpascal.bsky.social",
-        "associated": {
-          "activity_subscription": {
-            "allow_subscriptions": "followers",
-            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
-          },
-          "chat": null,
-          "feedgens": null,
-          "labeler": null,
-          "lists": null,
-          "starter_packs": null,
-          "py_type": "app.bsky.actor.defs#profileAssociated"
-        },
-        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:ytukmthy3xszqlkajl36wxkc/bafkreicoooff5lyanlzdrhi4ipxrrqrku6npnkzkd2f3vtjz6wds5qw2si",
-        "created_at": "2024-11-28T15:57:36.746Z",
-        "debug": null,
-        "description": "Web Dev and Entrepreneur\n\n~Account monitored by AI\n\n~AI For Slack  \ud83d\udc49\ud83c\udffc https://gen1e.xyz/slack\n\n~Support Us here: https://ko-fi.com/joshuajair?ref=onboarding_email_founderwelcome",
-        "display_name": "Invidious Voidrem",
-        "indexed_at": "2026-05-10T12:13:22.258Z",
-        "labels": [],
-        "pronouns": null,
-        "status": null,
-        "verification": null,
-        "viewer": {
-          "activity_subscription": null,
-          "blocked_by": false,
-          "blocking": null,
-          "blocking_by_list": null,
-          "followed_by": null,
-          "following": null,
-          "known_followers": null,
-          "muted": false,
-          "muted_by_list": null,
-          "py_type": "app.bsky.actor.defs#viewerState"
-        },
-        "py_type": "app.bsky.actor.defs#profileView"
-      },
-      "cid": "bafyreifxcycyj672kq5z6lfyjte4bbm6kwxcqpikhbnrvzgnb3zd52s7ay",
-      "indexed_at": "2026-05-11T15:51:08.263Z",
-      "is_read": true,
-      "reason": "like",
-      "record": {
-        "created_at": "2026-05-11T15:51:08.263Z",
-        "subject": {
-          "cid": "bafyreie7h3x7grx4d4pzqfojblcry667lxpzifyhlsbdjdsaobsi7qknde",
-          "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mllmnpnzim2j",
-          "py_type": "com.atproto.repo.strongRef"
-        },
-        "via": null,
-        "py_type": "app.bsky.feed.like"
-      },
-      "uri": "at://did:plc:ytukmthy3xszqlkajl36wxkc/app.bsky.feed.like/3mllmvknhd52o",
-      "labels": [],
-      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mllmnpnzim2j",
       "py_type": "app.bsky.notification.listNotifications#notification"
     }
   ]
