@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-05-15T04:57:49.272374+00:00",
-  "unread_count": 4,
+  "fetched_at": "2026-05-15T05:29:58.326024+00:00",
+  "unread_count": 0,
   "notifications": [
     {
       "author": {
@@ -47,7 +47,7 @@
       },
       "cid": "bafyreif7msp5dcz7nrhixz3oybbqrsvkxwk3rz4gp5ixmbkeyomit6jpye",
       "indexed_at": "2026-05-15T04:05:01.023Z",
-      "is_read": false,
+      "is_read": true,
       "reason": "reply",
       "record": {
         "created_at": "2026-05-15T04:05:01.023Z",
@@ -146,7 +146,7 @@
       },
       "cid": "bafyreiflr2wnvbosdc6cnppd7a3oatzobvse2yydlbnkqo7a37x55zp4wi",
       "indexed_at": "2026-05-15T04:03:14.427Z",
-      "is_read": false,
+      "is_read": true,
       "reason": "reply",
       "record": {
         "created_at": "2026-05-15T04:03:14.427Z",
@@ -258,7 +258,7 @@
       },
       "cid": "bafyreieumc6zwckxplkurvrgugtciwih5xtixwpepd5hno6442ue4dyvwy",
       "indexed_at": "2026-05-15T04:00:27.570Z",
-      "is_read": false,
+      "is_read": true,
       "reason": "reply",
       "record": {
         "created_at": "2026-05-15T04:00:27.570Z",
@@ -349,7 +349,7 @@
       },
       "cid": "bafyreiehdty47jcenkudt73ev6olbig3shbfsln7skgumnsu7i4o64hj2a",
       "indexed_at": "2026-05-15T04:00:27.569Z",
-      "is_read": false,
+      "is_read": true,
       "reason": "reply",
       "record": {
         "created_at": "2026-05-15T04:00:27.569Z",
