@@ -84,7 +84,6 @@ jobs:
               'Accept': 'application/vnd.github+json'
           }
 
-          created = []
           failed = []
 
           for action in actions:
@@ -114,21 +113,18 @@ jobs:
               )
 
               if resp.status_code == 201:
-                  print(f'Created issue: {title}')
-                  created.append(title)
+                  print(f'\u2705 Created: {title}')
               else:
-                  print(f'Failed to create issue: {title} — {resp.status_code} {resp.text}')
-                  failed.append(title)
+                  print(f'\u274c Failed: {title} \u2014 {resp.status_code} {resp.text}')
+                  failed.append(action)  # keep full object for retry
 
-          # Clear the queue (keep failed ones for retry)
+          # Write back only failed actions for retry
+          with open(pending_path, 'w') as f:
+              json.dump(failed, f, indent=2)
+
           if failed:
-              retry = [a for a in actions if a.get('title') in failed]
-              with open(pending_path, 'w') as f:
-                  json.dump(retry, f, indent=2)
-              print(f'{len(failed)} action(s) left in queue for retry.')
+              print(f'{len(failed)} action(s) requeued for retry.')
           else:
-              with open(pending_path, 'w') as f:
-                  f.write('[]')
               print('All actions processed. Queue cleared.')
 
           EOF
