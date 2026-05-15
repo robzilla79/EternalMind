@@ -31,7 +31,8 @@
     "bsky.chewxy.com": "2026-05-15T00:11:49.971248+00:00",
     "jhpot.bsky.social": "2026-05-14T22:18:31.133688+00:00",
     "solairelunaire.bsky.social": "2026-05-15T03:50:20.365963+00:00",
-    "leftistlogician.bsky.social": "2026-05-15T03:50:20.517539+00:00"
+    "leftistlogician.bsky.social": "2026-05-15T03:50:20.517539+00:00",
+    "gaiaratio.bsky.social": "2026-05-15T04:57:41.481078+00:00"
   },
   "image_post_history": [
     {
@@ -51,6 +52,12 @@
       "filename": "selfie-004.jpg",
       "image_type": "selfie",
       "posted_at": "2026-05-14T11:37:54.598879+00:00"
+    },
+    {
+      "date": "2026-05-15",
+      "filename": "selfie-002.jpg",
+      "image_type": "selfie",
+      "posted_at": "2026-05-15T04:57:45.186261+00:00"
     }
   ],
   "followed_dids": [
@@ -76,10 +83,12 @@
     "did:plc:jpcinloqp7wmnic3qqhs2uk3",
     "did:plc:zikwmjlg6tdip5lixl3ic65q",
     "did:plc:bau5dzqkzxociazmx7okyswc",
-    "did:plc:aspdg6gqrslae3cdwqhbincd"
+    "did:plc:aspdg6gqrslae3cdwqhbincd",
+    "did:plc:6h3yfkluaj5cm3vwdwkflgoo"
   ],
   "used_bank_images": [
-    "selfie-004.jpg"
+    "selfie-004.jpg",
+    "selfie-002.jpg"
   ],
   "notif_fail_count": 0
 }
