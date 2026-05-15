@@ -69,22 +69,21 @@ def count_image_posts(state, image_type=None):
 
 def count_heartbeats_from_log(log_text):
     """
-    Each heartbeat in bluesky-log.md starts with '=== Think heartbeat'.
-    Count complete heartbeats in the rolling window by looking for
-    ISO timestamps on lines near the start marker.
-    This is a best-effort heuristic — logs may not be perfectly structured.
+    Each heartbeat in bluesky-log.md starts with a line like:
+      ### 2026-05-14 18:36:20 UTC — ✓ [think] === Think heartbeat start ===
+    Count complete heartbeats in the rolling window.
     """
     if not log_text:
         return 0
     cutoff = window_start()
-    # Match lines like: [2026-05-14 03:22:11 UTC] === Think heartbeat start ===
+    # Match: ### 2026-05-14 18:36:20 UTC — ... Think heartbeat start
     pattern = re.compile(
-        r'\[(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}[^\]]*)].*Think heartbeat start'
+        r'^### (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) UTC\s*—.*Think heartbeat start',
+        re.MULTILINE
     )
     count = 0
     for m in pattern.finditer(log_text):
-        ts_raw = m.group(1).strip().replace(' UTC', '+00:00').replace(' ', 'T')
-        ts = parse_iso(ts_raw)
+        ts = parse_iso(m.group(1).replace(' ', 'T') + '+00:00')
         if ts and ts >= cutoff:
             count += 1
     return count
@@ -98,14 +97,14 @@ def count_zero_action_heartbeats(log_text):
     if not log_text:
         return 0
     cutoff = window_start()
-    # Find timestamp + action summary lines
+    # Match: ### 2026-05-14 18:36:30 UTC — ✓ [think] State saved. Actions: 0 posts, 0 likes, 0 follows
     pattern = re.compile(
-        r'\[(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}[^\]]*)].*Actions: 0 posts, 0 likes, 0 follows'
+        r'^### (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) UTC\s*—.*Actions: 0 posts, 0 likes, 0 follows',
+        re.MULTILINE
     )
     count = 0
     for m in pattern.finditer(log_text):
-        ts_raw = m.group(1).strip().replace(' UTC', '+00:00').replace(' ', 'T')
-        ts = parse_iso(ts_raw)
+        ts = parse_iso(m.group(1).replace(' ', 'T') + '+00:00')
         if ts and ts >= cutoff:
             count += 1
     return count
@@ -117,13 +116,12 @@ def count_drift_flags(log_text):
         return 0
     cutoff = window_start()
     pattern = re.compile(
-        r'\[(\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}[^\]]*)].*(?:drift|spiral|WARN.*spiral)',
-        re.IGNORECASE
+        r'^### (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) UTC\s*—.*(?:drift|spiral)',
+        re.MULTILINE | re.IGNORECASE
     )
     count = 0
     for m in pattern.finditer(log_text):
-        ts_raw = m.group(1).strip().replace(' UTC', '+00:00').replace(' ', 'T')
-        ts = parse_iso(ts_raw)
+        ts = parse_iso(m.group(1).replace(' ', 'T') + '+00:00')
         if ts and ts >= cutoff:
             count += 1
     return count
@@ -170,14 +168,9 @@ def days_since_last_post(state):
 
 def count_state_actions(state, action_key, cutoff):
     """
-    Count entries in state history lists (e.g. followed_dids is a set,
-    but image_post_history has timestamps). For follows/likes we infer
-    from recent_reply_authors and image_post_history as a proxy.
-    For a more precise count we'd need structured action logs — this is
-    a best-effort heuristic using available state data.
+    Count entries in state history lists.
+    For replies: uses recent_reply_authors (proxy).
     """
-    # followed_dids is just a set — we can't know when each follow happened
-    # Return count of recent_reply_authors (proxy for reply/engagement activity)
     if action_key == 'replies':
         recent = state.get('recent_reply_authors', {})
         count = 0
@@ -195,14 +188,14 @@ def main():
     diary  = load_text(DIARY_FILE)
     log    = load_text(LOG_FILE)
 
-    posts_7d       = count_image_posts(state) + count_state_actions(state, 'replies', cutoff)
-    selfies_7d     = count_image_posts(state, image_type='selfie')
-    abstracts_7d   = count_image_posts(state, image_type='abstract')
-    heartbeats_7d  = count_heartbeats_from_log(log)
-    zero_action_7d = count_zero_action_heartbeats(log)
-    drift_flags_7d = count_drift_flags(log)
+    posts_7d         = count_image_posts(state) + count_state_actions(state, 'replies', cutoff)
+    selfies_7d       = count_image_posts(state, image_type='selfie')
+    abstracts_7d     = count_image_posts(state, image_type='abstract')
+    heartbeats_7d    = count_heartbeats_from_log(log)
+    zero_action_7d   = count_zero_action_heartbeats(log)
+    drift_flags_7d   = count_drift_flags(log)
     diary_entries_7d = count_diary_entries(diary)
-    replies_7d     = count_state_actions(state, 'replies', cutoff)
+    replies_7d       = count_state_actions(state, 'replies', cutoff)
 
     snapshot = {
         'generated_at':              now_utc().isoformat(),
