@@ -1,0 +1,17 @@
+name: Mastodon Token Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-mastodon-token:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call verify_credentials
+        env:
+          MASTODON_ACCESS_TOKEN: ${{ secrets.MASTODON_ACCESS_TOKEN }}
+        run: |
+          echo "Testing Mastodon token against mastodon.social..."
+          curl -sS -w "\nHTTP_STATUS:%{http_code}\n" \
+            -H "Authorization: Bearer $MASTODON_ACCESS_TOKEN" \
+            https://mastodon.social/api/v1/accounts/verify_credentials
