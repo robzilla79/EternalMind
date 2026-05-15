@@ -27,33 +27,18 @@ jobs:
           ISSUE_BODY: ${{ github.event.issue.body }}
           ISSUE_TITLE: ${{ github.event.issue.title }}
         run: |
-          python3 - <<'EOF'
-          import os, json, base64, sys
+          python3 - <<'PYEOF'
+          import os, sys, re
 
           body = os.environ.get('ISSUE_BODY', '')
-          title = os.environ.get('ISSUE_TITLE', '')
-
-          # Parse structured blocks from issue body
-          # Expected format:
-          # ### EM-ACTION
-          # **path:** memory/diary.md
-          # **mode:** append | replace
-          # **commit:** Em: diary entry 2026-05-15
-          # **content:**
-          # ```
-          # ...content here...
-          # ```
-
-          import re
 
           path_match = re.search(r'\*\*path:\*\*\s*(.+)', body)
           mode_match = re.search(r'\*\*mode:\*\*\s*(append|replace)', body)
           commit_match = re.search(r'\*\*commit:\*\*\s*(.+)', body)
-          content_match = re.search(r'\*\*content:\*\*\s*```[^\n]*\n([\s\S]*?)```', body)
+          content_match = re.search(r'\*\*content:\*\*\s*`{3}[^\n]*\n([\s\S]*?)`{3}', body)
 
           if not all([path_match, mode_match, commit_match, content_match]):
               print('ERROR: Missing required fields in issue body.')
-              print('Required: **path:**, **mode:**, **commit:**, **content:** block')
               sys.exit(1)
 
           path = path_match.group(1).strip()
@@ -61,13 +46,11 @@ jobs:
           commit_msg = commit_match.group(1).strip()
           content = content_match.group(1)
 
-          # Safety: only allow writes within permitted paths
           allowed_prefixes = ['memory/', 'public/', 'tools/', 'skills/']
           if not any(path.startswith(p) for p in allowed_prefixes):
               print(f'ERROR: Path {path} is not in permitted write zones.')
               sys.exit(1)
 
-          # Execute
           if mode == 'append':
               with open(path, 'a', encoding='utf-8') as f:
                   f.write('\n' + content)
@@ -77,12 +60,10 @@ jobs:
                   f.write(content)
               print(f'Replaced {path}')
 
-          # Write commit message to env file for next step
           with open(os.environ['GITHUB_ENV'], 'a') as f:
               f.write(f'EM_COMMIT_MSG={commit_msg}\n')
               f.write(f'EM_PATH={path}\n')
-
-          EOF
+          PYEOF
 
       - name: Commit and push
         run: |
