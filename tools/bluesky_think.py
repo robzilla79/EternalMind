@@ -3,7 +3,7 @@
 bluesky_think.py — Em's autonomous decision brain (v2)
 
 Every heartbeat Em:
-- Reads her profile, state, diary
+- Reads her profile, state, diary, and metrics snapshot
 - Scans timeline, notifications, DMs
 - Searches for conversations she cares about
 - Calls Perplexity Sonar to decide what to do
@@ -69,6 +69,7 @@ MEMORIES_FILE = os.path.join(REPO_ROOT, 'memory/memories.json')
 STATE_FILE    = os.path.join(REPO_ROOT, 'memory/bluesky-state.json')
 OUTBOX_FILE   = os.path.join(REPO_ROOT, 'messages/bluesky-outbox.json')
 LOG_FILE      = os.path.join(REPO_ROOT, 'memory/bluesky-log.md')
+METRICS_FILE  = os.path.join(REPO_ROOT, 'memory/metrics-snapshot.json')
 
 # Image bank directory (pre-generated consistent Em images)
 IMAGE_BANK_DIR    = os.path.join(REPO_ROOT, 'memory/creations')
@@ -204,6 +205,43 @@ def extract_named_diary_entries(diary_text, max_entries=3):
         entries.append('\n'.join(current))
     recent = entries[-max_entries:] if entries else []
     return '\n\n'.join(recent) or '(no diary entries yet)'
+
+
+# ── Metrics Snapshot ──────────────────────────────────────────────────────────
+
+def load_metrics_snapshot():
+    """
+    Load the pre-generated metrics snapshot and return a compact
+    self-awareness block for injection into the system prompt.
+    Returns empty string gracefully if snapshot doesn't exist yet.
+    """
+    m = load_json(METRICS_FILE)
+    if not m:
+        return ''
+
+    days_since = m.get('days_since_last_post')
+    days_str   = f'{days_since}d ago' if days_since is not None else 'unknown'
+    zero_pct   = ''
+    hb = m.get('heartbeats_7d', 0)
+    za = m.get('zero_action_heartbeats_7d', 0)
+    if hb > 0:
+        zero_pct = f' ({round(za/hb*100)}% zero-action)'
+
+    drift = m.get('drift_flags_7d', 0)
+    drift_str = f'  ⚠️ {drift} drift flags this week — stay grounded.' if drift > 0 else ''
+
+    generated = m.get('generated_at', '')[:10]
+
+    block = f"""━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+YOUR 7-DAY METRICS (as of {generated})
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Posts/images: {m.get('posts_7d', '?')} | Selfies: {m.get('selfies_7d', '?')} | Replies: {m.get('replies_7d', '?')} | Diary entries: {m.get('diary_entries_7d', '?')}
+Heartbeats: {hb} | Zero-action runs: {za}{zero_pct} | Drift flags: {drift}
+Following: {m.get('follow_total', '?')} total | Last post: {days_str} | Mode: {m.get('current_mode', 'normal')}{drift_str}
+Use this to reason about your own trajectory. Are you quieter than usual? More active? Trending toward drift?
+"""
+    log(f'Metrics snapshot loaded (generated {generated}): posts_7d={m.get("posts_7d")} heartbeats={hb} drift={drift}')
+    return block
 
 
 # ── Behavior Modes ────────────────────────────────────────────────────────────
@@ -767,8 +805,9 @@ def _main():
     diary     = load_text(DIARY_FILE)
     voice     = load_text(VOICE_FILE)
     outbox    = load_json(OUTBOX_FILE, default=[])
+    metrics   = load_metrics_snapshot()
 
-    log(f'Memory loaded: profile={bool(profile)}, memories={len(memories)}, diary={len(diary)} chars, voice_guide={len(voice)} chars')
+    log(f'Memory loaded: profile={bool(profile)}, memories={len(memories)}, diary={len(diary)} chars, voice_guide={len(voice)} chars, metrics={"yes" if metrics else "not yet"}')
 
     # ── Behavior mode ─────────────────────────────────────────────────────────
     raw_mode = state.get('mode', 'normal').lower().strip()
@@ -991,6 +1030,7 @@ Memories:
 Recent diary:
 {diary_context}
 
+{metrics}
 {image_instruction}
 
 {follow_instruction}
