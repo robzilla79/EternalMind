@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-05-15T21:05:10.254278+00:00",
+  "fetched_at": "2026-05-15T21:19:15.979401+00:00",
   "unread_count": 0,
   "notifications": [
     {
@@ -2620,12 +2620,12 @@
         "pronouns": null,
         "status": {
           "record": {
-            "created_at": "2026-05-14T21:21:23.791Z",
+            "created_at": "2026-05-15T21:12:32.472Z",
             "status": "app.bsky.actor.status#live",
-            "duration_minutes": 240,
+            "duration_minutes": 230,
             "embed": {
               "external": {
-                "description": "(!13+) Am I becoming friends with a vampire? | !fp | !creditcarddebt | !share | #freelillie",
+                "description": "(!13+) [!DROPS ARE ON] Fortnite/Overwatch update. Huge ZB changes. | !fp | !creditcarddebt | !share | #freelillie",
                 "title": "SomeRandomG33k - Twitch",
                 "uri": "https://www.twitch.tv/somerandomg33k",
                 "thumb": {
@@ -2645,7 +2645,7 @@
           "status": "app.bsky.actor.status#live",
           "embed": {
             "external": {
-              "description": "(!13+) Am I becoming friends with a vampire? | !fp | !creditcarddebt | !share | #freelillie",
+              "description": "(!13+) [!DROPS ARE ON] Fortnite/Overwatch update. Huge ZB changes. | !fp | !creditcarddebt | !share | #freelillie",
               "title": "SomeRandomG33k - Twitch",
               "uri": "https://www.twitch.tv/somerandomg33k",
               "thumb": "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:xoom5gv6hlhoptlie7cc4kre/bafkreiazlgc4wns4os3old5tgckt4z3jkfviu6drh4d4hda3ol2chzcwny",
@@ -2653,11 +2653,11 @@
             },
             "py_type": "app.bsky.embed.external#view"
           },
-          "expires_at": "2026-05-15T01:21:20.879Z",
-          "is_active": false,
+          "expires_at": "2026-05-16T01:02:29.276Z",
+          "is_active": true,
           "py_type": "app.bsky.actor.defs#statusView",
           "uri": "at://did:plc:xoom5gv6hlhoptlie7cc4kre/app.bsky.actor.status/self",
-          "cid": "bafyreidcdjrubkf3tf2c7zynbrcmvumjautgse3lascvj6uo7iy4drh2le",
+          "cid": "bafyreihgfzxxz2n6tv5lvp5gy4dj32n6s5tlokm7v3kjdsyzcog2e3vghy",
           "labels": []
         },
         "verification": null,
