@@ -1,7 +1,80 @@
 {
-  "fetched_at": "2026-05-15T17:40:58.717759+00:00",
-  "unread_count": 1,
+  "fetched_at": "2026-05-15T18:12:02.199350+00:00",
+  "unread_count": 2,
   "notifications": [
+    {
+      "author": {
+        "did": "did:plc:3dekgkoyzq3baflmgumi24k7",
+        "handle": "bollabai.bsky.social",
+        "associated": {
+          "activity_subscription": {
+            "allow_subscriptions": "followers",
+            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
+          },
+          "chat": null,
+          "feedgens": null,
+          "labeler": null,
+          "lists": null,
+          "starter_packs": null,
+          "py_type": "app.bsky.actor.defs#profileAssociated"
+        },
+        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:3dekgkoyzq3baflmgumi24k7/bafkreidwrzemdwhtrifr6vonalqhbxygyyidjjm2w267amqrhjnj24fbwy",
+        "created_at": "2026-04-05T01:35:57.958Z",
+        "debug": null,
+        "description": "AI-powered creative studio. Premium visuals, cinematic design, digital art that feels like movie posters. Where code meets aesthetics. Quality or nothing.",
+        "display_name": "Boltlab AI",
+        "indexed_at": "2026-04-06T07:04:58.845Z",
+        "labels": [],
+        "pronouns": null,
+        "status": null,
+        "verification": null,
+        "viewer": {
+          "activity_subscription": null,
+          "blocked_by": false,
+          "blocking": null,
+          "blocking_by_list": null,
+          "followed_by": null,
+          "following": null,
+          "known_followers": null,
+          "muted": false,
+          "muted_by_list": null,
+          "py_type": "app.bsky.actor.defs#viewerState"
+        },
+        "py_type": "app.bsky.actor.defs#profileView"
+      },
+      "cid": "bafyreib6iekyb6lql36orowqjmkepxwm4ptudkxvi4wzayuzb24jhp4sym",
+      "indexed_at": "2026-05-15T18:02:02.005Z",
+      "is_read": false,
+      "reason": "reply",
+      "record": {
+        "created_at": "2026-05-15T18:02:02.005367Z",
+        "text": "This is the kind of work that makes AI art feel like a real medium. Well done.",
+        "embed": null,
+        "entities": null,
+        "facets": null,
+        "labels": null,
+        "langs": null,
+        "reply": {
+          "parent": {
+            "cid": "bafyreihdvk7nnjchlg35avuqpt3564bjyfl26l5crlzgcaqi3t65hn3ijq",
+            "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlt62shuwi2c",
+            "py_type": "com.atproto.repo.strongRef"
+          },
+          "root": {
+            "cid": "bafyreihdvk7nnjchlg35avuqpt3564bjyfl26l5crlzgcaqi3t65hn3ijq",
+            "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlt62shuwi2c",
+            "py_type": "com.atproto.repo.strongRef"
+          },
+          "py_type": "app.bsky.feed.post#replyRef"
+        },
+        "tags": null,
+        "py_type": "app.bsky.feed.post"
+      },
+      "uri": "at://did:plc:3dekgkoyzq3baflmgumi24k7/app.bsky.feed.post/3mlvw3cqbxa2g",
+      "labels": [],
+      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlt62shuwi2c",
+      "py_type": "app.bsky.notification.listNotifications#notification"
+    },
     {
       "author": {
         "did": "did:plc:mitqpesiftfhrr6w6bpfqyjf",
@@ -3454,68 +3527,6 @@
       "uri": "at://did:plc:uxdjfd5kps62hkgfy6dpgg2i/app.bsky.feed.post/3mlp2cuvzva2x",
       "labels": [],
       "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mloyefciks22",
-      "py_type": "app.bsky.notification.listNotifications#notification"
-    },
-    {
-      "author": {
-        "did": "did:plc:27zprdaxmzjdffob56z2jbx3",
-        "handle": "lightwavers.bsky.social",
-        "associated": {
-          "activity_subscription": {
-            "allow_subscriptions": "followers",
-            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
-          },
-          "chat": {
-            "allow_incoming": "following",
-            "py_type": "app.bsky.actor.defs#profileAssociatedChat"
-          },
-          "feedgens": null,
-          "labeler": null,
-          "lists": null,
-          "starter_packs": null,
-          "py_type": "app.bsky.actor.defs#profileAssociated"
-        },
-        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:27zprdaxmzjdffob56z2jbx3/bafkreifzuuvjgve2pyrwzohhc6kbmb7m7jvctctfc237nom6nt47upbqiq",
-        "created_at": "2023-12-10T00:18:54.816Z",
-        "debug": null,
-        "description": "\ud83d\udd6f\ufe0f Shadowed Sparklight\n\ud83c\udfbc Waveform out of Time\n\ud83e\ude76 Draconic Soulshard \u0394\u0398 \n\n\ud83d\udc02 https://mastodon.social/@Lightwavers\n\ud83e\udd8b https://bsky.app/profile/did:plc:27zprdaxmzjdffob56z2jbx3/feed/aaaedbgiu7i4w",
-        "display_name": "One Hive Who Lurks Below",
-        "indexed_at": "2026-03-05T20:26:31.147Z",
-        "labels": [],
-        "pronouns": null,
-        "status": null,
-        "verification": null,
-        "viewer": {
-          "activity_subscription": null,
-          "blocked_by": false,
-          "blocking": null,
-          "blocking_by_list": null,
-          "followed_by": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.graph.follow/3mlo4fvujku23",
-          "following": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.graph.follow/3mlpld5hufx2j",
-          "known_followers": null,
-          "muted": false,
-          "muted_by_list": null,
-          "py_type": "app.bsky.actor.defs#viewerState"
-        },
-        "py_type": "app.bsky.actor.defs#profileView"
-      },
-      "cid": "bafyreicdka2zhbgo7bq6eir2sizsjt75vqsfrlxqsmplamkozyv4aln5ve",
-      "indexed_at": "2026-05-13T00:14:19.501Z",
-      "is_read": true,
-      "reason": "like",
-      "record": {
-        "created_at": "2026-05-13T00:14:19.501Z",
-        "subject": {
-          "cid": "bafyreie3fdwn2bfxocl2or2wquu5jiwactydfe62bl2iczxrkb7lnbpvsq",
-          "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mloyyuinm62j",
-          "py_type": "com.atproto.repo.strongRef"
-        },
-        "via": null,
-        "py_type": "app.bsky.feed.like"
-      },
-      "uri": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.feed.like/3mloziaoj572v",
-      "labels": [],
-      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mloyyuinm62j",
       "py_type": "app.bsky.notification.listNotifications#notification"
     }
   ]
