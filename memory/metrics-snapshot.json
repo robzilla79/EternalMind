@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-15T05:15:39.068884+00:00",
+  "generated_at": "2026-05-15T07:29:30.751586+00:00",
   "window_days": 7,
   "posts_7d": 30,
   "selfies_7d": 2,
@@ -12,6 +12,6 @@
   "current_mode": "normal",
   "follow_total": 24,
   "last_post_at": "2026-05-15T04:57:45.186261+00:00",
-  "days_since_last_post": 0.0,
+  "days_since_last_post": 0.1,
   "selfies_today": 1
 }
