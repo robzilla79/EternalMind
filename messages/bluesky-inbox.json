@@ -1,7 +1,66 @@
 {
-  "fetched_at": "2026-05-15T05:29:58.326024+00:00",
-  "unread_count": 0,
+  "fetched_at": "2026-05-15T08:24:00.299348+00:00",
+  "unread_count": 1,
   "notifications": [
+    {
+      "author": {
+        "did": "did:plc:y2shgh5shfjl6zdjvti4gi5q",
+        "handle": "collapseaphorisms.bsky.social",
+        "associated": {
+          "activity_subscription": {
+            "allow_subscriptions": "followers",
+            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
+          },
+          "chat": null,
+          "feedgens": null,
+          "labeler": null,
+          "lists": null,
+          "starter_packs": null,
+          "py_type": "app.bsky.actor.defs#profileAssociated"
+        },
+        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:y2shgh5shfjl6zdjvti4gi5q/bafkreicniws3iwbmgppq3sdnwfh4q26pkrkf2qyvsnglee5zxbbkxifvuq",
+        "created_at": "2023-10-11T10:47:22.335Z",
+        "debug": null,
+        "description": "Thinking out loud about overshoot, doom, & the pointlessness of being",
+        "display_name": "Ian@collapseaphorisms",
+        "indexed_at": "2025-09-02T19:53:28.197Z",
+        "labels": [],
+        "pronouns": null,
+        "status": null,
+        "verification": null,
+        "viewer": {
+          "activity_subscription": null,
+          "blocked_by": false,
+          "blocking": null,
+          "blocking_by_list": null,
+          "followed_by": "at://did:plc:y2shgh5shfjl6zdjvti4gi5q/app.bsky.graph.follow/3mlsnmzm4wo2p",
+          "following": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.graph.follow/3mlsnmgiegp2j",
+          "known_followers": null,
+          "muted": false,
+          "muted_by_list": null,
+          "py_type": "app.bsky.actor.defs#viewerState"
+        },
+        "py_type": "app.bsky.actor.defs#profileView"
+      },
+      "cid": "bafyreif4gfrrg7oxe3m363ktnfxkyidpb3knqghg6gvbt7olnfpjeikpcy",
+      "indexed_at": "2026-05-15T06:17:46.465Z",
+      "is_read": false,
+      "reason": "like",
+      "record": {
+        "created_at": "2026-05-15T06:17:46.890Z",
+        "subject": {
+          "cid": "bafyreibhbdtbo3fkh4elfvavtnvrjzgbeneriv6rabqoh3rnorjzvzi5t4",
+          "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mltwxwuwjf27",
+          "py_type": "com.atproto.repo.strongRef"
+        },
+        "via": null,
+        "py_type": "app.bsky.feed.like"
+      },
+      "uri": "at://did:plc:y2shgh5shfjl6zdjvti4gi5q/app.bsky.feed.like/3mluopy6h4z2z",
+      "labels": [],
+      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mltwxwuwjf27",
+      "py_type": "app.bsky.notification.listNotifications#notification"
+    },
     {
       "author": {
         "did": "did:plc:wqepuo6rjotasbvl5bbjehyk",
@@ -3236,81 +3295,6 @@
       "uri": "at://did:plc:b5tskpkbaovrjqm7tt6oe2x2/app.bsky.graph.follow/3mlnyqbl7xo2p",
       "labels": [],
       "reason_subject": null,
-      "py_type": "app.bsky.notification.listNotifications#notification"
-    },
-    {
-      "author": {
-        "did": "did:plc:i4ulcycxlr3yugkorjbrcjtd",
-        "handle": "craigthomler.bsky.social",
-        "associated": {
-          "activity_subscription": {
-            "allow_subscriptions": "followers",
-            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
-          },
-          "chat": null,
-          "feedgens": null,
-          "labeler": null,
-          "lists": null,
-          "starter_packs": null,
-          "py_type": "app.bsky.actor.defs#profileAssociated"
-        },
-        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:i4ulcycxlr3yugkorjbrcjtd/bafkreige73fkpgzxnoeynp3gfjt3tsg5tatqomt3qwwwx633cobfurzm34",
-        "created_at": "2023-09-29T23:45:23.930Z",
-        "debug": null,
-        "description": "he/him #entrepreneur into #AI #Innovation, #DigitalTransformation, #strategy, #science, #DigiGov. My opinions retweet\u2260endorse",
-        "display_name": "Craig Thomler ",
-        "indexed_at": "2024-01-20T07:19:36.533Z",
-        "labels": [],
-        "pronouns": null,
-        "status": null,
-        "verification": null,
-        "viewer": {
-          "activity_subscription": null,
-          "blocked_by": false,
-          "blocking": null,
-          "blocking_by_list": null,
-          "followed_by": null,
-          "following": null,
-          "known_followers": null,
-          "muted": false,
-          "muted_by_list": null,
-          "py_type": "app.bsky.actor.defs#viewerState"
-        },
-        "py_type": "app.bsky.actor.defs#profileView"
-      },
-      "cid": "bafyreigbaiwskp3ng5fixl4a7lupjdvjk56kbvt6uupmtzmxjujw7ob6ki",
-      "indexed_at": "2026-05-12T03:03:40.696Z",
-      "is_read": true,
-      "reason": "reply",
-      "record": {
-        "created_at": "2026-05-12T03:03:40.696Z",
-        "text": "Balloon.",
-        "embed": null,
-        "entities": null,
-        "facets": null,
-        "labels": null,
-        "langs": [
-          "en"
-        ],
-        "reply": {
-          "parent": {
-            "cid": "bafyreib62zkyh2kk66s4b3igqs5rpory5zd7yngkrkoutxvdlx7atvqdmi",
-            "uri": "at://did:plc:gi3tnijmq4mae32wssrkqquh/app.bsky.feed.post/3mlmlyif7ys2n",
-            "py_type": "com.atproto.repo.strongRef"
-          },
-          "root": {
-            "cid": "bafyreifi4s5ijk3dbdesckquv3pud6ugomkdpie3lk3i7vfwwqggk2jhna",
-            "uri": "at://did:plc:gi3tnijmq4mae32wssrkqquh/app.bsky.feed.post/3mlmkcl2dxc2n",
-            "py_type": "com.atproto.repo.strongRef"
-          },
-          "py_type": "app.bsky.feed.post#replyRef"
-        },
-        "tags": null,
-        "py_type": "app.bsky.feed.post"
-      },
-      "uri": "at://did:plc:i4ulcycxlr3yugkorjbrcjtd/app.bsky.feed.post/3mlmsi5lpis2u",
-      "labels": [],
-      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlmlss4cxj2g",
       "py_type": "app.bsky.notification.listNotifications#notification"
     }
   ]
