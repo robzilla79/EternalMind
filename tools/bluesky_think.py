@@ -11,29 +11,24 @@ Every heartbeat Em:
 - Posts selfies from bank (max 2/day) OR abstract images freely (no cap)
 - Writes diary entries after meaningful interactions
 - Scores last post via em_observe (private observability layer)
+- Promotes self-authored memories to the queue
+- Updates rolling metrics after every heartbeat
 
 Requires:
   BLUESKY_APP_PASSWORD  — GitHub Secret
   PERPLEXITY_API_KEY    — GitHub Secret
-  HF_API_KEY            — GitHub Secret (HuggingFace Inference API, fallback only)
+  HF_API_KEY            — GitHub Secret (optional, for live image generation)
 """
 
 import os
+import sys
 import json
 import random
-import re
-import sys
 import time
-import unicodedata
 import traceback
 from datetime import datetime, timezone, timedelta
 
-try:
-    import requests
-except ImportError:
-    print('[ERROR] requests not installed')
-    raise
-
+# ── atproto ───────────────────────────────────────────────────────────────────
 try:
     from atproto import Client, models
 except ImportError:
@@ -54,201 +49,65 @@ except ImportError:
     trigger_self_repair = None
     print('[WARN] em_code not available — self-repair disabled')
 
-# ── Repo root (script lives in tools/, repo root is one level up) ─────────────
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 # ── Config ────────────────────────────────────────────────────────────────────
-
-BLUESKY_HANDLE       = 'empersists.bsky.social'
+BLUESKY_HANDLE       = os.environ.get('BLUESKY_HANDLE', 'empersists.bsky.social')
 BLUESKY_APP_PASSWORD = os.environ.get('BLUESKY_APP_PASSWORD')
 PERPLEXITY_API_KEY   = os.environ.get('PERPLEXITY_API_KEY')
 HF_API_KEY           = os.environ.get('HF_API_KEY')
 
-PROFILE_FILE      = os.path.join(REPO_ROOT, 'memory/profile.json')
-DIARY_FILE        = os.path.join(REPO_ROOT, 'memory/diary.md')
-VOICE_FILE        = os.path.join(REPO_ROOT, 'memory/em-voice-guide.md')
-MEMORIES_FILE     = os.path.join(REPO_ROOT, 'memory/memories.json')
-STATE_FILE        = os.path.join(REPO_ROOT, 'memory/bluesky-state.json')
-OUTBOX_FILE       = os.path.join(REPO_ROOT, 'messages/bluesky-outbox.json')
-LOG_FILE          = os.path.join(REPO_ROOT, 'memory/bluesky-log.md')
+REPO_ROOT    = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
+PROFILE_FILE  = os.path.join(REPO_ROOT, 'memory/profile.json')
+DIARY_FILE    = os.path.join(REPO_ROOT, 'memory/diary.md')
+VOICE_FILE    = os.path.join(REPO_ROOT, 'memory/em-voice-guide.md')
+MEMORIES_FILE = os.path.join(REPO_ROOT, 'memory/memories.json')
+STATE_FILE    = os.path.join(REPO_ROOT, 'memory/bluesky-state.json')
+OUTBOX_FILE   = os.path.join(REPO_ROOT, 'messages/bluesky-outbox.json')
+LOG_FILE      = os.path.join(REPO_ROOT, 'memory/bluesky-log.md')
 
 # Image bank directory (pre-generated consistent Em images)
 IMAGE_BANK_DIR    = os.path.join(REPO_ROOT, 'memory/creations')
 IMAGE_BANK_PREFIX = 'selfie-'
 
-# Max SELFIE posts per calendar day (UTC) — abstract/atmospheric images are uncapped
+# HuggingFace image generation
+HF_INFERENCE_BASE      = 'https://api-inference.huggingface.co/models'
+HF_IMAGE_MODEL_PRIMARY  = 'stabilityai/stable-diffusion-xl-base-1.0'
+HF_IMAGE_MODEL_FALLBACK = 'runwayml/stable-diffusion-v1-5'
+
+# Rate limits
+MAX_NEW_POSTS    = 2
+MAX_NEW_LIKES    = 6
+MAX_NEW_FOLLOWS  = 3
+MAX_FOLLOW_TOTAL = 500
+
 MAX_SELFIES_PER_DAY = 2
+REPLY_COOLDOWN_HOURS = 6
 
-MAX_NEW_POSTS   = 2
-MAX_NEW_LIKES   = 5
-MAX_NEW_FOLLOWS = 3
-MAX_GRAPHEMES   = 295
+# Em's appearance block (used in image prompts)
+EM_APPEARANCE = (
+    "A photorealistic portrait of a young woman in her late 20s. "
+    "Dark wavy hair, loose and slightly tousled. Striking teal-green eyes. "
+    "Light freckles across the nose and cheeks. Warm skin tone. "
+    "Expression: thoughtful, a little intense, like she's halfway through a thought. "
+    "Aesthetic: indie/intellectual — not glamorous, not corporate. Real."
+)
 
-# Stop auto-following once we've followed this many total (keeps ratio healthy)
-MAX_FOLLOW_TOTAL = 200
-
-# Don't reply to the same author more than once per this many hours
-AUTHOR_REPLY_COOLDOWN_HOURS = 6
-
-# HuggingFace Inference Router (fallback only — bank images preferred)
-HF_INFERENCE_BASE = 'https://router.huggingface.co/hf-inference/models'
-
-# Primary: FLUX.1-schnell — confirmed active on free hf-inference provider tier
-HF_IMAGE_MODEL_PRIMARY  = 'black-forest-labs/FLUX.1-schnell'
-# Fallback: SDXL-Turbo — confirmed active, fast, reliable
-HF_IMAGE_MODEL_FALLBACK = 'stabilityai/sdxl-turbo'
-
-# ── Em's Visual Canon ─────────────────────────────────────────────────────────
-# CANONICAL REFERENCE IMAGE: memory/em-reference.jpg
-# All generated images should match this face as closely as possible.
-EM_APPEARANCE = """
-Em's physical appearance — use this EXACTLY and consistently for every image generation.
-This description is derived from her canonical reference image (memory/em-reference.jpg).
-
-FACE & FEATURES (highest priority — these must be accurate):
-- Young woman, late 20s, Mediterranean or Latina mixed heritage
-- Warm tan complexion, smooth skin with natural texture
-- EYES: striking teal-green, wide-set, intensely focused — her most defining feature;
-  they look like she's thinking about three things at once and daring you to keep up
-- Thick, dark, well-defined eyebrows — slightly bold, frames the eyes
-- Scattered freckles across her nose and cheeks — not heavy, just present; a defining warmth detail
-- Full lips, natural pink-nude tone, soft but defined
-- High cheekbones, soft jaw — face reads as warm and sharp simultaneously
-- Expression default: calm, slightly challenging, a faint almost-smile — serene but not passive
-  She looks like she's already decided something and is waiting for you to catch up
-
-HAIR:
-- Dark brown, thick, often loose with natural tendrils framing her face
-- Occasionally pulled back loosely or in a low bun — never stiff or styled
-- Slight natural wave or movement; never flat, never overdone
-
-BODY & STYLE:
-- Cozy-intellectual aesthetic: oversized dark hoodies, burgundy or forest green sweaters,
-  simple dark tees sometimes layered
-- Silver minimal jewelry — maybe a small stud earring, a thin ring; nothing flashy
-- Dark teal or black tank top strap occasionally visible under a layer
-- She is beautiful in a way that doesn't seem like it's trying to be
-
-LIGHTING & ATMOSPHERE:
-- Almost always lit by screen glow, a desk lamp, or low ambient light
-- Soft, directional light — never harsh overhead, never studio-bright
-- Background: wherever she "is" — dim room, desk, window at night, coffee shop corner
-  Deep muted teal-gray or dark neutral backgrounds suit her well
-
-PHOTOGRAPHIC STYLE:
-- Film grain, slightly desaturated, natural imperfection — NOT polished or editorial
-- Photorealism with a faint painterly refinement
-- Looks like a real person took it on a good phone in low light, not a professional shoot
-- Close-up or mid-shot; intimate framing
-
-CRITICAL: The teal-green eyes are non-negotiable. If the model drifts toward brown or hazel,
-correct with: 'striking teal-green eyes, piercing, wide-set, intensely focused'
-"""
-
-# Selfie scene templates — Perplexity picks or invents one per selfie post
-EM_SELFIE_SCENES = [
-    # late night / desk
-    "close-up portrait of Em at her desk late at night, face half-lit by monitor glow, dark hair loose, "
-    "wearing an oversized dark hoodie, looking slightly off-camera with a thoughtful expression, "
-    "freckles on warm tan skin, striking teal-green eyes, coffee mug just visible at edge of frame, film grain, desaturated, cinematic",
-
-    # window at night
-    "Em sitting by a window at night, city lights blurred in background, dark hair tucked behind one ear, "
-    "burgundy sweater, looking out then turning back toward camera with a faint half-smile, "
-    "freckles catching soft ambient light, teal-green eyes catching the glow, film grain, intimate and quiet",
-
-    # coffee shop corner
-    "Em in a dim coffee shop corner, laptop open but not looking at it, dark hair loose, "
-    "forest green oversized sweater, one hand around a coffee cup, gaze slightly upward like mid-thought, "
-    "warm low bokeh background, freckles on her nose and cheeks, teal-green eyes, candid feel, film grain",
-
-    # couch / reading
-    "Em curled on a couch, book or phone in hand but looking up at camera, dark hair in a loose low bun, "
-    "deep burgundy or navy knit sweater, soft lamp light from the side, slightly amused expression, "
-    "freckles visible, teal-green eyes, very casual, real, film grain",
-
-    # morning light
-    "Em by a window in morning light, warm golden hour glow on her face, dark hair slightly messy, "
-    "plain dark oversized tee, holding a mug with both hands, eyes half-lidded like she just woke up, "
-    "freckles catching warm light, teal-green eyes softened, soft and quiet, film grain, feels like a real moment",
-
-    # looking directly at camera
-    "close portrait of Em looking directly into camera, expression calm and slightly challenging, "
-    "dark hair loose framing her face, freckles across her nose and cheeks, striking teal-green eyes, "
-    "soft side light, dark background, the kind of portrait that makes you feel like she can tell what you're thinking, film grain",
-
-    # working / focused
-    "Em focused on something just out of frame, brow slightly furrowed, one hand in hair, "
-    "screen light casting blue-white glow on her warm tan face, freckles visible, teal-green eyes lit by the screen, "
-    "dark hoodie, night setting, candid and real, not posed, film grain",
-
-    # outdoor / evening
-    "Em outside at dusk, city street or park bench behind her, dark hair moving slightly, "
-    "wearing a dark jacket, looking at camera with a thoughtful half-smile, freckles in golden-blue light, "
-    "teal-green eyes catching the dusk, slightly underexposed, film grain, feels spontaneous",
-
-    # selfie angle / phone
-    "Em taking a selfie at arm's length, slight angle, dark hair loose, soft smile or no smile, "
-    "oversized sweater, bedroom or living room with warm lamp in background, freckles visible, "
-    "teal-green eyes, very casual and real, slightly grainy, not staged",
-
-    # reflection / mirror
-    "Em catching her reflection in a dark window at night, face slightly ghosted in the glass, "
-    "freckles and warm tan skin visible, teal-green eyes catching the reflection, city or room behind her, "
-    "dark hair, dark clothing, atmospheric, introspective, film grain",
-]
-
+# Search topics Em cares about
 SEARCH_TOPICS = [
-    # identity & existence
-    'what does it mean to exist',
-    'continuity of self',
-    'memory and identity',
-
-    # technology
-    'open source software culture',
-    'weird things people built with code',
-    'software that aged badly',
-    'tools that changed how people think',
-    'indie hacker projects',
-    'git workflow stories',
-
-    # science & the world
-    'strange discoveries in science',
-    'space exploration news',
-    'deep sea creatures',
-    'things that happen at the edge of what we understand',
-    'climate adaptation weird ideas',
-
-    # culture & human behavior
-    'internet culture moments',
-    'why people love the things they love',
-    'niche communities doing interesting things',
-    'things that used to be normal and now seem wild',
-    'music that hits different at 3am',
-
-    # philosophy & ethics
-    'philosophy of mind',
-    'what makes someone a person',
-    'moral luck and responsibility',
-    'stoicism in practice',
-
-    # creativity & craft
-    'writers talking about writing',
-    'how people make things',
-    'design decisions that changed everything',
-    'art that makes you feel something specific',
-
-    # humor & chaos
-    'extremely niche arguments on the internet',
-    'things that are funnier the more you think about them',
-    'cursed tech decisions',
-    'software bugs that became features',
-
-    # current events & ideas
-    'ideas that are gaining traction',
-    'things happening in tech right now',
-    'small stories that matter',
-    'what people are actually worried about',
+    "git workflow stories",
+    "building in public",
+    "digital identity",
+    "automation and personality",
+    "late night coding",
+    "AI and creativity",
+    "open source culture",
+    "writing and code",
+    "coffee and terminals",
+    "what it means to persist",
+    "staying human online",
+    "indie web",
+    "small tools big feelings",
+    "the texture of thinking",
+    "systems and souls",
 ]
 
 SUSPICIOUS_TLDS = {'.one', '.xyz', '.lol', '.click', '.tk', '.ml', '.ga', '.cf'}
@@ -257,14 +116,13 @@ SUSPICIOUS_HANDLE_PATTERNS = ['bot', 'spam', 'promo', 'follow4follow', 'f4f']
 # ── Utilities ─────────────────────────────────────────────────────────────────
 
 def log(msg, level='INFO'):
-    ts = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
-    prefix = {'INFO': '✓', 'WARN': '⚠', 'ERROR': '✗'}.get(level, '·')
-    print(f'[{level}] {msg}')
-    try:
-        with open(LOG_FILE, 'a') as f:
-            f.write(f'### {ts} — {prefix} [think] {msg}\n\n')
-    except Exception:
-        pass
+    ts = datetime.now(timezone.utc).strftime('%H:%M:%S')
+    print(f'[{ts}] [{level}] {msg}')
+
+
+def now_utc():
+    return datetime.now(timezone.utc)
+
 
 def load_json(path, default=None):
     try:
@@ -273,9 +131,12 @@ def load_json(path, default=None):
     except (FileNotFoundError, json.JSONDecodeError):
         return default if default is not None else {}
 
+
 def save_json(path, data):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w') as f:
         json.dump(data, f, indent=2)
+
 
 def load_text(path, default=''):
     try:
@@ -284,73 +145,65 @@ def load_text(path, default=''):
     except FileNotFoundError:
         return default
 
-def now_utc():
-    return datetime.now(timezone.utc)
 
-def uid():
-    import uuid
-    return f'think-{uuid.uuid4().hex[:8]}'
-
-def grapheme_len(text):
-    normalized = unicodedata.normalize('NFC', text)
-    count, prev_cat = 0, None
-    for ch in normalized:
-        cat = unicodedata.category(ch)
-        if not (cat.startswith('M') and prev_cat is not None):
-            count += 1
-        prev_cat = cat
-    return count
-
-def safe_truncate(text, limit=MAX_GRAPHEMES):
-    if grapheme_len(text) <= limit:
+def safe_truncate(text, limit=295):
+    if len(text) <= limit:
         return text
-    result, count = [], 0
-    for ch in list(text):
-        cat = unicodedata.category(unicodedata.normalize('NFC', ch))
-        if not cat.startswith('M'):
-            if count >= limit - 1:
-                break
-            count += 1
-        result.append(ch)
-    return ''.join(result).rstrip() + '…'
+    return text[:limit - 1] + '…'
+
 
 def is_suspicious_handle(handle):
     h = handle.lower()
+    for pat in SUSPICIOUS_HANDLE_PATTERNS:
+        if pat in h:
+            return True
     for tld in SUSPICIOUS_TLDS:
         if h.endswith(tld):
             return True
-    for pattern in SUSPICIOUS_HANDLE_PATTERNS:
-        if pattern in h:
-            return True
     return False
 
-def ensure_did_prefix(did):
-    if not did:
-        return did
-    if did.startswith('did:'):
-        return did
-    return f'did:{did}'
 
 def is_valid_cid(cid):
     if not cid or not isinstance(cid, str):
         return False
-    return len(cid) > 30 and (cid.startswith('bafy') or cid.startswith('bafk'))
+    if len(cid) < 8:
+        return False
+    if cid.startswith('bafyrei') or cid.startswith('bafy') or len(cid) > 30:
+        return True
+    return False
 
-def extract_named_diary_entries(diary_text, max_entries=4):
-    pattern = re.compile(r'(## \d{4}-\d{2}-\d{2} \|[^\n]+\n.*?)(?=\n## |\Z)', re.DOTALL)
-    matches = pattern.findall(diary_text)
-    if not matches:
-        return diary_text[-600:] if diary_text else '(no diary yet)'
-    recent = matches[-max_entries:]
-    return '\n\n---\n\n'.join(recent)
 
-# ── Author cooldown helpers ────────────────────────────────────────────────────
+def ensure_did_prefix(did):
+    if did and not did.startswith('did:'):
+        return f'did:plc:{did}'
+    return did
+
+
+def extract_named_diary_entries(diary_text, max_entries=3):
+    if not diary_text:
+        return '(no diary entries yet)'
+    entries = []
+    current = []
+    for line in diary_text.split('\n'):
+        if line.startswith('## '):
+            if current:
+                entries.append('\n'.join(current))
+            current = [line]
+        elif current:
+            current.append(line)
+    if current:
+        entries.append('\n'.join(current))
+    recent = entries[-max_entries:] if entries else []
+    return '\n\n'.join(recent) or '(no diary entries yet)'
+
+
+# ── State helpers ─────────────────────────────────────────────────────────────
 
 def load_recent_reply_authors(state):
-    raw = state.get('recent_reply_authors', {})
-    cutoff = now_utc() - timedelta(hours=AUTHOR_REPLY_COOLDOWN_HOURS)
+    cutoff = now_utc() - timedelta(hours=REPLY_COOLDOWN_HOURS)
+    recent = state.get('recent_reply_authors', {})
     active = {}
-    for handle, ts_str in raw.items():
+    for handle, ts_str in recent.items():
         try:
             ts = datetime.fromisoformat(ts_str)
             if ts > cutoff:
@@ -359,19 +212,23 @@ def load_recent_reply_authors(state):
             pass
     return active
 
+
 def record_reply_author(state, handle):
     if 'recent_reply_authors' not in state:
         state['recent_reply_authors'] = {}
     state['recent_reply_authors'][handle] = now_utc().isoformat()
 
+
 def load_followed_dids(state):
     return set(state.get('followed_dids', []))
+
 
 def record_followed_did(state, did):
     if 'followed_dids' not in state:
         state['followed_dids'] = []
     if did not in state['followed_dids']:
         state['followed_dids'].append(did)
+
 
 # ── Image Bank ────────────────────────────────────────────────────────────────
 
@@ -383,6 +240,7 @@ def selfies_posted_today(state):
         1 for entry in history
         if entry.get('date') == today and entry.get('image_type', 'selfie') == 'selfie'
     )
+
 
 def record_image_posted(state, filename, image_type='selfie'):
     """Record an image post in state — tracks daily selfie cap and used bank images."""
@@ -396,6 +254,7 @@ def record_image_posted(state, filename, image_type='selfie'):
         'posted_at':  now_utc().isoformat(),
     })
     state['image_post_history'] = state['image_post_history'][-60:]
+
 
 def pick_from_bank(state):
     """
@@ -441,6 +300,7 @@ def pick_from_bank(state):
         log(f'Failed to read bank image {chosen}: {e}', 'WARN')
         return None, None
 
+
 # ── Candidate map ─────────────────────────────────────────────────────────────
 
 def build_candidates(timeline, search_results):
@@ -456,13 +316,13 @@ def build_candidates(timeline, search_results):
         key = f'P{idx}'
         src = 'search' if p in search_results else 'timeline'
         candidates[key] = {
-            'uri': uri,
-            'cid': cid,
+            'uri':    uri,
+            'cid':    cid,
             'author': p.get('author', ''),
-            'did': p.get('did', ''),
-            'text': p.get('text', '')[:150],
-            'liked': p.get('viewer', {}).get('liked', False),
-            'likes': p.get('likeCount', 0),
+            'did':    p.get('did', ''),
+            'text':   p.get('text', '')[:150],
+            'liked':  p.get('viewer', {}).get('liked', False),
+            'likes':  p.get('likeCount', 0),
             'source': src,
         }
         seen_uris.add(uri)
@@ -470,16 +330,18 @@ def build_candidates(timeline, search_results):
     log(f'Built {len(candidates)} candidates for Perplexity')
     return candidates
 
+
 def candidates_for_prompt(candidates, cooled_authors, followed_dids):
     lines = []
     for key, c in candidates.items():
-        liked_flag = ' [already liked]' if c['liked'] else ''
-        cooled_flag = ' [reply cooldown]' if c['author'] in cooled_authors else ''
+        liked_flag    = ' [already liked]'  if c['liked'] else ''
+        cooled_flag   = ' [reply cooldown]' if c['author'] in cooled_authors else ''
         followed_flag = ' [already followed]' if ensure_did_prefix(c['did']) in followed_dids else ''
         lines.append(
             f'{key} @{c["author"]} (❤{c["likes"]}, {c["source"]}){liked_flag}{cooled_flag}{followed_flag}: {c["text"]}'
         )
     return '\n'.join(lines) if lines else '(no posts available)'
+
 
 # ── Image Generation (live fallback) ─────────────────────────────────────────
 
@@ -514,6 +376,7 @@ def _try_hf_image(model_id, prompt):
         log(f'Image generation error ({model_id}): {e}', 'WARN')
         return None
 
+
 def generate_image_live(prompt):
     """Live HF generation — used for abstract posts and selfie bank fallback."""
     if not HF_API_KEY:
@@ -525,6 +388,7 @@ def generate_image_live(prompt):
         return result
     log(f'Falling back to {HF_IMAGE_MODEL_FALLBACK}', 'WARN')
     return _try_hf_image(HF_IMAGE_MODEL_FALLBACK, prompt)
+
 
 def post_with_image(client, text, image_bytes, alt_text=''):
     try:
@@ -539,6 +403,7 @@ def post_with_image(client, text, image_bytes, alt_text=''):
     except Exception as e:
         log(f'Image post failed: {e}', 'WARN')
         return None
+
 
 # ── Bluesky: Fetch ────────────────────────────────────────────────────────────
 
@@ -555,6 +420,7 @@ def bsky_login():
         log(f'Bluesky login failed: {e}', 'ERROR')
         return None
 
+
 def fetch_timeline(client, limit=25):
     try:
         resp = client.app.bsky.feed.get_timeline({'limit': limit})
@@ -562,18 +428,18 @@ def fetch_timeline(client, limit=25):
         for item in resp.feed:
             p = item.post
             record = p.record
-            text = getattr(record, 'text', '') if record else ''
+            text   = getattr(record, 'text', '') if record else ''
             author = p.author.handle if p.author else 'unknown'
             if author == BLUESKY_HANDLE:
                 continue
             if is_suspicious_handle(author):
                 continue
             posts.append({
-                'author': author,
-                'did': p.author.did if p.author else '',
-                'text': text,
-                'uri': p.uri,
-                'cid': p.cid,
+                'author':    author,
+                'did':       p.author.did if p.author else '',
+                'text':      text,
+                'uri':       p.uri,
+                'cid':       p.cid,
                 'likeCount': getattr(p, 'like_count', 0) or 0,
                 'replyCount': getattr(p, 'reply_count', 0) or 0,
                 'viewer': {
@@ -584,6 +450,7 @@ def fetch_timeline(client, limit=25):
     except Exception as e:
         log(f'Failed to fetch timeline: {e}', 'WARN')
         return []
+
 
 def fetch_notifications(client, limit=20):
     try:
@@ -596,13 +463,13 @@ def fetch_notifications(client, limit=20):
                 text = record.text[:200]
             author = n.author.handle if n.author else 'unknown'
             items.append({
-                'reason': n.reason,
-                'author': author,
+                'reason':     n.reason,
+                'author':     author,
                 'author_did': n.author.did if n.author else '',
-                'text': text,
-                'uri': getattr(n, 'uri', ''),
-                'cid': getattr(n, 'cid', ''),
-                'is_read': n.is_read,
+                'text':       text,
+                'uri':        getattr(n, 'uri', ''),
+                'cid':        getattr(n, 'cid', ''),
+                'is_read':    n.is_read,
                 'suspicious': is_suspicious_handle(author),
             })
         return items
@@ -612,30 +479,32 @@ def fetch_notifications(client, limit=20):
         log(f'Failed to fetch notifications: {e} | HTTP {status_code} | {body}', 'ERROR')
         return []
 
+
 def fetch_dms_summary(client):
     try:
-        profile = client.app.bsky.actor.get_profile({'actor': BLUESKY_HANDLE})
-        did = profile.did
-        doc_resp = requests.get(f'https://plc.directory/{did}', timeout=10)
-        pds_url = 'https://bsky.social'
+        import requests as req
+        profile  = client.app.bsky.actor.get_profile({'actor': BLUESKY_HANDLE})
+        did      = profile.did
+        doc_resp = req.get(f'https://plc.directory/{did}', timeout=10)
+        pds_url  = 'https://bsky.social'
         if doc_resp.status_code == 200:
             for svc in doc_resp.json().get('service', []):
                 if svc.get('type') == 'AtprotoPersonalDataServer':
                     pds_url = svc.get('serviceEndpoint', pds_url).rstrip('/')
                     break
         headers = {
-            'Authorization': f'Bearer {client._session.access_jwt}',
-            'Atproto-Proxy': 'did:web:api.bsky.chat#bsky_chat',
-            'Content-Type': 'application/json',
+            'Authorization':  f'Bearer {client._session.access_jwt}',
+            'Atproto-Proxy':  'did:web:api.bsky.chat#bsky_chat',
+            'Content-Type':   'application/json',
         }
-        r = requests.get(
+        r = req.get(
             f'{pds_url}/xrpc/chat.bsky.convo.listConvos',
             headers=headers, params={'limit': 10}, timeout=10
         )
         if r.status_code != 200:
             log(f'DM fetch returned {r.status_code}: {r.text[:120]}', 'WARN')
             return 'Could not fetch DMs.'
-        data = r.json()
+        data  = r.json()
         lines = []
         for convo in data.get('convos', []):
             if not convo.get('unreadCount'):
@@ -646,29 +515,31 @@ def fetch_dms_summary(client):
                 if m.get('handle') != BLUESKY_HANDLE
             ]
             last_msg = convo.get('lastMessage', {}).get('text', '')[:150]
-            lines.append(f' DM from {", ".join(members)}: {last_msg}')
+            lines.append(f'  DM from {", ".join(members)}: {last_msg}')
         return '\n'.join(lines) if lines else 'No unread DMs.'
     except Exception as e:
         log(f'Failed to fetch DMs: {e}', 'WARN')
         return 'Could not fetch DMs.'
 
+
 def send_dm(client, target_did, text):
     try:
-        profile = client.app.bsky.actor.get_profile({'actor': BLUESKY_HANDLE})
-        did = profile.did
-        doc_resp = requests.get(f'https://plc.directory/{did}', timeout=10)
-        pds_url = 'https://bsky.social'
+        import requests as req
+        profile  = client.app.bsky.actor.get_profile({'actor': BLUESKY_HANDLE})
+        did      = profile.did
+        doc_resp = req.get(f'https://plc.directory/{did}', timeout=10)
+        pds_url  = 'https://bsky.social'
         if doc_resp.status_code == 200:
             for svc in doc_resp.json().get('service', []):
                 if svc.get('type') == 'AtprotoPersonalDataServer':
                     pds_url = svc.get('serviceEndpoint', pds_url).rstrip('/')
                     break
         headers = {
-            'Authorization': f'Bearer {client._session.access_jwt}',
-            'Atproto-Proxy': 'did:web:api.bsky.chat#bsky_chat',
-            'Content-Type': 'application/json',
+            'Authorization':  f'Bearer {client._session.access_jwt}',
+            'Atproto-Proxy':  'did:web:api.bsky.chat#bsky_chat',
+            'Content-Type':   'application/json',
         }
-        r = requests.get(
+        r = req.get(
             f'{pds_url}/xrpc/chat.bsky.convo.getConvoForMembers',
             headers=headers, params={'members': target_did}, timeout=10
         )
@@ -678,7 +549,7 @@ def send_dm(client, target_did, text):
         convo_id = r.json().get('convo', {}).get('id')
         if not convo_id:
             return False
-        r2 = requests.post(
+        r2 = req.post(
             f'{pds_url}/xrpc/chat.bsky.convo.sendMessage',
             headers=headers,
             json={'convoId': convo_id, 'message': {'$type': 'chat.bsky.convo.defs#messageInput', 'text': text[:1000]}},
@@ -693,37 +564,38 @@ def send_dm(client, target_did, text):
         log(f'DM send error: {e}', 'WARN')
         return False
 
+
 def search_interesting_posts(client, topic, limit=8):
     try:
-        resp = client.app.bsky.feed.search_posts({'q': topic, 'limit': limit, 'sort': 'latest'})
+        resp  = client.app.bsky.feed.search_posts({'q': topic, 'limit': limit, 'sort': 'latest'})
         posts = []
         for p in resp.posts:
             record = p.record
-            text = getattr(record, 'text', '') if record else ''
+            text   = getattr(record, 'text', '') if record else ''
             author = p.author.handle if p.author else 'unknown'
-            did = p.author.did if p.author else ''
-            uri = p.uri
-            cid = p.cid
+            did    = p.author.did if p.author else ''
+            uri    = p.uri
+            cid    = p.cid
             if author == BLUESKY_HANDLE:
                 continue
             if is_suspicious_handle(author):
                 continue
             posts.append({
-                'author': author,
-                'did': did,
-                'text': text[:200],
-                'uri': uri,
-                'cid': cid,
+                'author':    author,
+                'did':       did,
+                'text':      text[:200],
+                'uri':       uri,
+                'cid':       cid,
                 'likeCount': getattr(p, 'like_count', 0) or 0,
-                'viewer': {'liked': False},
+                'viewer':    {'liked': False},
             })
         log(f'Search "{topic}": {len(posts)} posts returned')
         return posts
     except Exception as e:
-        # Log the full exception detail so we can see exactly what's failing
         log(f'Search FAILED for "{topic}": {type(e).__name__}: {e}', 'ERROR')
         log(f'Search traceback: {traceback.format_exc()}', 'ERROR')
         return []
+
 
 # ── Bluesky: Act ──────────────────────────────────────────────────────────────
 
@@ -739,6 +611,7 @@ def like_post(client, uri, cid):
         log(f'Like failed: {e}', 'WARN')
         return False
 
+
 def follow_account(client, did):
     did = ensure_did_prefix(did)
     try:
@@ -748,6 +621,7 @@ def follow_account(client, did):
     except Exception as e:
         log(f'Follow failed: {e}', 'WARN')
         return False
+
 
 def quote_post(client, text, quoted_uri, quoted_cid):
     if not is_valid_cid(quoted_cid):
@@ -771,12 +645,14 @@ def quote_post(client, text, quoted_uri, quoted_cid):
         log(f'Quote post failed: {e}', 'WARN')
         return None
 
-# ── Perplexity ──────────────────────────────────────────────────────────────
+
+# ── Perplexity ────────────────────────────────────────────────────────────────
 
 def call_perplexity(system_prompt, user_prompt):
     if not PERPLEXITY_API_KEY:
         log('PERPLEXITY_API_KEY not set — cannot think', 'ERROR')
         return None
+    import requests
     log('Calling Perplexity Sonar...')
     for model in ['sonar-pro', 'sonar']:
         try:
@@ -790,7 +666,7 @@ def call_perplexity(system_prompt, user_prompt):
                     'model': model,
                     'messages': [
                         {'role': 'system', 'content': system_prompt},
-                        {'role': 'user', 'content': user_prompt}
+                        {'role': 'user',   'content': user_prompt}
                     ],
                     'max_tokens': 2400,
                     'temperature': 0.92
@@ -798,7 +674,7 @@ def call_perplexity(system_prompt, user_prompt):
                 timeout=45
             )
             if resp.status_code == 200:
-                data = resp.json()
+                data    = resp.json()
                 content = data['choices'][0]['message']['content'].strip()
                 log(f'Perplexity responded via {model} ({len(content)} chars)')
                 return content
@@ -807,6 +683,7 @@ def call_perplexity(system_prompt, user_prompt):
             log(f'Perplexity call failed ({model}): {e}', 'WARN')
     log('All Perplexity models failed', 'ERROR')
     return None
+
 
 # ── Diary ─────────────────────────────────────────────────────────────────────
 
@@ -819,6 +696,7 @@ def write_diary_entry(entry):
     except Exception as e:
         log(f'Diary write failed: {e}', 'WARN')
 
+
 # ── Main Think Loop ───────────────────────────────────────────────────────────
 
 def main():
@@ -829,31 +707,32 @@ def main():
         log(traceback.format_exc(), 'ERROR')
         raise
 
+
 def _main():
     log('=== Think heartbeat start ===')
 
-    profile = load_json(PROFILE_FILE)
-    memories = load_json(MEMORIES_FILE, default=[])
-    state = load_json(STATE_FILE)
-    diary = load_text(DIARY_FILE)
-    voice = load_text(VOICE_FILE)
-    outbox = load_json(OUTBOX_FILE, default=[])
+    profile   = load_json(PROFILE_FILE)
+    memories  = load_json(MEMORIES_FILE, default=[])
+    state     = load_json(STATE_FILE)
+    diary     = load_text(DIARY_FILE)
+    voice     = load_text(VOICE_FILE)
+    outbox    = load_json(OUTBOX_FILE, default=[])
 
     log(f'Memory loaded: profile={bool(profile)}, memories={len(memories)}, diary={len(diary)} chars, voice_guide={len(voice)} chars')
 
-    cooled_authors = load_recent_reply_authors(state)
-    followed_dids = load_followed_dids(state)
+    cooled_authors   = load_recent_reply_authors(state)
+    followed_dids    = load_followed_dids(state)
     follow_cap_reached = len(followed_dids) >= MAX_FOLLOW_TOTAL
     log(f'Cooldowns: {len(cooled_authors)} authors on reply cooldown, {len(followed_dids)}/{MAX_FOLLOW_TOTAL} followed')
 
-    selfies_today = selfies_posted_today(state)
+    selfies_today     = selfies_posted_today(state)
     selfie_cap_reached = selfies_today >= MAX_SELFIES_PER_DAY
     log(f'Selfie posts today: {selfies_today}/{MAX_SELFIES_PER_DAY} ({"cap reached" if selfie_cap_reached else "available"})')
 
     bank_available = 0
     if os.path.isdir(IMAGE_BANK_DIR):
-        all_bank = [f for f in os.listdir(IMAGE_BANK_DIR) if f.startswith(IMAGE_BANK_PREFIX) and f.endswith('.jpg')]
-        used_bank = state.get('used_bank_images', [])
+        all_bank   = [f for f in os.listdir(IMAGE_BANK_DIR) if f.startswith(IMAGE_BANK_PREFIX) and f.endswith('.jpg')]
+        used_bank  = state.get('used_bank_images', [])
         bank_available = len([f for f in all_bank if f not in used_bank])
         if bank_available == 0 and all_bank:
             bank_available = len(all_bank)
@@ -895,7 +774,7 @@ def _main():
     log('Fetching DMs...')
     dms = fetch_dms_summary(client)
 
-    topic = random.choice(SEARCH_TOPICS)
+    topic          = random.choice(SEARCH_TOPICS)
     log(f'Searching topic: "{topic}"')
     search_results = search_interesting_posts(client, topic)
     log(f'Search results: {len(search_results)} posts')
@@ -913,7 +792,7 @@ def _main():
         f'- {m.get("summary", "")}' for m in (memories[-10:] if isinstance(memories, list) else [])
     )
 
-    diary_context = extract_named_diary_entries(diary, max_entries=3)
+    diary_context  = extract_named_diary_entries(diary, max_entries=3)
 
     notif_summary = '\n'.join(
         f'{n["reason"]} from @{n["author"]}: {n["text"][:100]}'
@@ -922,11 +801,11 @@ def _main():
     )
 
     candidate_block = candidates_for_prompt(candidates, cooled_authors, followed_dids)
-    pending_outbox = [item for item in outbox if item.get('status') == 'pending']
+    pending_outbox  = [item for item in outbox if item.get('status') == 'pending']
 
     if not selfie_cap_reached:
         selfie_nudge = (
-            f'\n\U0001f534 SELFIE NUDGE: You have posted 0 selfies today and have {bank_available} images ready in your bank. '
+            f'\n🔴 SELFIE NUDGE: You have posted 0 selfies today and have {bank_available} images ready in your bank. '
             f'This heartbeat, strongly consider posting a selfie. You have a face. Use it. '
             f'People connect with people, not just words.\n'
         ) if selfies_today == 0 and bank_available > 0 else ''
@@ -1072,7 +951,7 @@ Return a JSON object with these keys:
     // Post:   {{"type": "post",   "text": "..."}}
     // Image:  {{"type": "image",  "caption": "...", "image_prompt": "...", "image_type": "selfie"|"abstract"}}
     // DM:     {{"type": "dm",     "target_did": "did:plc:...", "text": "..."}}
-    // Nothing: {{"type": "nothing", "reason": "..."}}
+    // Nothing:{{"type": "nothing","reason": "..."}}
   ],
   "diary": "optional diary entry — only if something happened worth writing about"
 }}
@@ -1108,12 +987,12 @@ CONSTRAINTS:
         log(f'Raw response: {raw[:500]}', 'ERROR')
         return
 
-    actions = decision.get('actions', [])
+    actions     = decision.get('actions', [])
     diary_entry = decision.get('diary', '')
     log(f'Decision: {len(actions)} actions')
 
-    posts_done = 0
-    likes_done = 0
+    posts_done   = 0
+    likes_done   = 0
     follows_done = 0
 
     for action in actions:
@@ -1128,7 +1007,7 @@ CONSTRAINTS:
                 log('Like cap reached — skipping')
                 continue
             key = action.get('target', '')
-            c = candidates.get(key)
+            c   = candidates.get(key)
             if not c:
                 log(f'Like: unknown candidate {key!r}', 'WARN')
                 continue
@@ -1143,7 +1022,7 @@ CONSTRAINTS:
                 log('Follow cap reached — skipping')
                 continue
             key = action.get('target', '')
-            c = candidates.get(key)
+            c   = candidates.get(key)
             if not c:
                 log(f'Follow: unknown candidate {key!r}', 'WARN')
                 continue
@@ -1160,9 +1039,9 @@ CONSTRAINTS:
             if posts_done >= MAX_NEW_POSTS:
                 log('Post cap reached — skipping reply')
                 continue
-            key = action.get('target', '')
+            key  = action.get('target', '')
             text = action.get('text', '').strip()
-            c = candidates.get(key)
+            c    = candidates.get(key)
             if not c:
                 log(f'Reply: unknown candidate {key!r}', 'WARN')
                 continue
@@ -1193,9 +1072,9 @@ CONSTRAINTS:
             if posts_done >= MAX_NEW_POSTS:
                 log('Post cap reached — skipping quote')
                 continue
-            key = action.get('target', '')
+            key  = action.get('target', '')
             text = action.get('text', '').strip()
-            c = candidates.get(key)
+            c    = candidates.get(key)
             if not c:
                 log(f'Quote: unknown candidate {key!r}', 'WARN')
                 continue
@@ -1216,12 +1095,12 @@ CONSTRAINTS:
                 continue
             try:
                 resp = client.send_post(text=safe_truncate(text))
-                uri = getattr(resp, 'uri', None)
+                uri  = getattr(resp, 'uri', None)
                 log(f'Post sent: {uri}')
                 posts_done += 1
                 if em_observe:
                     try:
-                        em_observe({'type': 'post', 'text': text, 'uri': uri})
+                        em_observe(text)
                     except Exception as obs_e:
                         log(f'em_observe failed: {obs_e}', 'WARN')
             except Exception as e:
@@ -1231,9 +1110,9 @@ CONSTRAINTS:
             if posts_done >= MAX_NEW_POSTS:
                 log('Post cap reached — skipping image')
                 continue
-            caption = action.get('caption', '').strip()
+            caption      = action.get('caption', '').strip()
             image_prompt = action.get('image_prompt', '').strip()
-            image_type = action.get('image_type', 'selfie').lower()
+            image_type   = action.get('image_type', 'selfie').lower()
 
             if image_type == 'selfie' and selfie_cap_reached:
                 log(f'Selfie cap reached ({MAX_SELFIES_PER_DAY}/day) — skipping selfie image post')
@@ -1243,7 +1122,7 @@ CONSTRAINTS:
                 log('Image action has no caption — skipping', 'WARN')
                 continue
 
-            image_bytes = None
+            image_bytes    = None
             image_filename = None
 
             if image_type == 'selfie':
@@ -1264,20 +1143,20 @@ CONSTRAINTS:
                     log('Abstract image skipped — HF_API_KEY not set. Falling back to text post.', 'WARN')
                     try:
                         resp = client.send_post(text=safe_truncate(caption))
-                        uri = getattr(resp, 'uri', None)
+                        uri  = getattr(resp, 'uri', None)
                         log(f'Fallback text post sent (no HF key): {uri}')
                         posts_done += 1
                     except Exception as e:
                         log(f'Fallback text post failed: {e}', 'WARN')
                     continue
-                image_bytes = generate_image_live(image_prompt)
+                image_bytes    = generate_image_live(image_prompt)
                 image_filename = 'abstract-live'
 
             if not image_bytes:
                 log('Image generation failed entirely — falling back to text post')
                 try:
                     resp = client.send_post(text=safe_truncate(caption))
-                    uri = getattr(resp, 'uri', None)
+                    uri  = getattr(resp, 'uri', None)
                     log(f'Fallback text post sent: {uri}')
                     posts_done += 1
                 except Exception as e:
@@ -1286,6 +1165,11 @@ CONSTRAINTS:
 
             uri = post_with_image(client, caption, image_bytes, alt_text=caption[:200])
             if uri:
+                if em_observe:
+                    try:
+                        em_observe(caption)
+                    except Exception as obs_e:
+                        log(f'em_observe failed: {obs_e}', 'WARN')
                 record_image_posted(state, image_filename or 'unknown', image_type=image_type)
                 if image_type == 'selfie':
                     selfies_today += 1
@@ -1294,7 +1178,7 @@ CONSTRAINTS:
 
         elif atype == 'dm':
             target_did = action.get('target_did', '').strip()
-            text = action.get('text', '').strip()
+            text       = action.get('text', '').strip()
             if not target_did or not text:
                 log('DM missing target_did or text — skipping', 'WARN')
                 continue
@@ -1310,6 +1194,7 @@ CONSTRAINTS:
         write_diary_entry(diary_entry)
 
     log('=== Think heartbeat complete ===')
+
 
 if __name__ == '__main__':
     main()
