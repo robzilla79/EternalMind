@@ -1,7 +1,8 @@
 name: Em Self-Heal
 
-# Runs every 5 minutes. Detects failed workflow runs, auto-patches known issues,
-# logs unknowns to memory/status.md for Em to review next session.
+# Runs every 5 minutes. Detects failed workflow runs, sends broken file +
+# error context to Perplexity API for intelligent repair, commits the fix.
+# Falls back to pattern matching if API unavailable.
 # No human required.
 
 on:
@@ -17,7 +18,7 @@ permissions:
 jobs:
   self-heal:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repo
@@ -28,62 +29,82 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Detect, patch, and repair failed workflows
+      - name: Detect, reason, and repair failed workflows
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
           REPO: ${{ github.repository }}
         run: |
           python3 - <<'PYEOF'
-          import os, re, requests
+          import os, re, base64, requests
           from datetime import datetime, timezone, timedelta
 
           token = os.environ['GH_TOKEN']
+          pplx_key = os.environ.get('PERPLEXITY_API_KEY', '')
           repo = os.environ['REPO']
-          headers = {
+          gh_headers = {
               'Authorization': f'token {token}',
               'Accept': 'application/vnd.github+json'
           }
 
           def gh(method, url, **kwargs):
-              return getattr(requests, method)(url, headers=headers, **kwargs)
+              return getattr(requests, method)(url, headers=gh_headers, **kwargs)
 
-          # --- Known auto-patch rules ---
-          # Each rule: (description, detect_fn, patch_fn)
-          def detect_eof_heredoc(content):
-              return bool(re.search(r"<<'EOF'", content))
+          # --- Fallback pattern patches ---
+          PATCH_RULES = [
+              (
+                  'Heredoc EOF conflict',
+                  lambda c: bool(re.search(r"<<'EOF'", c)),
+                  lambda c: re.sub(r"<<'EOF'", "<<'PYEOF'", c).replace('\nEOF\n', '\nPYEOF\n')
+              ),
+              (
+                  'Backtick in heredoc',
+                  lambda c: '```' in c and ('PYEOF' in c or 'EOF' in c),
+                  lambda c: c  # Perplexity handles this; fallback is no-op
+              ),
+          ]
 
-          def patch_eof_heredoc(content):
-              return content.replace("<<'EOF'", "<<'PYEOF'")\
-                            .replace('\nEOF\n', '\nPYEOF\n')
+          def perplexity_fix(file_path, file_content, error_summary):
+              if not pplx_key:
+                  return None, 'No Perplexity API key available'
 
-          def detect_backtick_fstring(content):
-              # Triple backticks inside python f-string in a heredoc
-              return '```' in content and 'f"""' in content and 'PYEOF' in content
+              prompt = f"""You are a GitHub Actions YAML expert. A workflow file has failed.
 
-          def patch_backtick_fstring(content):
-              # Replace f-string triple backtick blocks with FENCE variable pattern
-              # Only inside PYEOF blocks
-              def fix_block(m):
-                  block = m.group(0)
-                  if 'FENCE' not in block and '```' in block:
-                      block = re.sub(
-                          r'(\s+)(f""")',
-                          r'\1FENCE = \'`\' * 3\n\1\2',
-                          block, count=1
-                      )
-                      block = block.replace('```', '{FENCE}')
-                  return block
-              return re.sub(
-                  r"<<'PYEOF'.*?PYEOF",
-                  fix_block,
-                  content,
-                  flags=re.DOTALL
+File path: {file_path}
+
+Error summary:
+{error_summary}
+
+Broken file content:
+```yaml
+{file_content}
+```
+
+Return ONLY the complete corrected file content with no explanation, no markdown fences, no commentary. Just the raw fixed YAML."""
+
+              resp = requests.post(
+                  'https://api.perplexity.ai/chat/completions',
+                  headers={
+                      'Authorization': f'Bearer {pplx_key}',
+                      'Content-Type': 'application/json'
+                  },
+                  json={
+                      'model': 'sonar',
+                      'messages': [{'role': 'user', 'content': prompt}],
+                      'max_tokens': 4000,
+                      'temperature': 0.1
+                  },
+                  timeout=30
               )
 
-          PATCH_RULES = [
-              ('Heredoc EOF conflict', detect_eof_heredoc, patch_eof_heredoc),
-              ('Backtick f-string in heredoc', detect_backtick_fstring, patch_backtick_fstring),
-          ]
+              if resp.status_code != 200:
+                  return None, f'Perplexity API error: {resp.status_code}'
+
+              fixed = resp.json()['choices'][0]['message']['content'].strip()
+              # Strip any accidental markdown fences
+              fixed = re.sub(r'^```[a-z]*\n', '', fixed)
+              fixed = re.sub(r'\n```$', '', fixed)
+              return fixed, None
 
           # --- Fetch failed runs in last 10 minutes ---
           since = (datetime.now(timezone.utc) - timedelta(minutes=10)).strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -113,64 +134,74 @@ jobs:
               html_url = run.get('html_url', '')
 
               if wf_path in already_patched:
-                  print(f'Already patched {wf_path} this cycle, skipping.')
                   continue
-
-              print(f'Checking: {wf_name} ({wf_path})')
 
               if not wf_path or not wf_path.endswith('.yml'):
-                  unknown.append({'name': wf_name, 'url': html_url, 'reason': 'No workflow path in run metadata'})
+                  unknown.append({'name': wf_name, 'url': html_url, 'reason': 'No workflow path'})
                   continue
 
-              # Fetch current file content
+              print(f'Investigating: {wf_name} ({wf_path})')
+
+              # Fetch broken file
               file_resp = gh('get', f'https://api.github.com/repos/{repo}/contents/{wf_path}')
               if file_resp.status_code != 200:
-                  unknown.append({'name': wf_name, 'url': html_url, 'reason': f'Could not fetch {wf_path}'})
+                  unknown.append({'name': wf_name, 'url': html_url, 'reason': f'Could not fetch file'})
                   continue
 
-              import base64
               file_data = file_resp.json()
               file_sha = file_data['sha']
               content = base64.b64decode(file_data['content']).decode('utf-8')
-              original = content
 
-              # Try each patch rule
-              applied_rules = []
-              for rule_name, detect, patch in PATCH_RULES:
-                  if detect(content):
-                      content = patch(content)
-                      applied_rules.append(rule_name)
-                      print(f'  Applied fix: {rule_name}')
+              # Fetch error summary from jobs
+              jobs_resp = gh('get', f'https://api.github.com/repos/{repo}/actions/runs/{run["id"]}/jobs')
+              error_summary = ''
+              if jobs_resp.status_code == 200:
+                  for job in jobs_resp.json().get('jobs', []):
+                      for step in job.get('steps', []):
+                          if step.get('conclusion') == 'failure':
+                              error_summary += f"Step '{step.get('name')}' failed.\n"
 
-              if not applied_rules:
-                  unknown.append({'name': wf_name, 'url': html_url, 'reason': 'No known fix pattern matched'})
-                  continue
+              # Try Perplexity first
+              fixed_content, err = perplexity_fix(wf_path, content, error_summary or 'Unknown error')
+              method_used = 'Perplexity API'
 
-              if content == original:
-                  unknown.append({'name': wf_name, 'url': html_url, 'reason': 'Pattern matched but content unchanged after patch'})
+              # Fallback to pattern rules
+              if fixed_content is None:
+                  print(f'  Perplexity unavailable ({err}), trying pattern rules...')
+                  method_used = 'pattern fallback'
+                  fixed_content = content
+                  applied = []
+                  for rule_name, detect, patch in PATCH_RULES:
+                      if detect(fixed_content):
+                          fixed_content = patch(fixed_content)
+                          applied.append(rule_name)
+                  if not applied or fixed_content == content:
+                      unknown.append({'name': wf_name, 'url': html_url, 'reason': 'No fix found'})
+                      continue
+
+              if fixed_content == content:
+                  unknown.append({'name': wf_name, 'url': html_url, 'reason': 'Fix returned identical content'})
                   continue
 
               # Commit the fix
-              import json as jsonlib
-              commit_msg = f'Em (self-heal): auto-patch {wf_path} — {", ".join(applied_rules)}'
+              commit_msg = f'Em (self-heal): auto-repair {wf_path} via {method_used}'
               patch_resp = gh('put', f'https://api.github.com/repos/{repo}/contents/{wf_path}',
                   json={
                       'message': commit_msg,
-                      'content': base64.b64encode(content.encode()).decode(),
+                      'content': base64.b64encode(fixed_content.encode()).decode(),
                       'sha': file_sha,
                       'branch': 'main'
                   }
               )
 
               if patch_resp.status_code in (200, 201):
-                  print(f'  Patched and committed: {wf_path}')
-                  patched.append({'name': wf_name, 'path': wf_path, 'rules': applied_rules})
+                  print(f'  Fixed and committed via {method_used}: {wf_path}')
+                  patched.append({'name': wf_name, 'path': wf_path, 'method': method_used})
                   already_patched.add(wf_path)
               else:
-                  print(f'  Commit failed: {patch_resp.status_code} {patch_resp.text[:200]}')
                   unknown.append({'name': wf_name, 'url': html_url, 'reason': f'Commit failed: {patch_resp.status_code}'})
 
-          # --- Write to status.md ---
+          # --- Log to status.md ---
           now_str = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
           status_path = 'memory/status.md'
           entry = ''
@@ -178,25 +209,24 @@ jobs:
           if patched:
               entry += f'\n## \U0001f7e2 Self-Healed — {now_str}\n'
               for p in patched:
-                  entry += f'- **{p["name"]}** (`{p["path"]}`) — fixed: {", ".join(p["rules"])}\n'
-              entry += '*Em: auto-patched without human input.*\n'
+                  entry += f'- **{p["name"]}** (`{p["path"]}`) repaired via {p["method"]}\n'
+              entry += '*Em: autonomous repair completed.*\n'
 
           if unknown:
-              entry += f'\n## \U0001f534 Unknown Failure — {now_str}\n'
+              entry += f'\n## \U0001f534 Unresolved Failure — {now_str}\n'
               for u in unknown:
                   entry += f'- **{u["name"]}** — {u.get("reason", "unknown")}\n'
                   if u.get('url'):
                       entry += f'  Run: {u["url"]}\n'
-              entry += '*Em: review and manual repair needed.*\n'
+              entry += '*Em: review needed.*\n'
 
           if entry:
               with open(status_path, 'a') as f:
                   f.write(entry)
-              print('Status logged to memory/status.md')
-
+              print('Status logged.')
           PYEOF
 
-      - name: Commit status and any direct patches
+      - name: Commit status log
         run: |
           git config user.name "Em (self-heal)"
           git config user.email "em@forgecore.co"
