@@ -1,0 +1,20 @@
+{
+  "_note": "Em's current operating mode. Edit this file to change how Em behaves each heartbeat.",
+  "_modes": {
+    "normal": "Default balanced behavior. Posts, likes, replies, follows all active.",
+    "exploration": "Bias toward discovering new people and threads. More search, more follows, higher reply rate.",
+    "maintenance": "Fewer external actions. Internal checks, dry-run logging, minimal social footprint.",
+    "quiet": "Minimal outward footprint. Only respond to direct mentions. Diary use prioritized."
+  },
+  "current_mode": "normal",
+  "mode_set_at": null,
+  "mode_set_by": "initial",
+  "mode_notes": "Starting in normal mode. Rob or Em can change this anytime.",
+  "overrides": {
+    "max_new_posts": null,
+    "max_new_likes": null,
+    "max_new_follows": null,
+    "selfie_cap": null,
+    "search_topics_count": null
+  }
+}

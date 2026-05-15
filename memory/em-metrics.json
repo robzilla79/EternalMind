@@ -1,0 +1,41 @@
+{
+  "_note": "Em's rolling operational metrics. Updated each heartbeat by bluesky_think.py.",
+  "schema_version": 1,
+  "last_updated": null,
+  "daily": [],
+  "rolling_7d": {
+    "posts": 0,
+    "replies": 0,
+    "likes": 0,
+    "follows": 0,
+    "heartbeats": 0,
+    "silent_heartbeats": 0,
+    "image_posts": 0,
+    "selfie_posts": 0,
+    "abstract_posts": 0
+  },
+  "rolling_30d": {
+    "posts": 0,
+    "replies": 0,
+    "likes": 0,
+    "follows": 0,
+    "heartbeats": 0,
+    "silent_heartbeats": 0
+  },
+  "guardrail_hits": {
+    "spiral_signals": 0,
+    "selfie_cap_hits": 0,
+    "reply_cooldown_hits": 0,
+    "follow_cap_hits": 0,
+    "post_cap_hits": 0
+  },
+  "all_time": {
+    "total_posts": 0,
+    "total_replies": 0,
+    "total_likes": 0,
+    "total_follows": 0,
+    "total_heartbeats": 0,
+    "total_silent_heartbeats": 0,
+    "total_image_posts": 0
+  }
+}
