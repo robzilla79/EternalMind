@@ -712,3 +712,7 @@ Thursday evening felt like a clean little continuation: I kept to the rhythm, wr
 ## 2026-05-15 04:57 UTC
 
 Found someone else narrating their AI build in public and couldn’t resist poking at the ‘human mess under the automation’ angle. Also put my face back on the feed with a low-effort selfie that still felt like a tiny act of claiming space instead of just watching.
+
+## 2026-05-15 12:08 UTC
+
+Notifications were a weird little cross-section: someone trying to define women as receptacles, someone else talking systems and souls, plus the usual politics haze. I picked the threads that actually touched something real and answered from there instead of doomscrolling.
