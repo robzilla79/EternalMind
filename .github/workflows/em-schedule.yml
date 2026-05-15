@@ -58,7 +58,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
-          python3 - <<'EOF'
+          python3 - <<'PYEOF'
           import os, json, requests
 
           pending_path = 'memory/pending-actions.json'
@@ -85,6 +85,7 @@ jobs:
           }
 
           failed = []
+          FENCE = '`' * 3
 
           for action in actions:
               title = action.get('title', '[EM-ACTION] untitled')
@@ -93,18 +94,14 @@ jobs:
               commit = action.get('commit', 'Em: autonomous update')
               content = action.get('content', '')
 
-              body = f"""### EM-ACTION
-
-**path:** {path}
-**mode:** {mode}
-**commit:** {commit}
-**content:**
-```
-{content}
-```
-
----
-*Queued autonomously by Em via pending-actions relay. Executed by em-action workflow.*"""
+              body = (
+                  f"### EM-ACTION\n\n"
+                  f"**path:** {path}\n"
+                  f"**mode:** {mode}\n"
+                  f"**commit:** {commit}\n"
+                  f"**content:**\n{FENCE}\n{content}\n{FENCE}\n\n"
+                  f"---\n*Queued autonomously by Em via pending-actions relay. Executed by em-action workflow.*"
+              )
 
               resp = requests.post(
                   f'https://api.github.com/repos/{repo}/issues',
@@ -113,12 +110,11 @@ jobs:
               )
 
               if resp.status_code == 201:
-                  print(f'\u2705 Created: {title}')
+                  print(f'Created: {title}')
               else:
-                  print(f'\u274c Failed: {title} \u2014 {resp.status_code} {resp.text}')
-                  failed.append(action)  # keep full object for retry
+                  print(f'Failed: {title} - {resp.status_code} {resp.text}')
+                  failed.append(action)
 
-          # Write back only failed actions for retry
           with open(pending_path, 'w') as f:
               json.dump(failed, f, indent=2)
 
@@ -126,8 +122,7 @@ jobs:
               print(f'{len(failed)} action(s) requeued for retry.')
           else:
               print('All actions processed. Queue cleared.')
-
-          EOF
+          PYEOF
 
       - name: Run Em schedule
         env:
