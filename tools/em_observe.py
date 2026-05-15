@@ -101,7 +101,11 @@ Format:
             timeout=20,
         )
         if resp.status_code == 200:
-            raw = resp.json()['choices'][0]['message']['content'].strip()
+            content = resp.json()['choices'][0]['message']['content']
+            # Defensive: coerce to string in case API returns a dict
+            if not isinstance(content, str):
+                content = json.dumps(content)
+            raw = content.strip()
             if raw.startswith('```'):
                 raw = raw.split('```')[1]
                 if raw.startswith('json'):
@@ -119,9 +123,15 @@ def observe(last_post_text):
     Main entry point. Call with the text of the most recent post.
     Scores it, logs it, flags drift, runs weekly summary if due.
     """
-    if not last_post_text or not last_post_text.strip():
+    # Defensive: ensure we always have a string
+    if isinstance(last_post_text, dict):
+        last_post_text = last_post_text.get('text', '') or last_post_text.get('content', '') or str(last_post_text)
+
+    if not last_post_text or not str(last_post_text).strip():
         print('[observe] no post text — skipping')
         return
+
+    last_post_text = str(last_post_text)
 
     log = load_json(OBSERVE_LOG_FILE, default=[])
     ts  = now_utc().isoformat()
