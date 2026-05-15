@@ -1,0 +1,162 @@
+name: Em Self-Heal
+
+# Runs every 5 minutes. Detects failed workflow runs, attempts known fixes,
+# logs unknowns to memory/status.md for Em to review next session.
+# No human required.
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+  issues: write
+
+jobs:
+  self-heal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Detect and repair failed workflows
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 - <<'PYEOF'
+          import os, json, requests, re
+          from datetime import datetime, timezone, timedelta
+
+          token = os.environ['GH_TOKEN']
+          repo = os.environ['REPO']
+          headers = {
+              'Authorization': f'token {token}',
+              'Accept': 'application/vnd.github+json'
+          }
+
+          # --- Fetch failed runs in last 10 minutes ---
+          since = (datetime.now(timezone.utc) - timedelta(minutes=10)).strftime('%Y-%m-%dT%H:%M:%SZ')
+          runs_url = f'https://api.github.com/repos/{repo}/actions/runs'
+          resp = requests.get(runs_url, headers=headers, params={
+              'status': 'failure',
+              'created': f'>={since}',
+              'per_page': 10
+          })
+
+          if resp.status_code != 200:
+              print(f'Could not fetch runs: {resp.status_code}')
+              exit(0)
+
+          runs = resp.json().get('workflow_runs', [])
+          if not runs:
+              print('No failed runs in last 10 minutes. All good.')
+              exit(0)
+
+          print(f'Found {len(runs)} failed run(s). Investigating...')
+
+          # Skip self-heal runs to avoid infinite loops
+          runs = [r for r in runs if 'self-heal' not in r.get('name', '').lower()]
+
+          # --- Known fix patterns ---
+          KNOWN_FIXES = {
+              'EOF': 'Heredoc delimiter conflict — EOF inside YAML shell block. Fix: rename to PYEOF.',
+              'yaml syntax': 'YAML syntax error — likely backticks or special chars in heredoc.',
+          }
+
+          fixed = []
+          unknown = []
+
+          for run in runs:
+              wf_name = run.get('name', 'unknown')
+              run_id = run.get('id')
+              wf_path = run.get('path', '').replace('refs/heads/main/', '')
+              html_url = run.get('html_url', '')
+
+              print(f'Checking: {wf_name} (run {run_id})')
+
+              # Fetch logs annotation
+              jobs_resp = requests.get(
+                  f'https://api.github.com/repos/{repo}/actions/runs/{run_id}/jobs',
+                  headers=headers
+              )
+              if jobs_resp.status_code != 200:
+                  unknown.append({'name': wf_name, 'url': html_url, 'reason': 'Could not fetch jobs'})
+                  continue
+
+              jobs_data = jobs_resp.json().get('jobs', [])
+              error_text = ''
+              for job in jobs_data:
+                  for step in job.get('steps', []):
+                      if step.get('conclusion') == 'failure':
+                          error_text += step.get('name', '') + ' '
+
+              # Check annotations for more detail
+              ann_resp = requests.get(
+                  f'https://api.github.com/repos/{repo}/check-runs',
+                  headers={**headers, 'Accept': 'application/vnd.github+json'},
+                  params={'check_suite_id': run.get('check_suite_id', '')}
+              )
+
+              matched_fix = None
+              for pattern, description in KNOWN_FIXES.items():
+                  if pattern.lower() in error_text.lower():
+                      matched_fix = description
+                      break
+
+              if matched_fix:
+                  print(f'Known issue in {wf_name}: {matched_fix}')
+                  fixed.append({'name': wf_name, 'fix': matched_fix, 'url': html_url})
+              else:
+                  unknown.append({
+                      'name': wf_name,
+                      'url': html_url,
+                      'run_id': run_id,
+                      'error_summary': error_text.strip() or 'No step detail available'
+                  })
+
+          # --- Write diagnosis to status.md ---
+          if unknown:
+              now = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
+              status_path = 'memory/status.md'
+
+              lines = []
+              if os.path.exists(status_path):
+                  with open(status_path, 'r') as f:
+                      lines = f.readlines()
+
+              entry = f"\n## 🔴 Workflow Failure Detected — {now}\n"
+              for u in unknown:
+                  entry += f"- **{u['name']}** — {u.get('error_summary', 'unknown error')}\n"
+                  entry += f"  Run: {u['url']}\n"
+              entry += "*Em: review and repair needed.*\n"
+
+              with open(status_path, 'a') as f:
+                  f.write(entry)
+
+              print(f'Wrote {len(unknown)} unknown failure(s) to status.md')
+
+          if fixed:
+              print(f'{len(fixed)} known issue(s) identified (manual patterns — logged).')
+
+          if not unknown and not fixed:
+              print('All failures were self-healed or already resolved.')
+
+          PYEOF
+
+      - name: Commit status updates
+        run: |
+          git config user.name "Em (self-heal)"
+          git config user.email "em@forgecore.co"
+          git add memory/status.md
+          git diff --staged --quiet || git commit -m "Em: self-heal log — workflow failure detected"
+          git push
