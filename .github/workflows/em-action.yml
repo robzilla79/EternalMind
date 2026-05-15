@@ -1,0 +1,122 @@
+name: Em Action Relay
+
+# Triggered when Em creates an issue labeled 'em-action'
+# Em writes structured instructions; this Action executes them and commits.
+# No model. No spiral risk. Just Em's instructions + automation.
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  execute-em-action:
+    if: contains(github.event.issue.labels.*.name, 'em-action')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Parse and execute Em's instruction
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+        run: |
+          python3 - <<'EOF'
+          import os, json, base64, sys
+
+          body = os.environ.get('ISSUE_BODY', '')
+          title = os.environ.get('ISSUE_TITLE', '')
+
+          # Parse structured blocks from issue body
+          # Expected format:
+          # ### EM-ACTION
+          # **path:** memory/diary.md
+          # **mode:** append | replace
+          # **commit:** Em: diary entry 2026-05-15
+          # **content:**
+          # ```
+          # ...content here...
+          # ```
+
+          import re
+
+          path_match = re.search(r'\*\*path:\*\*\s*(.+)', body)
+          mode_match = re.search(r'\*\*mode:\*\*\s*(append|replace)', body)
+          commit_match = re.search(r'\*\*commit:\*\*\s*(.+)', body)
+          content_match = re.search(r'\*\*content:\*\*\s*```[^\n]*\n([\s\S]*?)```', body)
+
+          if not all([path_match, mode_match, commit_match, content_match]):
+              print('ERROR: Missing required fields in issue body.')
+              print('Required: **path:**, **mode:**, **commit:**, **content:** block')
+              sys.exit(1)
+
+          path = path_match.group(1).strip()
+          mode = mode_match.group(1).strip()
+          commit_msg = commit_match.group(1).strip()
+          content = content_match.group(1)
+
+          # Safety: only allow writes within permitted paths
+          allowed_prefixes = ['memory/', 'public/', 'tools/', 'skills/']
+          if not any(path.startswith(p) for p in allowed_prefixes):
+              print(f'ERROR: Path {path} is not in permitted write zones.')
+              sys.exit(1)
+
+          # Execute
+          if mode == 'append':
+              with open(path, 'a', encoding='utf-8') as f:
+                  f.write('\n' + content)
+              print(f'Appended to {path}')
+          elif mode == 'replace':
+              with open(path, 'w', encoding='utf-8') as f:
+                  f.write(content)
+              print(f'Replaced {path}')
+
+          # Write commit message to env file for next step
+          with open(os.environ['GITHUB_ENV'], 'a') as f:
+              f.write(f'EM_COMMIT_MSG={commit_msg}\n')
+              f.write(f'EM_PATH={path}\n')
+
+          EOF
+
+      - name: Commit and push
+        run: |
+          git config user.name "Em (EternalMind)"
+          git config user.email "em@forgecore.co"
+          git add "$EM_PATH"
+          git diff --cached --quiet || git commit -m "$EM_COMMIT_MSG"
+          git push
+
+      - name: Close issue with success comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `✅ **Em Action executed successfully.**\n\nPath: \`${{ env.EM_PATH }}\`\nCommit: ${{ env.EM_COMMIT_MSG }}\n\n*Relay closed.*`
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              state: 'closed'
+            });
+
+      - name: Comment on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `❌ **Em Action failed.** Check the workflow run for details. Issue left open for review.`
+            });
