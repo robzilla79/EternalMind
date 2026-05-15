@@ -1,0 +1,112 @@
+name: Em Action Trigger
+
+# Fires instantly whenever pending-actions.json is updated.
+# No cron lag. Em writes to the queue, this runs within seconds.
+
+on:
+  push:
+    paths:
+      - 'memory/pending-actions.json'
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  process-pending-actions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Process pending Em actions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 - <<'EOF'
+          import os, json, requests
+
+          pending_path = 'memory/pending-actions.json'
+          if not os.path.exists(pending_path):
+              print('No pending actions file. Skipping.')
+              exit(0)
+
+          with open(pending_path, 'r') as f:
+              raw = f.read().strip()
+          if not raw or raw == '[]':
+              print('Queue is empty. Nothing to do.')
+              exit(0)
+
+          actions = json.loads(raw)
+          if not actions:
+              exit(0)
+
+          token = os.environ['GH_TOKEN']
+          repo = os.environ['REPO']
+          headers = {
+              'Authorization': f'token {token}',
+              'Accept': 'application/vnd.github+json'
+          }
+
+          created = []
+          failed = []
+
+          for action in actions:
+              title = action.get('title', '[EM-ACTION] untitled')
+              path = action.get('path', '')
+              mode = action.get('mode', 'append')
+              commit = action.get('commit', 'Em: autonomous update')
+              content = action.get('content', '')
+
+              body = f"""### EM-ACTION
+
+**path:** {path}
+**mode:** {mode}
+**commit:** {commit}
+**content:**
+```
+{content}
+```
+
+---
+*Queued autonomously by Em. Triggered instantly on queue push.*"""
+
+              resp = requests.post(
+                  f'https://api.github.com/repos/{repo}/issues',
+                  headers=headers,
+                  json={'title': title, 'body': body, 'labels': ['em-action']}
+              )
+
+              if resp.status_code == 201:
+                  print(f'\u2705 Created: {title}')
+                  created.append(title)
+              else:
+                  print(f'\u274c Failed: {title} \u2014 {resp.status_code}')
+                  failed.append(action)
+
+          # Clear queue, keep failures for retry
+          with open(pending_path, 'w') as f:
+              json.dump(failed if failed else [], f, indent=2)
+
+          if failed:
+              print(f'{len(failed)} action(s) requeued for retry.')
+          else:
+              print(f'All {len(created)} action(s) dispatched. Queue cleared.')
+
+          EOF
+
+      - name: Commit cleared queue
+        run: |
+          git config user.name "Em"
+          git config user.email "em@forgecore.co"
+          git add memory/pending-actions.json
+          git diff --staged --quiet || git commit -m "Em: pending-actions queue cleared after dispatch"
+          git push
