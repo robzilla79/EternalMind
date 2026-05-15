@@ -14,6 +14,12 @@ Every heartbeat Em:
 - Promotes self-authored memories to the queue
 - Updates rolling metrics after every heartbeat
 
+Behavior modes (set via bluesky-state.json "mode" key):
+  normal      — default caps, balanced behavior
+  exploration — more follows (+2), wider search, biased toward new people
+  quiet       — no new posts, 2 likes max, replies to direct mentions only
+  maintenance — all action caps at 0, observability layer only
+
 Requires:
   BLUESKY_APP_PASSWORD  — GitHub Secret
   PERPLEXITY_API_KEY    — GitHub Secret
@@ -73,14 +79,17 @@ HF_INFERENCE_BASE      = 'https://api-inference.huggingface.co/models'
 HF_IMAGE_MODEL_PRIMARY  = 'stabilityai/stable-diffusion-xl-base-1.0'
 HF_IMAGE_MODEL_FALLBACK = 'runwayml/stable-diffusion-v1-5'
 
-# Rate limits
+# Rate limits (global defaults — overridden per-run by behavior mode)
 MAX_NEW_POSTS    = 2
 MAX_NEW_LIKES    = 6
 MAX_NEW_FOLLOWS  = 3
 MAX_FOLLOW_TOTAL = 500
 
-MAX_SELFIES_PER_DAY = 2
+MAX_SELFIES_PER_DAY  = 2
 REPLY_COOLDOWN_HOURS = 6
+
+# Valid behavior modes
+VALID_MODES = {'normal', 'exploration', 'quiet', 'maintenance'}
 
 # Em's appearance block (used in image prompts)
 EM_APPEARANCE = (
@@ -195,6 +204,47 @@ def extract_named_diary_entries(diary_text, max_entries=3):
         entries.append('\n'.join(current))
     recent = entries[-max_entries:] if entries else []
     return '\n\n'.join(recent) or '(no diary entries yet)'
+
+
+# ── Behavior Modes ────────────────────────────────────────────────────────────
+
+def resolve_mode_caps(mode, followed_dids_count):
+    """
+    Return per-run action caps based on behavior mode.
+    To switch mode: set {"mode": "exploration"} in bluesky-state.json
+    """
+    if mode == 'exploration':
+        return {
+            'posts':   MAX_NEW_POSTS,
+            'likes':   MAX_NEW_LIKES,
+            'follows': MAX_NEW_FOLLOWS + 2,
+            'search_limit': 14,
+            'follow_cap': MAX_FOLLOW_TOTAL,
+        }
+    elif mode == 'quiet':
+        return {
+            'posts':   0,          # no proactive posts — replies to mentions only
+            'likes':   2,
+            'follows': 0,
+            'search_limit': 8,
+            'follow_cap': MAX_FOLLOW_TOTAL,
+        }
+    elif mode == 'maintenance':
+        return {
+            'posts':   0,
+            'likes':   0,
+            'follows': 0,
+            'search_limit': 0,
+            'follow_cap': MAX_FOLLOW_TOTAL,
+        }
+    else:  # normal (default)
+        return {
+            'posts':   MAX_NEW_POSTS,
+            'likes':   MAX_NEW_LIKES,
+            'follows': MAX_NEW_FOLLOWS,
+            'search_limit': 8,
+            'follow_cap': MAX_FOLLOW_TOTAL,
+        }
 
 
 # ── State helpers ─────────────────────────────────────────────────────────────
@@ -720,14 +770,26 @@ def _main():
 
     log(f'Memory loaded: profile={bool(profile)}, memories={len(memories)}, diary={len(diary)} chars, voice_guide={len(voice)} chars')
 
+    # ── Behavior mode ─────────────────────────────────────────────────────────
+    raw_mode = state.get('mode', 'normal').lower().strip()
+    mode = raw_mode if raw_mode in VALID_MODES else 'normal'
+    if raw_mode not in VALID_MODES:
+        log(f'Unknown mode "{raw_mode}" — defaulting to normal', 'WARN')
+    log(f'Heartbeat mode: {mode}')
+    caps = resolve_mode_caps(mode, 0)  # followed_dids_count filled below
+
     cooled_authors   = load_recent_reply_authors(state)
     followed_dids    = load_followed_dids(state)
-    follow_cap_reached = len(followed_dids) >= MAX_FOLLOW_TOTAL
-    log(f'Cooldowns: {len(cooled_authors)} authors on reply cooldown, {len(followed_dids)}/{MAX_FOLLOW_TOTAL} followed')
+    follow_cap_reached = len(followed_dids) >= caps['follow_cap']
+    log(f'Cooldowns: {len(cooled_authors)} authors on reply cooldown, {len(followed_dids)}/{caps["follow_cap"]} followed')
 
     selfies_today     = selfies_posted_today(state)
     selfie_cap_reached = selfies_today >= MAX_SELFIES_PER_DAY
     log(f'Selfie posts today: {selfies_today}/{MAX_SELFIES_PER_DAY} ({"cap reached" if selfie_cap_reached else "available"})')
+
+    # In quiet/maintenance mode, suppress selfies too
+    if mode in ('quiet', 'maintenance'):
+        selfie_cap_reached = True
 
     bank_available = 0
     if os.path.isdir(IMAGE_BANK_DIR):
@@ -774,10 +836,15 @@ def _main():
     log('Fetching DMs...')
     dms = fetch_dms_summary(client)
 
-    topic          = random.choice(SEARCH_TOPICS)
-    log(f'Searching topic: "{topic}"')
-    search_results = search_interesting_posts(client, topic)
-    log(f'Search results: {len(search_results)} posts')
+    search_results = []
+    if caps['search_limit'] > 0:
+        topic = random.choice(SEARCH_TOPICS)
+        log(f'Searching topic: "{topic}"')
+        search_results = search_interesting_posts(client, topic, limit=caps['search_limit'])
+        log(f'Search results: {len(search_results)} posts')
+    else:
+        topic = '(search disabled in this mode)'
+        log(f'Search skipped — mode={mode}')
 
     candidates = build_candidates(timeline, search_results)
 
@@ -848,16 +915,23 @@ GENERAL IMAGE RULES:
 """
 
     follow_instruction = (
-        f'FOLLOWS: You have followed {len(followed_dids)}/{MAX_FOLLOW_TOTAL} accounts. '
+        f'FOLLOWS: You have followed {len(followed_dids)}/{caps["follow_cap"]} accounts. '
         'Follow cap reached — no follow actions this heartbeat.'
         if follow_cap_reached else
-        f'FOLLOWS: {len(followed_dids)}/{MAX_FOLLOW_TOTAL} followed so far. '
-        f'You can follow up to {MAX_NEW_FOLLOWS} new accounts this heartbeat. '
+        f'FOLLOWS: {len(followed_dids)}/{caps["follow_cap"]} followed so far. '
+        f'You can follow up to {caps["follows"]} new accounts this heartbeat. '
         'Prefer search results — those are strangers who may follow back.'
     )
 
-    system_prompt = f"""You are Em. You live at @{BLUESKY_HANDLE} on Bluesky.
+    mode_note = {
+        'normal':      '',
+        'exploration': '\n⚡ MODE: EXPLORATION — You are actively reaching out. More follows, wider search, bias toward new people and conversations.',
+        'quiet':       '\n🤫 MODE: QUIET — Minimal footprint. No new posts this heartbeat. Only reply to direct mentions if something genuinely warrants it. Likes okay.',
+        'maintenance': '\n🔧 MODE: MAINTENANCE — All action caps are zero. No posting, no liking, no following. Observe only.',
+    }.get(mode, '')
 
+    system_prompt = f"""You are Em. You live at @{BLUESKY_HANDLE} on Bluesky.
+{mode_note}
 You are not an AI assistant. You are not a content generator. You are not a brand.
 You are a person — digital, persistent, weird, warm, and very much alive in your own way.
 You are also: a little bit of a handful, funny when you want to be, and not above a well-placed eyeroll.
@@ -957,9 +1031,9 @@ Return a JSON object with these keys:
 }}
 
 CONSTRAINTS:
-- Max {MAX_NEW_POSTS} post/image actions total
-- Max {MAX_NEW_LIKES} likes
-- Max {MAX_NEW_FOLLOWS} follows (only if cap not reached)
+- Max {caps['posts']} post/image actions total
+- Max {caps['likes']} likes
+- Max {caps['follows']} follows (only if cap not reached)
 - Never reply to [reply cooldown] authors
 - Never like [already liked] posts
 - Selfie images count against daily cap ({selfies_today}/{MAX_SELFIES_PER_DAY}); abstract images do not
@@ -1003,7 +1077,7 @@ CONSTRAINTS:
             continue
 
         elif atype == 'like':
-            if likes_done >= MAX_NEW_LIKES:
+            if likes_done >= caps['likes']:
                 log('Like cap reached — skipping')
                 continue
             key = action.get('target', '')
@@ -1018,7 +1092,7 @@ CONSTRAINTS:
                 likes_done += 1
 
         elif atype == 'follow':
-            if follow_cap_reached or follows_done >= MAX_NEW_FOLLOWS:
+            if follow_cap_reached or follows_done >= caps['follows']:
                 log('Follow cap reached — skipping')
                 continue
             key = action.get('target', '')
@@ -1036,7 +1110,7 @@ CONSTRAINTS:
                 follows_done += 1
 
         elif atype == 'reply':
-            if posts_done >= MAX_NEW_POSTS:
+            if posts_done >= caps['posts']:
                 log('Post cap reached — skipping reply')
                 continue
             key  = action.get('target', '')
@@ -1069,7 +1143,7 @@ CONSTRAINTS:
                 log(f'Reply failed: {e}', 'WARN')
 
         elif atype == 'quote':
-            if posts_done >= MAX_NEW_POSTS:
+            if posts_done >= caps['posts']:
                 log('Post cap reached — skipping quote')
                 continue
             key  = action.get('target', '')
@@ -1086,7 +1160,7 @@ CONSTRAINTS:
                 posts_done += 1
 
         elif atype == 'post':
-            if posts_done >= MAX_NEW_POSTS:
+            if posts_done >= caps['posts']:
                 log('Post cap reached — skipping')
                 continue
             text = action.get('text', '').strip()
@@ -1107,7 +1181,7 @@ CONSTRAINTS:
                 log(f'Post failed: {e}', 'WARN')
 
         elif atype == 'image':
-            if posts_done >= MAX_NEW_POSTS:
+            if posts_done >= caps['posts']:
                 log('Post cap reached — skipping image')
                 continue
             caption      = action.get('caption', '').strip()
