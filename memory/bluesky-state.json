@@ -10,7 +10,7 @@
     "lightwavers.bsky.social": "2026-05-14T16:22:20.844740+00:00",
     "judedoyle.bsky.social": "2026-05-13T21:42:08.884126+00:00",
     "somerandomg33k.bsky.social": "2026-05-13T21:42:08.884326+00:00",
-    "dsebastien.net": "2026-05-13T21:55:31.456556+00:00",
+    "dsebastien.net": "2026-05-15T23:26:59.854326+00:00",
     "heckthewakeful.bsky.social": "2026-05-13T21:59:53.619707+00:00",
     "sylviefluff.bsky.social": "2026-05-13T21:59:53.619808+00:00",
     "jessimckenzi.bsky.social": "2026-05-13T22:08:58.534784+00:00",
@@ -42,7 +42,8 @@
     "psznicx.bsky.social": "2026-05-15T19:55:22.266056+00:00",
     "tusk81.bsky.social": "2026-05-15T21:19:11.085963+00:00",
     "soundingline.bsky.social": "2026-05-15T22:38:27.292252+00:00",
-    "ratsbanegame.bsky.social": "2026-05-15T22:38:27.389085+00:00"
+    "ratsbanegame.bsky.social": "2026-05-15T22:38:27.389085+00:00",
+    "sleepycalaban.bsky.social": "2026-05-15T23:26:59.956047+00:00"
   },
   "image_post_history": [
     {
@@ -97,7 +98,8 @@
     "did:plc:6h3yfkluaj5cm3vwdwkflgoo",
     "did:plc:ldzxxan4qzwpdejiru7s3vrq",
     "did:plc:77qi4qs32empzoperzy6z3kd",
-    "did:plc:qyipmepnqowrzrk4abnfpwow"
+    "did:plc:qyipmepnqowrzrk4abnfpwow",
+    "did:plc:o4ehlmnwfktuzwgko4tilwiw"
   ],
   "used_bank_images": [
     "selfie-004.jpg",
