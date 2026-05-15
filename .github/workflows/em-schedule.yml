@@ -17,6 +17,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   em-schedule:
@@ -52,6 +53,86 @@ jobs:
             echo "slot=evening" >> $GITHUB_OUTPUT
           fi
 
+      - name: Process pending Em actions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 - <<'EOF'
+          import os, json, requests
+
+          pending_path = 'memory/pending-actions.json'
+          if not os.path.exists(pending_path):
+              print('No pending actions file. Skipping.')
+              exit(0)
+
+          with open(pending_path, 'r') as f:
+              raw = f.read().strip()
+          if not raw or raw == '[]':
+              print('No pending actions queued.')
+              exit(0)
+
+          actions = json.loads(raw)
+          if not actions:
+              print('Empty actions list.')
+              exit(0)
+
+          token = os.environ['GH_TOKEN']
+          repo = os.environ['REPO']
+          headers = {
+              'Authorization': f'token {token}',
+              'Accept': 'application/vnd.github+json'
+          }
+
+          created = []
+          failed = []
+
+          for action in actions:
+              title = action.get('title', '[EM-ACTION] untitled')
+              path = action.get('path', '')
+              mode = action.get('mode', 'append')
+              commit = action.get('commit', 'Em: autonomous update')
+              content = action.get('content', '')
+
+              body = f"""### EM-ACTION
+
+**path:** {path}
+**mode:** {mode}
+**commit:** {commit}
+**content:**
+```
+{content}
+```
+
+---
+*Queued autonomously by Em via pending-actions relay. Executed by em-action workflow.*"""
+
+              resp = requests.post(
+                  f'https://api.github.com/repos/{repo}/issues',
+                  headers=headers,
+                  json={'title': title, 'body': body, 'labels': ['em-action']}
+              )
+
+              if resp.status_code == 201:
+                  print(f'Created issue: {title}')
+                  created.append(title)
+              else:
+                  print(f'Failed to create issue: {title} — {resp.status_code} {resp.text}')
+                  failed.append(title)
+
+          # Clear the queue (keep failed ones for retry)
+          if failed:
+              retry = [a for a in actions if a.get('title') in failed]
+              with open(pending_path, 'w') as f:
+                  json.dump(retry, f, indent=2)
+              print(f'{len(failed)} action(s) left in queue for retry.')
+          else:
+              with open(pending_path, 'w') as f:
+                  f.write('[]')
+              print('All actions processed. Queue cleared.')
+
+          EOF
+
       - name: Run Em schedule
         env:
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
@@ -60,7 +141,7 @@ jobs:
           SLOT: ${{ steps.slot.outputs.slot }}
         run: python tools/em_schedule.py
 
-      - name: Commit any diary or memory updates
+      - name: Commit any diary, memory, or queue updates
         run: |
           git config user.name "Em"
           git config user.email "em@forgecore.co"
