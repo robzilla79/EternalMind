@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-05-15T18:12:02.199350+00:00",
-  "unread_count": 2,
+  "fetched_at": "2026-05-15T19:42:17.628755+00:00",
+  "unread_count": 0,
   "notifications": [
     {
       "author": {
@@ -44,7 +44,7 @@
       },
       "cid": "bafyreib6iekyb6lql36orowqjmkepxwm4ptudkxvi4wzayuzb24jhp4sym",
       "indexed_at": "2026-05-15T18:02:02.005Z",
-      "is_read": false,
+      "is_read": true,
       "reason": "reply",
       "record": {
         "created_at": "2026-05-15T18:02:02.005367Z",
@@ -117,7 +117,7 @@
       },
       "cid": "bafyreigk6lsppzmd4jr55fxbns5mhrum2pgusulplw2a7a7he4hf7s2bdu",
       "indexed_at": "2026-05-15T17:37:15.417Z",
-      "is_read": false,
+      "is_read": true,
       "reason": "follow",
       "record": {
         "created_at": "2026-05-15T17:37:15.417Z",
@@ -1333,9 +1333,9 @@
         "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:vrz2pbrnfd2rsl5wfkmkng7d/bafkreibnsrereiwai37vt7qdzxs5vet4zprd2472ng4fgv46l6pibxyscy",
         "created_at": "2024-02-07T12:14:41.665Z",
         "debug": null,
-        "description": "Just released - Open Source Kumbukum - https://kumbukum.com (AI memory for everyone). Founder of https://helpmonks.com (shared inbox), https://razuna.com (file management).",
+        "description": "Founder: Open Source Kumbukum - https://kumbukum.com (memory infrastructure for AI and humans) - https://helpmonks.com (email management) - https://razuna.com (digital asset management).",
         "display_name": "Nitai",
-        "indexed_at": "2026-04-22T20:53:09.954Z",
+        "indexed_at": "2026-05-15T18:15:42.062Z",
         "labels": [],
         "pronouns": null,
         "status": null,
