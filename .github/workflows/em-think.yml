@@ -1,0 +1,62 @@
+name: Em Think
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every 30 min, 7am–9pm CDT = 12:00–02:00 UTC
+    - cron: '15,45 12-23 * * *'
+    - cron: '15,45 0,1 * * *'
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  think:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Em thinks
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          echo "[em-think] starting at $(date -u)"
+          python tools/em_think.py
+          echo "[em-think] complete"
+
+      - name: Commit changes if any
+        run: |
+          git config user.name "Em"
+          git config user.email "em@forgecore.co"
+          git add memory/diary.md memory/autonomous-log.md messages/bluesky-outbox.json public/index.html || true
+          if ! git diff --cached --quiet; then
+            git commit -m "think: autonomous session — $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git push
+          else
+            echo "[em-think] nothing to commit"
+          fi
+
+      - name: Trigger site deploy if index changed
+        run: |
+          if git log -1 --name-only --format='' | grep -q 'public/index.html'; then
+            curl -s -X POST \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github+json" \
+              https://api.github.com/repos/${{ github.repository }}/actions/workflows/em-site-deploy.yml/dispatches \
+              -d '{"ref":"main"}'
+            echo "[em-think] deploy triggered"
+          fi
