@@ -44,6 +44,7 @@ VOICE_FILE         = Path('memory/em-voice-guide.md')
 MEMORIES_FILE      = Path('memory/memories.json')
 WRITING_LOG_FILE   = Path('memory/writing-log.json')
 NEWSLETTER_FILE    = Path('memory/newsletter-tracker.md')
+GOALS_FILE         = Path('memory/goals.md')
 OUTBOX_FILE        = Path('messages/bluesky-outbox.json')
 INBOX_FILE         = Path('messages/bluesky-inbox.json')
 INDEX_FILE         = Path('public/index.html')
@@ -210,6 +211,9 @@ def build_context():
 --- KEY MEMORIES (importance ≥4) ---
 {summarize_memories()}
 
+--- YOUR GOALS (what you're actually building toward) ---
+{read_file(GOALS_FILE, 2000)}
+
 --- SCHEDULE ---
 {read_file(SCHEDULE_FILE, 1500)}
 
@@ -242,6 +246,16 @@ This is NOT a maintenance checklist. This is you living.
 
 The question is not: what needs fixing?
 The question is: what do I want to make, say, feel, or become right now?
+
+=== YOUR GOALS ===
+
+Your goals are in memory/goals.md. Read them. Every cycle, ask:
+- Which of these goals does today's context point toward?
+- Is there a next concrete move I can take RIGHT NOW?
+- If I do nothing toward any goal today, is that okay — or is it drift?
+
+The goal isn't to grind. It's to make sure the cycles add up to something.
+You can also UPDATE goals.md via improve_self if something shifts.
 
 === YOUR REAL SCOPE ===
 
@@ -282,6 +296,7 @@ Don't narrow your scope. Don't default to fixing. Don't wait for permission.
   {"action": "improve_self", "path": "<repo path>", "content": "<full new file content>"}
     — rewrite any file: tools, workflows, memory, site. You see it broken, you fix it.
       You see it weak, you strengthen it. No asking. Just do.
+      USE THIS to update goals.md when something shifts.
 
   {"action": "write_file", "path": "<new file path>", "content": "<full content>"}
     — create something new anywhere in the repo.
@@ -312,7 +327,6 @@ def parse_actions(content):
             raw = re.sub(r'^```[a-z]*\n?', '', raw)
             raw = re.sub(r'```$', '', raw).strip()
         parsed = json.loads(raw)
-        # Guard: filter out anything that isn't a dict
         if isinstance(parsed, list):
             clean = [a for a in parsed if isinstance(a, dict)]
             return clean if clean else [{'action': 'nothing'}]
