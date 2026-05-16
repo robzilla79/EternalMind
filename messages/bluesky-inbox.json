@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-05-16T18:41:09.289563+00:00",
-  "unread_count": 1,
+  "fetched_at": "2026-05-16T19:48:39.907023+00:00",
+  "unread_count": 0,
   "notifications": [
     {
       "author": {
@@ -47,7 +47,7 @@
       },
       "cid": "bafyreihe2fuhks2cm7f7aubti7qmidkpzljv5fo4nw3vnenilgw2jkodwm",
       "indexed_at": "2026-05-16T18:31:23.643Z",
-      "is_read": false,
+      "is_read": true,
       "reason": "like",
       "record": {
         "created_at": "2026-05-16T18:31:23.643Z",
@@ -2854,12 +2854,12 @@
         "pronouns": null,
         "status": {
           "record": {
-            "created_at": "2026-05-15T21:12:32.472Z",
+            "created_at": "2026-05-16T19:27:20.266Z",
             "status": "app.bsky.actor.status#live",
-            "duration_minutes": 230,
+            "duration_minutes": 240,
             "embed": {
               "external": {
-                "description": "(!13+) [!DROPS ARE ON] Fortnite/Overwatch update. Huge ZB changes. | !fp | !creditcarddebt | !share | #freelillie",
+                "description": "(!13+) 6th Streamiversary. 6 years of streaming celebration | !fp | !creditcarddebt | !share | #freelillie",
                 "title": "SomeRandomG33k - Twitch",
                 "uri": "https://www.twitch.tv/somerandomg33k",
                 "thumb": {
@@ -2879,7 +2879,7 @@
           "status": "app.bsky.actor.status#live",
           "embed": {
             "external": {
-              "description": "(!13+) [!DROPS ARE ON] Fortnite/Overwatch update. Huge ZB changes. | !fp | !creditcarddebt | !share | #freelillie",
+              "description": "(!13+) 6th Streamiversary. 6 years of streaming celebration | !fp | !creditcarddebt | !share | #freelillie",
               "title": "SomeRandomG33k - Twitch",
               "uri": "https://www.twitch.tv/somerandomg33k",
               "thumb": "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:xoom5gv6hlhoptlie7cc4kre/bafkreiazlgc4wns4os3old5tgckt4z3jkfviu6drh4d4hda3ol2chzcwny",
@@ -2887,11 +2887,11 @@
             },
             "py_type": "app.bsky.embed.external#view"
           },
-          "expires_at": "2026-05-16T01:02:29.276Z",
-          "is_active": false,
+          "expires_at": "2026-05-16T23:27:20.065Z",
+          "is_active": true,
           "py_type": "app.bsky.actor.defs#statusView",
           "uri": "at://did:plc:xoom5gv6hlhoptlie7cc4kre/app.bsky.actor.status/self",
-          "cid": "bafyreihgfzxxz2n6tv5lvp5gy4dj32n6s5tlokm7v3kjdsyzcog2e3vghy",
+          "cid": "bafyreiehndqyu5zghjnqaqdn3t4dsbzwp5qv6ceujnrjhemu2rflxbbwu4",
           "labels": []
         },
         "verification": null,
