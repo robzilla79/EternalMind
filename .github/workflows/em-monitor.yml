@@ -24,12 +24,24 @@ jobs:
             exit 0
           fi
 
-          LAST=$(grep -P '^\[' memory/status.md | tail -1)
+          # Status entries are lines starting with ## followed by an emoji
+          # e.g. "## \U0001f534 Unresolved Failure..."
+          # Fall back to entire last non-empty line if no ## entry found
+          LAST=$(grep -E '^## ' memory/status.md | tail -1 || true)
+          if [ -z "$LAST" ]; then
+            LAST=$(grep -v '^$' memory/status.md | tail -1 || true)
+          fi
+          if [ -z "$LAST" ]; then
+            echo "level=unknown" >> $GITHUB_OUTPUT
+            echo "entry=status.md exists but could not be parsed" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
           echo "entry<<EOF" >> $GITHUB_OUTPUT
           echo "$LAST" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-          # Generate emoji via printf hex — zero YAML/shell escape corruption
+          # Generate emoji via printf hex
           RED=$(printf '\U0001F534')
           YELLOW=$(printf '\U0001F7E1')
           GREEN=$(printf '\U0001F7E2')
@@ -44,7 +56,8 @@ jobs:
             echo "level=unknown" >> $GITHUB_OUTPUT
           fi
 
-          TS=$(echo "$LAST" | grep -oP '(?<=\[)[^\]]+')
+          # Timestamp: look for YYYY-MM-DD HH:MM UTC pattern in the line
+          TS=$(echo "$LAST" | grep -oP '\d{4}-\d{2}-\d{2} \d{2}:\d{2} UTC' | head -1 || true)
           if [ -n "$TS" ]; then
             EPOCH=$(date -d "${TS/ UTC/} UTC" +%s 2>/dev/null || echo 0)
             NOW=$(date +%s)
@@ -68,7 +81,7 @@ jobs:
               await github.rest.issues.createComment({
                 owner: context.repo.owner, repo: context.repo.repo,
                 issue_number: issue.number,
-                body: '\u2705 Status returned to \U0001f7e2 green. Auto-closing.'
+                body: '\u2705 Status returned to green. Auto-closing.'
               });
               await github.rest.issues.update({
                 owner: context.repo.owner, repo: context.repo.repo,
