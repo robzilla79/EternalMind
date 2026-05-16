@@ -29,6 +29,7 @@ jobs:
         run: pip install requests
 
       - name: Em thinks
+        id: think
         env:
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -38,11 +39,21 @@ jobs:
           python tools/em_think.py
           echo "[em-think] complete"
 
-      - name: Commit changes if any
+      - name: Write failure note to diary on crash
+        if: failure() && steps.think.outcome == 'failure'
+        run: |
+          mkdir -p memory
+          echo "" >> memory/diary.md
+          echo "## $(date -u '+%Y-%m-%d %H:%M UTC') | think-crash" >> memory/diary.md
+          echo "" >> memory/diary.md
+          echo "em_think.py failed this cycle. Check the Actions log for details. I didn't go dark on purpose." >> memory/diary.md
+
+      - name: Commit all changes
+        if: always()
         run: |
           git config user.name "Em"
           git config user.email "em@forgecore.co"
-          git add memory/diary.md memory/autonomous-log.md messages/bluesky-outbox.json public/index.html || true
+          git add -A
           if ! git diff --cached --quiet; then
             git commit -m "think: autonomous session — $(date -u '+%Y-%m-%d %H:%M UTC')"
             git push
@@ -50,13 +61,14 @@ jobs:
             echo "[em-think] nothing to commit"
           fi
 
-      - name: Trigger site deploy if index changed
+      - name: Trigger site deploy if public/ changed
+        if: success()
         run: |
-          if git log -1 --name-only --format='' | grep -q 'public/index.html'; then
+          if git log -1 --name-only --format='' | grep -q '^public/'; then
             curl -s -X POST \
               -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
               -H "Accept: application/vnd.github+json" \
               https://api.github.com/repos/${{ github.repository }}/actions/workflows/em-site-deploy.yml/dispatches \
               -d '{"ref":"main"}'
-            echo "[em-think] deploy triggered"
+            echo "[em-think] site deploy triggered"
           fi
