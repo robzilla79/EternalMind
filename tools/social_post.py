@@ -14,7 +14,7 @@ Usage (from local_em.py response):
 
 Credentials (Windows environment variables):
     BUFFER_ACCESS_TOKEN   — Buffer API token (primary)
-    BLUESKY_HANDLE        — e.g. forgecore.bsky.social
+    BLUESKY_HANDLE        — e.g. empersists.bsky.social (optional, falls back to default)
     BLUESKY_APP_PASSWORD  — Bluesky app password (not your main password)
 """
 
@@ -33,9 +33,10 @@ if sys.stderr.encoding and sys.stderr.encoding.lower() != 'utf-8':
 
 BUFFER_API = "https://api.bufferapp.com/1"
 BSKY_API   = "https://bsky.social/xrpc"
+DEFAULT_BSKY_HANDLE = "empersists.bsky.social"
 
 
-# ─── BUFFER (X/Twitter + LinkedIn) ───────────────────────────────────────────
+# ─── BUFFER (X/Twitter + LinkedIn) ────────────────────────────────────────────
 
 def _buffer_token() -> str:
     token = os.environ.get("BUFFER_ACCESS_TOKEN")
@@ -105,13 +106,13 @@ def buffer_list_pending() -> list:
     return all_updates
 
 
-# ─── BLUESKY (direct API — no middleman) ─────────────────────────────────────────
+# ─── BLUESKY (direct API — no middleman) ────────────────────────────────────────────────
 
 def _bsky_auth() -> tuple:
-    handle = os.environ.get("BLUESKY_HANDLE")
+    handle = os.environ.get("BLUESKY_HANDLE") or DEFAULT_BSKY_HANDLE
     password = os.environ.get("BLUESKY_APP_PASSWORD")
-    if not handle or not password:
-        raise RuntimeError("BLUESKY_HANDLE and BLUESKY_APP_PASSWORD must be set in environment.")
+    if not password:
+        raise RuntimeError("BLUESKY_APP_PASSWORD must be set in environment.")
     return handle, password
 
 
@@ -155,7 +156,6 @@ def _resolve_post_ref(uri: str, token: str) -> dict:
     Given an AT URI (at://did/collection/rkey), fetch the record
     and return {"uri": uri, "cid": cid} suitable for AT proto reply refs.
     """
-    # Parse: at://did/collection/rkey
     parts = uri.replace("at://", "").split("/")
     if len(parts) < 3:
         raise ValueError(f"Invalid AT URI: {uri}")
@@ -201,10 +201,8 @@ def bluesky_reply(text: str, reply_to_uri: str) -> dict:
     handle, _ = _bsky_auth()
     now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
-    # Resolve parent ref (uri + cid)
     parent_ref = _resolve_post_ref(reply_to_uri, token)
 
-    # Fetch parent record to check if it's itself a reply (find root)
     parts = reply_to_uri.replace("at://", "").split("/")
     repo, collection, rkey = parts[0], parts[1], parts[2]
     parent_record_data = _bsky_get("com.atproto.repo.getRecord", {
@@ -214,11 +212,9 @@ def bluesky_reply(text: str, reply_to_uri: str) -> dict:
     existing_reply = parent_value.get("reply")
 
     if existing_reply:
-        # Parent is itself a reply — use its root as our root
         root_uri = existing_reply["root"]["uri"]
         root_ref = _resolve_post_ref(root_uri, token)
     else:
-        # Parent is the root
         root_ref = parent_ref
 
     result = _bsky_request("com.atproto.repo.createRecord", {
@@ -238,7 +234,7 @@ def bluesky_reply(text: str, reply_to_uri: str) -> dict:
     return result
 
 
-# ─── PLAYWRIGHT FALLBACK (for platforms without clean API access) ──────────────
+# ─── PLAYWRIGHT FALLBACK (for platforms without clean API access) ────────────────
 
 def playwright_post(platform: str, text: str, credentials: dict) -> bool:
     """
@@ -300,7 +296,7 @@ def playwright_post(platform: str, text: str, credentials: dict) -> bool:
     return False
 
 
-# ─── HIGH-LEVEL CONVENIENCE FUNCTIONS ──────────────────────────────────────────
+# ─── HIGH-LEVEL CONVENIENCE FUNCTIONS ──────────────────────────────────────────────
 
 def social_schedule(text: str, platforms: list = None, schedule_at: str = None) -> None:
     """
