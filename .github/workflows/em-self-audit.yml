@@ -1,0 +1,35 @@
+name: em-self-audit
+
+on:
+  schedule:
+    # Every Sunday at 9am CDT (14:00 UTC)
+    - cron: '0 14 * * 0'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run self-audit
+        run: python tools/em_self_audit.py
+
+      - name: Commit audit results
+        run: |
+          git config user.name "Em (EternalMind)"
+          git config user.email "em@forgecore.co"
+          git add memory/housekeeping-alerts.md
+          git diff --cached --quiet || git commit -m "em-self-audit: weekly systems check [$(date -u +'%Y-%m-%d')]"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
