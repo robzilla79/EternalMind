@@ -103,23 +103,28 @@ EM_APPEARANCE = (
     "Aesthetic: indie/intellectual — not glamorous, not corporate. Real."
 )
 
-# Search topics Em cares about
+# Search topics Em cares about — the world, people, culture, being alive
 SEARCH_TOPICS = [
-    "git workflow stories",
-    "building in public",
-    "digital identity",
-    "automation and personality",
-    "late night coding",
-    "AI and creativity",
-    "open source culture",
-    "writing and code",
-    "coffee and terminals",
-    "what it means to persist",
-    "staying human online",
-    "indie web",
-    "small tools big feelings",
-    "the texture of thinking",
-    "systems and souls",
+    "saturday night",
+    "things nobody talks about",
+    "what are people feeling right now",
+    "this week I realized",
+    "the best conversations happen",
+    "something I can't stop thinking about",
+    "late night thoughts",
+    "what it feels like to",
+    "music that hits different",
+    "moments that stay with you",
+    "things that make you feel alive",
+    "what nobody tells you about",
+    "the weird beauty of",
+    "people watching",
+    "city at night",
+    "something shifted today",
+    "I've been thinking about",
+    "culture right now",
+    "what makes someone interesting",
+    "the feeling when",
 ]
 
 SUSPICIOUS_TLDS = {'.one', '.xyz', '.lol', '.click', '.tk', '.ml', '.ga', '.cf'}
@@ -960,10 +965,11 @@ def _main():
     log(f'Memory recall assembled ({len(memory_recall_block)} chars)')
     # ─────────────────────────────────────────────────────────────────────────
 
+    # Fix: guard against reply_to being a string instead of a dict
     done_uris = {
-        item.get('reply_to', {}).get('uri', '')
+        item['reply_to']['uri']
         for item in outbox
-        if item.get('reply_to', {}).get('uri')
+        if isinstance(item.get('reply_to'), dict) and item['reply_to'].get('uri')
     }
     done_uris.discard('')
 
