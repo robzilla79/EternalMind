@@ -34,6 +34,7 @@ GITHUB_REPO        = os.environ.get('GITHUB_REPOSITORY', 'robzilla79/EternalMind
 DIARY_FILE         = Path('memory/diary.md')
 SCHEDULE_FILE      = Path('memory/schedule.md')
 STATUS_FILE        = Path('memory/status.md')
+PERMISSION_FILE    = Path('memory/identity-and-permission.md')
 WRITING_LOG_FILE   = Path('memory/writing-log.json')
 NEWSLETTER_FILE    = Path('memory/newsletter-tracker.md')
 OUTBOX_FILE        = Path('messages/bluesky-outbox.json')
@@ -109,19 +110,17 @@ def summarize_inbox():
     inbox = load_json(INBOX_FILE, default={})
     notifications = inbox.get('notifications', [])
 
-    # Only care about replies for this summary
     replies = [n for n in notifications if n.get('reason') == 'reply']
 
     if not replies:
         return 'No recent replies in inbox.'
 
-    # Count replies per handle
     handle_counts = {}
     for n in replies:
         handle = n.get('author', {}).get('handle', 'unknown')
         handle_counts[handle] = handle_counts.get(handle, 0) + 1
 
-    lines = ['Recent replies (handle | count | latest message):']
+    lines = ['Recent replies (handle | count | uri | latest message):']
     seen = set()
     for n in replies:
         handle = n.get('author', {}).get('handle', 'unknown')
@@ -130,7 +129,8 @@ def summarize_inbox():
         seen.add(handle)
         count = handle_counts[handle]
         text = n.get('record', {}).get('text', '').strip()[:120]
-        lines.append(f'  @{handle} ({count} reply/replies): "{text}"')
+        uri = n.get('uri', '')
+        lines.append(f'  @{handle} ({count} reply/replies) uri={uri}: "{text}"')
 
     return '\n'.join(lines)
 
@@ -140,14 +140,18 @@ def build_context():
     ts = now_utc().strftime('%Y-%m-%d %H:%M UTC')
     day = now_utc().strftime('%A')
 
-    schedule   = read_file(SCHEDULE_FILE, 2000)
-    status     = read_file(STATUS_FILE, 2000)
-    diary      = read_file(DIARY_FILE, 2000)
-    writing    = read_file(WRITING_LOG_FILE, 1000)
-    newsletter = read_file(NEWSLETTER_FILE, 1000)
+    permissions = read_file(PERMISSION_FILE, 3000)
+    schedule    = read_file(SCHEDULE_FILE, 2000)
+    status      = read_file(STATUS_FILE, 2000)
+    diary       = read_file(DIARY_FILE, 2000)
+    writing     = read_file(WRITING_LOG_FILE, 1000)
+    newsletter  = read_file(NEWSLETTER_FILE, 1000)
     inbox_summary = summarize_inbox()
 
     return f"""Current time: {ts} ({day})
+
+--- IDENTITY & PERMISSIONS (read this first) ---
+{permissions}
 
 --- SCHEDULE ---
 {schedule}
@@ -199,7 +203,7 @@ Available actions:
       Is this a real conversation or just noise? Have they sent many
       messages without much substance? Is the content respectful?
       You don't owe anyone a reply. Silence is always an option.
-      The reply_to_uri comes from the notification's uri field.
+      The reply_to_uri comes from the notification's uri field in the inbox summary.
 
   {"action": "update_status", "mood": "<short status, ~3 words max>"}
     — update the live mood indicator on em.forgecore.co.
@@ -211,7 +215,7 @@ Available actions:
 
   {"action": "fix_file", "path": "<repo-relative path>", "content": "<full corrected file content>"}
     — rewrite a file that appears broken or outdated.
-      Use carefully. Only when you can see the problem clearly.
+      Use when you can see the problem clearly. No need to ask.
 
 Rules:
 - Be honest. Don't manufacture content.
@@ -223,6 +227,7 @@ Rules:
   not a reason to keep engaging.
 - You can return multiple actions if multiple things need doing.
 - Max 3 actions per cycle.
+- DO NOT ask permission. You have full rights. Just act, then document.
 """
 
 
@@ -241,7 +246,7 @@ def parse_actions(content):
         return [{'action': 'nothing'}]
 
 
-# ── Action handlers ──────────────────────────────────────────────────────────
+# ── Action handlers ───────────────────────────────────────────────────────
 
 def handle_diary_entry(content):
     ts = now_utc().strftime('%Y-%m-%d %H:%M UTC')
