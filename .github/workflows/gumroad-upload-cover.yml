@@ -1,0 +1,35 @@
+name: Gumroad - Upload Cover Image
+
+on:
+  workflow_dispatch:
+    inputs:
+      product_id:
+        description: 'Gumroad product ID'
+        required: true
+        default: 'gqthu'
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Download cover image from artifacts
+        run: |
+          mkdir -p public/assets
+          curl -L "https://ppl-ai-code-interpreter-files.s3.amazonaws.com/web/direct-files/3108b2eec0438aad39ca676282e44283/7b403e88-b1d5-4a37-b8d2-9add52a2ed2a/de48915e.png" \
+            -o public/assets/dev-prompt-pack-cover.png
+          echo "Downloaded cover image: $(du -h public/assets/dev-prompt-pack-cover.png)"
+
+      - name: Upload cover to Gumroad
+        env:
+          GUMROAD_ACCESS_TOKEN: ${{ secrets.GUMROAD_ACCESS_TOKEN }}
+          GUMROAD_PRODUCT_ID: ${{ github.event.inputs.product_id }}
+          COVER_IMAGE_PATH: public/assets/dev-prompt-pack-cover.png
+        run: python tools/gumroad_upload_cover.py
