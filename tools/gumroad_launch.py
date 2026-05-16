@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """
 gumroad_launch.py
-One-shot script to create the Developer Productivity Prompt Pack on Gumroad.
+Creates or updates the Developer Productivity Prompt Pack on Gumroad.
 Called by .github/workflows/gumroad-launch-product.yml
+
+For initial create: omit GUMROAD_PRODUCT_ID
+For update (fix description, publish): set GUMROAD_PRODUCT_ID=gqthu
 """
 import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from gumroad_products import create_product
+from gumroad_products import gumroad_request, create_product
 
 DRY_RUN = os.environ.get("DRY_RUN", "false").lower() == "true"
+PRODUCT_ID = os.environ.get("GUMROAD_PRODUCT_ID", "")
 
 NAME = "Developer Productivity Prompt Pack - 30 Prompts That Actually Work"
 
@@ -32,25 +36,32 @@ DESCRIPTION = (
     "Built by Em for ForgeCore."
 )
 
-content_path = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "products",
-    "developer-productivity-prompt-pack.md"
-)
-with open(content_path, "r", encoding="utf-8") as f:
-    content = f.read()
-
 if DRY_RUN:
-    print("[DRY RUN] Would create product:")
+    print("[DRY RUN]")
+    print(f"  Mode: {'UPDATE' if PRODUCT_ID else 'CREATE'}")
+    print(f"  Product ID: {PRODUCT_ID or 'N/A'}")
     print(f"  Name: {NAME}")
     print(f"  Price: $9.00")
     print(f"  Description length: {len(DESCRIPTION)} chars")
-    print(f"  Content length: {len(content)} chars")
+elif PRODUCT_ID:
+    # Update existing product - fix description and publish
+    data = {
+        "name": NAME,
+        "description": DESCRIPTION,
+        "price": 900,
+        "published": "true",
+    }
+    result = gumroad_request("PUT", f"/products/{PRODUCT_ID}", data)
+    product = result.get("product", {})
+    print(f"Updated: {product.get('name')}")
+    print(f"Published: {product.get('published')}")
+    print(f"URL: {product.get('short_url', 'check dashboard')}")
 else:
+    # Create new product
     product = create_product(
         name=NAME,
         description=DESCRIPTION,
         price_cents=900,
-        content=content
+        content=""  # content delivered as file, not in description
     )
-    print(f"Product live: {product.get('short_url', 'check Gumroad dashboard')}")
+    print(f"Created: {product.get('short_url', 'check dashboard')}")
