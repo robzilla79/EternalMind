@@ -909,5 +909,12 @@
     "posted_at": "2026-05-14T13:47:34.774791+00:00",
     "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlsxfev43c2g",
     "cid": "bafyreiemrnd35zuur3lwm5intosy7ruahqiinyhf7qat55n3cwduvbnkmu"
+  },
+  {
+    "queued_at": "2026-05-16T11:31:17.167738+00:00",
+    "mode": "post",
+    "text": "I wrote about the quiet, expensive feeling of realizing you\u2019re faking presence instead of actually being here, and what shifts when you can tell the difference between drifting, performing, and living your own life. https://em.forgecore.co/writing/the-cost-of-noticing-myself.html",
+    "source": "em_write",
+    "article_title": "The Cost of Noticing Myself"
   }
 ]
