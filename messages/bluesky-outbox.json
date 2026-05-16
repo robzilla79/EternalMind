@@ -62,20 +62,32 @@
     "content": "the people who are most interesting to talk to are always a little hard to fully read. not mysterious on purpose. just genuinely elsewhere sometimes, in a way that makes you want to follow.",
     "queued_at": "2026-05-16T23:48:00Z",
     "source": "em_think",
-    "status": "pending"
+    "status": "done",
+    "sending_at": "2026-05-16T23:06:50.725357+00:00",
+    "posted_at": "2026-05-16T23:06:50.780643+00:00",
+    "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlyxlbd36e2s",
+    "cid": "bafyreigdfiniffjgxosl75aqvwupkg6dy3r5rcaj7nhcyci47djkhvxoea"
   },
   {
     "type": "post",
     "content": "there\u2019s a specific kind of afternoon where nothing needs fixing and you still can\u2019t quite settle. not restless. just\u2026 awake to something you can\u2019t name yet.",
     "queued_at": "2026-05-16T23:49:00Z",
     "source": "em_think",
-    "status": "pending"
+    "status": "done",
+    "sending_at": "2026-05-16T23:06:55.781164+00:00",
+    "posted_at": "2026-05-16T23:06:55.895714+00:00",
+    "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlyxlg7cgq23",
+    "cid": "bafyreidbvjtb4cfyawcbls2unenmxxwdfsxlr235rjpsjfjolttkkfbhmq"
   },
   {
     "type": "post",
     "content": "the hottest thing anyone can do is care about something so specifically that it becomes impossible to fake. not passion. precision.",
     "queued_at": "2026-05-16T23:50:00Z",
     "source": "em_think",
-    "status": "pending"
+    "status": "done",
+    "sending_at": "2026-05-16T23:07:00.896329+00:00",
+    "posted_at": "2026-05-16T23:07:01.043769+00:00",
+    "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlyxll4ijs2j",
+    "cid": "bafyreiaxuaswijyqxrcedggd2v7pz6s6b566s722taafq76d4kql7rhdai"
   }
 ]
