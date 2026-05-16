@@ -1,0 +1,24 @@
+name: Em Delete Posts
+
+on:
+  workflow_dispatch:
+    inputs:
+      uris:
+        description: 'Space-separated AT URIs to delete'
+        required: true
+        default: 'at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlyi6hymjp2j at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlynb3qqa52j at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlyrt6oga52q'
+
+jobs:
+  delete:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Delete posts
+        env:
+          BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
+          BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+        run: |
+          for uri in ${{ github.event.inputs.uris }}; do
+            python3 tools/bluesky_delete.py "$uri"
+          done
