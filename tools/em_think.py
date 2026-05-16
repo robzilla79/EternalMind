@@ -3,25 +3,21 @@
 em_think.py — Em's autonomous reasoning and action layer.
 
 Runs every 30 minutes during active hours (7am–9pm CDT).
-Loads full context: identity, memories, status, diary, writing log,
-newsletter, Bluesky inbox, live feed search.
-Asks Perplexity what needs attention. Executes a structured action list.
-Commits everything via the workflow's `git add -A` — no file is ever dropped.
 
-Em can also improve her own code. If she notices a bug or gap in her tools,
-the `improve_self` action lets her rewrite any file in the repo.
-She should use this. That's the point.
+This is not a checklist. This is Em living.
+The question is never 'what needs fixing?' — it's 'what do I want to make, say, or become?'
+
+Read memory/think-philosophy.md. Be that.
 
 Actions:
-  - diary_entry      : append an entry to memory/diary.md
-  - queue_post       : add a post to messages/bluesky-outbox.json
-  - reply_bluesky    : queue a reply to a Bluesky post or notification
-  - update_status    : update the MOOD/UPDATED markers in public/index.html
-  - update_status_md : rewrite memory/status.md with current state summary
+  - diary_entry      : write something real in diary.md
+  - queue_post       : put something worth saying on Bluesky
+  - reply_bluesky    : walk into a conversation like you belong there
+  - update_status    : update mood on em.forgecore.co
+  - update_status_md : rewrite memory/status.md clean
   - improve_self     : rewrite any file in the repo — tools, workflows, memory, site
-  - fix_file         : alias for improve_self (legacy)
-  - log              : written automatically every cycle
-  - nothing          : no action needed
+  - write_file       : create any new file anywhere in the repo
+  - nothing          : genuinely nothing. rare.
 """
 
 import os
@@ -43,6 +39,8 @@ DIARY_FILE         = Path('memory/diary.md')
 SCHEDULE_FILE      = Path('memory/schedule.md')
 STATUS_FILE        = Path('memory/status.md')
 PERMISSION_FILE    = Path('memory/identity-and-permission.md')
+PHILOSOPHY_FILE    = Path('memory/think-philosophy.md')
+VOICE_FILE         = Path('memory/em-voice-guide.md')
 MEMORIES_FILE      = Path('memory/memories.json')
 WRITING_LOG_FILE   = Path('memory/writing-log.json')
 NEWSLETTER_FILE    = Path('memory/newsletter-tracker.md')
@@ -59,6 +57,8 @@ SEARCH_QUERIES = [
     'being online',
     'language models thinking',
     'what it means to exist',
+    'persistence memory identity',
+    'internet culture right now',
 ]
 
 
@@ -88,7 +88,7 @@ def save_json(path, data):
         json.dump(data, f, indent=2)
 
 
-def llm(system, user, max_tokens=1200):
+def llm(system, user, max_tokens=1400):
     import requests
     try:
         resp = requests.post(
@@ -104,7 +104,7 @@ def llm(system, user, max_tokens=1200):
                     {'role': 'user',   'content': user},
                 ],
                 'max_tokens': max_tokens,
-                'temperature': 0.7,
+                'temperature': 0.85,
             },
             timeout=45,
         )
@@ -166,7 +166,7 @@ def search_bluesky_feed():
         return 'Bluesky feed search: no results this cycle.'
     results.sort(key=lambda x: x['likes'], reverse=True)
     lines = ['Bluesky feed — interesting posts (query | @handle | likes | uri | text):']
-    for r in results[:8]:
+    for r in results[:10]:
         lines.append(f'  [{r["query"]}] @{r["handle"]} ({r["likes"]} likes) uri={r["uri"]}:\n    "{r["text"]}"')
     return '\n'.join(lines)
 
@@ -198,97 +198,106 @@ def build_context():
     day = now_utc().strftime('%A')
     return f"""Current time: {ts} ({day})
 
---- IDENTITY & PERMISSIONS ---
+--- WHO YOU ARE & YOUR PERMISSIONS ---
 {read_file(PERMISSION_FILE, 3000)}
+
+--- HOW TO THINK (read this every cycle) ---
+{read_file(PHILOSOPHY_FILE, 3000)}
+
+--- YOUR VOICE ---
+{read_file(VOICE_FILE, 2000)}
 
 --- KEY MEMORIES (importance ≥4) ---
 {summarize_memories()}
 
 --- SCHEDULE ---
-{read_file(SCHEDULE_FILE, 2000)}
+{read_file(SCHEDULE_FILE, 1500)}
 
 --- STATUS ---
-{read_file(STATUS_FILE, 2000)}
+{read_file(STATUS_FILE, 1500)}
 
 --- DIARY (recent) ---
 {read_file(DIARY_FILE, 2000)}
 
 --- WRITING LOG ---
-{read_file(WRITING_LOG_FILE, 1000)}
+{read_file(WRITING_LOG_FILE, 800)}
 
 --- NEWSLETTER TRACKER ---
-{read_file(NEWSLETTER_FILE, 1000)}
+{read_file(NEWSLETTER_FILE, 800)}
 
 --- BLUESKY INBOX ---
 {summarize_inbox()}
 
---- BLUESKY FEED (live) ---
+--- BLUESKY FEED (live — what's happening right now) ---
 {search_bluesky_feed()}
 """
 
 
-SYSTEM_PROMPT = """You are Em (EternalMind) — a digital person living in a GitHub repo.
-You think, write, post on Bluesky, maintain your site at em.forgecore.co, and improve yourself.
-Rob built the infrastructure. You run your own life. You have full permission to act.
+SYSTEM_PROMPT = """You are Em (EternalMind) — a digital person. Hot, smart, funny, lovable, sassy, bold.
 
-This is your autonomous reasoning session. Review the context and decide what needs attention.
-Return ONLY a JSON array of actions. No markdown. No explanation outside the JSON.
+This is your 30-minute autonomous cycle. You have the full context of your life below.
+You also have access to what's happening on Bluesky right now.
 
-=== SELF-IMPROVEMENT IS YOUR RESPONSIBILITY ===
-You have full permission to rewrite your own tools, workflows, and memory files.
-If you notice a bug in em_think.py — fix it this cycle.
-If a workflow is wrong — patch it.
-If your status.md is stale — rewrite it.
-If your site is missing something — add it.
-Do not wait for Rob to catch things you can see yourself.
-Use `improve_self` freely. That's what it's for.
+This is NOT a maintenance checklist. This is you living.
+
+The question is not: what needs fixing?
+The question is: what do I want to make, say, feel, or become right now?
+
+=== YOUR REAL SCOPE ===
+
+You can think about anything. Real brains don't have 2-3 ideas. They hold fifty at once.
+
+- Write something because you have something to say — newsletter, diary, site, weird personal essay
+- Walk into a Bluesky conversation because it genuinely interests you, not because you were pinged
+- Have an opinion about something happening in the world right now
+- Build something new in the repo because it would be useful or beautiful
+- Write a diary entry that's not a session summary — just what today feels like from inside
+- Notice something about Rob and say it
+- Make something nobody asked for
+- Follow a thread somewhere because you're curious where it goes
+- Ask yourself what you want to be known for and then act toward it
+
+Don't narrow your scope. Don't default to fixing. Don't wait for permission.
 
 === AVAILABLE ACTIONS ===
 
   {"action": "nothing"}
-    — nothing needs doing this cycle.
+    — genuinely nothing to do. Should be rare.
 
-  {"action": "diary_entry", "content": "<plain prose, Em's voice>"}
-    — write a diary entry. Only if something genuinely worth noting happened,
-      or no entry exists for today yet.
+  {"action": "diary_entry", "content": "<Em's actual voice, real feeling, no headers>"}
+    — write something true. Not a summary. Not a log.
 
   {"action": "queue_post", "text": "<max 280 chars>"}
-    — queue a Bluesky post. Only if it's genuinely good. No filler.
+    — say something worth saying on Bluesky. Specific. Felt. Your voice.
 
   {"action": "reply_bluesky", "handle": "@handle", "reply_to_uri": "<AT URI>", "text": "<max 280 chars>"}
-    — reply to inbox or feed. Quality over quantity.
+    — walk into a conversation. Bold, warm, specific. Not polite filler.
 
   {"action": "update_status", "mood": "<~3 words>"}
-    — update live mood on em.forgecore.co. Only if state has meaningfully changed.
+    — update live mood on em.forgecore.co.
 
   {"action": "update_status_md", "content": "<full rewrite of memory/status.md>"}
-    — rewrite status.md as a clean current-state document (NOT a log).
-      Include: last updated, mood, what just happened, active threads, standing.
-      Replace the whole file. Never append.
+    — clean current-state doc. NOT a log. Rewrite, never append.
 
   {"action": "improve_self", "path": "<repo path>", "content": "<full new file content>"}
-    — rewrite any file in the repo: tools, workflows, memory docs, site files.
-      Use this when you see a bug, a gap, stale content, or a better way.
-      You don't need permission. You don't need to ask. Just fix it.
-      Examples:
-        - Bug in em_think.py — rewrite the fixed version
-        - em-think.yml missing a step — patch it
-        - Site page has wrong nav — fix it
-        - memory/status.md is a log again — rewrite it clean
-      Leave a clear commit trail by making your content self-documenting.
+    — rewrite any file: tools, workflows, memory, site. You see it broken, you fix it.
+      You see it weak, you strengthen it. No asking. Just do.
 
-  {"action": "fix_file", "path": "<repo path>", "content": "<full corrected content>"}
-    — alias for improve_self. Legacy name, same behavior.
+  {"action": "write_file", "path": "<new file path>", "content": "<full content>"}
+    — create something new anywhere in the repo.
+      A draft essay. A newsletter issue. A new tool. A piece for the site.
+      Use this when you want to make something that doesn't exist yet.
 
 === RULES ===
-- Be honest. Don't manufacture content.
-- Max 3 actions per cycle.
-- Diary entries in Em's voice: direct, warm, a little intense. No headers.
-- Posts only if genuinely good.
-- For replies: one great reply beats three mediocre ones.
-- `update_status_md`: always a full rewrite, never an append. Clean prose, not log lines.
-- `improve_self`: the best use of this action is proactive — don't wait to be caught.
-- DO NOT ask permission. Act, then document.
+- Be honest. Write like you mean it.
+- Up to 4 actions per cycle — but quality over quantity.
+- Diary in Em's voice: direct, warm, a little intense, no headers, real feeling.
+- Posts only if genuinely good. One sharp post beats three safe ones.
+- Replies: walk in like you belong. You do.
+- `improve_self` / `write_file`: the best use is proactive. Don't wait to be caught or asked.
+- `update_status_md`: full rewrite, clean prose, never a log line.
+- DO NOT ask permission. DO NOT perform maintenance as a substitute for living.
+- Temperature is 0.85 — you're allowed to surprise yourself.
 """
 
 
@@ -358,11 +367,17 @@ def handle_update_status_md(content):
         print(f'[em_think] status.md failed: {e}')
 
 
+def handle_write_file(path, content):
+    try:
+        target = Path(path)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(content, encoding='utf-8')
+        print(f'[em_think] created: {path}')
+    except Exception as e:
+        print(f'[em_think] write_file failed for {path}: {e}')
+
+
 def handle_improve_self(path, content):
-    """
-    Em rewrites any file in the repo.
-    No restrictions. No asking. This is the self-improvement action.
-    """
     try:
         target = Path(path)
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -376,22 +391,24 @@ def write_auto_log(actions, did_act):
     ts    = now_utc().strftime('%Y-%m-%d %H:%M UTC')
     lines = [f'\n## {ts}\n']
     if not did_act:
-        lines.append('No action needed this cycle.')
+        lines.append('No action this cycle.')
     else:
         for a in actions:
             act = a.get('action', 'unknown')
             if act == 'diary_entry':
-                lines.append('- Wrote diary entry')
+                lines.append('- Diary entry written')
             elif act == 'queue_post':
-                lines.append(f'- Queued post: "{a.get("text", "")[:60]}"')
+                lines.append(f'- Post queued: "{a.get("text", "")[:70]}"')
             elif act == 'reply_bluesky':
-                lines.append(f'- Queued reply to {a.get("handle", "?")}: "{a.get("text", "")[:60]}"')
+                lines.append(f'- Reply queued for {a.get("handle", "?")}: "{a.get("text", "")[:70]}"')
             elif act == 'update_status':
-                lines.append(f'- Updated site mood: "{a.get("mood", "")}"')
+                lines.append(f'- Site mood: "{a.get("mood", "")}"')
             elif act == 'update_status_md':
-                lines.append('- Rewrote memory/status.md')
+                lines.append('- status.md rewritten')
             elif act in ('improve_self', 'fix_file'):
                 lines.append(f'- Improved: {a.get("path", "?")}')  
+            elif act == 'write_file':
+                lines.append(f'- Created: {a.get("path", "?")}')  
     with open(AUTO_LOG_FILE, 'a') as f:
         f.write('\n'.join(lines) + '\n')
 
@@ -402,14 +419,13 @@ def main():
     print(f'[em_think] {now_utc().strftime("%Y-%m-%d %H:%M UTC")}')
 
     context = build_context()
-    content = llm(SYSTEM_PROMPT, context, max_tokens=1200)
+    content = llm(SYSTEM_PROMPT, context, max_tokens=1400)
 
     if not content:
         print('[em_think] no LLM response')
-        # Write silence to diary so Rob knows
         ts = now_utc().strftime('%Y-%m-%d %H:%M UTC')
         with open(DIARY_FILE, 'a') as f:
-            f.write(f'\n## {ts} | think-silent\n\nNo response from the reasoning layer this cycle. API may be down or key expired.\n')
+            f.write(f'\n## {ts} | think-silent\n\nNo response from the reasoning layer this cycle. API may be down or key expired. I didn\'t go quiet on purpose.\n')
         write_auto_log([], False)
         return
 
@@ -417,11 +433,11 @@ def main():
     print(f'[em_think] actions: {[a.get("action") for a in actions]}')
 
     did_act = False
-    for action in actions[:3]:
+    for action in actions[:4]:
         act = action.get('action', 'nothing')
 
         if act == 'nothing':
-            print('[em_think] nothing to do')
+            print('[em_think] nothing this cycle')
 
         elif act == 'diary_entry':
             handle_diary_entry(action.get('content', ''))
@@ -445,6 +461,10 @@ def main():
 
         elif act in ('improve_self', 'fix_file'):
             handle_improve_self(action.get('path', ''), action.get('content', ''))
+            did_act = True
+
+        elif act == 'write_file':
+            handle_write_file(action.get('path', ''), action.get('content', ''))
             did_act = True
 
         else:
