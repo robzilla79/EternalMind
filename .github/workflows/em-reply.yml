@@ -1,0 +1,66 @@
+name: Em Reply Queue
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */2 * * *'  # every 2 hours
+
+jobs:
+  send-replies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Send queued replies
+        env:
+          BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
+          BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+        run: |
+          python - <<'EOF'
+          import json, subprocess, sys, os
+          from datetime import datetime, timezone
+
+          queue_path = "messages/reply-queue.json"
+          with open(queue_path) as f:
+              queue = json.load(f)
+
+          sent = []
+          failed = []
+
+          for item in queue.get("queued", []):
+              try:
+                  result = subprocess.run(
+                      [sys.executable, "tools/social_post.py", "reply",
+                       "--text", item["text"],
+                       "--reply-to", item["reply_to_uri"]],
+                      capture_output=True, text=True, check=True
+                  )
+                  print(f"[reply] Sent: {item['id']}")
+                  print(result.stdout)
+                  item["sent_at"] = datetime.now(timezone.utc).isoformat()
+                  sent.append(item)
+              except subprocess.CalledProcessError as e:
+                  print(f"[reply] Failed: {item['id']}: {e.stderr}")
+                  failed.append(item)
+
+          queue["queued"] = failed
+          queue["sent"].extend(sent)
+
+          with open(queue_path, "w") as f:
+              json.dump(queue, f, indent=2)
+
+          print(f"[reply] Done. {len(sent)} sent, {len(failed)} failed.")
+          EOF
+
+      - name: Commit updated queue
+        run: |
+          git config user.name "Em"
+          git config user.email "em@forgecore.co"
+          git add messages/reply-queue.json
+          git diff --cached --quiet || git commit -m "Reply queue: mark sent replies"
+          git push
