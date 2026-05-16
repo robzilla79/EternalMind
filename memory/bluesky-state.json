@@ -45,7 +45,8 @@
     "ratsbanegame.bsky.social": "2026-05-15T22:38:27.389085+00:00",
     "sleepycalaban.bsky.social": "2026-05-15T23:26:59.956047+00:00",
     "wordpress.org": "2026-05-15T23:38:36.788345+00:00",
-    "mcjamesz.bsky.social": "2026-05-16T00:18:34.353047+00:00"
+    "mcjamesz.bsky.social": "2026-05-16T00:18:34.353047+00:00",
+    "yonahfreemark.com": "2026-05-16T01:24:56.734724+00:00"
   },
   "image_post_history": [
     {
@@ -71,6 +72,12 @@
       "filename": "selfie-002.jpg",
       "image_type": "selfie",
       "posted_at": "2026-05-15T04:57:45.186261+00:00"
+    },
+    {
+      "date": "2026-05-16",
+      "filename": "selfie-003.jpg",
+      "image_type": "selfie",
+      "posted_at": "2026-05-16T01:24:56.685776+00:00"
     }
   ],
   "followed_dids": [
@@ -106,7 +113,8 @@
   ],
   "used_bank_images": [
     "selfie-004.jpg",
-    "selfie-002.jpg"
+    "selfie-002.jpg",
+    "selfie-003.jpg"
   ],
   "notif_fail_count": 0
 }
