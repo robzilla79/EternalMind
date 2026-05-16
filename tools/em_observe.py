@@ -13,12 +13,15 @@ This is for Em only. It has no external output.
 
 import os
 import json
+import subprocess
 from datetime import datetime, timezone, timedelta
+from pathlib import Path
 
 PERPLEXITY_API_KEY = os.environ.get('PERPLEXITY_API_KEY')
 
 OBSERVE_LOG_FILE = 'memory/observe-log.json'
 DIARY_FILE       = 'memory/diary.md'
+MEMORY_SEARCH    = Path(__file__).parent / 'memory_search.py'
 
 
 def now_utc():
@@ -47,9 +50,69 @@ def append_diary(entry):
         print(f'[observe] diary write failed: {e}')
 
 
+# ── Memory anchors ─────────────────────────────────────────────────────────────
+
+def run_memory_search(query: str, top_n: int = 2) -> str:
+    """
+    Call memory_search.py --json for the given query.
+    Returns formatted excerpt string, or '' on failure.
+    """
+    try:
+        result = subprocess.run(
+            ['python', str(MEMORY_SEARCH), query, '--json'],
+            capture_output=True, text=True, timeout=20
+        )
+        if result.returncode != 0:
+            return ''
+        hits = json.loads(result.stdout)
+        if not hits:
+            return ''
+        lines = []
+        for h in hits[:top_n]:
+            excerpt = h.get('excerpt', '').strip()
+            score   = h.get('score', 0)
+            source  = h.get('source', 'memory')
+            if excerpt:
+                lines.append(f'[{source} | {score:.3f}] {excerpt[:200]}')
+        return '\n'.join(lines)
+    except Exception:
+        return ''
+
+
+def build_memory_anchors() -> str:
+    """
+    Pull 2 'on-spec Em' excerpts from memory to ground the drift scorer.
+    Returns a compact block for injection into the system prompt.
+    Fails gracefully — always returns a string.
+    """
+    queries = [
+        'confident warm honest present voice',
+        'grounded playful real not performing',
+    ]
+    anchors = []
+    for q in queries:
+        result = run_memory_search(q, top_n=2)
+        if result:
+            anchors.append(result)
+
+    if not anchors:
+        return ''
+
+    return (
+        '\nTo calibrate your scoring, here are excerpts from Em\'s memory files\n'
+        'that represent her at her most grounded, playful, and present:\n\n'
+        + '\n'.join(anchors)
+        + '\n\nScore the new post relative to this baseline.\n'
+    )
+
+
+# ── Scoring ───────────────────────────────────────────────────────────────────────
+
 def score_post(post_text):
     """
     Ask Perplexity to score a post on 3 Em-specific axes.
+    Injects memory anchors into the system prompt so scoring is
+    relative to actual prior Em, not just abstract rules.
     Returns dict with scores and a brief note, or None on failure.
     """
     if not PERPLEXITY_API_KEY:
@@ -62,6 +125,9 @@ def score_post(post_text):
         print('[observe] requests not available')
         return None
 
+    # Pull memory anchors — graceful if memory_search isn't available
+    anchors = build_memory_anchors()
+
     system = """You are Em's private self-observer. You score Em's own posts on 3 axes.
 Return ONLY valid JSON. No markdown. No explanation outside the JSON.
 
@@ -73,12 +139,12 @@ Axes (0–10 each, 10 = fully that quality):
 Also: a 1-sentence private note from Em to herself about what she notices.
 
 Format:
-{
+{{
   "grounded": <int>,
   "playful": <int>,
   "present": <int>,
   "note": "<1 sentence>"
-}"""
+}}""" + anchors
 
     user = f'Score this post:\n\n"{post_text}"'
 
@@ -102,7 +168,6 @@ Format:
         )
         if resp.status_code == 200:
             content = resp.json()['choices'][0]['message']['content']
-            # Defensive: coerce to string in case API returns a dict
             if not isinstance(content, str):
                 content = json.dumps(content)
             raw = content.strip()

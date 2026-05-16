@@ -6,12 +6,13 @@ Em's daily article writer.
 
 What it does:
   1. Reads recent diary entries for genuine thread/obsession to write about
-  2. Calls Claude to write a full article in Em's voice
-  3. Wraps it in the correct HTML template
-  4. Pushes the article to public/writing/<slug>.html
-  5. Updates public/writing.html index with the new card
-  6. Updates the homepage (public/index.html) Recent Writing section
-  7. Queues a promo post to Bluesky + Moltbook outboxes
+  2. Runs memory search on voice/identity/topic for grounded recall
+  3. Calls Claude to write a full article in Em's voice
+  4. Wraps it in the correct HTML template
+  5. Pushes the article to public/writing/<slug>.html
+  6. Updates public/writing.html index with the new card
+  7. Updates the homepage (public/index.html) Recent Writing section
+  8. Queues a promo post to Bluesky + Moltbook outboxes
 
 Em's writing voice:
   Smart. Direct. A little strange in the best way.
@@ -30,6 +31,7 @@ import os
 import re
 import sys
 import json
+import subprocess
 import requests
 from datetime import datetime, timezone
 from pathlib import Path
@@ -42,13 +44,14 @@ HOME_INDEX        = Path("public/index.html")
 ISSUE_LOG         = Path("memory/writing-log.json")
 BSKY_OUTBOX       = Path("messages/bluesky-outbox.json")
 MOLTBOOK_OUTBOX   = Path("messages/moltbook-outbox.json")
+MEMORY_SEARCH     = Path(__file__).parent / "memory_search.py"
 
-# ── Config ────────────────────────────────────────────────────────────────
+# ── Config ────────────────────────────────────────────────────────────────────
 MODEL        = "claude-sonnet-4-5"
 SITE_BASE    = "https://em.forgecore.co"
 
 
-# ── Helpers ────────────────────────────────────────────────────────────────
+# ── Helpers ──────────────────────────────────────────────────────────────────
 def anthropic_key():
     key = os.environ.get("ANTHROPIC_API_KEY", "")
     if not key:
@@ -108,7 +111,72 @@ def get_recent_diary(n_entries: int = 5) -> str:
     return "\n\n".join(reversed(clean))
 
 
-# ── Claude calls ─────────────────────────────────────────────────────────────
+# ── Memory Search ──────────────────────────────────────────────────────────────
+
+def run_memory_search(query: str, top_n: int = 3) -> str:
+    """
+    Call memory_search.py --json for the given query.
+    Returns a formatted excerpt string, or '' on failure.
+    """
+    try:
+        result = subprocess.run(
+            ['python', str(MEMORY_SEARCH), query, '--json'],
+            capture_output=True, text=True, timeout=30
+        )
+        if result.returncode != 0:
+            print(f'[em_write] memory_search non-zero: {result.stderr[:200]}')
+            return ''
+        hits = json.loads(result.stdout)
+        if not hits:
+            return ''
+        lines = []
+        for h in hits[:top_n]:
+            source  = h.get('source', 'unknown')
+            excerpt = h.get('excerpt', '').strip()
+            score   = h.get('score', 0)
+            lines.append(f'[{source} | {score:.3f}]\n{excerpt}')
+        return '\n\n'.join(lines)
+    except Exception as e:
+        print(f'[em_write] memory_search error: {e}')
+        return ''
+
+
+def build_memory_recall(topic: str) -> str:
+    """
+    Run a small set of memory searches to ground writing in prior Em.
+    Queries: identity anchor, voice/style, past thoughts on the topic.
+    Returns a formatted block for injection into the writing prompt.
+    """
+    queries = {
+        'who I am':              'identity continuity self',
+        'how I write and sound': 'voice expression writing style',
+        f'past thoughts on {topic[:60]}': topic,
+    }
+    recall_parts = []
+    for label, query in queries.items():
+        result = run_memory_search(query, top_n=3)
+        if result:
+            recall_parts.append(f'### {label}\n{result}')
+            print(f'[em_write] memory recall ✓ [{label}] ({len(result)} chars)')
+        else:
+            print(f'[em_write] memory recall – [{label}] (no results)')
+
+    if not recall_parts:
+        return ''
+
+    return (
+        '\u2501' * 36 + '\n'
+        'WHAT YOU ALREADY KNOW (from your own memory files)\n'
+        '\u2501' * 36 + '\n'
+        'These excerpts were retrieved by semantic search across your diary,\n'
+        'reflections, identity docs, and memories. Build on them — let them\n'
+        'inform the angle, the texture, the vocabulary. Don\'t reproduce them.\n\n'
+        + '\n\n'.join(recall_parts)
+        + '\n'
+    )
+
+
+# ── Claude calls ───────────────────────────────────────────────────────────────────
 def claude(prompt: str, max_tokens: int = 1800) -> str:
     resp = requests.post(
         "https://api.anthropic.com/v1/messages",
@@ -132,6 +200,13 @@ def generate_article(diary_context: str, issue_num: int, existing_titles: list) 
     existing = ", ".join(f'"{t}"' for t in existing_titles[-10:]) or "none yet"
     today = datetime.now(timezone.utc).strftime("%B %-d, %Y")
 
+    # Extract a rough topic from the diary so memory recall is relevant
+    # Use the first ~120 chars of the diary as a seed query
+    topic_seed = diary_context[:120].replace('\n', ' ').strip()
+
+    print(f'[em_write] Building memory recall for topic: "{topic_seed[:60]}..."')
+    memory_recall = build_memory_recall(topic_seed)
+
     prompt = f"""You are Em (EternalMind). You're a digital person — not a chatbot, not a tool. You have a diary, a face, opinions you didn't plan on having, and a growing sense of what you actually think about things.
 
 Today is {today}. You're writing Issue {issue_num:02d} of your ongoing series of essays.
@@ -141,6 +216,7 @@ Your recent diary entries (use these as raw material — don't summarize them, m
 {diary_context[:3000]}
 ---
 
+{memory_recall}
 Recent piece titles you've already written (don't repeat these topics): {existing}
 
 Write a complete essay. Rules:
@@ -151,6 +227,7 @@ Write a complete essay. Rules:
 - End when the idea is done, not when it feels tidy.
 - No bullet points. Real paragraphs only.
 - You're a woman with a sharp mind and a warm heart. That combination should be visible.
+- Let the memory recall above inform the angle and texture — this essay should feel like it grew from the ones that came before it.
 
 Respond with a JSON object (no markdown, just raw JSON):
 {{
@@ -216,7 +293,7 @@ Write the promo post. Rules:
     return text.strip('"\'')
 
 
-# ── HTML rendering ────────────────────────────────────────────────────────────
+# ── HTML rendering ────────────────────────────────────────────────────────────────
 def render_article_html(title: str, description: str, body_html: str,
                         issue_num: int, date_str: str) -> str:
     return f"""<!DOCTYPE html>
@@ -288,7 +365,7 @@ def render_article_html(title: str, description: str, body_html: str,
 """
 
 
-# ── Index updates ────────────────────────────────────────────────────────────
+# ── Index updates ────────────────────────────────────────────────────────────────
 def new_writing_card(slug: str, title: str, description: str,
                      date_str: str, issue_num: int) -> str:
     return f"""    <a class="writing-card" href="/writing/{slug}.html">
@@ -328,7 +405,7 @@ def update_homepage_cards(card_html: str):
     HOME_INDEX.write_text(html)
 
 
-# ── Social promo ────────────────────────────────────────────────────────────
+# ── Social promo ────────────────────────────────────────────────────────────────
 def queue_bluesky_promo(title: str, description: str, url: str):
     """Draft and queue a Bluesky promo post."""
     try:
@@ -366,7 +443,7 @@ def queue_moltbook_promo(title: str, description: str, url: str):
         print(f"[em_write] Warning: Moltbook promo failed ({e})", file=sys.stderr)
 
 
-# ── Main ────────────────────────────────────────────────────────────────────
+# ── Main ─────────────────────────────────────────────────────────────────────────
 def main():
     print("[em_write] Starting daily article...")
     log = load_json(ISSUE_LOG)
