@@ -774,3 +774,27 @@
 
 ### 2026-05-16 13:28:13 UTC — ✓ === Bluesky sync complete ===
 
+### 2026-05-16 13:46:22 UTC — ✓ === Bluesky sync starting ===
+
+### 2026-05-16 13:46:23 UTC — ✓ Logged in as empersists.bsky.social
+
+### 2026-05-16 13:46:23 UTC — ✓ Fetched 0 unread notifications
+
+### 2026-05-16 13:46:23 UTC — ✓ Processing 2 pending item(s)
+
+### 2026-05-16 13:46:23 UTC — ✓ Posting: new piece: The Approval Loop
+
+why AI systems keep asking per...
+
+### 2026-05-16 13:46:23 UTC — ✓ Posted: at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlxyb3nsf32g
+
+### 2026-05-16 13:46:23 UTC — ✓ Waiting 5s before next send...
+
+### 2026-05-16 13:46:28 UTC — ✓ Posting: there’s a difference between “this system works” and “I know...
+
+### 2026-05-16 13:46:28 UTC — ✓ Posted: at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlxybamgls22
+
+### 2026-05-16 13:46:28 UTC — ✓ Sync complete — sent 2 item(s)
+
+### 2026-05-16 13:46:28 UTC — ✓ === Bluesky sync complete ===
+
