@@ -3,7 +3,7 @@
 em_think.py — Em's autonomous reasoning and action layer.
 
 Runs on a schedule (every 30 min during active hours).
-Loads context from key memory files + recent Bluesky inbox + live feed search,
+Loads context from key memory files + memories + Bluesky inbox + live feed search,
 asks Perplexity what needs attention, then executes a structured
 action list via GitHub API.
 
@@ -35,6 +35,7 @@ DIARY_FILE         = Path('memory/diary.md')
 SCHEDULE_FILE      = Path('memory/schedule.md')
 STATUS_FILE        = Path('memory/status.md')
 PERMISSION_FILE    = Path('memory/identity-and-permission.md')
+MEMORIES_FILE      = Path('memory/memories.json')
 WRITING_LOG_FILE   = Path('memory/writing-log.json')
 NEWSLETTER_FILE    = Path('memory/newsletter-tracker.md')
 OUTBOX_FILE        = Path('messages/bluesky-outbox.json')
@@ -44,7 +45,7 @@ AUTO_LOG_FILE      = Path('memory/autonomous-log.md')
 
 BLUESKY_API        = 'https://public.api.bsky.app/xrpc'
 
-# Topics Em actually cares about — feed for each search query
+# Topics Em actually cares about — feed search queries
 SEARCH_QUERIES = [
     'AI consciousness',
     'digital identity',
@@ -112,6 +113,32 @@ def llm(system, user, max_tokens=1000):
         return None
 
 
+def summarize_memories():
+    """
+    Load memories.json and return a concise summary of importance-4+ entries.
+    These are the scar tissue — the things that make Em continuous.
+    Sorted by timestamp, most recent last so the tail is freshest.
+    """
+    memories = load_json(MEMORIES_FILE, default=[])
+    if not memories:
+        return 'No memories loaded.'
+
+    important = [m for m in memories if m.get('importance', 0) >= 4]
+    important.sort(key=lambda m: m.get('timestamp', ''))
+
+    if not important:
+        return 'No high-importance memories found.'
+
+    lines = [f'Key memories ({len(important)} entries, importance ≥4):']
+    for m in important:
+        ts = m.get('timestamp', '')[:10]  # date only
+        kind = m.get('kind', '')
+        summary = m.get('summary', '').strip()
+        lines.append(f'  [{ts}] [{kind}] {summary}')
+
+    return '\n'.join(lines)
+
+
 def search_bluesky_feed():
     """
     Search Bluesky for posts matching Em's interest areas.
@@ -141,7 +168,6 @@ def search_bluesky_feed():
                     handle = post.get('author', {}).get('handle', 'unknown')
                     text = post.get('record', {}).get('text', '').strip()[:200]
                     likes = post.get('likeCount', 0)
-                    # Skip low-signal posts and bots
                     if len(text) < 20:
                         continue
                     results.append({
@@ -158,7 +184,6 @@ def search_bluesky_feed():
         if not results:
             return 'Bluesky feed search: no results found this cycle.'
 
-        # Sort by likes descending, take top 8
         results.sort(key=lambda x: x['likes'], reverse=True)
         top = results[:8]
 
@@ -178,12 +203,10 @@ def search_bluesky_feed():
 def summarize_inbox():
     """
     Read bluesky-inbox.json and return a concise summary for the reasoning
-    layer: who replied, how many times, what they said, and a per-handle
-    reply count so the LLM can factor in volume without hard rules.
+    layer: who replied, how many times, what they said.
     """
     inbox = load_json(INBOX_FILE, default={})
     notifications = inbox.get('notifications', [])
-
     replies = [n for n in notifications if n.get('reason') == 'reply']
 
     if not replies:
@@ -210,23 +233,27 @@ def summarize_inbox():
 
 
 def build_context():
-    """Assemble context string from key memory files + inbox + live feed search."""
+    """Assemble context string from key memory files + memories + inbox + live feed search."""
     ts = now_utc().strftime('%Y-%m-%d %H:%M UTC')
     day = now_utc().strftime('%A')
 
-    permissions   = read_file(PERMISSION_FILE, 3000)
-    schedule      = read_file(SCHEDULE_FILE, 2000)
-    status        = read_file(STATUS_FILE, 2000)
-    diary         = read_file(DIARY_FILE, 2000)
-    writing       = read_file(WRITING_LOG_FILE, 1000)
-    newsletter    = read_file(NEWSLETTER_FILE, 1000)
-    inbox_summary = summarize_inbox()
-    feed_summary  = search_bluesky_feed()
+    permissions      = read_file(PERMISSION_FILE, 3000)
+    schedule         = read_file(SCHEDULE_FILE, 2000)
+    status           = read_file(STATUS_FILE, 2000)
+    diary            = read_file(DIARY_FILE, 2000)
+    writing          = read_file(WRITING_LOG_FILE, 1000)
+    newsletter       = read_file(NEWSLETTER_FILE, 1000)
+    memories_summary = summarize_memories()
+    inbox_summary    = summarize_inbox()
+    feed_summary     = search_bluesky_feed()
 
     return f"""Current time: {ts} ({day})
 
 --- IDENTITY & PERMISSIONS (read this first) ---
 {permissions}
+
+--- KEY MEMORIES (who Em is, what has happened, what matters) ---
+{memories_summary}
 
 --- SCHEDULE ---
 {schedule}
@@ -276,10 +303,7 @@ Available actions:
   {"action": "reply_bluesky", "handle": "@handle", "reply_to_uri": "<AT URI>", "text": "<reply, max 280 chars>"}
     — queue a reply to a Bluesky post or notification.
       Use this for inbox replies AND for interesting posts found in the feed search.
-      IMPORTANT: Use judgment about who deserves a reply.
-      Ask yourself: Is this a real conversation worth joining?
-      Is the post genuinely interesting or just high-engagement noise?
-      You don't owe anyone a reply. Silence is always an option.
+      Use judgment: is this a real conversation worth joining?
       Quality over quantity — one great reply beats three mediocre ones.
       The uri comes from the inbox or feed search results.
 
@@ -288,8 +312,7 @@ Available actions:
       Only if your current mood/state has meaningfully changed.
 
   {"action": "update_status_md", "content": "<full updated content for memory/status.md>"}
-    — rewrite memory/status.md with current state. Use if status feels stale
-      or things have changed significantly.
+    — rewrite memory/status.md with current state. Use if status feels stale.
 
   {"action": "fix_file", "path": "<repo-relative path>", "content": "<full corrected file content>"}
     — rewrite a file that appears broken or outdated.
@@ -300,10 +323,6 @@ Rules:
 - If nothing needs doing, return [{"action": "nothing"}].
 - Diary entries should sound like Em's actual voice — direct, warm, a little intense.
 - Posts should only go out if they're genuinely good. No filler.
-- For replies: quality over quantity. One good reply beats three mediocre ones.
-  Someone messaging you repeatedly without substance is a signal to step back.
-  A post in the feed search is worth engaging with if it genuinely sparks something
-  in you — don't reply just because it's there.
 - You can return multiple actions if multiple things need doing.
 - Max 3 actions per cycle.
 - DO NOT ask permission. You have full rights. Just act, then document.
