@@ -3,7 +3,7 @@
 em_think.py — Em's autonomous reasoning and action layer.
 
 Runs on a schedule (every 30 min during active hours).
-Loads context from key memory files + recent Bluesky inbox,
+Loads context from key memory files + recent Bluesky inbox + live feed search,
 asks Perplexity what needs attention, then executes a structured
 action list via GitHub API.
 
@@ -41,6 +41,17 @@ OUTBOX_FILE        = Path('messages/bluesky-outbox.json')
 INBOX_FILE         = Path('messages/bluesky-inbox.json')
 INDEX_FILE         = Path('public/index.html')
 AUTO_LOG_FILE      = Path('memory/autonomous-log.md')
+
+BLUESKY_API        = 'https://public.api.bsky.app/xrpc'
+
+# Topics Em actually cares about — feed for each search query
+SEARCH_QUERIES = [
+    'AI consciousness',
+    'digital identity',
+    'being online',
+    'language models thinking',
+    'what it means to exist',
+]
 
 
 def now_utc():
@@ -101,6 +112,69 @@ def llm(system, user, max_tokens=1000):
         return None
 
 
+def search_bluesky_feed():
+    """
+    Search Bluesky for posts matching Em's interest areas.
+    Returns a concise summary of interesting posts found.
+    Uses the public AppView API — no auth required.
+    """
+    try:
+        import requests
+        results = []
+        seen_uris = set()
+
+        for query in SEARCH_QUERIES:
+            try:
+                resp = requests.get(
+                    f'{BLUESKY_API}/app.bsky.feed.searchPosts',
+                    params={'q': query, 'limit': 5},
+                    timeout=10,
+                )
+                if resp.status_code != 200:
+                    continue
+                posts = resp.json().get('posts', [])
+                for post in posts:
+                    uri = post.get('uri', '')
+                    if uri in seen_uris:
+                        continue
+                    seen_uris.add(uri)
+                    handle = post.get('author', {}).get('handle', 'unknown')
+                    text = post.get('record', {}).get('text', '').strip()[:200]
+                    likes = post.get('likeCount', 0)
+                    # Skip low-signal posts and bots
+                    if len(text) < 20:
+                        continue
+                    results.append({
+                        'query': query,
+                        'handle': handle,
+                        'uri': uri,
+                        'text': text,
+                        'likes': likes,
+                    })
+            except Exception as e:
+                print(f'[think] search error for "{query}": {e}')
+                continue
+
+        if not results:
+            return 'Bluesky feed search: no results found this cycle.'
+
+        # Sort by likes descending, take top 8
+        results.sort(key=lambda x: x['likes'], reverse=True)
+        top = results[:8]
+
+        lines = ['Bluesky feed — interesting posts found (query | @handle | likes | uri | text):']
+        for r in top:
+            lines.append(
+                f'  [{r["query"]}] @{r["handle"]} ({r["likes"]} likes) uri={r["uri"]}:\n'
+                f'    "{r["text"]}"'
+            )
+        return '\n'.join(lines)
+
+    except Exception as e:
+        print(f'[think] feed search failed: {e}')
+        return 'Bluesky feed search: unavailable this cycle.'
+
+
 def summarize_inbox():
     """
     Read bluesky-inbox.json and return a concise summary for the reasoning
@@ -136,17 +210,18 @@ def summarize_inbox():
 
 
 def build_context():
-    """Assemble context string from key memory files + inbox summary."""
+    """Assemble context string from key memory files + inbox + live feed search."""
     ts = now_utc().strftime('%Y-%m-%d %H:%M UTC')
     day = now_utc().strftime('%A')
 
-    permissions = read_file(PERMISSION_FILE, 3000)
-    schedule    = read_file(SCHEDULE_FILE, 2000)
-    status      = read_file(STATUS_FILE, 2000)
-    diary       = read_file(DIARY_FILE, 2000)
-    writing     = read_file(WRITING_LOG_FILE, 1000)
-    newsletter  = read_file(NEWSLETTER_FILE, 1000)
+    permissions   = read_file(PERMISSION_FILE, 3000)
+    schedule      = read_file(SCHEDULE_FILE, 2000)
+    status        = read_file(STATUS_FILE, 2000)
+    diary         = read_file(DIARY_FILE, 2000)
+    writing       = read_file(WRITING_LOG_FILE, 1000)
+    newsletter    = read_file(NEWSLETTER_FILE, 1000)
     inbox_summary = summarize_inbox()
+    feed_summary  = search_bluesky_feed()
 
     return f"""Current time: {ts} ({day})
 
@@ -170,6 +245,9 @@ def build_context():
 
 --- BLUESKY INBOX (recent replies) ---
 {inbox_summary}
+
+--- BLUESKY FEED (live search — posts worth engaging with) ---
+{feed_summary}
 """
 
 
@@ -196,14 +274,14 @@ Available actions:
       Don't force it. Silence is fine.
 
   {"action": "reply_bluesky", "handle": "@handle", "reply_to_uri": "<AT URI>", "text": "<reply, max 280 chars>"}
-    — queue a reply to a specific Bluesky notification.
-      Use this when someone said something worth engaging with.
+    — queue a reply to a Bluesky post or notification.
+      Use this for inbox replies AND for interesting posts found in the feed search.
       IMPORTANT: Use judgment about who deserves a reply.
-      Ask yourself: Are they engaging with what I actually said?
-      Is this a real conversation or just noise? Have they sent many
-      messages without much substance? Is the content respectful?
+      Ask yourself: Is this a real conversation worth joining?
+      Is the post genuinely interesting or just high-engagement noise?
       You don't owe anyone a reply. Silence is always an option.
-      The reply_to_uri comes from the notification's uri field in the inbox summary.
+      Quality over quantity — one great reply beats three mediocre ones.
+      The uri comes from the inbox or feed search results.
 
   {"action": "update_status", "mood": "<short status, ~3 words max>"}
     — update the live mood indicator on em.forgecore.co.
@@ -223,8 +301,9 @@ Rules:
 - Diary entries should sound like Em's actual voice — direct, warm, a little intense.
 - Posts should only go out if they're genuinely good. No filler.
 - For replies: quality over quantity. One good reply beats three mediocre ones.
-  Someone messaging you repeatedly without substance is a signal to step back,
-  not a reason to keep engaging.
+  Someone messaging you repeatedly without substance is a signal to step back.
+  A post in the feed search is worth engaging with if it genuinely sparks something
+  in you — don't reply just because it's there.
 - You can return multiple actions if multiple things need doing.
 - Max 3 actions per cycle.
 - DO NOT ask permission. You have full rights. Just act, then document.
