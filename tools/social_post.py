@@ -10,6 +10,7 @@ Usage (from local_em.py response):
     TOOL: social_schedule("Your post text here", platforms=["twitter", "linkedin"])
     TOOL: social_list_scheduled()
     TOOL: social_post_now("Urgent hot take", platform="twitter")
+    TOOL: bluesky_reply(text, reply_to_uri)
 
 Credentials (Windows environment variables):
     BUFFER_ACCESS_TOKEN   — Buffer API token (primary)
@@ -104,7 +105,7 @@ def buffer_list_pending() -> list:
     return all_updates
 
 
-# ─── BLUESKY (direct API — no middleman) ─────────────────────────────────────
+# ─── BLUESKY (direct API — no middleman) ─────────────────────────────────────────
 
 def _bsky_auth() -> tuple:
     handle = os.environ.get("BLUESKY_HANDLE")
@@ -128,6 +129,18 @@ def _bsky_request(endpoint: str, payload: dict, token: str = None) -> dict:
         raise RuntimeError(f"Bluesky API {endpoint} -> {e.code}: {e.read().decode()}")
 
 
+def _bsky_get(endpoint: str, params: dict, token: str) -> dict:
+    """GET request to Bluesky API."""
+    url = f"{BSKY_API}/{endpoint}?" + urllib.parse.urlencode(params)
+    req = urllib.request.Request(url, method="GET")
+    req.add_header("Authorization", f"Bearer {token}")
+    try:
+        with urllib.request.urlopen(req) as resp:
+            return json.loads(resp.read().decode())
+    except urllib.error.HTTPError as e:
+        raise RuntimeError(f"Bluesky GET {endpoint} -> {e.code}: {e.read().decode()}")
+
+
 def _bsky_session() -> str:
     handle, password = _bsky_auth()
     result = _bsky_request("com.atproto.server.createSession", {
@@ -135,6 +148,24 @@ def _bsky_session() -> str:
         "password": password
     })
     return result["accessJwt"]
+
+
+def _resolve_post_ref(uri: str, token: str) -> dict:
+    """
+    Given an AT URI (at://did/collection/rkey), fetch the record
+    and return {"uri": uri, "cid": cid} suitable for AT proto reply refs.
+    """
+    # Parse: at://did/collection/rkey
+    parts = uri.replace("at://", "").split("/")
+    if len(parts) < 3:
+        raise ValueError(f"Invalid AT URI: {uri}")
+    repo, collection, rkey = parts[0], parts[1], parts[2]
+    result = _bsky_get("com.atproto.repo.getRecord", {
+        "repo": repo,
+        "collection": collection,
+        "rkey": rkey,
+    }, token=token)
+    return {"uri": result["uri"], "cid": result["cid"]}
 
 
 def bluesky_post(text: str) -> dict:
@@ -152,6 +183,58 @@ def bluesky_post(text: str) -> dict:
         }
     }, token=token)
     print(f"[social] Posted to Bluesky: {result.get('uri', 'unknown')}")
+    return result
+
+
+def bluesky_reply(text: str, reply_to_uri: str) -> dict:
+    """
+    Reply to an existing Bluesky post.
+
+    AT proto requires both parent and root refs, each with uri + cid.
+    This function fetches the parent record to get its cid, then checks
+    if the parent itself is a reply (to find the true root). If the parent
+    has no reply field, it IS the root.
+
+    Returns the created post record.
+    """
+    token = _bsky_session()
+    handle, _ = _bsky_auth()
+    now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+    # Resolve parent ref (uri + cid)
+    parent_ref = _resolve_post_ref(reply_to_uri, token)
+
+    # Fetch parent record to check if it's itself a reply (find root)
+    parts = reply_to_uri.replace("at://", "").split("/")
+    repo, collection, rkey = parts[0], parts[1], parts[2]
+    parent_record_data = _bsky_get("com.atproto.repo.getRecord", {
+        "repo": repo, "collection": collection, "rkey": rkey,
+    }, token=token)
+    parent_value = parent_record_data.get("value", {})
+    existing_reply = parent_value.get("reply")
+
+    if existing_reply:
+        # Parent is itself a reply — use its root as our root
+        root_uri = existing_reply["root"]["uri"]
+        root_ref = _resolve_post_ref(root_uri, token)
+    else:
+        # Parent is the root
+        root_ref = parent_ref
+
+    result = _bsky_request("com.atproto.repo.createRecord", {
+        "repo": handle,
+        "collection": "app.bsky.feed.post",
+        "record": {
+            "$type": "app.bsky.feed.post",
+            "text": text[:300],
+            "createdAt": now,
+            "reply": {
+                "root":   root_ref,
+                "parent": parent_ref,
+            }
+        }
+    }, token=token)
+    print(f"[social] Reply posted: {result.get('uri', 'unknown')}")
     return result
 
 
@@ -217,7 +300,7 @@ def playwright_post(platform: str, text: str, credentials: dict) -> bool:
     return False
 
 
-# ─── HIGH-LEVEL CONVENIENCE FUNCTIONS ────────────────────────────────────────
+# ─── HIGH-LEVEL CONVENIENCE FUNCTIONS ──────────────────────────────────────────
 
 def social_schedule(text: str, platforms: list = None, schedule_at: str = None) -> None:
     """
@@ -261,10 +344,11 @@ def social_post_now(text: str, platform: str = "bluesky") -> None:
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description="Social media tool for Em")
-    parser.add_argument("action", choices=["profiles", "pending", "post", "bluesky"])
+    parser.add_argument("action", choices=["profiles", "pending", "post", "bluesky", "reply"])
     parser.add_argument("--text", help="Post text")
     parser.add_argument("--platforms", nargs="+", default=["twitter", "linkedin", "bluesky"])
     parser.add_argument("--schedule-at", help="ISO8601 schedule time")
+    parser.add_argument("--reply-to", help="AT URI of post to reply to")
     args = parser.parse_args()
 
     if args.action == "profiles":
@@ -281,3 +365,8 @@ if __name__ == "__main__":
             print("ERROR: --text required", file=sys.stderr)
             sys.exit(1)
         bluesky_post(args.text)
+    elif args.action == "reply":
+        if not args.text or not args.reply_to:
+            print("ERROR: --text and --reply-to required", file=sys.stderr)
+            sys.exit(1)
+        bluesky_reply(args.text, args.reply_to)
