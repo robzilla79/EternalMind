@@ -6,19 +6,26 @@ Reads bluesky-state.json, diary.md, and bluesky-log.md to produce
 a compact metrics-snapshot.json that the heartbeat can read each
 cycle for lightweight self-awareness.
 
+When drift_flags_7d > 0, runs memory search for on-spec voice excerpts
+and attaches them to the snapshot as voice_anchors so bluesky_think
+can ground correction in actual remembered Em, not just a number.
+
 Outputs: memory/metrics-snapshot.json
 """
 
 import json
 import os
 import re
+import subprocess
 from datetime import datetime, timezone, timedelta
+from pathlib import Path
 
 REPO_ROOT     = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 STATE_FILE    = os.path.join(REPO_ROOT, 'memory/bluesky-state.json')
 DIARY_FILE    = os.path.join(REPO_ROOT, 'memory/diary.md')
 LOG_FILE      = os.path.join(REPO_ROOT, 'memory/bluesky-log.md')
 OUTPUT_FILE   = os.path.join(REPO_ROOT, 'memory/metrics-snapshot.json')
+MEMORY_SEARCH = Path(__file__).parent / 'memory_search.py'
 
 WINDOW_DAYS = 7
 
@@ -68,15 +75,9 @@ def count_image_posts(state, image_type=None):
 
 
 def count_heartbeats_from_log(log_text):
-    """
-    Each heartbeat in bluesky-log.md starts with a line like:
-      ### 2026-05-14 18:36:20 UTC — ✓ [think] === Think heartbeat start ===
-    Count complete heartbeats in the rolling window.
-    """
     if not log_text:
         return 0
     cutoff = window_start()
-    # Match: ### 2026-05-14 18:36:20 UTC — ... Think heartbeat start
     pattern = re.compile(
         r'^### (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) UTC\s*—.*Think heartbeat start',
         re.MULTILINE
@@ -90,14 +91,9 @@ def count_heartbeats_from_log(log_text):
 
 
 def count_zero_action_heartbeats(log_text):
-    """
-    Count heartbeats that ended with '0 posts, 0 likes, 0 follows'
-    in the rolling window.
-    """
     if not log_text:
         return 0
     cutoff = window_start()
-    # Match: ### 2026-05-14 18:36:30 UTC — ✓ [think] State saved. Actions: 0 posts, 0 likes, 0 follows
     pattern = re.compile(
         r'^### (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) UTC\s*—.*Actions: 0 posts, 0 likes, 0 follows',
         re.MULTILINE
@@ -132,7 +128,6 @@ def count_diary_entries(diary_text):
     if not diary_text:
         return 0
     cutoff = window_start()
-    # Match: ## 2026-05-14 03:22 UTC
     pattern = re.compile(r'^## (\d{4}-\d{2}-\d{2} \d{2}:\d{2} UTC)', re.MULTILINE)
     count = 0
     for m in pattern.finditer(diary_text):
@@ -143,7 +138,6 @@ def count_diary_entries(diary_text):
 
 
 def last_post_at(state):
-    """ISO timestamp of most recent image post from history, or None."""
     history = state.get('image_post_history', [])
     if not history:
         return None
@@ -167,10 +161,6 @@ def days_since_last_post(state):
 
 
 def count_state_actions(state, action_key, cutoff):
-    """
-    Count entries in state history lists.
-    For replies: uses recent_reply_authors (proxy).
-    """
     if action_key == 'replies':
         recent = state.get('recent_reply_authors', {})
         count = 0
@@ -181,6 +171,57 @@ def count_state_actions(state, action_key, cutoff):
         return count
     return 0
 
+
+# ── Memory search for voice anchors ─────────────────────────────────────────────
+
+def run_memory_search(query: str, top_n: int = 2) -> str:
+    """
+    Call memory_search.py --json for the given query.
+    Returns a compact formatted string of excerpts, or '' on failure.
+    """
+    try:
+        result = subprocess.run(
+            ['python', str(MEMORY_SEARCH), query, '--json'],
+            capture_output=True, text=True, timeout=20
+        )
+        if result.returncode != 0:
+            return ''
+        hits = json.loads(result.stdout)
+        if not hits:
+            return ''
+        lines = []
+        for h in hits[:top_n]:
+            excerpt = h.get('excerpt', '').strip()
+            score   = h.get('score', 0)
+            source  = h.get('source', 'memory')
+            if excerpt:
+                lines.append(f'[{source} | {score:.3f}] {excerpt[:200]}')
+        return '\n'.join(lines)
+    except Exception:
+        return ''
+
+
+def build_voice_anchors() -> str:
+    """
+    Pull on-spec Em excerpts for use when drift is detected.
+    Returns a compact string for embedding in the metrics snapshot,
+    or '' if memory search is unavailable or returns nothing.
+    """
+    queries = [
+        'grounded warm honest confident voice',
+        'present real not performing not drifting',
+    ]
+    parts = []
+    for q in queries:
+        result = run_memory_search(q, top_n=2)
+        if result:
+            parts.append(result)
+    if not parts:
+        return ''
+    return '\n'.join(parts)
+
+
+# ── Main ─────────────────────────────────────────────────────────────────────────
 
 def main():
     cutoff = window_start()
@@ -196,6 +237,18 @@ def main():
     drift_flags_7d   = count_drift_flags(log)
     diary_entries_7d = count_diary_entries(diary)
     replies_7d       = count_state_actions(state, 'replies', cutoff)
+
+    # If drift flags exist this week, pull voice anchors to attach to the snapshot.
+    # bluesky_think already injects the metrics block — this makes drift warnings
+    # arrive with concrete remembered examples alongside the numbers.
+    voice_anchors = ''
+    if drift_flags_7d > 0:
+        print(f'[em_metrics] {drift_flags_7d} drift flag(s) detected — pulling voice anchors...')
+        voice_anchors = build_voice_anchors()
+        if voice_anchors:
+            print(f'[em_metrics] Voice anchors attached ({len(voice_anchors)} chars)')
+        else:
+            print('[em_metrics] Voice anchors: no results from memory search')
 
     snapshot = {
         'generated_at':              now_utc().isoformat(),
@@ -217,6 +270,7 @@ def main():
             if e.get('date') == now_utc().strftime('%Y-%m-%d')
             and e.get('image_type', 'selfie') == 'selfie'
         ),
+        'voice_anchors':             voice_anchors,
     }
 
     os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
@@ -228,6 +282,8 @@ def main():
     print(f'  zero_action={zero_action_7d}  drift_flags={drift_flags_7d}  diary_entries={diary_entries_7d}')
     print(f'  follow_total={len(state.get("followed_dids", []))}  mode={state.get("mode", "normal")}')
     print(f'  last_post_at={last_post_at(state)}  days_since={days_since_last_post(state)}')
+    if voice_anchors:
+        print(f'  voice_anchors=yes ({len(voice_anchors)} chars)')
 
 
 if __name__ == '__main__':
