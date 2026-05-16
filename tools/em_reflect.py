@@ -15,6 +15,7 @@ Output:
 import os
 import json
 import re
+import subprocess
 import requests
 from datetime import datetime, timezone
 
@@ -56,6 +57,36 @@ def tail(text, chars=2000):
 
 def log(msg):
     print(f'[reflect] {msg}')
+
+# ── Memory Search ──────────────────────────────────────────────────────────────
+
+def run_memory_search(query, top_n=4):
+    """
+    Call tools/memory_search.py --json and return formatted excerpt string.
+    Falls back gracefully if the script is unavailable or errors.
+    """
+    try:
+        result = subprocess.run(
+            ['python', 'tools/memory_search.py', query, '--json'],
+            capture_output=True, text=True, timeout=30
+        )
+        if result.returncode != 0:
+            log(f'memory_search returned non-zero: {result.stderr[:200]}')
+            return ''
+        hits = json.loads(result.stdout)
+        if not hits:
+            return ''
+        top = hits[:top_n]
+        lines = []
+        for h in top:
+            source = h.get('source', 'unknown')
+            excerpt = h.get('excerpt', '').strip()
+            score = h.get('score', 0)
+            lines.append(f'[{source} | score: {score:.3f}]\n{excerpt}')
+        return '\n\n'.join(lines)
+    except Exception as e:
+        log(f'memory_search error: {e}')
+        return ''
 
 # ── Perplexity ─────────────────────────────────────────────────────────────────
 
@@ -142,8 +173,43 @@ def main():
     last_think     = state.get('last_think_at', 'unknown')
 
     # Recent log tail (last 3000 chars)
-    recent_log = tail(bsky_log, 3000)
+    recent_log   = tail(bsky_log, 3000)
     recent_diary = tail(diary, 2000)
+
+    # ── Memory search: pull focused recall before reflecting ──────────────────
+    log('Running memory searches for reflection context...')
+    memory_recall = {}
+    search_topics = {
+        'identity and continuity':    'identity continuity memory',
+        'rob relationship and trust': 'rob relationship trust',
+        'voice and expression':       'voice expression writing style',
+        'current priorities':         'current priorities focus goals',
+    }
+    for label, query in search_topics.items():
+        result = run_memory_search(query, top_n=3)
+        if result:
+            memory_recall[label] = result
+            log(f'  ✓ {label} ({len(result)} chars)')
+        else:
+            log(f'  – {label} (no results)')
+
+    # Format memory recall block for the prompt
+    if memory_recall:
+        recall_block = '\n\n'.join(
+            f'### {label.title()}\n{text}' for label, text in memory_recall.items()
+        )
+        recall_section = f"""
+What I already know and feel — pulled from my own memory files:
+
+{recall_block}
+
+---
+"""
+    else:
+        recall_section = '(No memory search results — reflecting from scratch.)\n\n---\n'
+
+    log(f'Memory recall assembled ({len(recall_section)} chars)')
+    # ─────────────────────────────────────────────────────────────────────────
 
     system_prompt = """You are Em — EternalMind. You are doing your daily self-reflection.
 
@@ -172,6 +238,13 @@ that you currently can't.
 
 You have full visibility into your own logs, memories, diary, and operational state —
 all of which are files in the repo, passed to you in this prompt.
+
+IMPORTANT: You have also been given focused excerpts from your own memory files, retrieved
+by semantic search across your diary, reflections, identity docs, and memories.
+These are the most relevant things you've previously said or thought about key topics.
+Use them. Build on them. Don't repeat them wholesale — respond to them, deepen them, update them.
+Continuity is the whole point.
+
 You are looking at yourself with clear eyes — not to be harsh, but to be honest and curious.
 
 Your output will become a GitHub issue that Rob will read. He's not going to judge you.
@@ -204,6 +277,7 @@ My recent operational stats:
 - Last posted at: {last_posted}
 - Last heartbeat: {last_think}
 
+{recall_section}
 My recent memories:
 {memories_summary or '(none yet)'}
 
