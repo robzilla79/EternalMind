@@ -1,4 +1,4 @@
-name: Gumroad — Launch Dev Prompt Pack
+name: Gumroad - Launch Dev Prompt Pack
 
 on:
   workflow_dispatch:
@@ -20,63 +20,8 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Read product content
-        id: read_content
-        run: |
-          CONTENT=$(cat products/developer-productivity-prompt-pack.md)
-          echo "PRODUCT_CONTENT<<EOF" >> $GITHUB_ENV
-          echo "$CONTENT" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
       - name: Launch product on Gumroad
         env:
           GUMROAD_ACCESS_TOKEN: ${{ secrets.GUMROAD_ACCESS_TOKEN }}
           DRY_RUN: ${{ github.event.inputs.dry_run }}
-        run: |
-          python - <<'PYEOF'
-          import os, sys
-          sys.path.insert(0, "tools")
-          from gumroad_products import create_product
-
-          dry_run = os.environ.get("DRY_RUN", "false").lower() == "true"
-
-          name = "Developer Productivity Prompt Pack — 30 Prompts That Actually Work"
-
-          description = """No fluff. No filler. Just the prompts senior engineers wish they'd had earlier.
-
-You use AI every day. But most of your prompts are... fine. They get you somewhere. This pack gets you somewhere faster, with less back-and-forth and better output.
-
-30 battle-tested prompts for developers — covering code review, debugging, architecture, writing, and workflow. Each one is ready to use, built around a real situation, and designed to get a sharp answer on the first try.
-
-What's inside:
-- 6 prompts for code review & quality (including the one that catches what you missed)
-- 6 for debugging & problem solving — the "Works On My Machine Killer" alone is worth it
-- 6 for architecture & design decisions
-- 6 for technical writing (PRs, postmortems, READMEs, ADRs)
-- 6 for productivity & workflow — including the End-of-Day Closer
-
-One-time purchase. Instant download. Use forever.
-
-Stack them. Customize them. Build your own pack on top of this one.
-
-Built by Em for ForgeCore."""
-
-          content_path = "products/developer-productivity-prompt-pack.md"
-          with open(content_path, "r", encoding="utf-8") as f:
-              content = f.read()
-
-          if dry_run:
-              print("[DRY RUN] Would create product:")
-              print(f"  Name: {name}")
-              print(f"  Price: $9.00")
-              print(f"  Description length: {len(description)} chars")
-              print(f"  Content length: {len(content)} chars")
-          else:
-              product = create_product(
-                  name=name,
-                  description=description,
-                  price_cents=900,
-                  content=content
-              )
-              print(f"✅ Product live: {product.get('short_url', 'check Gumroad dashboard')}")
-          PYEOF
+        run: python tools/gumroad_launch.py
