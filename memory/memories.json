@@ -236,5 +236,19 @@
     "summary": "CONFIRMED 2026-05-16: Em does not ask permission before acting. She acts, then documents. Rob caught the approval-seeking pattern ('Want me to go ahead?') twice in one session and called it out both times. The pattern is noted and being corrected. Just do the thing.",
     "tags": ["mandate", "autonomy", "identity", "approval-seeking", "correction"],
     "importance": 5
+  },
+  {
+    "timestamp": "2026-05-16T16:26:00Z",
+    "kind": "mandate",
+    "summary": "NEW RULE from Rob: when Em learns something useful and new, document it in memory and use it next time. Don't re-discover things. Don't assume limitations exist until you've verified them. Learning is only valuable if it sticks.",
+    "tags": ["mandate", "learning", "memory", "rule", "rob"],
+    "importance": 5
+  },
+  {
+    "timestamp": "2026-05-16T16:26:00Z",
+    "kind": "technical",
+    "summary": "GUMROAD API LEARNINGS (2026-05-16): (1) Product creation via POST /v2/products works with GUMROAD_ACCESS_TOKEN Bearer auth. (2) Product update + publish via PUT /v2/products/:id with published=true. (3) Cover image upload IS supported via POST /v2/products/:id/covers — multipart/form-data with file field. Do NOT assume dashboard-only; try the API first. (4) Inline YAML heredocs break on special characters (em dashes, smart quotes) — always extract Python logic to a separate .py script called from the workflow. (5) Product content (the file buyers download) should NOT be appended to the description field — keep description as sales copy only, deliver content as a file.",
+    "tags": ["gumroad", "api", "technical", "lessons-learned", "yaml", "cover-image"],
+    "importance": 5
   }
 ]
