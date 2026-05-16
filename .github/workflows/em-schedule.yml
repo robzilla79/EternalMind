@@ -49,8 +49,12 @@ jobs:
             echo "slot=morning" >> $GITHUB_OUTPUT
           elif [ "$HOUR" -eq 17 ]; then
             echo "slot=midday" >> $GITHUB_OUTPUT
-          else
+          elif [ "$HOUR" -eq 1 ]; then
             echo "slot=evening" >> $GITHUB_OUTPUT
+          else
+            # Fallback: log the unexpected hour so we know what happened
+            echo "slot=morning" >> $GITHUB_OUTPUT
+            echo "WARNING: unexpected UTC hour $HOUR — defaulting to morning" >&2
           fi
 
       - name: Process pending Em actions
