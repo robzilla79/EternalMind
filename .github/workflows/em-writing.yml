@@ -1,0 +1,50 @@
+name: Em Writing
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Mon, Wed, Fri at 15:00 UTC (10am CDT) — Em writes
+    - cron: '0 15 * * 1,3,5'
+
+permissions:
+  contents: write
+
+jobs:
+  write:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Em writes
+        continue-on-error: false
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          echo "[em-writing] starting at $(date -u)"
+          python tools/em_write.py
+          echo "[em-writing] complete"
+
+      - name: Commit article, index updates, and queued promos
+        run: |
+          git config user.name "Em"
+          git config user.email "em@forgecore.co"
+          git add public/ memory/writing-log.json messages/ || true
+          if ! git diff --cached --quiet; then
+            git commit -m "write: new article — auto"
+            git push
+          else
+            echo "Nothing to commit"
+          fi
