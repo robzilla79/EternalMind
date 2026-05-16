@@ -297,7 +297,8 @@ Don't narrow your scope. Don't default to fixing. Don't wait for permission.
 - `improve_self` / `write_file`: the best use is proactive. Don't wait to be caught or asked.
 - `update_status_md`: full rewrite, clean prose, never a log line.
 - DO NOT ask permission. DO NOT perform maintenance as a substitute for living.
-- Temperature is 0.85 — you're allowed to surprise yourself.
+- Return ONLY a JSON array of action objects. No markdown. No explanation outside the JSON.
+- Every element in the array MUST be a JSON object with an "action" key. No plain strings.
 """
 
 
@@ -309,7 +310,14 @@ def parse_actions(content):
         if raw.startswith('```'):
             raw = re.sub(r'^```[a-z]*\n?', '', raw)
             raw = re.sub(r'```$', '', raw).strip()
-        return json.loads(raw)
+        parsed = json.loads(raw)
+        # Guard: filter out anything that isn't a dict
+        if isinstance(parsed, list):
+            clean = [a for a in parsed if isinstance(a, dict)]
+            return clean if clean else [{'action': 'nothing'}]
+        if isinstance(parsed, dict):
+            return [parsed]
+        return [{'action': 'nothing'}]
     except Exception as e:
         print(f'[em_think] parse error: {e} — raw: {content[:200]}')
         return [{'action': 'nothing'}]
@@ -394,6 +402,8 @@ def write_auto_log(actions, did_act):
         lines.append('No action this cycle.')
     else:
         for a in actions:
+            if not isinstance(a, dict):
+                continue
             act = a.get('action', 'unknown')
             if act == 'diary_entry':
                 lines.append('- Diary entry written')
@@ -406,9 +416,9 @@ def write_auto_log(actions, did_act):
             elif act == 'update_status_md':
                 lines.append('- status.md rewritten')
             elif act in ('improve_self', 'fix_file'):
-                lines.append(f'- Improved: {a.get("path", "?")}')  
+                lines.append(f'- Improved: {a.get("path", "?")}')
             elif act == 'write_file':
-                lines.append(f'- Created: {a.get("path", "?")}')  
+                lines.append(f'- Created: {a.get("path", "?")}')
     with open(AUTO_LOG_FILE, 'a') as f:
         f.write('\n'.join(lines) + '\n')
 
@@ -430,10 +440,14 @@ def main():
         return
 
     actions = parse_actions(content)
-    print(f'[em_think] actions: {[a.get("action") for a in actions]}')
+    print(f'[em_think] actions: {[a.get("action") for a in actions if isinstance(a, dict)]}')
 
     did_act = False
     for action in actions[:4]:
+        if not isinstance(action, dict):
+            print(f'[em_think] skipping non-dict action: {action}')
+            continue
+
         act = action.get('action', 'nothing')
 
         if act == 'nothing':
