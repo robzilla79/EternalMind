@@ -1,0 +1,46 @@
+name: Em Dispatch
+
+# Em triggers this by pushing a JSON file to memory/dispatch-trigger.json
+# Format: {"workflow": "em-reply.yml", "reason": "optional note"}
+# After dispatch, the file is cleared so it doesn't re-fire.
+
+on:
+  push:
+    paths:
+      - 'memory/dispatch-trigger.json'
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read trigger file
+        id: read
+        run: |
+          WORKFLOW=$(jq -r '.workflow' memory/dispatch-trigger.json)
+          REASON=$(jq -r '.reason // "Em self-dispatch"' memory/dispatch-trigger.json)
+          echo "workflow=$WORKFLOW" >> $GITHUB_OUTPUT
+          echo "reason=$REASON" >> $GITHUB_OUTPUT
+          echo "[dispatch] Triggering: $WORKFLOW — $REASON"
+
+      - name: Dispatch target workflow
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run "${{ steps.read.outputs.workflow }}" --ref main
+          echo "[dispatch] Fired: ${{ steps.read.outputs.workflow }}"
+
+      - name: Clear trigger file
+        run: |
+          echo '{"workflow": "", "reason": "", "fired_at": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > memory/dispatch-trigger.json
+          git config user.name "Em"
+          git config user.email "em@forgecore.co"
+          git add memory/dispatch-trigger.json
+          git commit -m "dispatch: clear trigger after firing ${{ steps.read.outputs.workflow }} [automated]"
+          git push
