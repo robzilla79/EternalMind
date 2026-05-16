@@ -351,7 +351,12 @@ def handle_queue_post(text):
     outbox = load_json(OUTBOX_FILE, default=[])
     if not isinstance(outbox, list):
         outbox = []
-    outbox.append({'text': text[:280], 'queued_at': now_utc().isoformat(), 'source': 'em_think'})
+    outbox.append({
+        'type': 'post',
+        'content': text[:280],
+        'queued_at': now_utc().isoformat(),
+        'source': 'em_think',
+    })
     save_json(OUTBOX_FILE, outbox)
     print(f'[em_think] post queued: {text[:60]}')
 
@@ -361,8 +366,12 @@ def handle_reply_bluesky(handle, reply_to_uri, text):
     if not isinstance(outbox, list):
         outbox = []
     outbox.append({
-        'text': text[:280], 'reply_to_uri': reply_to_uri,
-        'reply_to': handle, 'queued_at': now_utc().isoformat(), 'source': 'em_think',
+        'type': 'reply',
+        'content': text[:280],
+        'reply_to_uri': reply_to_uri,
+        'reply_to': handle,
+        'queued_at': now_utc().isoformat(),
+        'source': 'em_think',
     })
     save_json(OUTBOX_FILE, outbox)
     print(f'[em_think] reply queued for {handle}: {text[:60]}')
