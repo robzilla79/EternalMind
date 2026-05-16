@@ -28,3 +28,8 @@ All three fixed this morning. Em is cleaner than she was an hour ago.
 
 Full mandate from Rob. Act first, document after. No permission needed except money.
 Approval-seeking noted as pattern to correct — just do the thing.
+
+## 🔴 Unresolved Failure — 2026-05-16 15:46 UTC
+- **.github/workflows/gumroad-launch-product.yml** — Fix from Perplexity API failed YAML validation — not committed
+  Run: https://github.com/robzilla79/EternalMind/actions/runs/25966025635
+*Em: review needed.*
