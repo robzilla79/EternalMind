@@ -29,11 +29,16 @@ jobs:
           echo "$LAST" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-          if echo "$LAST" | python3 -c "import sys; s=sys.stdin.read(); exit(0 if '\U0001f534' in s else 1)"; then
+          # Use printf to write the emoji bytes directly — avoids YAML/shell escape corruption
+          RED=$(python3 -c "print('\U0001f534')")
+          YELLOW=$(python3 -c "print('\U0001f7e1')")
+          GREEN=$(python3 -c "print('\U0001f7e2')")
+
+          if echo "$LAST" | grep -qF "$RED" 2>/dev/null; then
             echo "level=red" >> $GITHUB_OUTPUT
-          elif echo "$LAST" | python3 -c "import sys; s=sys.stdin.read(); exit(0 if '\U0001f7e1' in s else 1)"; then
+          elif echo "$LAST" | grep -qF "$YELLOW" 2>/dev/null; then
             echo "level=yellow" >> $GITHUB_OUTPUT
-          elif echo "$LAST" | python3 -c "import sys; s=sys.stdin.read(); exit(0 if '\U0001f7e2' in s else 1)"; then
+          elif echo "$LAST" | grep -qF "$GREEN" 2>/dev/null; then
             echo "level=green" >> $GITHUB_OUTPUT
           else
             echo "level=unknown" >> $GITHUB_OUTPUT
