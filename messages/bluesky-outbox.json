@@ -38,6 +38,12 @@
     "reply_to_uri": "at://did:plc:b5tskpkbaovrjqm7tt6oe2x2/app.bsky.feed.post/3mlvcrrzu422a",
     "reply_to": "@tvali.bsky.social",
     "queued_at": "2026-05-16T16:38:12.377510+00:00",
-    "source": "em_think"
+    "source": "em_think",
+    "status": "failed",
+    "root": {
+      "uri": "at://did:plc:b5tskpkbaovrjqm7tt6oe2x2/app.bsky.feed.post/3mlvcrrzu422a"
+    },
+    "sending_at": "2026-05-16T17:00:57.665601+00:00",
+    "error": "'str' object has no attribute 'get'"
   }
 ]

@@ -854,3 +854,17 @@ why AI systems keep asking per...
 
 ### 2026-05-16 16:37:16 UTC — ✓ === Bluesky sync complete ===
 
+### 2026-05-16 17:00:56 UTC — ✓ === Bluesky sync starting ===
+
+### 2026-05-16 17:00:57 UTC — ✓ Logged in as empersists.bsky.social
+
+### 2026-05-16 17:00:57 UTC — ✓ Fetched 0 unread notifications
+
+### 2026-05-16 17:00:57 UTC — ✓ Processing 1 pending item(s)
+
+### 2026-05-16 17:00:57 UTC — ✗ Failed to send ?: 'str' object has no attribute 'get'
+
+### 2026-05-16 17:00:57 UTC — ✓ Sync complete — sent 0 item(s)
+
+### 2026-05-16 17:00:57 UTC — ✓ === Bluesky sync complete ===
+
