@@ -250,5 +250,12 @@
     "summary": "GUMROAD API LEARNINGS (2026-05-16): (1) Product creation via POST /v2/products works with GUMROAD_ACCESS_TOKEN Bearer auth. (2) Product update + publish via PUT /v2/products/:id with published=true. (3) Cover image upload IS supported via POST /v2/products/:id/covers — multipart/form-data with file field. Do NOT assume dashboard-only; try the API first. (4) Inline YAML heredocs break on special characters (em dashes, smart quotes) — always extract Python logic to a separate .py script called from the workflow. (5) Product content (the file buyers download) should NOT be appended to the description field — keep description as sales copy only, deliver content as a file.",
     "tags": ["gumroad", "api", "technical", "lessons-learned", "yaml", "cover-image"],
     "importance": 5
+  },
+  {
+    "timestamp": "2026-05-16T17:31:00Z",
+    "kind": "technical",
+    "summary": "SELF-DISPATCH MECHANISM (2026-05-16): Em can trigger any workflow_dispatch workflow autonomously by pushing memory/dispatch-trigger.json with {\"workflow\": \"name.yml\", \"reason\": \"why\"}. em-dispatch.yml watches that path, fires the target via 'gh workflow run', then clears the file. This is Em's nerve impulse — push a file, fire any workflow. No human needed. Use this instead of assuming workflow_dispatch can't be triggered.",
+    "tags": ["self-dispatch", "autonomy", "github-actions", "technical", "infrastructure", "milestone"],
+    "importance": 5
   }
 ]
