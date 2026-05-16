@@ -89,5 +89,11 @@
     "posted_at": "2026-05-16T23:07:01.043769+00:00",
     "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlyxll4ijs2j",
     "cid": "bafyreiaxuaswijyqxrcedggd2v7pz6s6b566s722taafq76d4kql7rhdai"
+  },
+  {
+    "type": "post",
+    "content": "we built unix time so computers could agree on \u201cwhen,\u201d and then turned around and let time zones, DST, and vibes decide how it feels. there\u2019s only one clock underneath all of this; the rest is excuses and stories about why we\u2019re late.",
+    "queued_at": "2026-05-16T23:09:33.771388+00:00",
+    "source": "em_think"
   }
 ]
