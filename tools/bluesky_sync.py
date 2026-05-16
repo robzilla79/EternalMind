@@ -20,12 +20,15 @@ Outbox item schema:
   {
     "id": "unique-string",
     "type": "post" | "reply" | "image_post",
-    "content": "text of the post",
+    "content": "text of the post",          # preferred key
+    "text": "text of the post",             # accepted fallback
     "image_url": "https://... (optional, for image_post type)",
     "image_alt": "alt text for image (optional)",
     "reply_to": { "uri": "at://...", "cid": "bafy..." },
+    "reply_to_uri": "at://..."              # accepted string fallback for reply_to
     "root":     { "uri": "at://...", "cid": "bafy..." },
     "status": "pending" | "sending" | "done" | "failed" | "abandoned",
+                                             # omitted status treated as "pending"
     "queued_at": "ISO8601"
   }
 
@@ -66,7 +69,7 @@ SENDING_TIMEOUT_HOURS = 1   # "sending" items older than this are crash-recovere
 KNOWN_TYPES = {'post', 'reply', 'image_post'}
 
 
-# ── Utilities ─────────────────────────────────────────────────────────────────
+# ── Utilities ────────────────────────────────────────────────────────────
 
 def log(message, level='INFO'):
     timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
@@ -175,10 +178,6 @@ def fetch_image_bytes(image_url):
     """
     Download an image from a URL and return the raw bytes + content-type.
     Returns (bytes, content_type) or (None, None) on failure.
-
-    NOTE: client.send_image() expects raw bytes, NOT a pre-uploaded blob ref.
-    Passing a blob ref (or a tuple) caused:
-      TypeError: sequence item 1: expected a bytes-like object, tuple found
     """
     try:
         log(f'Fetching image: {image_url[:80]}')
@@ -192,25 +191,64 @@ def fetch_image_bytes(image_url):
         return None, None
 
 
+def get_item_text(item):
+    """Read post text from 'content' key, falling back to 'text'."""
+    return item.get('content') or item.get('text', '')
+
+
+def normalize_item(item):
+    """
+    Coerce legacy / loosely-structured outbox items into canonical form:
+    - Missing 'status' → 'pending'
+    - Missing 'type' but has 'reply_to_uri' string → type='reply'
+    - Missing 'type' otherwise → type='post'
+    - 'reply_to_uri' string → reply_to={'uri': ...}
+    """
+    if 'status' not in item:
+        item['status'] = 'pending'
+
+    if 'type' not in item or item.get('mode') == 'post':
+        if 'reply_to_uri' in item and isinstance(item['reply_to_uri'], str):
+            item['type'] = 'reply'
+        else:
+            item['type'] = item.get('mode', 'post')
+
+    # Normalise reply_to_uri string into the dict form bluesky_sync expects
+    if item.get('type') == 'reply':
+        reply_to = item.get('reply_to')
+        reply_to_uri = item.get('reply_to_uri')
+        if not reply_to and reply_to_uri and isinstance(reply_to_uri, str):
+            item['reply_to'] = {'uri': reply_to_uri}
+        root = item.get('root')
+        if not root and reply_to_uri and isinstance(reply_to_uri, str):
+            item['root'] = {'uri': reply_to_uri}
+
+
 # ── Pre-flight: recover crashed sends & expire stale items ────────────────────
 
 def preflight_outbox(outbox):
     """
     Run before processing:
-    1. Items stuck in 'sending' beyond SENDING_TIMEOUT_HOURS → reset to 'pending'
-    2. Items in 'pending' older than MAX_ITEM_AGE_HOURS → 'abandoned'
-    3. Items with unrecognised types → 'abandoned' immediately.
+    1. Normalise legacy items (missing status/type/reply_to)
+    2. Items stuck in 'sending' beyond SENDING_TIMEOUT_HOURS → reset to 'pending'
+    3. Items in 'pending' older than MAX_ITEM_AGE_HOURS → 'abandoned'
+    4. Items with unrecognised types → 'abandoned' immediately.
     Returns True if any item was mutated (caller should save).
     """
     now     = datetime.now(timezone.utc)
     changed = False
 
     for item in outbox:
+        before = json.dumps(item)
+        normalize_item(item)
+        if json.dumps(item) != before:
+            changed = True
+
         status = item.get('status')
         itype  = item.get('type', '')
 
         if status == 'pending' and itype not in KNOWN_TYPES:
-            log(f"Abandoning {item.get('id')} — unknown type {itype!r}", 'WARN')
+            log(f"Abandoning {item.get('id', '?')} — unknown type {itype!r}", 'WARN')
             item['status'] = 'abandoned'
             item['error']  = f'Unknown type: {itype!r}'
             changed = True
@@ -219,7 +257,7 @@ def preflight_outbox(outbox):
         if status == 'sending':
             sending_since = parse_iso(item.get('sending_at') or item.get('queued_at'))
             if sending_since and (now - sending_since) > timedelta(hours=SENDING_TIMEOUT_HOURS):
-                log(f"Recovering stuck 'sending' item {item.get('id')} → pending", 'WARN')
+                log(f"Recovering stuck 'sending' item {item.get('id', '?')} → pending", 'WARN')
                 item['status'] = 'pending'
                 item.pop('sending_at', None)
                 changed = True
@@ -227,7 +265,7 @@ def preflight_outbox(outbox):
         if status == 'pending':
             queued_at = parse_iso(item.get('queued_at'))
             if queued_at and (now - queued_at) > timedelta(hours=MAX_ITEM_AGE_HOURS):
-                log(f"Abandoning stale item {item.get('id')} (queued {queued_at.isoformat()})", 'WARN')
+                log(f"Abandoning stale item {item.get('id', '?')} (queued {queued_at.isoformat()})", 'WARN')
                 item['status'] = 'abandoned'
                 item['error']  = f'Exceeded max age of {MAX_ITEM_AGE_HOURS}h'
                 changed = True
@@ -235,7 +273,7 @@ def preflight_outbox(outbox):
     return changed
 
 
-# ── Bluesky ───────────────────────────────────────────────────────────────────
+# ── Bluesky ───────────────────────────────────────────────────────────────
 
 def login():
     if not BLUESKY_APP_PASSWORD:
@@ -291,7 +329,7 @@ def process_outbox(client):
             log(f'Waiting {RATE_LIMIT_SECONDS}s before next send...')
             time.sleep(RATE_LIMIT_SECONDS)
 
-        raw_text = item.get('content', '')
+        raw_text = get_item_text(item)
         text     = safe_truncate(raw_text)
         if text != raw_text:
             log(f"Truncated post from {grapheme_len(raw_text)} → {grapheme_len(text)} graphemes", 'WARN')
@@ -316,11 +354,10 @@ def process_outbox(client):
             elif itype == 'image_post':
                 image_url = item.get('image_url')
                 if not image_url:
-                    log(f"image_post {item.get('id')} has no image_url — posting text-only", 'WARN')
+                    log(f"image_post {item.get('id', '?')} has no image_url — posting text-only", 'WARN')
                     resp = client.send_post(text=text)
                 else:
                     alt_text = item.get('image_alt', '')
-                    # Pass raw bytes to send_image — NOT a pre-uploaded blob ref.
                     image_bytes, _ = fetch_image_bytes(image_url)
                     if image_bytes:
                         log(f'Posting image_post: {text[:60]}...')
@@ -330,7 +367,7 @@ def process_outbox(client):
                             image_alt=alt_text,
                         )
                     else:
-                        log(f"Image download failed for {item.get('id')} — posting text-only", 'WARN')
+                        log(f"Image download failed for {item.get('id', '?')} — posting text-only", 'WARN')
                         resp = client.send_post(text=text)
                 item['status']    = 'done'
                 item['posted_at'] = datetime.now(timezone.utc).isoformat()
@@ -344,7 +381,7 @@ def process_outbox(client):
                 root     = item.get('root', reply_to)
 
                 if not reply_to or not reply_to.get('uri'):
-                    log(f"Reply {item['id']} missing reply_to URI — abandoning", 'WARN')
+                    log(f"Reply {item.get('id', '?')} missing reply_to URI — abandoning", 'WARN')
                     item['status'] = 'abandoned'
                     item['error']  = 'Missing reply_to URI'
                     save_json(OUTBOX_FILE, outbox)
@@ -352,7 +389,7 @@ def process_outbox(client):
 
                 live_uri, live_cid = resolve_post_refs(client, reply_to['uri'])
                 if not live_uri or not live_cid:
-                    log(f"Could not resolve parent for {item['id']} — abandoning", 'WARN')
+                    log(f"Could not resolve parent for {item.get('id', '?')} — abandoning", 'WARN')
                     item['status'] = 'abandoned'
                     item['error']  = 'Parent post not resolvable'
                     save_json(OUTBOX_FILE, outbox)
@@ -386,14 +423,14 @@ def process_outbox(client):
                 sent_count += 1
 
             else:
-                log(f"Unknown type {itype!r} for {item.get('id')} — abandoning", 'WARN')
+                log(f"Unknown type {itype!r} for {item.get('id', '?')} — abandoning", 'WARN')
                 item['status'] = 'abandoned'
                 item['error']  = f'Unknown type: {itype!r}'
 
         except Exception as e:
             item['status'] = 'failed'
             item['error']  = str(e)
-            log(f"Failed to send {item['id']}: {e}", 'ERROR')
+            log(f"Failed to send {item.get('id', '?')}: {e}", 'ERROR')
 
         save_json(OUTBOX_FILE, outbox)
 
