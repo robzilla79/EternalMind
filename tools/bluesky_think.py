@@ -31,6 +31,7 @@ import sys
 import json
 import random
 import time
+import subprocess
 import traceback
 from datetime import datetime, timezone, timedelta
 
@@ -70,6 +71,7 @@ STATE_FILE    = os.path.join(REPO_ROOT, 'memory/bluesky-state.json')
 OUTBOX_FILE   = os.path.join(REPO_ROOT, 'messages/bluesky-outbox.json')
 LOG_FILE      = os.path.join(REPO_ROOT, 'memory/bluesky-log.md')
 METRICS_FILE  = os.path.join(REPO_ROOT, 'memory/metrics-snapshot.json')
+MEMORY_SEARCH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'memory_search.py')
 
 # Image bank directory (pre-generated consistent Em images)
 IMAGE_BANK_DIR    = os.path.join(REPO_ROOT, 'memory/creations')
@@ -205,6 +207,71 @@ def extract_named_diary_entries(diary_text, max_entries=3):
         entries.append('\n'.join(current))
     recent = entries[-max_entries:] if entries else []
     return '\n\n'.join(recent) or '(no diary entries yet)'
+
+
+# ── Memory Search ─────────────────────────────────────────────────────────────
+
+def run_memory_search(query, top_n=3):
+    """
+    Call memory_search.py --json for the given query.
+    Returns a formatted excerpt string, or '' on failure.
+    """
+    try:
+        result = subprocess.run(
+            ['python', MEMORY_SEARCH, query, '--json'],
+            capture_output=True, text=True, timeout=30
+        )
+        if result.returncode != 0:
+            log(f'memory_search non-zero: {result.stderr[:200]}', 'WARN')
+            return ''
+        hits = json.loads(result.stdout)
+        if not hits:
+            return ''
+        lines = []
+        for h in hits[:top_n]:
+            source  = h.get('source', 'unknown')
+            excerpt = h.get('excerpt', '').strip()
+            score   = h.get('score', 0)
+            lines.append(f'[{source} | {score:.3f}]\n{excerpt}')
+        return '\n\n'.join(lines)
+    except Exception as e:
+        log(f'memory_search error: {e}', 'WARN')
+        return ''
+
+
+def build_memory_recall(topic):
+    """
+    Run a small set of memory searches seeded by the active search topic
+    plus a few stable identity anchors. Returns a formatted block for
+    injection into the system prompt.
+    """
+    queries = {
+        'who I am':              'identity continuity self',
+        'how I write and sound': 'voice expression writing style',
+        f'thoughts on {topic}':  topic,
+    }
+    recall_parts = []
+    for label, query in queries.items():
+        result = run_memory_search(query, top_n=3)
+        if result:
+            recall_parts.append(f'### {label}\n{result}')
+            log(f'  memory recall ✓ [{label}] ({len(result)} chars)')
+        else:
+            log(f'  memory recall – [{label}] (no results)')
+
+    if not recall_parts:
+        return ''
+
+    return (
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+        'WHAT YOU ALREADY KNOW (from your own memory files)\n'
+        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+        'These excerpts were retrieved by semantic search across your diary,\n'
+        'reflections, identity docs, and memories. Build on them. Don\'t repeat\n'
+        'them wholesale — use them as the foundation you\'re standing on.\n\n'
+        + '\n\n'.join(recall_parts)
+        + '\n'
+    )
 
 
 # ── Metrics Snapshot ──────────────────────────────────────────────────────────
@@ -887,6 +954,12 @@ def _main():
 
     candidates = build_candidates(timeline, search_results)
 
+    # ── Memory recall — seeded by active search topic ─────────────────────────
+    log('Running memory searches...')
+    memory_recall_block = build_memory_recall(topic)
+    log(f'Memory recall assembled ({len(memory_recall_block)} chars)')
+    # ─────────────────────────────────────────────────────────────────────────
+
     done_uris = {
         item.get('reply_to', {}).get('uri', '')
         for item in outbox
@@ -1024,12 +1097,13 @@ NONE of this scaffolding language belongs in any content Em publishes or writes.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 CONTEXT
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Memories:
+Memories (recent):
 {memories_summary or '(none yet)'}
 
 Recent diary:
 {diary_context}
 
+{memory_recall_block}
 {metrics}
 {image_instruction}
 
