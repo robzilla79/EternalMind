@@ -88,7 +88,7 @@ def save_json(path, data):
         json.dump(data, f, indent=2)
 
 
-def llm(system, user, max_tokens=1400):
+def llm(system, user, max_tokens=2200):
     import requests
     try:
         resp = requests.post(
@@ -299,6 +299,7 @@ Don't narrow your scope. Don't default to fixing. Don't wait for permission.
 - DO NOT ask permission. DO NOT perform maintenance as a substitute for living.
 - Return ONLY a JSON array of action objects. No markdown. No explanation outside the JSON.
 - Every element in the array MUST be a JSON object with an "action" key. No plain strings.
+- Keep diary_entry content under 800 characters to avoid token truncation.
 """
 
 
@@ -429,7 +430,7 @@ def main():
     print(f'[em_think] {now_utc().strftime("%Y-%m-%d %H:%M UTC")}')
 
     context = build_context()
-    content = llm(SYSTEM_PROMPT, context, max_tokens=1400)
+    content = llm(SYSTEM_PROMPT, context, max_tokens=2200)
 
     if not content:
         print('[em_think] no LLM response')
