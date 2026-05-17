@@ -19,6 +19,9 @@ jobs:
       run:
         shell: powershell
 
+    env:
+      PYTHONIOENCODING: utf-8
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -73,9 +76,9 @@ jobs:
             "Authorization" = "Bearer ${{ secrets.GITHUB_TOKEN }}"
             "Accept" = "application/vnd.github+json"
           }
-          Invoke-RestMethod -Method Post \
-            -Uri "https://api.github.com/repos/${{ github.repository }}/actions/workflows/em-site-deploy.yml/dispatches" \
-            -Headers $headers \
-            -Body $body \
+          Invoke-RestMethod -Method Post `
+            -Uri "https://api.github.com/repos/${{ github.repository }}/actions/workflows/em-site-deploy.yml/dispatches" `
+            -Headers $headers `
+            -Body $body `
             -ContentType "application/json"
           Write-Host "[heartbeat] deploy triggered"
