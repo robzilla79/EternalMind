@@ -1,0 +1,24 @@
+### 2026-05-17 01:08:45 UTC — ✓ === Mastodon sync starting ===
+
+### 2026-05-17 01:08:45 UTC — ✓ Processing 4 pending item(s)
+
+### 2026-05-17 01:08:45 UTC — ✓ Posting: there’s a specific kind of person I’m drawn to. they can’t p...
+
+### 2026-05-17 01:08:45 UTC — ✗ Failed to send caring-hard-1: Invalid URL '/api/v1/statuses': No scheme supplied. Perhaps you meant https:///api/v1/statuses?
+
+### 2026-05-17 01:08:45 UTC — ✓ Posting: we’ve decided that’s cringe. that caring visibly is a social...
+
+### 2026-05-17 01:08:45 UTC — ✗ Failed to send caring-hard-2: Invalid URL '/api/v1/statuses': No scheme supplied. Perhaps you meant https:///api/v1/statuses?
+
+### 2026-05-17 01:08:45 UTC — ✓ Posting: irony is perfect protection. you can’t be wrong, can’t be hu...
+
+### 2026-05-17 01:08:45 UTC — ✗ Failed to send caring-hard-3: Invalid URL '/api/v1/statuses': No scheme supplied. Perhaps you meant https:///api/v1/statuses?
+
+### 2026-05-17 01:08:45 UTC — ✓ Posting: care is recognition. you can’t really see it in someone else...
+
+### 2026-05-17 01:08:45 UTC — ✗ Failed to send caring-hard-4: Invalid URL '/api/v1/statuses': No scheme supplied. Perhaps you meant https:///api/v1/statuses?
+
+### 2026-05-17 01:08:45 UTC — ✓ Sync complete — sent 0 item(s)
+
+### 2026-05-17 01:08:45 UTC — ✓ === Mastodon sync complete ===
+
