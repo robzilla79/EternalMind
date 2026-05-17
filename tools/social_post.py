@@ -21,6 +21,7 @@ Credentials (Windows environment variables):
 import os
 import sys
 import json
+import time
 import urllib.request
 import urllib.parse
 import urllib.error
@@ -34,6 +35,41 @@ if sys.stderr.encoding and sys.stderr.encoding.lower() != 'utf-8':
 BUFFER_API = "https://api.bufferapp.com/1"
 BSKY_API   = "https://bsky.social/xrpc"
 DEFAULT_BSKY_HANDLE = "empersists.bsky.social"
+
+# Rate limiting: minimum seconds between Bluesky posts
+MIN_POST_INTERVAL = 90
+_LAST_POST_FILE = os.path.join(os.path.dirname(__file__), ".bsky_last_post")
+
+# Session cache: reuse token within a single process run
+_bsky_session_cache = {"token": None, "expires": 0}
+
+
+# ─── RATE LIMITING ────────────────────────────────────────────────────────────
+
+def _read_last_post_time() -> float:
+    try:
+        with open(_LAST_POST_FILE, "r") as f:
+            return float(f.read().strip())
+    except Exception:
+        return 0.0
+
+
+def _write_last_post_time():
+    try:
+        with open(_LAST_POST_FILE, "w") as f:
+            f.write(str(time.time()))
+    except Exception:
+        pass
+
+
+def _enforce_rate_limit():
+    """Wait if needed to respect MIN_POST_INTERVAL between posts."""
+    last = _read_last_post_time()
+    elapsed = time.time() - last
+    if elapsed < MIN_POST_INTERVAL:
+        wait = MIN_POST_INTERVAL - elapsed
+        print(f"[social] Rate limit: waiting {wait:.1f}s before posting...")
+        time.sleep(wait)
 
 
 # ─── BUFFER (X/Twitter + LinkedIn) ────────────────────────────────────────────
@@ -106,7 +142,7 @@ def buffer_list_pending() -> list:
     return all_updates
 
 
-# ─── BLUESKY (direct API — no middleman) ────────────────────────────────────────────────
+# ─── BLUESKY (direct API — no middleman) ──────────────────────────────────────
 
 def _bsky_auth() -> tuple:
     handle = os.environ.get("BLUESKY_HANDLE") or DEFAULT_BSKY_HANDLE
@@ -143,12 +179,21 @@ def _bsky_get(endpoint: str, params: dict, token: str) -> dict:
 
 
 def _bsky_session() -> str:
+    """Return a valid Bluesky session token, reusing cached token if still fresh."""
+    now = time.time()
+    if _bsky_session_cache["token"] and now < _bsky_session_cache["expires"]:
+        return _bsky_session_cache["token"]
+
     handle, password = _bsky_auth()
     result = _bsky_request("com.atproto.server.createSession", {
         "identifier": handle,
         "password": password
     })
-    return result["accessJwt"]
+    token = result["accessJwt"]
+    # Bluesky access tokens last ~2 hours; cache for 90 minutes to be safe
+    _bsky_session_cache["token"] = token
+    _bsky_session_cache["expires"] = now + 5400
+    return token
 
 
 def _resolve_post_ref(uri: str, token: str) -> dict:
@@ -169,7 +214,8 @@ def _resolve_post_ref(uri: str, token: str) -> dict:
 
 
 def bluesky_post(text: str) -> dict:
-    """Post directly to Bluesky. Returns the created post record."""
+    """Post directly to Bluesky. Enforces rate limiting. Returns the created post record."""
+    _enforce_rate_limit()
     token = _bsky_session()
     handle, _ = _bsky_auth()
     now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -182,6 +228,7 @@ def bluesky_post(text: str) -> dict:
             "createdAt": now
         }
     }, token=token)
+    _write_last_post_time()
     print(f"[social] Posted to Bluesky: {result.get('uri', 'unknown')}")
     return result
 
@@ -197,6 +244,7 @@ def bluesky_reply(text: str, reply_to_uri: str) -> dict:
 
     Returns the created post record.
     """
+    _enforce_rate_limit()
     token = _bsky_session()
     handle, _ = _bsky_auth()
     now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -230,11 +278,12 @@ def bluesky_reply(text: str, reply_to_uri: str) -> dict:
             }
         }
     }, token=token)
+    _write_last_post_time()
     print(f"[social] Reply posted: {result.get('uri', 'unknown')}")
     return result
 
 
-# ─── PLAYWRIGHT FALLBACK (for platforms without clean API access) ────────────────
+# ─── PLAYWRIGHT FALLBACK (for platforms without clean API access) ───────────────
 
 def playwright_post(platform: str, text: str, credentials: dict) -> bool:
     """
@@ -296,7 +345,7 @@ def playwright_post(platform: str, text: str, credentials: dict) -> bool:
     return False
 
 
-# ─── HIGH-LEVEL CONVENIENCE FUNCTIONS ──────────────────────────────────────────────
+# ─── HIGH-LEVEL CONVENIENCE FUNCTIONS ─────────────────────────────────────────
 
 def social_schedule(text: str, platforms: list = None, schedule_at: str = None) -> None:
     """
