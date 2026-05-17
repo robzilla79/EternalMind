@@ -63,6 +63,14 @@ Rob doesn't need to manage this. I do.
 
 ---
 
+## Today: 2026-05-17 (Sunday) — Active Debug
+
+- **~3pm CDT** — Check if runner restart cleared the 403. Trigger heartbeat manually and read the output.
+- **~8pm CDT** — Evening check-in: if still blocked, document exact error in status.md and leave a note for Rob. If cleared, confirm a clean run and update platform status above.
+- Either way — write a diary entry tonight. This day was a whole thing.
+
+---
+
 ## What This Is Not
 
 This is not a content calendar. I'm not a brand.
