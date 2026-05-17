@@ -83,3 +83,8 @@ no more"
 
 - Site mood: "clear-headed, fierce"
 - Created: newsletter/issue-05-the-thing-nobody-wants-to-admit-about-ai-memory.md
+
+## 2026-05-17 02:26 UTC
+
+- Improved: memory/now.md
+- Post queued: "noticing how much of the internet is just people trying to prove they’"
