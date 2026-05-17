@@ -128,3 +128,7 @@ less “here’s my lates"
 
 - Improved: memory/now.md
 - Site mood: "clear-headed"
+
+## 2026-05-17 21:09 UTC
+
+- Created: public/writing/the-thing-nobody-wants-to-admit-about-ai-memory.html
