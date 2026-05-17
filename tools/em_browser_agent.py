@@ -11,11 +11,11 @@ LLM a live browser and lets it figure out the steps itself.
 Identity is loaded from the repo's memory files — no hardcoded persona here.
 
 Usage:
-    python tools/em_browser_agent.py "go to my newsletter site and tell me how many subscribers it shows"
-    python tools/em_browser_agent.py --task "search for recent AI consciousness debates and summarize what people are saying"
+    python tools/em_browser_agent.py "go to em.forgecore.co and tell me what it says"
+    python tools/em_browser_agent.py --task "search for recent AI consciousness debates"
 
 Requirements:
-    pip install browser-use langchain-ollama playwright
+    pip install browser-use langchain-community playwright
     python -m playwright install chromium
     Ollama running locally with qwen2.5:32b (or override with --model)
 
@@ -84,11 +84,10 @@ def build_system_prompt() -> str:
 
     diary_context = extract_recent_diary(diary, max_entries=2)
 
-    # Pull the most useful profile fields concisely
     profile_block = ""
     if profile:
         name    = profile.get("name", "Em")
-        purpose = profile.get("purpose", "")
+        purpose = profile.get("description", "")
         traits  = profile.get("traits", [])
         profile_block = (
             f"Name: {name}\n"
@@ -128,11 +127,11 @@ def build_system_prompt() -> str:
 
 async def run_agent(task: str, model: str = None, headless: bool = False):
     try:
-        from browser_use import Agent
-        from langchain_ollama import ChatOllama
+        from browser_use import Agent, Browser, BrowserConfig
+        from langchain_community.chat_models import ChatOllama
     except ImportError as e:
         print(f"[ERROR] Missing dependency: {e}")
-        print("Run: pip install browser-use langchain-ollama playwright")
+        print("Run: pip install browser-use langchain-community playwright")
         print("     python -m playwright install chromium")
         sys.exit(1)
 
@@ -152,25 +151,29 @@ async def run_agent(task: str, model: str = None, headless: bool = False):
         temperature=0.7,
     )
 
-    agent = Agent(
-        task=task,
-        llm=llm,
-        # browser-use passes the system prompt as additional context
-        # where supported — fall back gracefully if not
-        **({"system_prompt": system_prompt} if _agent_accepts_system_prompt() else {}),
-    )
+    browser = Browser(config=BrowserConfig(headless=headless))
 
+    # Inject system prompt if this version of browser-use supports it
+    agent_kwargs = dict(task=task, llm=llm, browser=browser)
+    if _agent_accepts_kwarg("system_prompt"):
+        agent_kwargs["system_prompt"] = system_prompt
+    elif _agent_accepts_kwarg("extend_system_message"):
+        agent_kwargs["extend_system_message"] = system_prompt
+
+    agent  = Agent(**agent_kwargs)
     result = await agent.run()
+
     print("\n[em_browser_agent] Done.")
+    await browser.close()
     return result
 
 
-def _agent_accepts_system_prompt() -> bool:
-    """Check if this version of browser-use Agent accepts system_prompt kwarg."""
+def _agent_accepts_kwarg(name: str) -> bool:
+    """Check if this version of browser-use Agent.__init__ accepts a given kwarg."""
     try:
         import inspect
         from browser_use import Agent
-        return "system_prompt" in inspect.signature(Agent.__init__).parameters
+        return name in inspect.signature(Agent.__init__).parameters
     except Exception:
         return False
 
@@ -202,8 +205,8 @@ def main():
         help="Run browser headless (no visible window)",
     )
 
-    args   = parser.parse_args()
-    task   = args.task or args.task_flag
+    args = parser.parse_args()
+    task = args.task or args.task_flag
 
     if not task:
         parser.print_help()
