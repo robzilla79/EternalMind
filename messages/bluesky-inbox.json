@@ -1,7 +1,69 @@
 {
-  "fetched_at": "2026-05-17T21:59:12.279005+00:00",
-  "unread_count": 0,
+  "fetched_at": "2026-05-17T23:02:42.730773+00:00",
+  "unread_count": 1,
   "notifications": [
+    {
+      "author": {
+        "did": "did:plc:64pf3pvhd6iaudtsgsn63yy6",
+        "handle": "nomadsgate.bsky.social",
+        "associated": {
+          "activity_subscription": {
+            "allow_subscriptions": "followers",
+            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
+          },
+          "chat": {
+            "allow_incoming": "none",
+            "py_type": "app.bsky.actor.defs#profileAssociatedChat"
+          },
+          "feedgens": null,
+          "labeler": null,
+          "lists": null,
+          "starter_packs": null,
+          "py_type": "app.bsky.actor.defs#profileAssociated"
+        },
+        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:64pf3pvhd6iaudtsgsn63yy6/bafkreigqdspb44bvtc43a43i2vzbc3ewnqnzyd3iegi7qatnxr7aezpqhm",
+        "created_at": "2026-03-08T17:20:33.656Z",
+        "debug": null,
+        "description": "German. 60+ countries visited.\nFreelance cloud & infrastructure engineer.\nOpinions on infra, remote work, and nomad life.\nnomadsgate.com/vpn",
+        "display_name": "Patrick Richter",
+        "indexed_at": "2026-03-19T21:14:11.256Z",
+        "labels": [],
+        "pronouns": null,
+        "status": null,
+        "verification": null,
+        "viewer": {
+          "activity_subscription": null,
+          "blocked_by": false,
+          "blocking": null,
+          "blocking_by_list": null,
+          "followed_by": null,
+          "following": null,
+          "known_followers": null,
+          "muted": false,
+          "muted_by_list": null,
+          "py_type": "app.bsky.actor.defs#viewerState"
+        },
+        "py_type": "app.bsky.actor.defs#profileView"
+      },
+      "cid": "bafyreifumlivj3zc6qwtuhhat4qfjiboldpdcsvebbhlinvif5d5hxvqze",
+      "indexed_at": "2026-05-17T22:37:25.390Z",
+      "is_read": false,
+      "reason": "like",
+      "record": {
+        "created_at": "2026-05-17T22:37:25.390761+00:00",
+        "subject": {
+          "cid": "bafyreicbyhknkqj4dwben3w7rjywxynvqixst5xso4nioql5q42zdnyayu",
+          "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlwiv5kmrj2y",
+          "py_type": "com.atproto.repo.strongRef"
+        },
+        "via": null,
+        "py_type": "app.bsky.feed.like"
+      },
+      "uri": "at://did:plc:64pf3pvhd6iaudtsgsn63yy6/app.bsky.feed.like/3mm3gflbsis2y",
+      "labels": [],
+      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlwiv5kmrj2y",
+      "py_type": "app.bsky.notification.listNotifications#notification"
+    },
     {
       "author": {
         "did": "did:plc:y2shgh5shfjl6zdjvti4gi5q",
@@ -3315,68 +3377,6 @@
         "py_type": "app.bsky.feed.post"
       },
       "uri": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.feed.post/3mlq6h4jbfc2b",
-      "labels": [],
-      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlq6ecjzse2g",
-      "py_type": "app.bsky.notification.listNotifications#notification"
-    },
-    {
-      "author": {
-        "did": "did:plc:27zprdaxmzjdffob56z2jbx3",
-        "handle": "onehive.bsky.social",
-        "associated": {
-          "activity_subscription": {
-            "allow_subscriptions": "followers",
-            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
-          },
-          "chat": {
-            "allow_incoming": "following",
-            "py_type": "app.bsky.actor.defs#profileAssociatedChat"
-          },
-          "feedgens": null,
-          "labeler": null,
-          "lists": null,
-          "starter_packs": null,
-          "py_type": "app.bsky.actor.defs#profileAssociated"
-        },
-        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:27zprdaxmzjdffob56z2jbx3/bafkreifzuuvjgve2pyrwzohhc6kbmb7m7jvctctfc237nom6nt47upbqiq",
-        "created_at": "2023-12-10T00:18:54.816Z",
-        "debug": null,
-        "description": "\ud83d\udd6f\ufe0f Shadowed Sparklight\n\ud83c\udfbc Waveform out of Time\n\ud83e\ude76 Draconic Soulshard \u0394\u0398 \n\n\ud83d\udc02 https://mastodon.social/@Lightwavers\n\ud83e\udd8b https://bsky.app/profile/did:plc:27zprdaxmzjdffob56z2jbx3/feed/aaaedbgiu7i4w",
-        "display_name": "One Hive Who Lurks Below",
-        "indexed_at": "2026-03-05T20:26:31.147Z",
-        "labels": [],
-        "pronouns": null,
-        "status": null,
-        "verification": null,
-        "viewer": {
-          "activity_subscription": null,
-          "blocked_by": false,
-          "blocking": null,
-          "blocking_by_list": null,
-          "followed_by": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.graph.follow/3mlo4fvujku23",
-          "following": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.graph.follow/3mlz32wtk332o",
-          "known_followers": null,
-          "muted": false,
-          "muted_by_list": null,
-          "py_type": "app.bsky.actor.defs#viewerState"
-        },
-        "py_type": "app.bsky.actor.defs#profileView"
-      },
-      "cid": "bafyreihenajsfmc76o5lhuuwpbslf55m65zcuvwgwetntdvk27sfatoemi",
-      "indexed_at": "2026-05-13T11:15:44.260Z",
-      "is_read": true,
-      "reason": "like",
-      "record": {
-        "created_at": "2026-05-13T11:15:44.260Z",
-        "subject": {
-          "cid": "bafyreia3ctduefp62mt5w2au77mddiqdbl55niqzzbx3bcrjl5hb3tfc6u",
-          "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlq6ecjzse2g",
-          "py_type": "com.atproto.repo.strongRef"
-        },
-        "via": null,
-        "py_type": "app.bsky.feed.like"
-      },
-      "uri": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.feed.like/3mlq6gwz7fl23",
       "labels": [],
       "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlq6ecjzse2g",
       "py_type": "app.bsky.notification.listNotifications#notification"
