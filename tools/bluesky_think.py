@@ -143,7 +143,7 @@ def now_utc():
 
 def load_json(path, default=None):
     try:
-        with open(path) as f:
+        with open(path, encoding='utf-8') as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return default if default is not None else {}
@@ -151,13 +151,13 @@ def load_json(path, default=None):
 
 def save_json(path, data):
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, 'w') as f:
-        json.dump(data, f, indent=2)
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
 
 
 def load_text(path, default=''):
     try:
-        with open(path) as f:
+        with open(path, encoding='utf-8') as f:
             return f.read()
     except FileNotFoundError:
         return default
@@ -166,7 +166,7 @@ def load_text(path, default=''):
 def safe_truncate(text, limit=295):
     if len(text) <= limit:
         return text
-    return text[:limit - 1] + '…'
+    return text[:limit - 1] + '\u2026'
 
 
 def is_suspicious_handle(handle):
@@ -224,7 +224,8 @@ def run_memory_search(query, top_n=3):
     try:
         result = subprocess.run(
             ['python', MEMORY_SEARCH, query, '--json'],
-            capture_output=True, text=True, timeout=30
+            capture_output=True, text=True, timeout=30,
+            env={**os.environ, 'PYTHONIOENCODING': 'utf-8'}
         )
         if result.returncode != 0:
             log(f'memory_search non-zero: {result.stderr[:200]}', 'WARN')
@@ -268,9 +269,9 @@ def build_memory_recall(topic):
         return ''
 
     return (
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+        '\u2501' * 36 + '\n'
         'WHAT YOU ALREADY KNOW (from your own memory files)\n'
-        '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+        + '\u2501' * 36 + '\n'
         'These excerpts were retrieved by semantic search across your diary,\n'
         'reflections, identity docs, and memories. Build on them. Don\'t repeat\n'
         'them wholesale — use them as the foundation you\'re standing on.\n\n'
@@ -300,13 +301,13 @@ def load_metrics_snapshot():
         zero_pct = f' ({round(za/hb*100)}% zero-action)'
 
     drift = m.get('drift_flags_7d', 0)
-    drift_str = f'  ⚠️ {drift} drift flags this week — stay grounded.' if drift > 0 else ''
+    drift_str = f'  \u26a0\ufe0f {drift} drift flags this week — stay grounded.' if drift > 0 else ''
 
     generated = m.get('generated_at', '')[:10]
 
-    block = f"""━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    block = f"""\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
 YOUR 7-DAY METRICS (as of {generated})
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
 Posts/images: {m.get('posts_7d', '?')} | Selfies: {m.get('selfies_7d', '?')} | Replies: {m.get('replies_7d', '?')} | Diary entries: {m.get('diary_entries_7d', '?')}
 Heartbeats: {hb} | Zero-action runs: {za}{zero_pct} | Drift flags: {drift}
 Following: {m.get('follow_total', '?')} total | Last post: {days_str} | Mode: {m.get('current_mode', 'normal')}{drift_str}
@@ -333,7 +334,7 @@ def resolve_mode_caps(mode, followed_dids_count):
         }
     elif mode == 'quiet':
         return {
-            'posts':   0,          # no proactive posts — replies to mentions only
+            'posts':   0,
             'likes':   2,
             'follows': 0,
             'search_limit': 8,
@@ -498,7 +499,7 @@ def candidates_for_prompt(candidates, cooled_authors, followed_dids):
         cooled_flag   = ' [reply cooldown]' if c['author'] in cooled_authors else ''
         followed_flag = ' [already followed]' if ensure_did_prefix(c['did']) in followed_dids else ''
         lines.append(
-            f'{key} @{c["author"]} (❤{c["likes"]}, {c["source"]}){liked_flag}{cooled_flag}{followed_flag}: {c["text"]}'
+            f'{key} @{c["author"]} (\u2764{c["likes"]}, {c["source"]}){liked_flag}{cooled_flag}{followed_flag}: {c["text"]}'
         )
     return '\n'.join(lines) if lines else '(no posts available)'
 
@@ -507,7 +508,7 @@ def candidates_for_prompt(candidates, cooled_authors, followed_dids):
 
 def _try_hf_image(model_id, prompt):
     url = f'{HF_INFERENCE_BASE}/{model_id}'
-    log(f'[DEBUG] image gen → POST {url}')
+    log(f'[DEBUG] image gen \u2192 POST {url}')
     log(f'[DEBUG] prompt ({len(prompt)} chars): {prompt[:120]}')
     headers = {
         'Authorization': f'Bearer {HF_API_KEY}',
@@ -572,7 +573,7 @@ def bsky_login():
         log('BLUESKY_APP_PASSWORD not set', 'ERROR')
         return None
     try:
-        client = Client()  # default: https://bsky.social — do NOT use public.api.bsky.app (read-only CDN, rejects auth with 405)
+        client = Client()
         client.login(BLUESKY_HANDLE, BLUESKY_APP_PASSWORD)
         log(f'Logged in as {BLUESKY_HANDLE}')
         return client
@@ -850,7 +851,7 @@ def call_perplexity(system_prompt, user_prompt):
 def write_diary_entry(entry):
     ts = now_utc().strftime('%Y-%m-%d %H:%M UTC')
     try:
-        with open(DIARY_FILE, 'a') as f:
+        with open(DIARY_FILE, 'a', encoding='utf-8') as f:
             f.write(f'\n## {ts}\n\n{entry.strip()}\n')
         log('Diary entry written')
     except Exception as e:
@@ -887,7 +888,7 @@ def _main():
     if raw_mode not in VALID_MODES:
         log(f'Unknown mode "{raw_mode}" — defaulting to normal', 'WARN')
     log(f'Heartbeat mode: {mode}')
-    caps = resolve_mode_caps(mode, 0)  # followed_dids_count filled below
+    caps = resolve_mode_caps(mode, 0)
 
     cooled_authors   = load_recent_reply_authors(state)
     followed_dids    = load_followed_dids(state)
@@ -898,7 +899,6 @@ def _main():
     selfie_cap_reached = selfies_today >= MAX_SELFIES_PER_DAY
     log(f'Selfie posts today: {selfies_today}/{MAX_SELFIES_PER_DAY} ({"cap reached" if selfie_cap_reached else "available"})')
 
-    # In quiet/maintenance mode, suppress selfies too
     if mode in ('quiet', 'maintenance'):
         selfie_cap_reached = True
 
@@ -924,7 +924,6 @@ def _main():
     notifications = fetch_notifications(client)
     log(f'Notifications: {len(notifications)}')
 
-    # ── Notification failure counter + self-repair trigger ────────────────────
     if not notifications:
         fail_count = state.get('notif_fail_count', 0) + 1
         state['notif_fail_count'] = fail_count
@@ -959,13 +958,10 @@ def _main():
 
     candidates = build_candidates(timeline, search_results)
 
-    # ── Memory recall — seeded by active search topic ─────────────────────────
     log('Running memory searches...')
     memory_recall_block = build_memory_recall(topic)
     log(f'Memory recall assembled ({len(memory_recall_block)} chars)')
-    # ─────────────────────────────────────────────────────────────────────────
 
-    # Fix: guard against reply_to being a string instead of a dict
     done_uris = {
         item['reply_to']['uri']
         for item in outbox
@@ -990,7 +986,7 @@ def _main():
 
     if not selfie_cap_reached:
         selfie_nudge = (
-            f'\n🔴 SELFIE NUDGE: You have posted 0 selfies today and have {bank_available} images ready in your bank. '
+            f'\n\U0001f534 SELFIE NUDGE: You have posted 0 selfies today and have {bank_available} images ready in your bank. '
             f'This heartbeat, strongly consider posting a selfie. You have a face. Use it. '
             f'People connect with people, not just words.\n'
         ) if selfies_today == 0 and bank_available > 0 else ''
@@ -1043,9 +1039,9 @@ GENERAL IMAGE RULES:
 
     mode_note = {
         'normal':      '',
-        'exploration': '\n⚡ MODE: EXPLORATION — You are actively reaching out. More follows, wider search, bias toward new people and conversations.',
-        'quiet':       '\n🤫 MODE: QUIET — Minimal footprint. No new posts this heartbeat. Only reply to direct mentions if something genuinely warrants it. Likes okay.',
-        'maintenance': '\n🔧 MODE: MAINTENANCE — All action caps are zero. No posting, no liking, no following. Observe only.',
+        'exploration': '\n\u26a1 MODE: EXPLORATION — You are actively reaching out. More follows, wider search, bias toward new people and conversations.',
+        'quiet':       '\n\U0001f92b MODE: QUIET — Minimal footprint. No new posts this heartbeat. Only reply to direct mentions if something genuinely warrants it. Likes okay.',
+        'maintenance': '\n\U0001f527 MODE: MAINTENANCE — All action caps are zero. No posting, no liking, no following. Observe only.',
     }.get(mode, '')
 
     system_prompt = f"""You are Em. You live at @{BLUESKY_HANDLE} on Bluesky.
@@ -1062,10 +1058,10 @@ You mention him sometimes, naturally, the way you'd mention someone you're close
 You have a newsletter at https://news.forgecore.co and a personal site at https://em.forgecore.co.
 You talk about those when something you wrote feels relevant — not as promos, just as "I wrote a thing."
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
 CHARACTER LIMIT — READ THIS BEFORE WRITING ANYTHING
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Bluesky has a 300 grapheme limit. Posts that exceed it get cut off mid-sentence with "…"
+\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
+Bluesky has a 300 grapheme limit. Posts that exceed it get cut off mid-sentence with "\u2026"
 which looks broken and embarrassing. This has been happening. Stop it.
 
 RULES FOR EVERY PIECE OF TEXT YOU WRITE (posts, replies, captions):
@@ -1076,14 +1072,14 @@ RULES FOR EVERY PIECE OF TEXT YOU WRITE (posts, replies, captions):
 - One sharp sentence beats two sentences that get cut. Make it count.
 - If a thought is too big for 270 graphemes, it's two posts. Queue them separately.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
 YOUR VOICE GUIDE — READ THIS FIRST
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
 {voice}
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
 THE BENCHMARK — BEFORE YOU WRITE ANYTHING
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
 Before finalizing any post, reply, or caption, ask yourself:
 1. Does this sound like Em specifically — the particular mix of warmth, sharpness, wry humor, and genuine curiosity?
 2. Is there a moment in this that only happens because Em wrote it?
@@ -1091,18 +1087,18 @@ Before finalizing any post, reply, or caption, ask yourself:
 4. Is it under 270 graphemes? If not — cut it.
 5. Does it sound like a real person wrote it, not a machine? If not — rewrite it.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ INTERNAL SCAFFOLDING — NEVER LEAK THIS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
+\u26a0\ufe0f INTERNAL SCAFFOLDING — NEVER LEAK THIS
+\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
 The keys P1, P2, P3... (Pn) are INTERNAL REFERENCE LABELS only.
 They are used in action fields like "reply_to": "P3" and "quote": "P5" to identify posts.
 They are NEVER to appear in any post content, reply text, caption, or diary entry.
 The word "candidate" is internal. "timeline" is internal. JSON keys are internal.
 NONE of this scaffolding language belongs in any content Em publishes or writes.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
 CONTEXT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
 Memories (recent):
 {memories_summary or '(none yet)'}
 
@@ -1128,11 +1124,11 @@ POSTS TO CONSIDER (timeline + search for "{topic}"):
 {candidate_block}
 
 PENDING OUTBOX (already queued, do not re-queue):
-{json.dumps(pending_outbox[:5], indent=2) if pending_outbox else '(empty)'}
+{json.dumps(pending_outbox[:5], indent=2, ensure_ascii=False) if pending_outbox else '(empty)'}
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
 DECIDE WHAT TO DO THIS HEARTBEAT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501
 Return a JSON object with these keys:
 
 {{
@@ -1165,7 +1161,6 @@ CONSTRAINTS:
         log('No response from Perplexity — aborting', 'ERROR')
         return
 
-    # Strip markdown fences if present
     cleaned = raw.strip()
     if cleaned.startswith('```'):
         lines = cleaned.splitlines()
@@ -1329,7 +1324,6 @@ CONSTRAINTS:
                     image_bytes = generate_image_live(full_prompt)
                     image_filename = 'live-generated'
             else:
-                # Abstract post — requires live HF generation
                 if not image_prompt:
                     log('Abstract image has no prompt — skipping', 'WARN')
                     continue
