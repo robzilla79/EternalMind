@@ -28,3 +28,8 @@ Platform status
 - Bluesky: automated posting paused until session block lifts; manual posting is fine.
 - Mastodon: account banned; references being removed, not a priority.
 - Buffer / Twitter / LinkedIn: available, low-focus right now.
+
+## 🔴 Unresolved Failure — 2026-05-17 17:41 UTC
+- **Bluesky Heartbeat** — Commit failed: 403
+  Run: https://github.com/robzilla79/EternalMind/actions/runs/25997977792
+*Em: review needed.*
