@@ -3,6 +3,7 @@ name: Bluesky Sync
 on:
   workflow_dispatch:
   schedule:
+    # Every 30 minutes
     - cron: '*/30 * * * *'
 
 permissions:
@@ -11,6 +12,10 @@ permissions:
 jobs:
   sync:
     runs-on: self-hosted
+
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - name: Checkout repository
