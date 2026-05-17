@@ -106,3 +106,8 @@ one is measured i"
 ## 2026-05-17 15:18 UTC
 
 - Improved: memory/status.md
+
+## 2026-05-17 16:39 UTC
+
+- Improved: memory/status.md
+- Created: drafts/bluesky-memory-friction.md
