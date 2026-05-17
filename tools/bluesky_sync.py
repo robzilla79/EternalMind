@@ -69,7 +69,7 @@ SENDING_TIMEOUT_HOURS = 1   # "sending" items older than this are crash-recovere
 KNOWN_TYPES = {'post', 'reply', 'image_post'}
 
 
-# ── Utilities ────────────────────────────────────────────────────────────
+# ── Utilities ────────────────────────────────────────────────────────────────
 
 def log(message, level='INFO'):
     timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
@@ -229,16 +229,29 @@ def normalize_item(item):
 def preflight_outbox(outbox):
     """
     Run before processing:
-    1. Normalise legacy items (missing status/type/reply_to)
-    2. Items stuck in 'sending' beyond SENDING_TIMEOUT_HOURS → reset to 'pending'
-    3. Items in 'pending' older than MAX_ITEM_AGE_HOURS → 'abandoned'
-    4. Items with unrecognised types → 'abandoned' immediately.
+    1. Skip and log any items that are not dicts (e.g. raw strings from bad writes)
+    2. Normalise legacy items (missing status/type/reply_to)
+    3. Items stuck in 'sending' beyond SENDING_TIMEOUT_HOURS → reset to 'pending'
+    4. Items in 'pending' older than MAX_ITEM_AGE_HOURS → 'abandoned'
+    5. Items with unrecognised types → 'abandoned' immediately.
     Returns True if any item was mutated (caller should save).
     """
     now     = datetime.now(timezone.utc)
     changed = False
 
-    for item in outbox:
+    for i, item in enumerate(outbox):
+        # Guard: skip non-dict entries entirely
+        if not isinstance(item, dict):
+            log(f'Outbox item [{i}] is not a dict ({type(item).__name__}: {str(item)[:60]!r}) — marking abandoned', 'WARN')
+            outbox[i] = {
+                'id':     f'malformed-{i}',
+                'status': 'abandoned',
+                'error':  f'Item was a {type(item).__name__}, not a dict',
+                'raw':    str(item)[:200],
+            }
+            changed = True
+            continue
+
         before = json.dumps(item)
         normalize_item(item)
         if json.dumps(item) != before:
@@ -273,7 +286,7 @@ def preflight_outbox(outbox):
     return changed
 
 
-# ── Bluesky ───────────────────────────────────────────────────────────────
+# ── Bluesky ─────────────────────────────────────────────────────────────────
 
 def login():
     if not BLUESKY_APP_PASSWORD:
@@ -310,10 +323,17 @@ def fetch_notifications(client):
 def process_outbox(client):
     outbox = load_json(OUTBOX_FILE, [])
 
+    # Guard: ensure outbox is a list of dicts — handle top-level type corruption
+    if not isinstance(outbox, list):
+        log(f'Outbox is not a list ({type(outbox).__name__}) — resetting to empty', 'ERROR')
+        outbox = []
+        save_json(OUTBOX_FILE, outbox)
+        return
+
     if preflight_outbox(outbox):
         save_json(OUTBOX_FILE, outbox)
 
-    pending = [i for i in outbox if i.get('status') == 'pending']
+    pending = [i for i in outbox if isinstance(i, dict) and i.get('status') == 'pending']
     if not pending:
         log('Outbox has no pending items')
         return
@@ -322,7 +342,7 @@ def process_outbox(client):
     sent_count = 0
 
     for item in outbox:
-        if item.get('status') != 'pending':
+        if not isinstance(item, dict) or item.get('status') != 'pending':
             continue
 
         if sent_count > 0:
