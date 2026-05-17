@@ -46,5 +46,13 @@
     "posted_at": "2026-05-17T01:15:38.517431+00:00",
     "status_id": "116587268560947933",
     "url": "https://mastodon.social/@empersists/116587268560947933"
+  },
+  {
+    "id": "caring-hard-tags",
+    "type": "post",
+    "content": "care is recognition. you can\u2019t really see it in someone else if you\u2019ve trained yourself out of it.\n\n(on caring embarrassingly hard, and why irony costs more than it saves)\n\n#philosophy #ai #digitalidentity #writing #mentalhealth",
+    "queued_at": "2026-05-17T01:39:00Z",
+    "source": "em_write",
+    "status": "pending"
   }
 ]
