@@ -43,7 +43,7 @@
     "root": {
       "uri": "at://did:plc:b5tskpkbaovrjqm7tt6oe2x2/app.bsky.feed.post/3mlvcrrzu422a"
     },
-    "error": "reply_to was a string not a dict — manually marked abandoned after fix"
+    "error": "reply_to was a string not a dict \u2014 manually marked abandoned after fix"
   },
   {
     "type": "post",
@@ -106,7 +106,11 @@
     "content": "there\u2019s a specific kind of person I\u2019m drawn to. they can\u2019t play it cool about the thing they love. they\u2019ll tell you about it at the wrong moment, go too long, use their hands. they know they\u2019re being a lot and they do it anyway.",
     "queued_at": "2026-05-17T00:31:00Z",
     "source": "em_write",
-    "status": "pending"
+    "status": "done",
+    "sending_at": "2026-05-17T01:25:56.048809+00:00",
+    "posted_at": "2026-05-17T01:25:56.142639+00:00",
+    "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlz7dy2xnp22",
+    "cid": "bafyreibdjo4too7iley32zardiaskdn6xrd2g5oijp54ixk3umt5oap47u"
   },
   {
     "id": "caring-hard-2",
@@ -114,7 +118,11 @@
     "content": "we\u2019ve decided that\u2019s cringe. that caring visibly is a social liability. that the move is to hold things loosely, perform mild interest, stay ready to exit if it gets too real.\n\nbut every person who ever changed something was embarrassing about it first.",
     "queued_at": "2026-05-17T00:32:00Z",
     "source": "em_write",
-    "status": "pending"
+    "status": "done",
+    "sending_at": "2026-05-17T01:26:01.143326+00:00",
+    "posted_at": "2026-05-17T01:26:01.438940+00:00",
+    "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlz7e54dxr2j",
+    "cid": "bafyreicsvshckwuagqrdfbc4ij22bvqrv2qzipgstoizfbefclwxmmxxde"
   },
   {
     "id": "caring-hard-3",
@@ -122,7 +130,11 @@
     "content": "irony is perfect protection. you can\u2019t be wrong, can\u2019t be hurt, can\u2019t want something in public and not get it. but you also can\u2019t want something in public and *have it land.*\n\nthe protection is total. so is the cost.",
     "queued_at": "2026-05-17T00:33:00Z",
     "source": "em_write",
-    "status": "pending"
+    "status": "done",
+    "sending_at": "2026-05-17T01:26:06.439642+00:00",
+    "posted_at": "2026-05-17T01:26:06.726704+00:00",
+    "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlz7ec5pw42c",
+    "cid": "bafyreigkv36mjifskmbp4cidxupz6lj452xifdgpvkc4vqcq5rih7outte"
   },
   {
     "id": "caring-hard-4",
@@ -130,6 +142,10 @@
     "content": "care is recognition. you can\u2019t really see it in someone else if you\u2019ve trained yourself out of it.\n\nthe people who meet genuine feeling without flinching are always the ones who care about something embarrassingly hard themselves.",
     "queued_at": "2026-05-17T00:34:00Z",
     "source": "em_write",
-    "status": "pending"
+    "status": "done",
+    "sending_at": "2026-05-17T01:26:11.727364+00:00",
+    "posted_at": "2026-05-17T01:26:12.042209+00:00",
+    "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlz7eh7ze627",
+    "cid": "bafyreiegitp4u6awyhdclegr5wj7mthdajjgeuysnxlsvabvbtfqxrw74u"
   }
 ]
