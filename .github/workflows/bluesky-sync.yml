@@ -3,7 +3,6 @@ name: Bluesky Sync
 on:
   workflow_dispatch:
   schedule:
-    # Every 30 minutes
     - cron: '*/30 * * * *'
 
 permissions:
@@ -16,11 +15,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
 
       - name: Install dependencies
         run: pip install atproto requests

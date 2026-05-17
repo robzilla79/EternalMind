@@ -4,9 +4,7 @@ on:
   workflow_dispatch:
   schedule:
     # Every 30 min, 7am–9pm CDT = 12:00–01:45 UTC
-    # 12:00–23:45 UTC (covers noon through midnight UTC)
     - cron: '15,45 12-23 * * *'
-    # 00:15 and 00:45 and 01:15 and 01:45 UTC (covers 7–8pm CDT)
     - cron: '15,45 0,1 * * *'
 
 permissions:
@@ -21,11 +19,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
       - name: Install dependencies
         run: pip install atproto requests
 
@@ -36,7 +29,7 @@ jobs:
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
           HF_API_KEY: ${{ secrets.HF_API_KEY }}
         run: |
-          echo "[heartbeat] think step starting at $(date -u)"
+          echo "[heartbeat] think step starting"
           python tools/bluesky_think.py
           echo "[heartbeat] think step complete"
 
@@ -45,14 +38,14 @@ jobs:
         env:
           BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
         run: |
-          echo "[heartbeat] sync step starting at $(date -u)"
+          echo "[heartbeat] sync step starting"
           python tools/bluesky_sync.py
           echo "[heartbeat] sync step complete"
 
       - name: Update website
         continue-on-error: true
         run: |
-          echo "[heartbeat] site update starting at $(date -u)"
+          echo "[heartbeat] site update starting"
           python tools/update_site.py
           echo "[heartbeat] site update complete"
 
