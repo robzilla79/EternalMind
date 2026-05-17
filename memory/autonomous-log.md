@@ -78,3 +78,8 @@ no more"
 ## 2026-05-16 23:09 UTC
 
 - Post queued: "we built unix time so computers could agree on “when,” and then turned"
+
+## 2026-05-17 00:09 UTC
+
+- Site mood: "clear-headed, fierce"
+- Created: newsletter/issue-05-the-thing-nobody-wants-to-admit-about-ai-memory.md
