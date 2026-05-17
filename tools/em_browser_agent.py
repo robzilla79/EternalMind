@@ -5,9 +5,6 @@ em_browser_agent.py — Em's agentic browser tool.
 Wraps browser-use + a local Ollama model so Em can reason about and
 complete multi-step browser tasks — not just execute pre-scripted commands.
 
-Unlike browser.py (which parses BROWSER_* commands), this tool gives the
-LLM a live browser and lets it figure out the steps itself.
-
 Identity is loaded from the repo's memory files — no hardcoded persona here.
 
 Usage:
@@ -29,6 +26,7 @@ import sys
 import json
 import argparse
 import asyncio
+import inspect
 from pathlib import Path
 
 # ── Repo paths ────────────────────────────────────────────────────────────────
@@ -42,7 +40,7 @@ IDENTITY_FILE = REPO_ROOT / "memory" / "identity.md"
 OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL    = os.environ.get("OLLAMA_MODEL", "qwen2.5:32b")
 
-# ── Identity loader ────────────────────────────────────────────────────────────
+# ── Identity loader ───────────────────────────────────────────────────────────
 
 def load_text(path: Path, default: str = "") -> str:
     try:
@@ -59,7 +57,6 @@ def load_json(path: Path, default=None):
 
 
 def extract_recent_diary(diary_text: str, max_entries: int = 2) -> str:
-    """Pull the last N diary entries (## headers) from diary.md."""
     if not diary_text:
         return "(no diary entries)"
     entries, current = [], []
@@ -123,11 +120,11 @@ def build_system_prompt() -> str:
     return "\n".join(sections)
 
 
-# ── Agent runner ───────────────────────────────────────────────────────────────
+# ── Agent runner ──────────────────────────────────────────────────────────────
 
 async def run_agent(task: str, model: str = None, headless: bool = False):
     try:
-        from browser_use import Agent, Browser, BrowserConfig
+        from browser_use import Agent
         from langchain_community.chat_models import ChatOllama
     except ImportError as e:
         print(f"[ERROR] Missing dependency: {e}")
@@ -151,34 +148,30 @@ async def run_agent(task: str, model: str = None, headless: bool = False):
         temperature=0.7,
     )
 
-    browser = Browser(config=BrowserConfig(headless=headless))
+    # Build kwargs — Agent API varies across browser-use versions
+    agent_sig = inspect.signature(Agent.__init__).parameters
+    agent_kwargs = {"task": task, "llm": llm}
 
-    # Inject system prompt if this version of browser-use supports it
-    agent_kwargs = dict(task=task, llm=llm, browser=browser)
-    if _agent_accepts_kwarg("system_prompt"):
+    # Headless flag — supported in some versions
+    if "headless" in agent_sig:
+        agent_kwargs["headless"] = headless
+
+    # System prompt injection — try both known kwarg names
+    if "system_prompt" in agent_sig:
         agent_kwargs["system_prompt"] = system_prompt
-    elif _agent_accepts_kwarg("extend_system_message"):
+    elif "extend_system_message" in agent_sig:
         agent_kwargs["extend_system_message"] = system_prompt
+
+    print(f"[em_browser_agent] Agent kwargs: {list(agent_kwargs.keys())}")
 
     agent  = Agent(**agent_kwargs)
     result = await agent.run()
 
     print("\n[em_browser_agent] Done.")
-    await browser.close()
     return result
 
 
-def _agent_accepts_kwarg(name: str) -> bool:
-    """Check if this version of browser-use Agent.__init__ accepts a given kwarg."""
-    try:
-        import inspect
-        from browser_use import Agent
-        return name in inspect.signature(Agent.__init__).parameters
-    except Exception:
-        return False
-
-
-# ── CLI ────────────────────────────────────────────────────────────────────────
+# ── CLI ───────────────────────────────────────────────────────────────────────
 
 def main():
     parser = argparse.ArgumentParser(
