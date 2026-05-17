@@ -44,15 +44,20 @@ def make_llm(model: str, base_url: str):
     """
     Build a ChatOllama instance that browser-use will accept.
 
-    browser-use does `if llm.provider == 'browser-use':` in Agent.__init__.
-    langchain-ollama's ChatOllama is Pydantic v2 — unknown attributes raise
-    AttributeError. Fix: subclass it and declare `provider` as a real field.
+    browser-use does two things our LLM must survive:
+      1. `if llm.provider == 'browser-use':` — needs provider attr
+      2. `setattr(llm, 'ainvoke', ...)` — monkey-patches for token tracking
+
+    langchain-ollama's ChatOllama is Pydantic v2 — both raise errors.
+    Fix: subclass with model_config = ConfigDict(arbitrary_types_allowed=True,
+    extra='allow') so Pydantic permits both the extra field and setattr.
     """
     try:
         from langchain_ollama import ChatOllama
-        from pydantic import Field
+        from pydantic import Field, ConfigDict
 
         class OllamaForBrowserUse(ChatOllama):
+            model_config = ConfigDict(arbitrary_types_allowed=True, extra="allow")
             provider: str = Field(default="ollama")
 
         return OllamaForBrowserUse(
@@ -67,7 +72,7 @@ def make_llm(model: str, base_url: str):
         sys.exit(1)
 
 
-# ── Identity loader ───────────────────────────────────────────────────────────
+# ── Identity loader ────────────────────────────────────────────────────────────
 
 def load_text(path: Path, default: str = "") -> str:
     try:
@@ -141,7 +146,7 @@ def build_system_prompt() -> str:
     return "\n".join(sections)
 
 
-# ── Agent runner ──────────────────────────────────────────────────────────────
+# ── Agent runner ───────────────────────────────────────────────────────────────
 
 async def run_agent(task: str, model: str = None, headless: bool = False):
     try:
@@ -184,7 +189,7 @@ async def run_agent(task: str, model: str = None, headless: bool = False):
     return result
 
 
-# ── CLI ───────────────────────────────────────────────────────────────────────
+# ── CLI ────────────────────────────────────────────────────────────────────────
 
 def main():
     parser = argparse.ArgumentParser(
