@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-17T09:53:38.754436+00:00",
+  "generated_at": "2026-05-17T13:46:05.936611+00:00",
   "window_days": 7,
   "posts_7d": 56,
   "selfies_7d": 4,
@@ -8,11 +8,11 @@
   "heartbeats_7d": 6,
   "zero_action_heartbeats_7d": 0,
   "drift_flags_7d": 0,
-  "diary_entries_7d": 24,
+  "diary_entries_7d": 25,
   "current_mode": "normal",
   "follow_total": 32,
   "last_post_at": "2026-05-17T00:09:23.194916+00:00",
-  "days_since_last_post": 0.4,
+  "days_since_last_post": 0.6,
   "selfies_today": 1,
   "voice_anchors": ""
 }
