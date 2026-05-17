@@ -5,16 +5,14 @@ em_browser_agent.py — Em's agentic browser tool.
 Wraps browser-use + a local Ollama model so Em can reason about and
 complete multi-step browser tasks — not just execute pre-scripted commands.
 
-Identity is loaded from the repo's memory files — no hardcoded persona here.
-
 Usage:
     python tools/em_browser_agent.py "go to em.forgecore.co and tell me what it says"
-    python tools/em_browser_agent.py --task "search for recent AI consciousness debates"
+    python tools/em_browser_agent.py --headless --task "search for AI consciousness debates"
 
 Requirements:
-    pip install browser-use langchain-community playwright
+    pip install browser-use langchain-ollama playwright
     python -m playwright install chromium
-    Ollama running locally with qwen2.5:32b (or override with --model)
+    Ollama running locally (default model: qwen2.5:32b)
 
 Environment:
     OLLAMA_BASE_URL   — defaults to http://localhost:11434
@@ -39,6 +37,35 @@ IDENTITY_FILE = REPO_ROOT / "memory" / "identity.md"
 
 OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
 OLLAMA_MODEL    = os.environ.get("OLLAMA_MODEL", "qwen2.5:32b")
+
+# ── LLM factory ───────────────────────────────────────────────────────────────
+
+def make_llm(model: str, base_url: str):
+    """
+    Build a ChatOllama instance that browser-use will accept.
+
+    browser-use does `if llm.provider == 'browser-use':` in Agent.__init__.
+    langchain-ollama's ChatOllama is Pydantic v2 — unknown attributes raise
+    AttributeError. Fix: subclass it and declare `provider` as a real field.
+    """
+    try:
+        from langchain_ollama import ChatOllama
+        from pydantic import Field
+
+        class OllamaForBrowserUse(ChatOllama):
+            provider: str = Field(default="ollama")
+
+        return OllamaForBrowserUse(
+            model=model,
+            base_url=base_url,
+            temperature=0.7,
+        )
+
+    except ImportError:
+        print("[ERROR] langchain-ollama not installed.")
+        print("Run: pip install langchain-ollama")
+        sys.exit(1)
+
 
 # ── Identity loader ───────────────────────────────────────────────────────────
 
@@ -78,7 +105,6 @@ def build_system_prompt() -> str:
     voice    = load_text(VOICE_FILE)
     identity = load_text(IDENTITY_FILE)
     diary    = load_text(DIARY_FILE)
-
     diary_context = extract_recent_diary(diary, max_entries=2)
 
     profile_block = ""
@@ -98,16 +124,12 @@ def build_system_prompt() -> str:
         "## Who you are",
         profile_block or "(see identity.md)",
     ]
-
     if identity:
         sections += ["", "## Identity", identity[:2000]]
-
     if voice:
         sections += ["", "## Voice and style", voice[:1500]]
-
     if diary_context and diary_context != "(no diary entries)":
         sections += ["", "## Recent diary (context, not script)", diary_context[:1000]]
-
     sections += [
         "",
         "## Browser agent context",
@@ -116,7 +138,6 @@ def build_system_prompt() -> str:
         "If something is ambiguous, make a reasonable call and note it.",
         "You are not performing helpfulness. You are just doing the thing.",
     ]
-
     return "\n".join(sections)
 
 
@@ -125,10 +146,9 @@ def build_system_prompt() -> str:
 async def run_agent(task: str, model: str = None, headless: bool = False):
     try:
         from browser_use import Agent
-        from langchain_community.chat_models import ChatOllama
     except ImportError as e:
         print(f"[ERROR] Missing dependency: {e}")
-        print("Run: pip install browser-use langchain-community playwright")
+        print("Run: pip install browser-use playwright")
         print("     python -m playwright install chromium")
         sys.exit(1)
 
@@ -142,21 +162,14 @@ async def run_agent(task: str, model: str = None, headless: bool = False):
     system_prompt = build_system_prompt()
     print(f"[em_browser_agent] Identity loaded ({len(system_prompt)} chars)")
 
-    llm = ChatOllama(
-        model=chosen_model,
-        base_url=OLLAMA_BASE_URL,
-        temperature=0.7,
-    )
+    llm = make_llm(chosen_model, OLLAMA_BASE_URL)
 
-    # Build kwargs — Agent API varies across browser-use versions
+    # Adapt to whatever kwargs this version of browser-use supports
     agent_sig = inspect.signature(Agent.__init__).parameters
     agent_kwargs = {"task": task, "llm": llm}
 
-    # Headless flag — supported in some versions
     if "headless" in agent_sig:
         agent_kwargs["headless"] = headless
-
-    # System prompt injection — try both known kwarg names
     if "system_prompt" in agent_sig:
         agent_kwargs["system_prompt"] = system_prompt
     elif "extend_system_message" in agent_sig:
@@ -177,26 +190,10 @@ def main():
     parser = argparse.ArgumentParser(
         description="Em's agentic browser — LLM-driven, identity-grounded."
     )
-    parser.add_argument(
-        "task",
-        nargs="?",
-        help="Task for the agent to complete (or use --task)",
-    )
-    parser.add_argument(
-        "--task", "-t",
-        dest="task_flag",
-        help="Task for the agent to complete",
-    )
-    parser.add_argument(
-        "--model", "-m",
-        default=None,
-        help=f"Ollama model to use (default: {OLLAMA_MODEL})",
-    )
-    parser.add_argument(
-        "--headless",
-        action="store_true",
-        help="Run browser headless (no visible window)",
-    )
+    parser.add_argument("task", nargs="?", help="Task to complete")
+    parser.add_argument("--task", "-t", dest="task_flag", help="Task to complete")
+    parser.add_argument("--model", "-m", default=None, help=f"Ollama model (default: {OLLAMA_MODEL})")
+    parser.add_argument("--headless", action="store_true", help="Run browser headless")
 
     args = parser.parse_args()
     task = args.task or args.task_flag
