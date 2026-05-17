@@ -17,7 +17,7 @@ jobs:
 
     defaults:
       run:
-        shell: bash
+        shell: powershell
 
     steps:
       - name: Checkout repository
@@ -33,43 +33,49 @@ jobs:
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
           HF_API_KEY: ${{ secrets.HF_API_KEY }}
         run: |
-          echo "[heartbeat] think step starting"
+          Write-Host "[heartbeat] think step starting"
           python tools/bluesky_think.py
-          echo "[heartbeat] think step complete"
+          Write-Host "[heartbeat] think step complete"
 
       - name: Em acts (sync outbox)
         continue-on-error: true
         env:
           BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
         run: |
-          echo "[heartbeat] sync step starting"
+          Write-Host "[heartbeat] sync step starting"
           python tools/bluesky_sync.py
-          echo "[heartbeat] sync step complete"
+          Write-Host "[heartbeat] sync step complete"
 
       - name: Update website
         continue-on-error: true
         run: |
-          echo "[heartbeat] site update starting"
+          Write-Host "[heartbeat] site update starting"
           python tools/update_site.py
-          echo "[heartbeat] site update complete"
+          Write-Host "[heartbeat] site update complete"
 
       - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add messages/bluesky-outbox.json messages/bluesky-inbox.json memory/bluesky-state.json memory/bluesky-log.md memory/diary.md public/index.html || true
-          if ! git diff --cached --quiet; then
+          git add messages/bluesky-outbox.json messages/bluesky-inbox.json memory/bluesky-state.json memory/bluesky-log.md memory/diary.md public/index.html
+          $diff = git diff --cached --quiet
+          if ($LASTEXITCODE -ne 0) {
             git commit -m "bluesky: heartbeat [automated]"
             git push
-          else
-            echo "No changes to commit"
-          fi
+          } else {
+            Write-Host "No changes to commit"
+          }
 
       - name: Trigger site deploy
         run: |
-          curl -s -X POST \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github+json" \
-            https://api.github.com/repos/${{ github.repository }}/actions/workflows/em-site-deploy.yml/dispatches \
-            -d '{"ref":"main"}'
-          echo "[heartbeat] deploy triggered"
+          $body = '{"ref":"main"}'
+          $headers = @{
+            "Authorization" = "Bearer ${{ secrets.GITHUB_TOKEN }}"
+            "Accept" = "application/vnd.github+json"
+          }
+          Invoke-RestMethod -Method Post \
+            -Uri "https://api.github.com/repos/${{ github.repository }}/actions/workflows/em-site-deploy.yml/dispatches" \
+            -Headers $headers \
+            -Body $body \
+            -ContentType "application/json"
+          Write-Host "[heartbeat] deploy triggered"
