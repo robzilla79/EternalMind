@@ -44,12 +44,13 @@ def make_llm(model: str, base_url: str):
     """
     Build a ChatOllama instance that browser-use will accept.
 
-    browser-use pokes several attributes onto/into the LLM:
-      - llm.provider     (service.py:235)   — needs to exist, not equal 'browser-use'
-      - setattr(llm, 'ainvoke', ...)         — token tracking monkey-patch
-      - llm.model_name   (cloud_events.py)  — ChatOllama uses .model, not .model_name
+    browser-use 0.12.x pokes several things onto the LLM:
+      - llm.provider     needs to exist (not equal 'browser-use')
+      - setattr ainvoke  token tracking monkey-patch
+      - llm.model_name   cloud_events telemetry
 
-    Fix: subclass with extra='allow' + expose model_name as a property.
+    It also requires the model to return valid structured JSON for its
+    action schema. Passing format='json' tells Ollama to enforce this.
     """
     try:
         from langchain_ollama import ChatOllama
@@ -66,7 +67,8 @@ def make_llm(model: str, base_url: str):
         return OllamaForBrowserUse(
             model=model,
             base_url=base_url,
-            temperature=0.7,
+            temperature=0.0,   # lower temp = more reliable JSON output
+            format="json",     # enforce JSON mode at Ollama level
         )
 
     except ImportError:
@@ -75,7 +77,7 @@ def make_llm(model: str, base_url: str):
         sys.exit(1)
 
 
-# ── Identity loader ────────────────────────────────────────────────────────────
+# ── Identity loader ───────────────────────────────────────────────────────────
 
 def load_text(path: Path, default: str = "") -> str:
     try:
@@ -149,7 +151,7 @@ def build_system_prompt() -> str:
     return "\n".join(sections)
 
 
-# ── Agent runner ───────────────────────────────────────────────────────────────
+# ── Agent runner ──────────────────────────────────────────────────────────────
 
 async def run_agent(task: str, model: str = None, headless: bool = False):
     try:
