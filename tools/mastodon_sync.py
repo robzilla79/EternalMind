@@ -6,31 +6,11 @@ Mastodon Sync Script for EternalMind
 Handles posting and replying on Mastodon as Em.
 
 Run via GitHub Actions (.github/workflows/mastodon-sync.yml)
-Requires MASTODON_ACCESS_TOKEN and MASTODON_INSTANCE_URL environment variables.
-
-Rate limits:
-  Mastodon allows 300 requests per 5 minutes per user.
-  We sleep RATE_LIMIT_SECONDS between sends as courtesy.
+Requires MASTODON_ACCESS_TOKEN environment variable.
+Optional: MASTODON_INSTANCE_URL (defaults to https://mastodon.social if unset or empty)
 
 Outbox file: messages/mastodon-outbox.json
 Log file:    memory/mastodon-log.md
-
-Outbox item schema:
-  {
-    "id": "unique-string",
-    "type": "post" | "reply",
-    "content": "text of the post",
-    "reply_to_id": "mastodon status ID (for replies)",
-    "status": "pending" | "sending" | "done" | "failed" | "abandoned",
-    "queued_at": "ISO8601"
-  }
-
-Status lifecycle:
-  pending  -> sending  (marked before API call)
-  sending  -> done     (API call succeeded)
-  sending  -> failed   (API call threw an exception)
-  pending  -> abandoned (item too old or unrecognised type)
-  Items stuck in 'sending' for > SENDING_TIMEOUT_HOURS are re-queued as 'pending'.
 """
 
 import os
@@ -39,8 +19,9 @@ import time
 import requests
 from datetime import datetime, timezone, timedelta
 
-MAST_TOKEN       = os.environ.get('MASTODON_ACCESS_TOKEN')
-MAST_INSTANCE    = os.environ.get('MASTODON_INSTANCE_URL', 'https://mastodon.social').rstrip('/')
+MAST_TOKEN    = os.environ.get('MASTODON_ACCESS_TOKEN')
+_raw_instance = os.environ.get('MASTODON_INSTANCE_URL', '').strip()
+MAST_INSTANCE = (_raw_instance or 'https://mastodon.social').rstrip('/')
 
 OUTBOX_FILE = 'messages/mastodon-outbox.json'
 LOG_FILE    = 'memory/mastodon-log.md'
@@ -118,7 +99,6 @@ def preflight_outbox(outbox):
     changed = False
 
     for i, item in enumerate(outbox):
-        # Guard: skip non-dict entries
         if not isinstance(item, dict):
             log(f'Outbox item [{i}] is not a dict ({type(item).__name__}) \u2014 marking abandoned', 'WARN')
             outbox[i] = {
@@ -167,10 +147,6 @@ def preflight_outbox(outbox):
 # -- Mastodon API ---------------------------------------------------------------
 
 def mastodon_post(text, reply_to_id=None):
-    """
-    Post a status to Mastodon. Returns the created status dict.
-    reply_to_id: Mastodon status ID string to reply to (optional).
-    """
     if not MAST_TOKEN:
         raise RuntimeError('MASTODON_ACCESS_TOKEN not set')
 
@@ -273,6 +249,7 @@ def process_outbox():
 
 def main():
     log('=== Mastodon sync starting ===')
+    log(f'Instance: {MAST_INSTANCE}')
     if not MAST_TOKEN:
         log('MASTODON_ACCESS_TOKEN not set \u2014 cannot proceed', 'ERROR')
         return
