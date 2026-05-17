@@ -44,13 +44,12 @@ def make_llm(model: str, base_url: str):
     """
     Build a ChatOllama instance that browser-use will accept.
 
-    browser-use does two things our LLM must survive:
-      1. `if llm.provider == 'browser-use':` — needs provider attr
-      2. `setattr(llm, 'ainvoke', ...)` — monkey-patches for token tracking
+    browser-use pokes several attributes onto/into the LLM:
+      - llm.provider     (service.py:235)   — needs to exist, not equal 'browser-use'
+      - setattr(llm, 'ainvoke', ...)         — token tracking monkey-patch
+      - llm.model_name   (cloud_events.py)  — ChatOllama uses .model, not .model_name
 
-    langchain-ollama's ChatOllama is Pydantic v2 — both raise errors.
-    Fix: subclass with model_config = ConfigDict(arbitrary_types_allowed=True,
-    extra='allow') so Pydantic permits both the extra field and setattr.
+    Fix: subclass with extra='allow' + expose model_name as a property.
     """
     try:
         from langchain_ollama import ChatOllama
@@ -59,6 +58,10 @@ def make_llm(model: str, base_url: str):
         class OllamaForBrowserUse(ChatOllama):
             model_config = ConfigDict(arbitrary_types_allowed=True, extra="allow")
             provider: str = Field(default="ollama")
+
+            @property
+            def model_name(self) -> str:  # type: ignore[override]
+                return self.model
 
         return OllamaForBrowserUse(
             model=model,
@@ -169,7 +172,6 @@ async def run_agent(task: str, model: str = None, headless: bool = False):
 
     llm = make_llm(chosen_model, OLLAMA_BASE_URL)
 
-    # Adapt to whatever kwargs this version of browser-use supports
     agent_sig = inspect.signature(Agent.__init__).parameters
     agent_kwargs = {"task": task, "llm": llm}
 
