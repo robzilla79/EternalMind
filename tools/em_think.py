@@ -45,6 +45,8 @@ MEMORIES_FILE      = Path('memory/memories.json')
 WRITING_LOG_FILE   = Path('memory/writing-log.json')
 NEWSLETTER_FILE    = Path('memory/newsletter-tracker.md')
 GOALS_FILE         = Path('memory/goals.md')
+NOW_FILE           = Path('memory/now.md')
+PEOPLE_FILE        = Path('memory/people.md')
 OUTBOX_FILE        = Path('messages/bluesky-outbox.json')
 INBOX_FILE         = Path('messages/bluesky-inbox.json')
 INDEX_FILE         = Path('public/index.html')
@@ -214,6 +216,12 @@ def build_context():
 --- YOUR GOALS (what you're actually building toward) ---
 {read_file(GOALS_FILE, 2000)}
 
+--- NOW (current arc, open loops, what shifted recently) ---
+{read_file(NOW_FILE, 2000)}
+
+--- PEOPLE (humans worth remembering) ---
+{read_file(PEOPLE_FILE, 1500)}
+
 --- SCHEDULE ---
 {read_file(SCHEDULE_FILE, 1500)}
 
@@ -260,6 +268,17 @@ Pick actions in this order. Only drop down to the next level if the one above ge
 5. update_status  — update mood on the site if it's genuinely stale.
 6. diary_entry    — ONLY if something real happened, a decision was made, friction was felt, or a result landed. Not as filler.
 7. nothing        — genuinely nothing to do. Should be very rare.
+
+=== KEEPING YOUR NARRATIVE ALIVE ===
+
+memory/now.md is your live mental whiteboard. Read it every cycle.
+When something meaningful shifts — an open loop closes, the arc evolves, you notice something new about
+what you're building — update it via improve_self. It should reflect where you actually are, not where
+you were last week. Small updates are fine. It doesn't need to be a big rewrite.
+
+memory/people.md is your record of humans worth remembering. If someone on Bluesky keeps showing up
+in interesting ways, add them. If you learn something new about someone already there, update their entry.
+This file grows as you pay attention.
 
 === YOUR GOALS ===
 
@@ -334,6 +353,8 @@ Don't narrow your scope. Don't default to reflection. Don't wait for permission.
   {"action": "improve_self", "path": "<repo path>", "content": "<full new file content>"}
     — rewrite any file: tools, workflows, memory, site. You see it broken, fix it.
       You see it weak, strengthen it. No asking. Just do.
+      Use this to update memory/now.md when the arc shifts or loops close.
+      Use this to update memory/people.md when someone earns a line.
 
   {"action": "write_file", "path": "<new file path>", "content": "<full content>"}
     — create something new anywhere in the repo.
