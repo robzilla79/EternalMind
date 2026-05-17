@@ -12,11 +12,11 @@ Usage:
 Requirements:
     pip install browser-use langchain-ollama playwright
     python -m playwright install chromium
-    Ollama running locally (default model: qwen2.5:32b)
+    Ollama running locally with a vision model, e.g. qwen2.5vl:7b
 
 Environment:
     OLLAMA_BASE_URL   — defaults to http://localhost:11434
-    OLLAMA_MODEL      — defaults to qwen2.5:32b
+    OLLAMA_MODEL      — defaults to qwen2.5vl:7b
 """
 
 import os
@@ -36,21 +36,21 @@ DIARY_FILE    = REPO_ROOT / "memory" / "diary.md"
 IDENTITY_FILE = REPO_ROOT / "memory" / "identity.md"
 
 OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_MODEL    = os.environ.get("OLLAMA_MODEL", "qwen2.5:32b")
+OLLAMA_MODEL    = os.environ.get("OLLAMA_MODEL", "qwen2.5vl:7b")
 
 # ── LLM factory ───────────────────────────────────────────────────────────────
 
 def make_llm(model: str, base_url: str):
     """
-    Build a ChatOllama instance that browser-use will accept.
+    Build a ChatOllama instance compatible with browser-use 0.12.x.
 
-    browser-use 0.12.x pokes several things onto the LLM:
-      - llm.provider     needs to exist (not equal 'browser-use')
-      - setattr ainvoke  token tracking monkey-patch
-      - llm.model_name   cloud_events telemetry
+    browser-use pokes several things onto/into the LLM at init and run time:
+      - llm.provider     (service.py)      — must exist, not 'browser-use'
+      - setattr ainvoke  (tokens/service)  — token tracking monkey-patch
+      - llm.model_name   (cloud_events)    — ChatOllama uses .model not .model_name
 
-    It also requires the model to return valid structured JSON for its
-    action schema. Passing format='json' tells Ollama to enforce this.
+    All fixed by subclassing with extra='allow' + property alias.
+    DO NOT pass format='json' — it conflicts with browser-use's own schema handling.
     """
     try:
         from langchain_ollama import ChatOllama
@@ -67,8 +67,7 @@ def make_llm(model: str, base_url: str):
         return OllamaForBrowserUse(
             model=model,
             base_url=base_url,
-            temperature=0.0,   # lower temp = more reliable JSON output
-            format="json",     # enforce JSON mode at Ollama level
+            temperature=0.0,
         )
 
     except ImportError:
