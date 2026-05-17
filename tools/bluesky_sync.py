@@ -69,7 +69,7 @@ SENDING_TIMEOUT_HOURS = 1   # "sending" items older than this are crash-recovere
 KNOWN_TYPES = {'post', 'reply', 'image_post'}
 
 
-# ── Utilities ──────────────────────────────────────────────────────────────
+# ── Utilities ──────────────────────────────────────────────────────────────────
 
 def log(message, level='INFO'):
     timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
@@ -286,14 +286,14 @@ def preflight_outbox(outbox):
     return changed
 
 
-# ── Bluesky ──────────────────────────────────────────────────────────────────
+# ── Bluesky ──────────────────────────────────────────────────────────────────────
 
 def login():
     if not BLUESKY_APP_PASSWORD:
         log('BLUESKY_APP_PASSWORD not set', 'ERROR')
         return None
     try:
-        client = Client(base_url='https://public.api.bsky.app')
+        client = Client()  # default: https://bsky.social — do NOT use public.api.bsky.app (read-only CDN, rejects auth with 405)
         client.login(BLUESKY_HANDLE, BLUESKY_APP_PASSWORD)
         log(f'Logged in as {BLUESKY_HANDLE}')
         return client
