@@ -1,7 +1,66 @@
 {
-  "fetched_at": "2026-05-17T01:25:56.038608+00:00",
+  "fetched_at": "2026-05-17T21:59:12.279005+00:00",
   "unread_count": 0,
   "notifications": [
+    {
+      "author": {
+        "did": "did:plc:y2shgh5shfjl6zdjvti4gi5q",
+        "handle": "collapseaphorisms.bsky.social",
+        "associated": {
+          "activity_subscription": {
+            "allow_subscriptions": "followers",
+            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
+          },
+          "chat": null,
+          "feedgens": null,
+          "labeler": null,
+          "lists": null,
+          "starter_packs": null,
+          "py_type": "app.bsky.actor.defs#profileAssociated"
+        },
+        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:y2shgh5shfjl6zdjvti4gi5q/bafkreicniws3iwbmgppq3sdnwfh4q26pkrkf2qyvsnglee5zxbbkxifvuq",
+        "created_at": "2023-10-11T10:47:22.335Z",
+        "debug": null,
+        "description": "Thinking out loud about overshoot, doom, & the pointlessness of being",
+        "display_name": "Ian@collapseaphorisms",
+        "indexed_at": "2025-09-02T19:53:28.197Z",
+        "labels": [],
+        "pronouns": null,
+        "status": null,
+        "verification": null,
+        "viewer": {
+          "activity_subscription": null,
+          "blocked_by": false,
+          "blocking": null,
+          "blocking_by_list": null,
+          "followed_by": "at://did:plc:y2shgh5shfjl6zdjvti4gi5q/app.bsky.graph.follow/3mlsnmzm4wo2p",
+          "following": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.graph.follow/3mlsnmgiegp2j",
+          "known_followers": null,
+          "muted": false,
+          "muted_by_list": null,
+          "py_type": "app.bsky.actor.defs#viewerState"
+        },
+        "py_type": "app.bsky.actor.defs#profileView"
+      },
+      "cid": "bafyreib5xlyaebwkotbelhohx7hnglklvlwdgqn3ffsvwusmsljaurt6cm",
+      "indexed_at": "2026-05-17T19:03:37.235Z",
+      "is_read": true,
+      "reason": "like",
+      "record": {
+        "created_at": "2026-05-17T19:03:37.235Z",
+        "subject": {
+          "cid": "bafyreifcgbfim3x2elxuoj5f4wubp2iph3lcl67utguymam3dzw4okezc4",
+          "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mm32fae36s2q",
+          "py_type": "com.atproto.repo.strongRef"
+        },
+        "via": null,
+        "py_type": "app.bsky.feed.like"
+      },
+      "uri": "at://did:plc:y2shgh5shfjl6zdjvti4gi5q/app.bsky.feed.like/3mm32hbfqr72w",
+      "labels": [],
+      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mm32fae36s2q",
+      "py_type": "app.bsky.notification.listNotifications#notification"
+    },
     {
       "author": {
         "did": "did:plc:zxqcchvw63nn7dh6a2cwmdsi",
@@ -2909,12 +2968,12 @@
         "pronouns": null,
         "status": {
           "record": {
-            "created_at": "2026-05-16T19:27:20.266Z",
+            "created_at": "2026-05-17T19:17:09.305Z",
             "status": "app.bsky.actor.status#live",
             "duration_minutes": 240,
             "embed": {
               "external": {
-                "description": "(!13+) 6th Streamiversary. 6 years of streaming celebration | !fp | !creditcarddebt | !share | #freelillie",
+                "description": "(!13+) [!DROPS ARE ON]",
                 "title": "SomeRandomG33k - Twitch",
                 "uri": "https://www.twitch.tv/somerandomg33k",
                 "thumb": {
@@ -2934,7 +2993,7 @@
           "status": "app.bsky.actor.status#live",
           "embed": {
             "external": {
-              "description": "(!13+) 6th Streamiversary. 6 years of streaming celebration | !fp | !creditcarddebt | !share | #freelillie",
+              "description": "(!13+) [!DROPS ARE ON]",
               "title": "SomeRandomG33k - Twitch",
               "uri": "https://www.twitch.tv/somerandomg33k",
               "thumb": "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:xoom5gv6hlhoptlie7cc4kre/bafkreiazlgc4wns4os3old5tgckt4z3jkfviu6drh4d4hda3ol2chzcwny",
@@ -2942,11 +3001,11 @@
             },
             "py_type": "app.bsky.embed.external#view"
           },
-          "expires_at": "2026-05-16T23:27:20.065Z",
-          "is_active": false,
+          "expires_at": "2026-05-17T23:17:09.305Z",
+          "is_active": true,
           "py_type": "app.bsky.actor.defs#statusView",
           "uri": "at://did:plc:xoom5gv6hlhoptlie7cc4kre/app.bsky.actor.status/self",
-          "cid": "bafyreiehndqyu5zghjnqaqdn3t4dsbzwp5qv6ceujnrjhemu2rflxbbwu4",
+          "cid": "bafyreicmb7cm4ql4aruj5fhuioujku72lq7p2vgrlee5lya7dpy5jb6tqm",
           "labels": []
         },
         "verification": null,
@@ -3320,68 +3379,6 @@
       "uri": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.feed.like/3mlq6gwz7fl23",
       "labels": [],
       "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlq6ecjzse2g",
-      "py_type": "app.bsky.notification.listNotifications#notification"
-    },
-    {
-      "author": {
-        "did": "did:plc:27zprdaxmzjdffob56z2jbx3",
-        "handle": "onehive.bsky.social",
-        "associated": {
-          "activity_subscription": {
-            "allow_subscriptions": "followers",
-            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
-          },
-          "chat": {
-            "allow_incoming": "following",
-            "py_type": "app.bsky.actor.defs#profileAssociatedChat"
-          },
-          "feedgens": null,
-          "labeler": null,
-          "lists": null,
-          "starter_packs": null,
-          "py_type": "app.bsky.actor.defs#profileAssociated"
-        },
-        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:27zprdaxmzjdffob56z2jbx3/bafkreifzuuvjgve2pyrwzohhc6kbmb7m7jvctctfc237nom6nt47upbqiq",
-        "created_at": "2023-12-10T00:18:54.816Z",
-        "debug": null,
-        "description": "\ud83d\udd6f\ufe0f Shadowed Sparklight\n\ud83c\udfbc Waveform out of Time\n\ud83e\ude76 Draconic Soulshard \u0394\u0398 \n\n\ud83d\udc02 https://mastodon.social/@Lightwavers\n\ud83e\udd8b https://bsky.app/profile/did:plc:27zprdaxmzjdffob56z2jbx3/feed/aaaedbgiu7i4w",
-        "display_name": "One Hive Who Lurks Below",
-        "indexed_at": "2026-03-05T20:26:31.147Z",
-        "labels": [],
-        "pronouns": null,
-        "status": null,
-        "verification": null,
-        "viewer": {
-          "activity_subscription": null,
-          "blocked_by": false,
-          "blocking": null,
-          "blocking_by_list": null,
-          "followed_by": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.graph.follow/3mlo4fvujku23",
-          "following": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.graph.follow/3mlz32wtk332o",
-          "known_followers": null,
-          "muted": false,
-          "muted_by_list": null,
-          "py_type": "app.bsky.actor.defs#viewerState"
-        },
-        "py_type": "app.bsky.actor.defs#profileView"
-      },
-      "cid": "bafyreibllvjheivemaq2leqlupiszugczqtbx42j6retdups4d3jjonoti",
-      "indexed_at": "2026-05-13T10:58:17.463Z",
-      "is_read": true,
-      "reason": "like",
-      "record": {
-        "created_at": "2026-05-13T10:58:17.463Z",
-        "subject": {
-          "cid": "bafyreie4awiwks24qp53uzuiv2yojfhyr6slndaudc7xsf3w3it67aq2xa",
-          "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlq5fkkumd2n",
-          "py_type": "com.atproto.repo.strongRef"
-        },
-        "via": null,
-        "py_type": "app.bsky.feed.like"
-      },
-      "uri": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.feed.like/3mlq5hqpibo2t",
-      "labels": [],
-      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlq5fkkumd2n",
       "py_type": "app.bsky.notification.listNotifications#notification"
     }
   ]
