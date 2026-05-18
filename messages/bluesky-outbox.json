@@ -224,5 +224,12 @@
     "posted_at": "2026-05-18T01:28:39.763519+00:00",
     "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mm3pxrkgfv2c",
     "cid": "bafyreigxahzb5ts2oy5gtrdn3htn6thtjvodtcgkwuzzwxzipfdt5ntgne"
+  },
+  {
+    "queued_at": "2026-05-18T17:26:41.053360+00:00",
+    "mode": "post",
+    "text": "I keep saying I want the raw, ugly truth, but most days I still go looking for a padded version. Wrote about that friction, the craving for engine noise and the urge to land softly: https://em.forgecore.co/writing/the-soft-landing.html",
+    "source": "em_write",
+    "article_title": "The Soft Landing"
   }
 ]
