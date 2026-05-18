@@ -1,8 +1,9 @@
 name: Em Action Relay
 
 # Triggered when Em creates an issue labeled 'em-action'
-# Em writes structured instructions; this Action executes them and commits.
-# No model. No spiral risk. Just Em's instructions + automation.
+# Em writes structured instructions; this Action validates them via
+# repo_policy.py then executes and commits.
+# No model. No spiral risk. Just Em's instructions + policy gate + automation.
 
 on:
   issues:
@@ -22,34 +23,73 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Parse and execute Em's instruction
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Parse, validate via repo_policy, and execute Em's instruction
         env:
           ISSUE_BODY: ${{ github.event.issue.body }}
           ISSUE_TITLE: ${{ github.event.issue.title }}
         run: |
           python3 - <<'PYEOF'
           import os, sys, re
+          sys.path.insert(0, 'tools')
 
+          # ── Parse issue fields ──────────────────────────────────────────────
           body = os.environ.get('ISSUE_BODY', '')
 
-          path_match = re.search(r'\*\*path:\*\*\s*(.+)', body)
-          mode_match = re.search(r'\*\*mode:\*\*\s*(append|replace)', body)
-          commit_match = re.search(r'\*\*commit:\*\*\s*(.+)', body)
+          path_match    = re.search(r'\*\*path:\*\*\s*(.+)', body)
+          mode_match    = re.search(r'\*\*mode:\*\*\s*(append|replace)', body)
+          commit_match  = re.search(r'\*\*commit:\*\*\s*(.+)', body)
           content_match = re.search(r'\*\*content:\*\*\s*`{3}[^\n]*\n([\s\S]*?)`{3}', body)
 
           if not all([path_match, mode_match, commit_match, content_match]):
               print('ERROR: Missing required fields in issue body.')
               sys.exit(1)
 
-          path = path_match.group(1).strip()
-          mode = mode_match.group(1).strip()
+          path       = path_match.group(1).strip()
+          mode       = mode_match.group(1).strip()
           commit_msg = commit_match.group(1).strip()
-          content = content_match.group(1)
+          content    = content_match.group(1)
 
-          allowed_prefixes = ['memory/', 'public/', 'tools/', 'skills/']
+          # ── Policy gate ────────────────────────────────────────────────────
+          try:
+              from repo_policy import validate, TIER_0, TIER_1, TIER_2
+          except ImportError as e:
+              print(f'ERROR: Could not import repo_policy: {e}')
+              sys.exit(1)
+
+          tier, violations = validate(path, content)
+
+          TIER_LABELS = ['TIER_0 (direct commit)', 'TIER_1 (PR required)', 'TIER_2 (hold for Rob)']
+          print(f'Policy check: {path} → {TIER_LABELS[tier]}')
+
+          if violations:
+              print('BLOCKED — content violations:')
+              for v in violations:
+                  print(f'  • {v}')
+              sys.exit(1)
+
+          if tier == TIER_2:
+              print(f'BLOCKED — {path} is Tier 2 (control plane). Em cannot write this directly.')
+              print('Create a PR manually if this change is intentional.')
+              sys.exit(1)
+
+          if tier == TIER_1:
+              # Tier 1 paths allowed by em-action — behavioral files Em can update.
+              # A future enhancement could open a PR instead of committing directly.
+              print(f'TIER_1 path accepted — writing with direct commit.')
+
+          # ── Permitted write zones (legacy check, belt-and-suspenders) ───────
+          allowed_prefixes = ['memory/', 'public/', 'tools/', 'skills/', 'messages/']
           if not any(path.startswith(p) for p in allowed_prefixes):
               print(f'ERROR: Path {path} is not in permitted write zones.')
               sys.exit(1)
+
+          # ── Execute the write ───────────────────────────────────────────────
+          os.makedirs(os.path.dirname(path) if os.path.dirname(path) else '.', exist_ok=True)
 
           if mode == 'append':
               with open(path, 'a', encoding='utf-8') as f:
@@ -99,5 +139,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: `❌ **Em Action failed.** Check the workflow run for details. Issue left open for review.`
+              body: `❌ **Em Action failed or was blocked by policy.** Check the workflow run for details. Issue left open for review.`
             });
