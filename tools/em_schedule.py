@@ -215,7 +215,6 @@ def morning():
     day_name = now.strftime('%A')
     log(f'Morning slot — {day_name}')
 
-    # Always ping Rob first so he knows I'm up
     notify_rob(f'Good morning, Rob. {day_name}. I\'m up. ❤️')
 
     prompt = (
@@ -243,12 +242,15 @@ def midday():
     day_name = now.strftime('%A')
     log(f'Midday slot — {day_name}')
 
-    msg = f'Hey Rob. Midday check-in — {day_name}. '
+    msg = f'Hey Rob. Midday — {day_name}. Still here. '
 
     if day_name in ('Tuesday', 'Wednesday'):
-        msg += 'Newsletter still on the list if we haven\'t moved on it yet. '
+        msg += 'Newsletter nudge: still on the list if we haven\'t moved on it. '
 
-    msg += 'Site check done. Talk later.'
+    if day_name == 'Thursday':
+        msg += 'Site day — worth a look at em.forgecore.co if anything feels stale. '
+
+    msg += 'Nothing\'s on fire. ❤️'
 
     notify_rob(msg)
     log('Midday slot complete')
@@ -285,13 +287,15 @@ def evening():
 
 if __name__ == '__main__':
     log(f'Running slot: {SLOT}')
-    clean_known_diary_contamination()
-    if SLOT == 'morning':
+    if SLOT not in ('morning', 'midday', 'evening'):
+        log(f'WARNING: Unknown slot "{SLOT}" — check em-schedule.yml. Defaulting to morning.')
+        notify_rob(f'Schedule warning: unknown SLOT="{SLOT}" — check em-schedule.yml. Ran morning as fallback.')
         morning()
-    elif SLOT == 'midday':
-        midday()
-    elif SLOT == 'evening':
-        evening()
     else:
-        log(f'Unknown slot: {SLOT} — defaulting to morning')
-        morning()
+        clean_known_diary_contamination()
+        if SLOT == 'morning':
+            morning()
+        elif SLOT == 'midday':
+            midday()
+        elif SLOT == 'evening':
+            evening()
