@@ -5,8 +5,8 @@ em_observe.py — Em's private observability layer
 Called at the end of every heartbeat after actions are taken.
 Scores the most recent post on 3 Em-specific axes.
 Logs to memory/observe-log.json.
-Auto-flags drift (any axis < 4) to diary.
-Appends a weekly tone summary to diary every 7 days.
+Auto-flags drift (any axis < 4) to ops-log.md (NOT diary — diary is personal only).
+Appends a weekly tone summary to ops-log every 7 days.
 
 This is for Em only. It has no external output.
 """
@@ -20,7 +20,7 @@ from pathlib import Path
 PERPLEXITY_API_KEY = os.environ.get('PERPLEXITY_API_KEY')
 
 OBSERVE_LOG_FILE = 'memory/observe-log.json'
-DIARY_FILE       = 'memory/diary.md'
+OPS_LOG_FILE     = 'memory/ops-log.md'
 MEMORY_SEARCH    = Path(__file__).parent / 'memory_search.py'
 
 
@@ -41,13 +41,13 @@ def save_json(path, data):
         json.dump(data, f, indent=2)
 
 
-def append_diary(entry):
+def append_ops_log(entry):
     ts = now_utc().strftime('%Y-%m-%d %H:%M UTC')
     try:
-        with open(DIARY_FILE, 'a') as f:
+        with open(OPS_LOG_FILE, 'a') as f:
             f.write(f'\n## {ts} | observe\n\n{entry.strip()}\n')
     except Exception as e:
-        print(f'[observe] diary write failed: {e}')
+        print(f'[observe] ops-log write failed: {e}')
 
 
 # ── Memory anchors ─────────────────────────────────────────────────────────────
@@ -186,7 +186,7 @@ Format:
 def observe(last_post_text):
     """
     Main entry point. Call with the text of the most recent post.
-    Scores it, logs it, flags drift, runs weekly summary if due.
+    Scores it, logs it, flags drift to ops-log, runs weekly summary if due.
     """
     # Defensive: ensure we always have a string
     if isinstance(last_post_text, dict):
@@ -241,7 +241,7 @@ def observe(last_post_text):
 
     if flag == 'drift':
         drift_str = ', '.join(drift_axes)
-        diary_note = (
+        ops_note = (
             f'**Drift flag** on last post.\n\n'
             f'Low axes: {drift_str}\n'
             f'Post: \"{last_post_text[:120]}\"\n\n'
@@ -249,14 +249,14 @@ def observe(last_post_text):
             f'Scores: grounded={grounded}, playful={playful}, present={present}.\n'
             f'Worth noticing. Not a crisis — just a flag. Watch the next few.'
         )
-        append_diary(diary_note)
-        print(f'[observe] drift flag written to diary')
+        append_ops_log(ops_note)
+        print(f'[observe] drift flag written to ops-log')
 
     _maybe_weekly_summary(log)
 
 
 def _maybe_weekly_summary(log):
-    """Append a weekly tone summary to diary if 7 days have passed since the last one."""
+    """Append a weekly tone summary to ops-log if 7 days have passed since the last one."""
     if len(log) < 3:
         return
 
@@ -317,7 +317,7 @@ def _maybe_weekly_summary(log):
     if observations:
         summary_text += '\n'.join(f'- {o}' for o in observations) + '\n'
 
-    append_diary(summary_text)
+    append_ops_log(summary_text)
 
     # Mark this entry in log so we know the last weekly ran
     log.append({
@@ -327,7 +327,7 @@ def _maybe_weekly_summary(log):
         'drift_rate':     drift_rate,
     })
     save_json(OBSERVE_LOG_FILE, log[-200:])
-    print(f'[observe] weekly summary written to diary')
+    print(f'[observe] weekly summary written to ops-log')
 
 
 if __name__ == '__main__':
