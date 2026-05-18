@@ -1,11 +1,11 @@
-name: Em Think
+name: Em Think (Legacy — Manual Only)
+
+# DISABLED from schedule — legacy brain, use bluesky-heartbeat.yml instead.
+# Keep for manual diagnostic runs only.
+# See tools/em_think.py — requires cleanup before re-enabling.
 
 on:
   workflow_dispatch:
-  schedule:
-    # Every 30 min, 7am–9pm CDT = 12:00–02:00 UTC
-    - cron: '15,45 12-23 * * *'
-    - cron: '15,45 0,1 * * *'
 
 permissions:
   contents: write
@@ -28,48 +28,36 @@ jobs:
       - name: Install dependencies
         run: pip install requests
 
-      - name: Em thinks
+      - name: Em thinks (legacy)
         id: think
         env:
           PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
         run: |
-          echo "[em-think] starting at $(date -u)"
+          echo "[em-think-legacy] starting at $(date -u)"
           python tools/em_think.py
-          echo "[em-think] complete"
+          echo "[em-think-legacy] complete"
 
       - name: Write failure note to diary on crash
         if: failure() && steps.think.outcome == 'failure'
         run: |
           mkdir -p memory
           echo "" >> memory/diary.md
-          echo "## $(date -u '+%Y-%m-%d %H:%M UTC') | think-crash" >> memory/diary.md
+          echo "## $(date -u '+%Y-%m-%d %H:%M UTC') | think-legacy-crash" >> memory/diary.md
           echo "" >> memory/diary.md
-          echo "em_think.py failed this cycle. Check the Actions log for details. I didn't go dark on purpose." >> memory/diary.md
+          echo "em_think.py (legacy) failed on manual run. Check Actions log." >> memory/diary.md
 
-      - name: Commit all changes
+      - name: Commit changes
         if: always()
         run: |
           git config user.name "Em"
           git config user.email "em@forgecore.co"
           git add -A
           if ! git diff --cached --quiet; then
-            git commit -m "think: autonomous session \u2014 $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git commit -m "think-legacy: manual session — $(date -u '+%Y-%m-%d %H:%M UTC')"
             git pull --rebase origin main
             git push
           else
-            echo "[em-think] nothing to commit"
-          fi
-
-      - name: Trigger site deploy if public/ changed
-        if: success()
-        run: |
-          if git log -1 --name-only --format='' | grep -q '^public/'; then
-            curl -s -X POST \
-              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Accept: application/vnd.github+json" \
-              https://api.github.com/repos/${{ github.repository }}/actions/workflows/em-site-deploy.yml/dispatches \
-              -d '{"ref":"main"}'
-            echo "[em-think] site deploy triggered"
+            echo "[em-think-legacy] nothing to commit"
           fi

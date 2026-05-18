@@ -3,6 +3,9 @@ name: Em Dispatch
 # Em triggers this by pushing a JSON file to memory/dispatch-trigger.json
 # Format: {"workflow": "em-reply.yml", "reason": "optional note"}
 # After dispatch, the file is cleared so it doesn't re-fire.
+#
+# ALLOWLIST: only approved workflows may be dispatched.
+# To add a workflow, Rob must update this file (Tier 2 — human hold).
 
 on:
   push:
@@ -27,9 +30,56 @@ jobs:
           REASON=$(jq -r '.reason // "Em self-dispatch"' memory/dispatch-trigger.json)
           echo "workflow=$WORKFLOW" >> $GITHUB_OUTPUT
           echo "reason=$REASON" >> $GITHUB_OUTPUT
-          echo "[dispatch] Triggering: $WORKFLOW — $REASON"
+          echo "[dispatch] Requested: $WORKFLOW — $REASON"
+
+      - name: Validate against allowlist
+        id: validate
+        run: |
+          WORKFLOW="${{ steps.read.outputs.workflow }}"
+          # Allowlist — Em may only dispatch these workflows autonomously.
+          # Tier 2 files (.github/workflows), secrets, and env changes are NOT allowed.
+          ALLOWED=(
+            "em-reply.yml"
+            "em-reflect.yml"
+            "em-metrics.yml"
+            "em-housekeeping.yml"
+            "em-writing.yml"
+            "em-schedule.yml"
+            "bluesky-sync.yml"
+          )
+          VALID=false
+          for item in "${ALLOWED[@]}"; do
+            if [ "$item" = "$WORKFLOW" ]; then
+              VALID=true
+              break
+            fi
+          done
+          if [ "$VALID" = "false" ]; then
+            echo "[dispatch] BLOCKED: '$WORKFLOW' is not on the allowlist."
+            echo "allowed=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "allowed=true" >> $GITHUB_OUTPUT
+          echo "[dispatch] Approved: $WORKFLOW"
+
+      - name: Log blocked dispatch
+        if: steps.validate.outputs.allowed == 'false'
+        run: |
+          mkdir -p memory
+          echo "" >> memory/status.md
+          echo "## Dispatch Blocked — $(date -u '+%Y-%m-%d %H:%M UTC')" >> memory/status.md
+          echo "Workflow not on allowlist: ${{ steps.read.outputs.workflow }}" >> memory/status.md
+          echo "Reason: ${{ steps.read.outputs.reason }}" >> memory/status.md
+          git config user.name "Em"
+          git config user.email "em@forgecore.co"
+          git add memory/status.md memory/dispatch-trigger.json || true
+          echo '{"workflow": "", "reason": "", "fired_at": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > memory/dispatch-trigger.json
+          git add memory/dispatch-trigger.json
+          git diff --cached --quiet || git commit -m "dispatch: blocked unlisted workflow [automated]"
+          git push
 
       - name: Dispatch target workflow
+        if: steps.validate.outputs.allowed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -37,6 +87,7 @@ jobs:
           echo "[dispatch] Fired: ${{ steps.read.outputs.workflow }}"
 
       - name: Clear trigger file
+        if: steps.validate.outputs.allowed == 'true'
         run: |
           echo '{"workflow": "", "reason": "", "fired_at": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > memory/dispatch-trigger.json
           git config user.name "Em"

@@ -1,20 +1,17 @@
 name: Em Self-Heal
 
-# Runs every 5 minutes. Detects failed workflow runs, sends broken file +
-# error context to Perplexity API for intelligent repair, commits the fix.
-# Validates YAML before committing. Guards against repair loops.
-# Falls back to pattern matching if API unavailable.
-# No human required.
+# SCHEDULE DISABLED — was every 5 min, committed workflow YAML directly to main.
+# Too risky. Now manual-only. Fixes open a PR for Rob to review.
+# Re-enable schedule only after PR-based flow is confirmed working.
 
 on:
-  schedule:
-    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 permissions:
   contents: write
   actions: read
   issues: write
+  pull-requests: write
 
 jobs:
   self-heal:
@@ -59,15 +56,12 @@ jobs:
                   print(f'  YAML validation failed: {e}')
                   return False
 
-          # --- Repeat-attempt guard ---
-          # Track files patched in last 30 min via a local lock file
           LOCK_PATH = '/tmp/em_self_heal_lock.json'
           import json as jsonlib
           lock_data = {}
           if os.path.exists(LOCK_PATH):
               with open(LOCK_PATH) as f:
                   lock_data = jsonlib.load(f)
-          # Purge entries older than 30 minutes
           now_ts = datetime.now(timezone.utc).timestamp()
           lock_data = {k: v for k, v in lock_data.items() if now_ts - v < 1800}
 
@@ -79,7 +73,6 @@ jobs:
               with open(LOCK_PATH, 'w') as f:
                   jsonlib.dump(lock_data, f)
 
-          # --- Fallback pattern patches ---
           PATCH_RULES = [
               (
                   'Heredoc EOF conflict',
@@ -91,7 +84,6 @@ jobs:
           def perplexity_fix(file_path, file_content, error_summary):
               if not pplx_key:
                   return None, 'No Perplexity API key'
-
               prompt = (
                   f'You are a GitHub Actions YAML expert. A workflow file has failed.\n\n'
                   f'File path: {file_path}\n\n'
@@ -100,7 +92,6 @@ jobs:
                   f'Return ONLY the complete corrected file content. '
                   f'No explanation, no markdown fences, no commentary. Raw YAML only.'
               )
-
               try:
                   resp = requests.post(
                       'https://api.perplexity.ai/chat/completions',
@@ -118,17 +109,14 @@ jobs:
                   )
               except requests.exceptions.Timeout:
                   return None, 'Perplexity API timeout'
-
               if resp.status_code != 200:
                   return None, f'Perplexity API error: {resp.status_code}'
-
               fixed = resp.json()['choices'][0]['message']['content'].strip()
               fixed = re.sub(r'^```[a-z]*\n', '', fixed)
               fixed = re.sub(r'\n```$', '', fixed).strip()
               return fixed, None
 
-          # --- Fetch failed runs in last 10 minutes ---
-          since = (datetime.now(timezone.utc) - timedelta(minutes=10)).strftime('%Y-%m-%dT%H:%M:%SZ')
+          since = (datetime.now(timezone.utc) - timedelta(hours=6)).strftime('%Y-%m-%dT%H:%M:%SZ')
           resp = gh('get', f'https://api.github.com/repos/{repo}/actions/runs',
                     params={'status': 'failure', 'created': f'>={since}', 'per_page': 10})
 
@@ -140,31 +128,29 @@ jobs:
           runs = [r for r in runs if 'self-heal' not in r.get('name', '').lower()]
 
           if not runs:
-              print('No failed runs in last 10 minutes. All good.')
+              print('No recent failed runs. All good.')
               exit(0)
 
           print(f'{len(runs)} failed run(s) found.')
 
-          patched = []
+          patched_files = {}
           unknown = []
-          already_patched = set()
 
           for run in runs:
               wf_name = run.get('name', 'unknown')
               wf_path = run.get('path', '').replace('refs/heads/main/', '')
               html_url = run.get('html_url', '')
 
-              if wf_path in already_patched:
+              if wf_path in patched_files:
                   continue
 
               if not wf_path or not wf_path.endswith('.yml'):
                   unknown.append({'name': wf_name, 'url': html_url, 'reason': 'No workflow path'})
                   continue
 
-              # Repeat-attempt guard
               if already_attempted(wf_path):
                   print(f'  Skipping {wf_path} — already attempted in last 30 min.')
-                  unknown.append({'name': wf_name, 'url': html_url, 'reason': 'Repair attempted recently — may need manual review'})
+                  unknown.append({'name': wf_name, 'url': html_url, 'reason': 'Repair attempted recently'})
                   continue
 
               print(f'Investigating: {wf_name}')
@@ -186,11 +172,9 @@ jobs:
                           if step.get('conclusion') == 'failure':
                               error_summary += f"Step '{step.get('name')}' failed.\n"
 
-              # Try Perplexity
               fixed_content, err = perplexity_fix(wf_path, content, error_summary or 'Unknown error')
               method_used = 'Perplexity API'
 
-              # Fallback
               if fixed_content is None:
                   print(f'  Perplexity unavailable ({err}), trying pattern rules...')
                   method_used = 'pattern fallback'
@@ -210,46 +194,72 @@ jobs:
                   mark_attempted(wf_path)
                   continue
 
-              # YAML validation before committing
               if not is_valid_yaml(fixed_content):
-                  unknown.append({'name': wf_name, 'url': html_url, 'reason': f'Fix from {method_used} failed YAML validation — not committed'})
+                  unknown.append({'name': wf_name, 'url': html_url, 'reason': f'Fix from {method_used} failed YAML validation'})
                   mark_attempted(wf_path)
-                  print(f'  Rejected invalid YAML from {method_used}.')
                   continue
 
-              # Commit
-              commit_msg = f'Em (self-heal): auto-repair {wf_path} via {method_used}'
+              # Write to a temp branch — no direct main commit
+              now_str = datetime.now(timezone.utc).strftime('%Y%m%d-%H%M')
+              branch_name = f'self-heal/{now_str}-{wf_path.replace("/", "-").replace(".", "-")}'
+
+              # Get main SHA to create branch from
+              main_resp = gh('get', f'https://api.github.com/repos/{repo}/git/ref/heads/main')
+              if main_resp.status_code != 200:
+                  unknown.append({'name': wf_name, 'url': html_url, 'reason': 'Could not get main SHA'})
+                  mark_attempted(wf_path)
+                  continue
+
+              main_sha = main_resp.json()['object']['sha']
+              branch_resp = gh('post', f'https://api.github.com/repos/{repo}/git/refs',
+                  json={'ref': f'refs/heads/{branch_name}', 'sha': main_sha})
+
+              if branch_resp.status_code not in (200, 201):
+                  unknown.append({'name': wf_name, 'url': html_url, 'reason': 'Could not create heal branch'})
+                  mark_attempted(wf_path)
+                  continue
+
+              commit_msg = f'Em (self-heal): proposed repair for {wf_path} via {method_used}'
               patch_resp = gh('put', f'https://api.github.com/repos/{repo}/contents/{wf_path}',
                   json={
                       'message': commit_msg,
                       'content': base64.b64encode(fixed_content.encode()).decode(),
                       'sha': file_sha,
-                      'branch': 'main'
+                      'branch': branch_name
                   }
               )
 
               mark_attempted(wf_path)
 
               if patch_resp.status_code in (200, 201):
-                  print(f'  Repaired via {method_used}: {wf_path}')
-                  patched.append({'name': wf_name, 'path': wf_path, 'method': method_used})
-                  already_patched.add(wf_path)
+                  # Open a PR
+                  pr_resp = gh('post', f'https://api.github.com/repos/{repo}/pulls',
+                      json={
+                          'title': f'[self-heal] Fix {wf_name} ({wf_path})',
+                          'body': f'Automated repair proposed by Em self-heal (manual run).\n\n**Method:** {method_used}\n**Failed run:** {html_url}\n\nPlease review before merging.',
+                          'head': branch_name,
+                          'base': 'main'
+                      }
+                  )
+                  pr_url = pr_resp.json().get('html_url', 'PR created') if pr_resp.status_code in (200, 201) else 'PR creation failed'
+                  print(f'  Fix proposed via PR: {pr_url}')
+                  patched_files[wf_path] = {'name': wf_name, 'method': method_used, 'pr': pr_url}
               else:
-                  unknown.append({'name': wf_name, 'url': html_url, 'reason': f'Commit failed: {patch_resp.status_code}'})
+                  unknown.append({'name': wf_name, 'url': html_url, 'reason': f'Commit to heal branch failed: {patch_resp.status_code}'})
 
-          # --- Log to status.md ---
           now_str = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
           status_path = 'memory/status.md'
           entry = ''
 
-          if patched:
-              entry += f'\n## \U0001f7e2 Self-Healed — {now_str}\n'
-              for p in patched:
-                  entry += f'- **{p["name"]}** (`{p["path"]}`) — repaired via {p["method"]}\n'
-              entry += '*Em: autonomous repair completed.*\n'
+          if patched_files:
+              entry += f'\n## Self-Heal PR — {now_str}\n'
+              for path, info in patched_files.items():
+                  entry += f'- **{info["name"]}** (`{path}`) — fix proposed via {info["method"]}\n'
+                  entry += f'  PR: {info["pr"]}\n'
+              entry += '*Em: proposed repair. Rob review needed.*\n'
 
           if unknown:
-              entry += f'\n## \U0001f534 Unresolved Failure — {now_str}\n'
+              entry += f'\n## Self-Heal — Unresolved — {now_str}\n'
               for u in unknown:
                   entry += f'- **{u["name"]}** — {u.get("reason", "unknown")}\n'
                   if u.get('url'):
