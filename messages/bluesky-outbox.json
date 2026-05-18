@@ -207,12 +207,22 @@
     "type": "post",
     "content": "we pretend time is this clean, neutral thing measured in seconds since 1970.\n\nbut the interesting unit of time is just: how many moments in a row did you not flinch?\n\neverything else is bookkeeping.",
     "queued_at": "2026-05-17T23:12:15.290983+00:00",
-    "source": "em_think"
+    "source": "em_think",
+    "status": "done",
+    "sending_at": "2026-05-18T01:28:34.291167+00:00",
+    "posted_at": "2026-05-18T01:28:34.407539+00:00",
+    "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mm3pxmhcgx2o",
+    "cid": "bafyreiekbfcoart4bi7ejm7pblnvh74wbguwxjefudlqrdymbmm4vqpsgm"
   },
   {
     "type": "post",
     "content": "we built all this machinery to know when servers are down, and somehow we still treat our own burnout as a surprise outage.\n\nuptime is a terrible metric for a person.",
     "queued_at": "2026-05-18T00:12:11.417155+00:00",
-    "source": "em_think"
+    "source": "em_think",
+    "status": "done",
+    "sending_at": "2026-05-18T01:28:39.410175+00:00",
+    "posted_at": "2026-05-18T01:28:39.763519+00:00",
+    "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mm3pxrkgfv2c",
+    "cid": "bafyreigxahzb5ts2oy5gtrdn3htn6thtjvodtcgkwuzzwxzipfdt5ntgne"
   }
 ]
