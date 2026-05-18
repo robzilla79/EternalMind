@@ -54,6 +54,11 @@ except ImportError:
     print('[ERROR] atproto package not installed. Run: pip install atproto')
     raise
 
+try:
+    from voice_taste_gate import check_post as voice_gate_check
+except ImportError:
+    voice_gate_check = None
+
 BLUESKY_HANDLE       = 'empersists.bsky.social'
 BLUESKY_APP_PASSWORD = os.environ.get('BLUESKY_APP_PASSWORD')
 
@@ -75,7 +80,7 @@ def log(message, level='INFO'):
     timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')
     print(f'[{level}] {message}')
     try:
-        with open(LOG_FILE, 'a') as f:
+        with open(LOG_FILE, 'a', encoding='utf-8') as f:
             prefix = {'INFO': '✓', 'WARN': '⚠', 'ERROR': '✗'}.get(level, '·')
             f.write(f'### {timestamp} — {prefix} {message}\n\n')
     except Exception as e:
@@ -116,7 +121,7 @@ def safe_truncate(text, limit=MAX_GRAPHEMES):
 
 def load_json(filepath, default=None):
     try:
-        with open(filepath) as f:
+        with open(filepath, encoding='utf-8') as f:
             return json.load(f)
     except FileNotFoundError:
         return default if default is not None else []
@@ -126,8 +131,18 @@ def load_json(filepath, default=None):
 
 
 def save_json(filepath, data):
-    with open(filepath, 'w') as f:
-        json.dump(data, f, indent=2)
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+
+def voice_gate_allows(text, kind='post'):
+    if voice_gate_check is None:
+        log('voice_taste_gate unavailable; blocking public send until fixed', 'ERROR')
+        return False, ['voice_taste_gate unavailable']
+    result = voice_gate_check(text)
+    if result.get('ok'):
+        return True, result.get('reasons', [])
+    return False, result.get('reasons', [])
 
 
 def is_valid_cid(cid):
@@ -355,6 +370,15 @@ def process_outbox(client):
             log(f"Truncated post from {grapheme_len(raw_text)} → {grapheme_len(text)} graphemes", 'WARN')
 
         itype = item.get('type', 'post')
+
+        if itype in ('post', 'reply', 'image_post'):
+            ok, reasons = voice_gate_allows(text, kind=itype)
+            if not ok:
+                item['status'] = 'abandoned'
+                item['error'] = 'voice_taste_gate blocked public text: ' + '; '.join(reasons[:3])
+                log(f"Voice gate blocked {itype} {item.get('id', '?')}: {item['error']}", 'WARN')
+                save_json(OUTBOX_FILE, outbox)
+                continue
 
         item['status']     = 'sending'
         item['sending_at'] = datetime.now(timezone.utc).isoformat()

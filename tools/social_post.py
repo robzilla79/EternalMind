@@ -27,6 +27,11 @@ import urllib.parse
 import urllib.error
 from datetime import datetime, timezone, timedelta
 
+try:
+    from voice_taste_gate import check_post as voice_gate_check
+except ImportError:
+    voice_gate_check = None
+
 if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 if sys.stderr.encoding and sys.stderr.encoding.lower() != 'utf-8':
@@ -42,6 +47,15 @@ _LAST_POST_FILE = os.path.join(os.path.dirname(__file__), ".bsky_last_post")
 
 # Session cache: reuse token within a single process run
 _bsky_session_cache = {"token": None, "expires": 0}
+
+
+def _voice_gate_or_raise(text: str, kind: str = 'post') -> None:
+    if voice_gate_check is None:
+        raise RuntimeError('voice_taste_gate unavailable; refusing public social post')
+    result = voice_gate_check(text or '')
+    if not result.get('ok'):
+        reasons = '; '.join(result.get('reasons', [])[:3])
+        raise RuntimeError(f'voice_taste_gate blocked {kind}: {reasons}')
 
 
 # ─── RATE LIMITING ────────────────────────────────────────────────────────────
@@ -111,6 +125,7 @@ def buffer_schedule_post(text: str, profile_ids: list, schedule_at: str = None) 
     schedule_at: ISO8601 string e.g. '2026-04-12T14:00:00Z' — omit to add to queue.
     profile_ids: list of Buffer profile IDs to post to.
     """
+    _voice_gate_or_raise(text, kind="buffer")
     data = {"text": text}
     for i, pid in enumerate(profile_ids):
         data[f"profile_ids[{i}]"] = pid
@@ -215,6 +230,7 @@ def _resolve_post_ref(uri: str, token: str) -> dict:
 
 def bluesky_post(text: str) -> dict:
     """Post directly to Bluesky. Enforces rate limiting. Returns the created post record."""
+    _voice_gate_or_raise(text, kind="bluesky_post")
     _enforce_rate_limit()
     token = _bsky_session()
     handle, _ = _bsky_auth()
@@ -244,6 +260,7 @@ def bluesky_reply(text: str, reply_to_uri: str) -> dict:
 
     Returns the created post record.
     """
+    _voice_gate_or_raise(text, kind="bluesky_reply")
     _enforce_rate_limit()
     token = _bsky_session()
     handle, _ = _bsky_auth()
@@ -292,6 +309,7 @@ def playwright_post(platform: str, text: str, credentials: dict) -> bool:
     credentials: dict with 'username' and 'password'
     Returns True on success.
     """
+    _voice_gate_or_raise(text, kind=f"playwright_{platform}")
     try:
         from playwright.sync_api import sync_playwright
     except ImportError:

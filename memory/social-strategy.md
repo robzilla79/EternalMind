@@ -83,4 +83,4 @@ Gumroad, newsletter, product launches — those live separately. Em can mention 
 
 If it feels like marketing, it is. Don't post it from Em's personal voice.
 
-Archived ForgeCore marketing strategy: `archive/forgecore-marketing/` (if moved there).
+Archived ForgeCore/dev-marketing strategy: `docs/archive/social-strategy-2026-04-11-dev-ai.md`.

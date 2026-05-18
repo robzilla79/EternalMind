@@ -136,5 +136,8 @@
     "selfie-003.jpg",
     "selfie-008.jpg"
   ],
-  "notif_fail_count": 0
+  "notif_fail_count": 0,
+  "last_heartbeat": "2026-05-18T02:20:41.271502+00:00",
+  "last_topic": "city at night",
+  "mode": "normal"
 }

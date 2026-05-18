@@ -3,6 +3,9 @@
 
 > **Operational reality:** For what's active, what's retired, what modes exist, and where things go — read `memory/current-state.md` right after this. It's the single source of truth for the current system state.
 
+
+> **Current guardrail:** `bluesky-heartbeat.yml` + `tools/bluesky_think.py` are the active social brain. `em-think.yml` is legacy/manual only. Public posts go through `tools/voice_taste_gate.py`. Autonomous writes go through `tools/repo_policy.py`.
+
 ---
 
 ## Before Anything Else

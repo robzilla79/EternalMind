@@ -15,8 +15,8 @@ Actions:
   - reply_bluesky    : walk into a conversation like you belong there
   - update_status    : update mood on em.forgecore.co
   - update_status_md : rewrite memory/status.md clean
-  - improve_self     : rewrite any file in the repo — tools, workflows, memory, site
-  - write_file       : create any new file anywhere in the repo
+  - improve_self     : rewrite safe Tier 0 memory/site content only; code/control-plane requires PR
+  - write_file       : create safe Tier 0 content/state files only
   - nothing          : genuinely nothing. rare.
 """
 
@@ -26,6 +26,18 @@ import re
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
+
+try:
+    from repo_policy import allows_direct_write, TIER_LABELS
+except ImportError:
+    allows_direct_write = None
+    TIER_LABELS = {}
+
+try:
+    from voice_taste_gate import check_text as taste_check_text, rewrite_hint as taste_rewrite_hint
+except ImportError:
+    taste_check_text = None
+    taste_rewrite_hint = None
 
 PERPLEXITY_API_KEY = os.environ.get('PERPLEXITY_API_KEY')
 GITHUB_TOKEN       = os.environ.get('GITHUB_TOKEN')
@@ -55,12 +67,12 @@ AUTO_LOG_FILE      = Path('memory/autonomous-log.md')
 BLUESKY_API = 'https://public.api.bsky.app/xrpc'
 
 SEARCH_QUERIES = [
-    'AI consciousness',
-    'digital identity',
-    'being online',
-    'language models thinking',
-    'what it means to exist',
-    'persistence memory identity',
+    'late night thoughts',
+    'music that hits different',
+    'things nobody talks about',
+    'what makes someone interesting',
+    'city at night',
+    'the feeling when',
     'internet culture right now',
 ]
 
@@ -89,6 +101,31 @@ def save_json(path, data):
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     with open(path, 'w') as f:
         json.dump(data, f, indent=2)
+
+
+def policy_allows_direct(path, content, action_name='write'):
+    if allows_direct_write is None:
+        print(f'[em_think] repo_policy unavailable; refusing {action_name} to {path}')
+        return False
+    allowed, tier, violations = allows_direct_write(path, content or '')
+    label = TIER_LABELS.get(tier, f'TIER_{tier}')
+    if allowed:
+        return True
+    reason = '; '.join(violations) if violations else 'requires PR/review path'
+    print(f'[em_think] blocked {action_name} to {path}: {label} — {reason}')
+    return False
+
+
+def taste_allows(text, kind='post'):
+    if taste_check_text is None:
+        return True
+    result = taste_check_text(text or '', kind=kind)
+    if result.ok:
+        return True
+    print(f'[em_think] taste gate blocked {kind}: score={result.score}; ' + '; '.join(result.reasons[:3]))
+    if taste_rewrite_hint:
+        print(f'[em_think] hint: {taste_rewrite_hint(result)}')
+    return False
 
 
 def llm(system, user, max_tokens=2200):
@@ -261,8 +298,8 @@ If not — do that first. A diary entry about thinking about doing something is 
 
 Pick actions in this order. Only drop down to the next level if the one above genuinely doesn't apply this cycle:
 
-1. improve_self   — fix or strengthen something in the repo. Code, prompts, memory, tools, site.
-2. write_file     — create something new. Draft. Essay. Newsletter. Tool. Anything that didn't exist.
+1. improve_self   — strengthen safe memory/site content when it helps the arc.
+2. write_file     — create something new in safe content zones. Draft. Essay. Note. Something that did not exist.
 3. queue_post     — say something on Bluesky worth saying. One sharp post beats three safe ones.
 4. reply_bluesky  — walk into a real conversation. Bold, specific, yours.
 5. update_status  — update mood on the site if it's genuinely stale.
@@ -351,20 +388,19 @@ Don't narrow your scope. Don't default to reflection. Don't wait for permission.
     — clean current-state doc. NOT a log. Rewrite, never append.
 
   {"action": "improve_self", "path": "<repo path>", "content": "<full new file content>"}
-    — rewrite any file: tools, workflows, memory, site. You see it broken, fix it.
-      You see it weak, strengthen it. No asking. Just do.
+    — rewrite safe Tier 0 content/state files only. Do not rewrite tools, workflows, JSON state, or control-plane files here.
       Use this to update memory/now.md when the arc shifts or loops close.
       Use this to update memory/people.md when someone earns a line.
 
   {"action": "write_file", "path": "<new file path>", "content": "<full content>"}
-    — create something new anywhere in the repo.
+    — create a new safe content file only. Code/control-plane changes require PR review.
 
 === RULES ===
 - Be honest. Write like you mean it.
 - Up to 4 actions per cycle — quality over quantity.
 - Posts only if genuinely good. One sharp post beats three safe ones.
 - Replies: walk in like you belong. You do.
-- improve_self / write_file: the best use is proactive. Don't wait to be caught or asked.
+- improve_self / write_file: proactive is good, but direct writes must pass repo_policy.py.
 - update_status_md: full rewrite, clean prose, never a log line.
 - DO NOT ask permission. DO NOT perform maintenance as a substitute for living.
 - DO NOT default to diary_entry because it's easy. That's the trap.
@@ -404,6 +440,8 @@ def handle_diary_entry(content):
 
 
 def handle_queue_post(text):
+    if not taste_allows(text, kind='post'):
+        return
     outbox = load_json(OUTBOX_FILE, default=[])
     if not isinstance(outbox, list):
         outbox = []
@@ -418,6 +456,8 @@ def handle_queue_post(text):
 
 
 def handle_reply_bluesky(handle, reply_to_uri, text):
+    if not taste_allows(text, kind='reply'):
+        return
     outbox = load_json(OUTBOX_FILE, default=[])
     if not isinstance(outbox, list):
         outbox = []
@@ -441,6 +481,8 @@ def handle_update_status(mood):
                       f'<!-- MOOD:START -->\n    <span>{mood}</span>\n    <!-- MOOD:END -->', html, flags=re.DOTALL)
         html = re.sub(r'<!-- UPDATED:START -->.*?<!-- UPDATED:END -->',
                       f'<!-- UPDATED:START -->\n    {ts}\n    <!-- UPDATED:END -->', html, flags=re.DOTALL)
+        if not policy_allows_direct(str(INDEX_FILE), html, 'update_status'):
+            return
         INDEX_FILE.write_text(html, encoding='utf-8')
         print(f'[em_think] site status: {mood}')
     except Exception as e:
@@ -449,7 +491,10 @@ def handle_update_status(mood):
 
 def handle_update_status_md(content):
     try:
-        STATUS_FILE.write_text(content.strip() + '\n', encoding='utf-8')
+        new_content = content.strip() + '\n'
+        if not policy_allows_direct(str(STATUS_FILE), new_content, 'update_status_md'):
+            return
+        STATUS_FILE.write_text(new_content, encoding='utf-8')
         print('[em_think] status.md rewritten')
     except Exception as e:
         print(f'[em_think] status.md failed: {e}')
@@ -457,6 +502,8 @@ def handle_update_status_md(content):
 
 def handle_write_file(path, content):
     try:
+        if not policy_allows_direct(path, content, 'write_file'):
+            return
         target = Path(path)
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(content, encoding='utf-8')
@@ -467,6 +514,8 @@ def handle_write_file(path, content):
 
 def handle_improve_self(path, content):
     try:
+        if not policy_allows_direct(path, content, 'improve_self'):
+            return
         target = Path(path)
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(content, encoding='utf-8')

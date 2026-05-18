@@ -27,6 +27,13 @@ import base64
 import requests
 from datetime import datetime, timezone
 
+try:
+    from repo_policy import validate, TIER_LABELS, BLOCKED
+except ImportError:
+    validate = None
+    TIER_LABELS = {}
+    BLOCKED = 3
+
 # ── Config ────────────────────────────────────────────────────────────────────
 
 GITHUB_TOKEN   = os.environ.get("GITHUB_TOKEN", "")
@@ -241,14 +248,35 @@ def main():
         notify_rob(f"Em dry-run fix for {target_file}:\n\nProblem: {problem}\n\n[Review in logs — no branch created]")
         return
 
-    # 4. Create branch
+    # 4. Validate generated content before creating a branch
+    if validate is None:
+        print('[em_code] ERROR: repo_policy unavailable; refusing autonomous fix branch.')
+        notify_rob(f"Em refused to patch {target_file}: repo_policy.py was unavailable.")
+        sys.exit(1)
+
+    tier, violations = validate(target_file, fixed_content)
+    label = TIER_LABELS.get(tier, f'TIER_{tier}')
+    print(f'[em_code] repo_policy: {target_file} => {label}')
+    if violations or tier == BLOCKED:
+        print('[em_code] ERROR: generated fix violates repo policy or targets a blocked path:')
+        for violation in violations:
+            print(f'  - {violation}')
+        if tier == BLOCKED:
+            print('  - path is BLOCKED for autonomous self-repair')
+        notify_rob(
+            f"Em generated a fix for {target_file}, but repo_policy blocked it.\n\n"
+            f"Policy tier: {label}\nViolations: {'; '.join(violations) if violations else 'blocked path'}"
+        )
+        sys.exit(1)
+
+    # 5. Create branch
     create_branch(branch_name, base_sha)
 
-    # 5. Commit fix
+    # 6. Commit fix
     commit_msg = f"em/fix: {problem[:72]}"
     commit_file(target_file, fixed_content, file_sha, branch_name, commit_msg)
 
-    # 6. Open PR
+    # 7. Open PR
     pr_title = f"[Em] Fix: {problem[:60]}"
     pr_body = f"""## Autonomous fix by Em
 
@@ -258,6 +286,8 @@ def main():
 {problem}
 
 **Generated:** {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')}
+
+**Repo policy tier:** {label}
 
 ---
 *This PR was opened autonomously. Please review before merging.*"""

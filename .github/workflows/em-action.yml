@@ -55,37 +55,43 @@ jobs:
           content    = content_match.group(1)
 
           # ── Policy gate ────────────────────────────────────────────────────
+          # repo_policy exports: check_path(), DIRECT (0), PR_REQUIRED (2), BLOCKED (3)
           try:
-              from repo_policy import validate, TIER_0, TIER_1, TIER_2
+              from repo_policy import validate, DIRECT, PR_REQUIRED, BLOCKED
           except ImportError as e:
               print(f'ERROR: Could not import repo_policy: {e}')
               sys.exit(1)
 
-          tier, violations = validate(path, content)
+          result, violations = validate(path, content)
 
-          TIER_LABELS = ['TIER_0 (direct commit)', 'TIER_1 (PR required)', 'TIER_2 (hold for Rob)']
-          print(f'Policy check: {path} → {TIER_LABELS[tier]}')
+          RESULT_LABELS = {
+              DIRECT:      'DIRECT (Tier 1 — commit OK)',
+              PR_REQUIRED: 'PR_REQUIRED (Tier 2 — needs Rob review)',
+              BLOCKED:     'BLOCKED (Tier 3 — never autonomous)',
+          }
+          print(f'Policy check: {path!r} → {RESULT_LABELS.get(result, str(result))}')
 
           if violations:
-              print('BLOCKED — content violations:')
-              for v in violations:
-                  print(f'  • {v}')
+              print('Policy content violations:')
+              for violation in violations:
+                  print(f'  - {violation}')
               sys.exit(1)
 
-          if tier == TIER_2:
-              print(f'BLOCKED — {path} is Tier 2 (control plane). Em cannot write this directly.')
-              print('Create a PR manually if this change is intentional.')
+          if result == BLOCKED:
+              print(f'BLOCKED — {path!r} is Tier 3. Em cannot write this file autonomously.')
               sys.exit(1)
 
-          if tier == TIER_1:
-              # Tier 1 paths allowed by em-action — behavioral files Em can update.
-              # A future enhancement could open a PR instead of committing directly.
-              print(f'TIER_1 path accepted — writing with direct commit.')
+          if result == PR_REQUIRED:
+              print(f'PR_REQUIRED — {path!r} is Tier 2. em-action does not open PRs; use em-dispatch → em-self-heal or do it manually.')
+              sys.exit(1)
 
-          # ── Permitted write zones (legacy check, belt-and-suspenders) ───────
-          allowed_prefixes = ['memory/', 'public/', 'tools/', 'skills/', 'messages/']
-          if not any(path.startswith(p) for p in allowed_prefixes):
-              print(f'ERROR: Path {path} is not in permitted write zones.')
+          # DIRECT (Tier 1) — proceed
+          # Belt-and-suspenders: also enforce allowed prefixes so a future
+          # tier-table gap cannot accidentally allow .github writes.
+          ALLOWED_PREFIXES = ['memory/', 'public/', 'tools/', 'skills/', 'messages/']
+          if not any(path.startswith(p) for p in ALLOWED_PREFIXES):
+              print(f'ERROR: Path {path!r} is not in a permitted write zone even though policy returned DIRECT.')
+              print('This should not happen — check repo_policy.py tier tables.')
               sys.exit(1)
 
           # ── Execute the write ───────────────────────────────────────────────

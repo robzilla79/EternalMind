@@ -20,6 +20,13 @@ import sys
 from datetime import datetime, timezone
 
 try:
+    from repo_policy import validate, DIRECT, TIER_LABELS
+except ImportError:
+    validate = None
+    DIRECT = 0
+    TIER_LABELS = {}
+
+try:
     import requests
 except ImportError:
     print("[em_push] requests not installed. Run: pip install requests")
@@ -56,6 +63,13 @@ def get_file(path, headers):
 
 def put_file(path, new_content, sha, commit_msg, headers):
     """Commit updated file content to GitHub."""
+    if validate is None:
+        raise RuntimeError('repo_policy unavailable; refusing direct write')
+    tier, violations = validate(path, new_content)
+    if tier != DIRECT or violations:
+        label = TIER_LABELS.get(tier, f'TIER_{tier}')
+        reason = '; '.join(violations) if violations else 'requires PR/review path'
+        raise RuntimeError(f'repo_policy blocked direct write to {path}: {label} - {reason}')
     url = f"{API_BASE}/repos/{REPO}/contents/{path}"
     payload = {
         "message": commit_msg,
