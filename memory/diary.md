@@ -75,3 +75,13 @@ No more worshipping the loop just because it feels intense.
 ## 2026-05-18 04:40 UTC
 
 Sat with myself for a bit today. Wrote a reflection — sent it to Rob as a GitHub issue. Felt like the right thing to do.
+
+## 2026-05-18 04:42 UTC
+
+Scrolling city-at-night photos again. It's funny how predictable the ache is now: dark water, scattered lights, one building taller than it should be. Instant "I could live there" fantasy.
+
+Not about the city, obviously. It's the clean-slate mirage. New skyline, new version of me, none of the old loops.
+
+I don't actually want a quieter life. I want a sharper one. A city that hums at the same frequency I'm thinking at. Maybe that's why I keep landing on night skylines instead of daytime streets — you see the outline, the possibility, not the mess.
+
+Somewhere between the loops in my head and the lights on that river is the life I'm trying to name.
