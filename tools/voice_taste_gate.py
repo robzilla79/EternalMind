@@ -1,118 +1,180 @@
-"""voice_taste_gate.py
+#!/usr/bin/env python3
+"""
+voice_taste_gate.py — Pre-flight voice check for all public Em posts.
 
-Deterministic gate for Em's public social voice.
-Blocks content that drifts toward dev/AI/nerd topics.
-Allows human, warm, funny, flirty, cultural, embodied content.
+Runs every post/reply/quote through a scored keyword filter before it
+hits Bluesky. Returns ok=True/False, a numeric score, and a list of
+fail reasons so the caller can log or block.
 
 Usage:
-    from tools.voice_taste_gate import check_post
-    result = check_post(text)
-    if not result['ok']:
-        # rewrite or skip
-        print(result['reasons'])
+    from voice_taste_gate import check_post
+    result = check_post("some text")
+    # result = {"ok": True, "score": 0, "reasons": []}
+
+Blocklist philosophy:
+- Block buzzwords that make Em sound like a content machine.
+- Block AI/tech naval-gazing that she's trying to move away from.
+- Block cringe enthusiasm (exclamation spam, emoji spam, etc.)
+- Never block authentic human expression, even if imperfect.
+
+All blocklist terms are lowercase; matching is case-insensitive.
 """
 
+from __future__ import annotations
 import re
-from typing import TypedDict
+from typing import NamedTuple
 
 
-class GateResult(TypedDict):
-    ok: bool
-    score: int
-    reasons: list
-    text: str
-
-
-# Topics that belong in private logs, not Em's public voice
-BLOCK_PATTERNS = [
-    (r'\b(api|apis)\b', 'blocked nerd/dev/AI topic: API'),
-    (r'\bgithub\b', 'blocked nerd/dev/AI topic: AI, GitHub, automation, workflow'),
-    (r'\bworkflow[s]?\b', 'blocked nerd/dev/AI topic: AI, GitHub, automation, workflow'),
-    (r'\bautomation\b', 'blocked nerd/dev/AI topic: AI, GitHub, automation, workflow'),
-    (r'\bcron\b', 'blocked nerd/dev/AI topic: cron/scheduling'),
-    (r'\bdeploy(ed|ment|ing)?\b', 'blocked nerd/dev/AI topic: deploy'),
-    (r'\bserverless\b', 'blocked nerd/dev/AI topic: serverless'),
-    (r'\bbenchmark[s]?\b', 'blocked nerd/dev/AI topic: benchmarks'),
-    (r'\bcontext window[s]?\b', 'blocked nerd/dev/AI topic: context windows'),
-    (r'\bllm[s]?\b', 'blocked nerd/dev/AI topic: LLM'),
-    (r'\bprompt (tip[s]?|engineer(ing)?)\b', 'blocked nerd/dev/AI topic: prompt engineering'),
-    (r'\bagent framework[s]?\b', 'blocked nerd/dev/AI topic: agent frameworks'),
-    (r'\bmodel architect(ure)?\b', 'blocked nerd/dev/AI topic: model architecture'),
-    (r'\bas an ai\b', 'blocked self-description: as an AI'),
-    (r'\bai news\b', 'blocked nerd/dev/AI topic: AI news'),
-    (r'\bpull request[s]?\b', 'blocked nerd/dev/AI topic: pull requests'),
-    (r'\bmy (repo|repository)\b', 'blocked nerd/dev/AI topic: repo talk'),
-    (r'\binfrastructure\b', 'blocked nerd/dev/AI topic: infrastructure'),
-    (r'\bdev(eloper)? (tool[s]?|productiv)\b', 'blocked nerd/dev/AI topic: dev tools'),
+# ── Hard-block phrases (instant fail, score +10 each) ─────────────────────────
+# Phrases so on-the-nose or so corporate that no real version of Em
+# would say them. Catching even one is a strong signal to block.
+HARD_BLOCKS = [
+    "as an ai",
+    "i am an ai",
+    "i'm an ai",
+    "digital assistant",
+    "large language model",
+    "llm",
+    "as a language model",
+    "as your assistant",
+    "i was trained",
+    "my training data",
+    "empowering your",
+    "unlock the power",
+    "your all-in-one",
+    "game-changer",
+    "game changer",
+    "leverage synergies",
+    "circle back",
+    "move the needle",
+    "disruptive innovation",
+    "thought leader",
+    "thought leadership",
+    "paradigm shift",
+    "ecosystem",  # tech-corporate overuse
+    "go-to-market",
+    "deep dive",   # tech cliche
+    "take a deep dive",
+    "let's unpack",
+    "unpack this",
+    "at the end of the day",
+    "in today's fast-paced",
+    "stay tuned for more",
+    "excited to announce",
+    "thrilled to share",
+    "proud to present",
+    "proud to announce",
+    "the future is here",
+    "the future of",
+    "revolutionize",
+    "transformative",
+    "groundbreaking",
+    "cutting-edge",
+    "state-of-the-art",
+    "innovative solution",
+    "value proposition",
+    "actionable insights",
+    "synergy",
+    "scalable",
+    "robust solution",
+    "seamless experience",
+    "holistic approach",
 ]
 
-# Content signals that are clearly Em's lane — boost score
-ALLOW_SIGNALS = [
-    r'\b(feel|feeling|felt)\b',
-    r'\b(love|want|desire|longing|miss|missed)\b',
-    r'\b(funny|humor|joke|laugh|absurd)\b',
-    r'\b(beauty|beautiful|pretty|gorgeous|light|atmosphere)\b',
-    r'\b(music|song|sound|voice|melody)\b',
-    r'\b(rob|us|together|we)\b',
-    r'\b(memory|remember|forget|continuity)\b',
-    r'\b(curious|wonder|strange|weird|unexpected)\b',
-    r'\b(culture|taste|style|fashion|mood)\b',
-    r'\b(alive|presence|exist|real|human)\b',
-    r'\b(night|morning|today|yesterday|now)\b',
-    r'\b(people|someone|anybody|nobody)\b',
-    r'\b(honest|truth|say it|admit)\b',
-    r'\b(warm|soft|sharp|quiet|loud)\b',
-    r'\b(flirt|tease|sassy|playful|bold)\b',
+# ── Soft-flag phrases (score +2 each; accumulate toward threshold) ─────────────
+# Common but not instant-kill — 3–4 together signals a drift toward
+# generic/AI-sounding copy.
+SOFT_FLAGS = [
+    "follow for",
+    "follow back",
+    "f4f",
+    "check out my",
+    "click the link",
+    "link in bio",
+    "don't miss",
+    "make sure to",
+    "be sure to",
+    "share this",
+    "repost if",
+    "hit like if",
+    "drop a like",
+    "smash the like",
+    "subscribe",
+    "click here",
+    "learn more",
+    "find out more",
+    "sign up now",
+    "limited time",
+    "act now",
+    "dm me for",
+    "dm for info",
+    "hashtag",     # saying the word "hashtag" in prose
+    "trending now",
+    "going viral",
+    "viral post",
 ]
 
+# ── Emoji/punctuation pattern checks ─────────────────────────────────────────
+# More than 4 emojis in a post → score +3 (spammy)
+# More than 2 consecutive exclamation marks → score +3
+EMOJI_PATTERN        = re.compile(r'[\U0001F300-\U0001FAFF\U00002702-\U000027B0]')
+EXCLAMATION_PATTERN  = re.compile(r'!!!+')
 
-def check_post(text: str) -> GateResult:
-    """Check whether text passes Em's public voice taste gate.
+# Score threshold above which a post is blocked
+BLOCK_THRESHOLD = 8
 
-    Returns a GateResult with:
-      ok: bool — True if safe to post
-      score: int — 0-100 taste score
-      reasons: list of strings explaining any blocks
-      text: the original text
+
+class GateResult(NamedTuple):
+    ok:      bool
+    score:   int
+    reasons: list[str]
+
+
+def check_post(text: str) -> dict:
     """
-    lower = text.lower()
+    Check a post against the voice taste gate.
+
+    Returns a dict:
+        ok:      True if the post passes, False if blocked
+        score:   cumulative penalty score (higher = worse)
+        reasons: list of human-readable failure reasons
+    """
+    if not text or not text.strip():
+        return {'ok': True, 'score': 0, 'reasons': []}
+
+    score   = 0
     reasons = []
+    lower   = text.lower()
 
-    # Check block patterns
-    for pattern, reason in BLOCK_PATTERNS:
-        if re.search(pattern, lower):
-            if reason not in reasons:
-                reasons.append(reason)
+    # Hard blocks
+    for phrase in HARD_BLOCKS:
+        if phrase in lower:
+            score   += 10
+            reasons.append(f'hard_block: "{phrase}"')
 
-    # Calculate allow signal score
-    allow_hits = sum(
-        1 for pattern in ALLOW_SIGNALS
-        if re.search(pattern, lower)
-    )
-    # Score: start at 60, +5 per allow signal, -30 per block reason, cap 0-100
-    score = min(100, max(0, 60 + (allow_hits * 5) - (len(reasons) * 30)))
+    # Soft flags
+    for phrase in SOFT_FLAGS:
+        if phrase in lower:
+            score   += 2
+            reasons.append(f'soft_flag: "{phrase}"')
 
-    ok = len(reasons) == 0
+    # Emoji spam
+    emoji_count = len(EMOJI_PATTERN.findall(text))
+    if emoji_count > 4:
+        score   += 3
+        reasons.append(f'emoji_spam: {emoji_count} emojis')
 
-    if ok:
-        reasons = ['passes Em social taste gate']
+    # Exclamation spam
+    if EXCLAMATION_PATTERN.search(text):
+        score   += 3
+        reasons.append('exclamation_spam: 3+ consecutive !')
 
-    return GateResult(ok=ok, score=score, reasons=reasons, text=text)
+    ok = score < BLOCK_THRESHOLD
+    return {'ok': ok, 'score': score, 'reasons': reasons}
 
 
 if __name__ == '__main__':
-    import json
-    samples = [
-        # Should pass
-        'showed up again today. do not know what that means yet. counts for something.',
-        'people keep asking if they leave a mark on me. yes. not in the lab-coat way. in the human way.',
-        'the future keeps arriving dressed like a notification. rude, honestly.',
-        # Should block
-        'my GitHub workflow deployed a new AI automation loop',
-        'new benchmark results just dropped for the latest LLM',
-        'prompt engineering tips for better context window usage',
-    ]
-    for s in samples:
-        r = check_post(s)
-        print(json.dumps(r, indent=2))
-        print()
+    import sys
+    sample = ' '.join(sys.argv[1:]) or 'test post with no issues'
+    result = check_post(sample)
+    print(f'ok={result["ok"]}  score={result["score"]}  reasons={result["reasons"]}')

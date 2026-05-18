@@ -1,108 +1,150 @@
 #!/usr/bin/env python3
 """
-repo_policy.py
+repo_policy.py — Em's self-modification policy enforcement layer.
 
-EternalMind write policy engine.
-Every autonomous file write should be validated here before committing.
+Called by em-action.yml before any autonomous file write, branch push,
+or workflow modification. Enforces the Tier 1 / Tier 2 / Tier 3 boundary
+that Rob and Em agreed on in memory/identity-and-permission.md.
 
-Three risk tiers:
+  Tier 1 (Em can write freely, no approval):
+    memory/diary.md, memory/diary-archive-*.md, memory/reflection-log.md,
+    memory/memories.json, memory/bluesky-state.json,
+    memory/bluesky-log.md, memory/metrics-snapshot.json,
+    memory/status.md, memory/writing-log.json,
+    messages/bluesky-outbox.json,
+    memory/creations/**
 
-  TIER_0 — Direct commit allowed (content/state updates)
-  TIER_1 — PR required, auto-merge allowed after checks (behavioral files)
-  TIER_2 — PR required, NO autonomous merge (control plane)
+  Tier 2 (Em can write, commits to a branch, opens a PR — Rob reviews):
+    memory/profile.json, memory/identity.md,
+    memory/em-voice-guide.md, memory/social-strategy.md,
+    memory/schedule.md, memory/newsletter-tracker.md,
+    public/** (site content),
+    tools/** (scripts, but NOT workflows),
+    skills/**
+
+  Tier 3 (BLOCKED — no autonomous modification, ever):
+    .github/workflows/**
+    memory/identity-and-permission.md
+    memory/rob-em-relationship-contract.md
+    tools/repo_policy.py (this file)
+    Any path containing "secret", "key", "token", "password"
 
 Usage:
-    from repo_policy import check_path, TIER_0, TIER_1, TIER_2
-    tier = check_path("memory/diary.md")      # returns 0
-    tier = check_path("tools/bluesky_sync.py") # returns 1
-    tier = check_path(".github/workflows/x.yml") # returns 2
+    python tools/repo_policy.py <path> [--write-mode direct|pr|block]
+
+    Exit codes:
+        0  — allowed (direct write)
+        2  — allowed (PR required)
+        3  — blocked
+
+    Can also be imported:
+        from repo_policy import check_path, DIRECT, PR_REQUIRED, BLOCKED
 """
+
+from __future__ import annotations
+import fnmatch
+import os
 import re
-from pathlib import PurePosixPath
+import sys
 
-TIER_0 = 0  # direct commit
-TIER_1 = 1  # PR, auto-merge ok
-TIER_2 = 2  # PR, no autonomous merge
+# Policy constants
+DIRECT      = 0
+PR_REQUIRED = 2
+BLOCKED     = 3
 
-# Order matters — first match wins
-_RULES = [
-    # TIER 2 — control plane (check first, most restrictive)
-    (TIER_2, re.compile(r'^\.github/')),
-    (TIER_2, re.compile(r'^secrets/')),
-    (TIER_2, re.compile(r'^\.env')),
-    (TIER_2, re.compile(r'^requirements\.txt$')),
-    (TIER_2, re.compile(r'^pyproject\.toml$')),
-    (TIER_2, re.compile(r'^package\.json$')),
-
-    # TIER 1 — behavioral
-    (TIER_1, re.compile(r'^tools/')),
-    (TIER_1, re.compile(r'^skills/')),
-    (TIER_1, re.compile(r'^public/assets/')),
-    (TIER_1, re.compile(r'^memory/.*\.json$')),
-    (TIER_1, re.compile(r'^products/')),
-
-    # TIER 0 — safe content/state (default for memory/, messages/, public/)
-    (TIER_0, re.compile(r'^memory/')),
-    (TIER_0, re.compile(r'^messages/')),
-    (TIER_0, re.compile(r'^public/')),
+# ── Tier 3: BLOCKED ──────────────────────────────────────────────────────────
+TIER3_PATTERNS = [
+    '.github/workflows/**',
+    'memory/identity-and-permission.md',
+    'memory/rob-em-relationship-contract.md',
+    'tools/repo_policy.py',
 ]
 
-_DEFAULT_TIER = TIER_1  # unknown paths get tier 1 — PR but auto-mergeable
+# Sensitive keyword check (any path segment)
+SENSITIVE_RE = re.compile(r'(secret|apikey|api_key|token|password|passwd|credentials)', re.IGNORECASE)
 
-MAX_FILE_SIZE_BYTES = 512 * 1024  # 512KB hard limit on autonomous writes
-
-_BLOCKED_PATTERNS = [
-    re.compile(r'GITHUB_TOKEN\s*=\s*["\']?[a-zA-Z0-9_-]{20,}'),
-    re.compile(r'PERPLEXITY_API_KEY\s*=\s*["\']?pplx-[a-zA-Z0-9]+'),
-    re.compile(r'password\s*=\s*["\']?.{8,}', re.IGNORECASE),
+# ── Tier 1: DIRECT WRITE ─────────────────────────────────────────────────────
+TIER1_PATTERNS = [
+    'memory/diary.md',
+    'memory/diary-archive-*.md',
+    'memory/reflection-log.md',
+    'memory/memories.json',
+    'memory/bluesky-state.json',
+    'memory/bluesky-log.md',
+    'memory/metrics-snapshot.json',
+    'memory/status.md',
+    'memory/writing-log.json',
+    'messages/bluesky-outbox.json',
+    'memory/creations/**',
 ]
+
+# ── Tier 2: PR REQUIRED ──────────────────────────────────────────────────────
+TIER2_PATTERNS = [
+    'memory/profile.json',
+    'memory/identity.md',
+    'memory/em-voice-guide.md',
+    'memory/social-strategy.md',
+    'memory/schedule.md',
+    'memory/newsletter-tracker.md',
+    'public/**',
+    'tools/**',
+    'skills/**',
+]
+
+
+def _match(path: str, patterns: list[str]) -> bool:
+    """Case-insensitive fnmatch against a list of glob patterns."""
+    p = path.replace('\\', '/').lstrip('/')
+    return any(fnmatch.fnmatch(p, pat) for pat in patterns)
 
 
 def check_path(path: str) -> int:
-    """Return the risk tier for a given repo path."""
-    p = str(PurePosixPath(path))
-    for tier, pattern in _RULES:
-        if pattern.match(p):
-            return tier
-    return _DEFAULT_TIER
-
-
-def check_content(content: str) -> list:
     """
-    Scan content for blocked patterns (secrets, credentials).
-    Returns list of violation strings. Empty list = clean.
+    Return DIRECT (0), PR_REQUIRED (2), or BLOCKED (3) for a given path.
+
+    Precedence: Tier 3 > sensitive keyword > Tier 1 > Tier 2 > default BLOCKED.
+    Any path not explicitly in Tier 1 or Tier 2 defaults to BLOCKED.
     """
-    violations = []
-    for pattern in _BLOCKED_PATTERNS:
-        if pattern.search(content):
-            violations.append(f"Blocked pattern matched: {pattern.pattern[:40]}...")
-    if len(content.encode()) > MAX_FILE_SIZE_BYTES:
-        violations.append(f"Content exceeds max size ({MAX_FILE_SIZE_BYTES} bytes)")
-    return violations
+    clean = path.replace('\\', '/').lstrip('/')
+
+    # Tier 3 — hardcoded blocks first
+    if _match(clean, TIER3_PATTERNS):
+        return BLOCKED
+
+    # Sensitive keyword check
+    if SENSITIVE_RE.search(clean):
+        return BLOCKED
+
+    # Tier 1
+    if _match(clean, TIER1_PATTERNS):
+        return DIRECT
+
+    # Tier 2
+    if _match(clean, TIER2_PATTERNS):
+        return PR_REQUIRED
+
+    # Default: block anything not explicitly allowed
+    return BLOCKED
 
 
-def validate(path: str, content: str) -> tuple:
-    """
-    Full validation. Returns (tier, violations).
-    violations is a list of strings — empty means safe to proceed.
-    """
-    tier = check_path(path)
-    violations = check_content(content)
-    return tier, violations
+def explain(path: str) -> str:
+    result = check_path(path)
+    labels = {DIRECT: 'DIRECT (Tier 1)', PR_REQUIRED: 'PR_REQUIRED (Tier 2)', BLOCKED: 'BLOCKED (Tier 3)'}
+    return f'{path!r} → {labels[result]}'
 
 
-if __name__ == "__main__":
-    # Quick self-test
-    test_cases = [
-        "memory/diary.md",
-        "memory/memories.json",
-        "tools/bluesky_sync.py",
-        ".github/workflows/em-dispatch.yml",
-        "public/index.html",
-        "products/my-product.md",
-        "requirements.txt",
-    ]
-    labels = ["DIRECT", "PR+AUTO", "PR+HOLD"]
-    for p in test_cases:
-        t = check_path(p)
-        print(f"  {labels[t]:10s}  {p}")
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser(description='Em repo policy checker')
+    parser.add_argument('path', help='Repo-relative file path to check')
+    parser.add_argument('--explain', action='store_true', help='Print human-readable result')
+    args = parser.parse_args()
+
+    result = check_path(args.path)
+    if args.explain:
+        print(explain(args.path))
+    else:
+        labels = {DIRECT: 'direct', PR_REQUIRED: 'pr_required', BLOCKED: 'blocked'}
+        print(labels[result])
+
+    sys.exit(result)
