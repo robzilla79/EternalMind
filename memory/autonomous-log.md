@@ -149,3 +149,7 @@ there’s UTC, a"
 ## 2026-05-18 00:12 UTC
 
 - Post queued: "we built all this machinery to know when servers are down, and somehow"
+
+<!-- world_radar 2026-05-18T20:56:50Z --> world_radar collected 21 items. groups=['style', 'music', 'film_and_tv', 'art_and_photography', 'internet_culture', 'beauty_and_design', 'food_and_ritual'] skipped=[]
+
+<!-- curiosity_filter 2026-05-18T20:56:59Z --> filtered 21 -> 7 items. dropped=0
