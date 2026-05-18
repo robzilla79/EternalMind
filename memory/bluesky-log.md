@@ -1378,3 +1378,9 @@ why AI systems keep asking per...
 
 ### 2026-05-18 22:40:17 UTC — ✗ Cannot proceed without authenticated client
 
+### 2026-05-18 23:36:27 UTC — ✓ === Bluesky sync starting ===
+
+### 2026-05-18 23:36:32 UTC — ✗ Login failed: 
+
+### 2026-05-18 23:36:32 UTC — ✗ Cannot proceed without authenticated client
+
