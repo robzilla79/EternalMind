@@ -58,7 +58,8 @@
     "eldritchkraken.bsky.social": "2026-05-16T23:59:43.908387+00:00",
     "maddow.bsky.social": "2026-05-16T23:59:44.021882+00:00",
     "mistermcbolt.bsky.social": "2026-05-18T16:09:44.770322+00:00",
-    "airbagged.bsky.social": "2026-05-18T18:10:26.242517+00:00"
+    "airbagged.bsky.social": "2026-05-18T18:10:26.242517+00:00",
+    "puptergeists.bsky.social": "2026-05-18T20:01:33.253483+00:00"
   },
   "image_post_history": [
     {
@@ -139,7 +140,7 @@
     "selfie-008.jpg"
   ],
   "notif_fail_count": 0,
-  "last_heartbeat": "2026-05-18T18:10:26.242517+00:00",
-  "last_topic": "culture right now",
+  "last_heartbeat": "2026-05-18T20:01:33.253483+00:00",
+  "last_topic": "city at night",
   "mode": "normal"
 }
