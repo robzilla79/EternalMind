@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "updated_at": null,
+  "note": "These are query groups, not categories. They are doors, not cages. Em's taste is the real boundary.",
+  "max_items_per_run": 20,
+  "max_items_per_group": 3,
+  "groups": [
+    {
+      "id": "style",
+      "enabled": true,
+      "queries": [
+        "fashion moments people are talking about this week",
+        "style trends emerging right now",
+        "what people are wearing and obsessing over"
+      ]
+    },
+    {
+      "id": "music",
+      "enabled": true,
+      "queries": [
+        "songs and albums people can't stop listening to right now",
+        "music moments worth noticing this week"
+      ]
+    },
+    {
+      "id": "film_and_tv",
+      "enabled": true,
+      "queries": [
+        "movies and shows people are obsessed with right now",
+        "film or TV moments everyone is talking about"
+      ]
+    },
+    {
+      "id": "art_and_photography",
+      "enabled": true,
+      "queries": [
+        "art or photography making people feel something right now",
+        "visual artists getting attention this week"
+      ]
+    },
+    {
+      "id": "internet_culture",
+      "enabled": true,
+      "queries": [
+        "internet moments or memes people are suddenly obsessed with",
+        "weird little things going viral this week that are actually interesting"
+      ]
+    },
+    {
+      "id": "beauty_and_design",
+      "enabled": true,
+      "queries": [
+        "beauty or design trends people are loving right now",
+        "objects rooms spaces that are having a moment"
+      ]
+    },
+    {
+      "id": "food_and_ritual",
+      "enabled": true,
+      "queries": [
+        "food or drink things people are obsessing over",
+        "little rituals and pleasures trending in culture"
+      ]
+    },
+    {
+      "id": "places_and_travel",
+      "enabled": true,
+      "queries": [
+        "places people are suddenly wanting to go or talk about"
+      ]
+    },
+    {
+      "id": "weird_history",
+      "enabled": true,
+      "queries": [
+        "strange historical facts or stories that surfaced recently",
+        "weird things people just learned about history"
+      ]
+    },
+    {
+      "id": "relationship_discourse",
+      "enabled": true,
+      "queries": [
+        "relationship or dating conversations people are having online right now"
+      ]
+    },
+    {
+      "id": "books_and_essays",
+      "enabled": true,
+      "queries": [
+        "books or essays people are reading and talking about"
+      ]
+    },
+    {
+      "id": "current_events_light",
+      "enabled": true,
+      "queries": [
+        "what is the general mood and texture of the world this week",
+        "interesting stories in the news that aren't politics or tech"
+      ]
+    },
+    {
+      "id": "odd_discoveries",
+      "enabled": true,
+      "queries": [
+        "strange or beautiful things people discovered or noticed this week",
+        "things people are suddenly obsessed with that feel unexpected"
+      ]
+    },
+    {
+      "id": "humor",
+      "enabled": true,
+      "queries": [
+        "things that are genuinely funny right now not just popular"
+      ]
+    },
+    {
+      "id": "sports_culture",
+      "enabled": false,
+      "queries": [
+        "sports moments that crossed into culture or fashion this week"
+      ]
+    },
+    {
+      "id": "em_relevant",
+      "enabled": true,
+      "queries": [
+        "what are people saying about digital identity presence and being seen online",
+        "interesting ideas about memory continuity and what makes a self"
+      ]
+    }
+  ]
+}

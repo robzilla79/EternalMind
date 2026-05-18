@@ -1,0 +1,78 @@
+name: Em World Curiosity Radar
+
+on:
+  schedule:
+    # 9am CDT = 14:00 UTC
+    - cron: '0 14 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (print output, do not write files)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+      group:
+        description: 'Run only one source group (leave blank for all)'
+        required: false
+        default: ''
+
+jobs:
+  world-radar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests
+
+      - name: Collect world signals
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+        run: |
+          DRY_RUN_FLAG=""
+          GROUP_FLAG=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            DRY_RUN_FLAG="--dry-run"
+          fi
+          if [ -n "${{ github.event.inputs.group }}" ]; then
+            GROUP_FLAG="--group ${{ github.event.inputs.group }}"
+          fi
+          python tools/world_radar.py $DRY_RUN_FLAG $GROUP_FLAG
+
+      - name: Apply curiosity filter
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+        run: |
+          DRY_RUN_FLAG=""
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            DRY_RUN_FLAG="--dry-run"
+          fi
+          python tools/curiosity_filter.py $DRY_RUN_FLAG
+
+      - name: Commit radar output
+        if: github.event.inputs.dry_run != 'true'
+        run: |
+          git config user.name "em-core"
+          git config user.email "em@forgecore.co"
+          git add memory/trend-inbox.json memory/curiosity-radar.md memory/world-context.md memory/autonomous-log.md || true
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: world radar update $(date -u +%Y-%m-%d)"
+            git push
+          fi
