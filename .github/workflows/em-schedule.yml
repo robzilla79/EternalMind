@@ -12,8 +12,7 @@ on:
     inputs:
       slot:
         description: 'Which slot to run (morning / midday / evening)'
-        required: false
-        default: 'morning'
+        required: true
 
 permissions:
   contents: write
@@ -52,9 +51,8 @@ jobs:
           elif [ "$HOUR" -eq 1 ]; then
             echo "slot=evening" >> $GITHUB_OUTPUT
           else
-            # Fallback: log the unexpected hour so we know what happened
-            echo "slot=morning" >> $GITHUB_OUTPUT
-            echo "WARNING: unexpected UTC hour $HOUR — defaulting to morning" >&2
+            echo "slot=unknown" >> $GITHUB_OUTPUT
+            echo "WARNING: unexpected UTC hour $HOUR — slot set to unknown" >&2
           fi
 
       - name: Process pending Em actions
