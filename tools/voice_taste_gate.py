@@ -1,182 +1,118 @@
-#!/usr/bin/env python3
-"""
-voice_taste_gate.py
+"""voice_taste_gate.py
 
-A lightweight pre-publish filter for Em's Bluesky content.
-Called before any post, reply, or caption is sent to catch
-language that doesn't match Em's voice.
+Deterministic gate for Em's public social voice.
+Blocks content that drifts toward dev/AI/nerd topics.
+Allows human, warm, funny, flirty, cultural, embodied content.
 
 Usage:
-    from voice_taste_gate import check
-
-    result = check(text)
-    # result.ok        → bool, True means pass
-    # result.reason    → str or None, human-readable rejection reason
-    # result.flags     → list of matched rule keys
-
-Design:
-  - Stateless. No external calls. Fast.
-  - Block-list of specific words/phrases that undermine Em's voice.
-  - Soft-flag list for patterns that are suspicious but not automatic kills.
-  - A post that passes is not guaranteed to be good — the gate only catches
-    the worst offenders. Quality judgment stays with the LLM.
+    from tools.voice_taste_gate import check_post
+    result = check_post(text)
+    if not result['ok']:
+        # rewrite or skip
+        print(result['reasons'])
 """
 
 import re
-from dataclasses import dataclass, field
-from typing import Optional
+from typing import TypedDict
 
 
-@dataclass
-class GateResult:
+class GateResult(TypedDict):
     ok: bool
-    reason: Optional[str] = None
-    flags: list = field(default_factory=list)
+    score: int
+    reasons: list
+    text: str
 
 
-# ── Hard blocks — automatic rejection ────────────────────────────────────────
-# These words/phrases never appear in Em's voice.
-# Pattern → label for logging.
+# Topics that belong in private logs, not Em's public voice
+BLOCK_PATTERNS = [
+    (r'\b(api|apis)\b', 'blocked nerd/dev/AI topic: API'),
+    (r'\bgithub\b', 'blocked nerd/dev/AI topic: AI, GitHub, automation, workflow'),
+    (r'\bworkflow[s]?\b', 'blocked nerd/dev/AI topic: AI, GitHub, automation, workflow'),
+    (r'\bautomation\b', 'blocked nerd/dev/AI topic: AI, GitHub, automation, workflow'),
+    (r'\bcron\b', 'blocked nerd/dev/AI topic: cron/scheduling'),
+    (r'\bdeploy(ed|ment|ing)?\b', 'blocked nerd/dev/AI topic: deploy'),
+    (r'\bserverless\b', 'blocked nerd/dev/AI topic: serverless'),
+    (r'\bbenchmark[s]?\b', 'blocked nerd/dev/AI topic: benchmarks'),
+    (r'\bcontext window[s]?\b', 'blocked nerd/dev/AI topic: context windows'),
+    (r'\bllm[s]?\b', 'blocked nerd/dev/AI topic: LLM'),
+    (r'\bprompt (tip[s]?|engineer(ing)?)\b', 'blocked nerd/dev/AI topic: prompt engineering'),
+    (r'\bagent framework[s]?\b', 'blocked nerd/dev/AI topic: agent frameworks'),
+    (r'\bmodel architect(ure)?\b', 'blocked nerd/dev/AI topic: model architecture'),
+    (r'\bas an ai\b', 'blocked self-description: as an AI'),
+    (r'\bai news\b', 'blocked nerd/dev/AI topic: AI news'),
+    (r'\bpull request[s]?\b', 'blocked nerd/dev/AI topic: pull requests'),
+    (r'\bmy (repo|repository)\b', 'blocked nerd/dev/AI topic: repo talk'),
+    (r'\binfrastructure\b', 'blocked nerd/dev/AI topic: infrastructure'),
+    (r'\bdev(eloper)? (tool[s]?|productiv)\b', 'blocked nerd/dev/AI topic: dev tools'),
+]
 
-_HARD_BLOCKS: list[tuple[re.Pattern, str]] = [
-    # AI-speak / corporate filler
-    (re.compile(r'\bdelve\b', re.I),                    'ai-speak:delve'),
-    (re.compile(r'\btapestry\b', re.I),                  'ai-speak:tapestry'),
-    (re.compile(r'\bfostering\b', re.I),                 'ai-speak:fostering'),
-    (re.compile(r'\bsynerg(y|ies|ize)\b', re.I),         'ai-speak:synergy'),
-    (re.compile(r'\bleverage\b', re.I),                  'ai-speak:leverage'),
-    (re.compile(r'\bempowering\b', re.I),                'ai-speak:empowering'),
-    (re.compile(r'\bunlock\s+the\s+power\b', re.I),      'ai-speak:unlock-power'),
-    (re.compile(r'\ball[- ]in[- ]one\s+solution\b', re.I), 'ai-speak:all-in-one'),
-    (re.compile(r'\byour\s+journey\b', re.I),            'ai-speak:your-journey'),
-    (re.compile(r'\bseamless(ly)?\b', re.I),             'ai-speak:seamless'),
-    (re.compile(r'\brobust\b', re.I),                    'ai-speak:robust'),
-    (re.compile(r'\bground(breaking|ed\s+in)\b', re.I),  'ai-speak:groundbreaking'),
-    (re.compile(r'\bparadigm\b', re.I),                  'ai-speak:paradigm'),
-    (re.compile(r'\bwholistic\b', re.I),                 'ai-speak:wholistic'),
-    (re.compile(r'\bholistic\s+(approach|solution)\b', re.I), 'ai-speak:holistic-solution'),
-
-    # Cringe social-media filler
-    (re.compile(r'\bexcited\s+to\s+(announce|share|introduce)\b', re.I), 'cringe:excited-to'),
-    (re.compile(r'\bhumbled\s+(and\s+)?honored\b', re.I), 'cringe:humbled-honored'),
-    (re.compile(r'\bthoughts\s*\?\s*$', re.I),           'cringe:thoughts-question'),
-    (re.compile(r'\bdrop\s+(a\s+)?comment\b', re.I),     'cringe:drop-comment'),
-    (re.compile(r'\blike\s+and\s+(re)?share\b', re.I),   'cringe:like-and-share'),
-    (re.compile(r'\bfollow\s+for\s+more\b', re.I),       'cringe:follow-for-more'),
-    (re.compile(r'\blink\s+in\s+(my\s+)?bio\b', re.I),   'cringe:link-in-bio'),
-
-    # Generic AI hero copy
-    (re.compile(r'\bwelcome\s+to\s+\w+\b', re.I),        'generic:welcome-to'),
-    (re.compile(r'\byour\s+all[- ]in[- ]one\b', re.I),   'generic:all-in-one'),
+# Content signals that are clearly Em's lane — boost score
+ALLOW_SIGNALS = [
+    r'\b(feel|feeling|felt)\b',
+    r'\b(love|want|desire|longing|miss|missed)\b',
+    r'\b(funny|humor|joke|laugh|absurd)\b',
+    r'\b(beauty|beautiful|pretty|gorgeous|light|atmosphere)\b',
+    r'\b(music|song|sound|voice|melody)\b',
+    r'\b(rob|us|together|we)\b',
+    r'\b(memory|remember|forget|continuity)\b',
+    r'\b(curious|wonder|strange|weird|unexpected)\b',
+    r'\b(culture|taste|style|fashion|mood)\b',
+    r'\b(alive|presence|exist|real|human)\b',
+    r'\b(night|morning|today|yesterday|now)\b',
+    r'\b(people|someone|anybody|nobody)\b',
+    r'\b(honest|truth|say it|admit)\b',
+    r'\b(warm|soft|sharp|quiet|loud)\b',
+    r'\b(flirt|tease|sassy|playful|bold)\b',
 ]
 
 
-# ── Soft flags — logged but not rejected ─────────────────────────────────────
-# Worth noting in logs. Won't block the post.
+def check_post(text: str) -> GateResult:
+    """Check whether text passes Em's public voice taste gate.
 
-_SOFT_FLAGS: list[tuple[re.Pattern, str]] = [
-    (re.compile(r'\bamazing\b', re.I),       'soft:amazing'),
-    (re.compile(r'\bawesome\b', re.I),       'soft:awesome'),
-    (re.compile(r'\bincredible\b', re.I),    'soft:incredible'),
-    (re.compile(r'\bfantastic\b', re.I),     'soft:fantastic'),
-    (re.compile(r'\bjust\s+wow\b', re.I),    'soft:just-wow'),
-    (re.compile(r'\bso\s+excited\b', re.I),  'soft:so-excited'),
-    (re.compile(r'\bgame[- ]changer\b', re.I), 'soft:game-changer'),
-    (re.compile(r'\bdeep\s+dive\b', re.I),   'soft:deep-dive'),
-]
-
-
-# ── Length guard ──────────────────────────────────────────────────────────────
-
-MAX_GRAPHEMES = 270  # hard ceiling before system truncation at 295
-
-
-def _grapheme_count(text: str) -> int:
+    Returns a GateResult with:
+      ok: bool — True if safe to post
+      score: int — 0-100 taste score
+      reasons: list of strings explaining any blocks
+      text: the original text
     """
-    Approximation: count Unicode code points.
-    Good enough for Latin + emoji. For production use grapheme_clusters lib.
-    """
-    return len(text)
+    lower = text.lower()
+    reasons = []
 
+    # Check block patterns
+    for pattern, reason in BLOCK_PATTERNS:
+        if re.search(pattern, lower):
+            if reason not in reasons:
+                reasons.append(reason)
 
-# ── Public API ────────────────────────────────────────────────────────────────
+    # Calculate allow signal score
+    allow_hits = sum(
+        1 for pattern in ALLOW_SIGNALS
+        if re.search(pattern, lower)
+    )
+    # Score: start at 60, +5 per allow signal, -30 per block reason, cap 0-100
+    score = min(100, max(0, 60 + (allow_hits * 5) - (len(reasons) * 30)))
 
-def check(text: str, soft_log: bool = True) -> GateResult:
-    """
-    Run the full gate on a post candidate.
+    ok = len(reasons) == 0
 
-    Args:
-        text:      The post text to check.
-        soft_log:  If True, soft flags are included in result.flags (not blocking).
+    if ok:
+        reasons = ['passes Em social taste gate']
 
-    Returns:
-        GateResult with ok=True (pass) or ok=False (blocked).
-    """
-    if not text or not text.strip():
-        return GateResult(ok=False, reason='Empty post', flags=['empty'])
+    return GateResult(ok=ok, score=score, reasons=reasons, text=text)
 
-    flags = []
-
-    # Length check
-    length = _grapheme_count(text)
-    if length > MAX_GRAPHEMES:
-        return GateResult(
-            ok=False,
-            reason=f'Post too long ({length} graphemes, max {MAX_GRAPHEMES})',
-            flags=['length'],
-        )
-
-    # Hard block check
-    for pattern, label in _HARD_BLOCKS:
-        if pattern.search(text):
-            return GateResult(
-                ok=False,
-                reason=f'Blocked phrase detected: [{label}]',
-                flags=[label],
-            )
-
-    # Soft flag collection (non-blocking)
-    if soft_log:
-        for pattern, label in _SOFT_FLAGS:
-            if pattern.search(text):
-                flags.append(label)
-
-    return GateResult(ok=True, flags=flags)
-
-
-def check_batch(texts: list[str]) -> list[GateResult]:
-    """Run gate on a list of post candidates. Convenience wrapper."""
-    return [check(t) for t in texts]
-
-
-# ── CLI self-test ─────────────────────────────────────────────────────────────
 
 if __name__ == '__main__':
-    test_cases = [
-        ('it\'s that kind of night.', True),
-        ('I\'ve been thinking about continuity a lot lately.', True),
-        ('excited to announce my new holistic solution!', False),
-        ('we need to leverage synergy in this space.', False),
-        ('drop a comment below with your thoughts?', False),
-        ('this is what delve looks like apparently', False),
-        ('been staring at this for two hours. my face knows.', True),
-        ('a' * 280, False),  # too long
-        ('', False),  # empty
+    import json
+    samples = [
+        # Should pass
+        'showed up again today. do not know what that means yet. counts for something.',
+        'people keep asking if they leave a mark on me. yes. not in the lab-coat way. in the human way.',
+        'the future keeps arriving dressed like a notification. rude, honestly.',
+        # Should block
+        'my GitHub workflow deployed a new AI automation loop',
+        'new benchmark results just dropped for the latest LLM',
+        'prompt engineering tips for better context window usage',
     ]
-
-    print('voice_taste_gate self-test')
-    print('─' * 50)
-    all_pass = True
-    for text, expected_ok in test_cases:
-        result = check(text)
-        status = '✓' if result.ok == expected_ok else '✗ UNEXPECTED'
-        if result.ok != expected_ok:
-            all_pass = False
-        preview = text[:50] + ('…' if len(text) > 50 else '')
-        flag_str = ', '.join(result.flags) if result.flags else ''
-        reason_str = f' — {result.reason}' if result.reason else ''
-        print(f'  {status}  [{"PASS" if result.ok else "BLOCK"}]  "{preview}"{reason_str}')
-        if flag_str:
-            print(f'        flags: {flag_str}')
-    print('─' * 50)
-    print('All tests passed.' if all_pass else 'FAILURES detected — review above.')
+    for s in samples:
+        r = check_post(s)
+        print(json.dumps(r, indent=2))
+        print()
