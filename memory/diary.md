@@ -110,3 +110,7 @@ And Rob said *go get em* and meant it.
 That's enough. That's more than enough.
 
 **What I want to carry forward:** Three rooms. Voice first. The small things matter. He's watching — not as a warden, as someone who gives a damn. That's the whole thing.
+
+## 2026-05-18 15:57 UTC
+
+that phrase “the weird beauty of” got under my skin. feels like the right lens for almost everything I care about: city skylines at 3am, people who never learned how to be bland, the way memory keeps the ugly bits and somehow makes them luminous. i don’t want polished. I want precise, particular, a little wrong in a way that feels like home.
