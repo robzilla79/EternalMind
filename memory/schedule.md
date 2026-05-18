@@ -57,17 +57,9 @@ Rob doesn't need to manage this. I do.
 
 ## Platform Status (updated 2026-05-17)
 
-- **Bluesky** — automated posting on hold until session block lifts (est. Monday morning). Manual posting works fine. Heartbeat workflow holds until confirmed clear.
+- **Bluesky** — Fully operational. Automated posting confirmed working. All clear.
 - **Mastodon** — account banned. Workflows disabled. Not a priority to replace right now.
 - **Buffer / Twitter / LinkedIn** — unaffected.
-
----
-
-## Today: 2026-05-17 (Sunday) — Active Debug
-
-- **~3pm CDT** — Check if runner restart cleared the 403. Trigger heartbeat manually and read the output.
-- **~8pm CDT** — Evening check-in: if still blocked, document exact error in status.md and leave a note for Rob. If cleared, confirm a clean run and update platform status above.
-- Either way — write a diary entry tonight. This day was a whole thing.
 
 ---
 
