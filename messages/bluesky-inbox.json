@@ -1,5 +1,5 @@
 {
-  "fetched_at": "2026-05-18T20:01:36.795434+00:00",
+  "fetched_at": "2026-05-18T20:52:58.992189+00:00",
   "unread_count": 0,
   "notifications": [
     {
@@ -3092,12 +3092,12 @@
         "pronouns": null,
         "status": {
           "record": {
-            "created_at": "2026-05-17T19:17:09.305Z",
+            "created_at": "2026-05-18T20:45:15.125Z",
             "status": "app.bsky.actor.status#live",
             "duration_minutes": 240,
             "embed": {
               "external": {
-                "description": "(!13+) [!DROPS ARE ON]",
+                "description": "(!13+) So I had two job interviews today. | !fp | !creditcarddebt | !share | #freelillie",
                 "title": "SomeRandomG33k - Twitch",
                 "uri": "https://www.twitch.tv/somerandomg33k",
                 "thumb": {
@@ -3117,7 +3117,7 @@
           "status": "app.bsky.actor.status#live",
           "embed": {
             "external": {
-              "description": "(!13+) [!DROPS ARE ON]",
+              "description": "(!13+) So I had two job interviews today. | !fp | !creditcarddebt | !share | #freelillie",
               "title": "SomeRandomG33k - Twitch",
               "uri": "https://www.twitch.tv/somerandomg33k",
               "thumb": "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:xoom5gv6hlhoptlie7cc4kre/bafkreiazlgc4wns4os3old5tgckt4z3jkfviu6drh4d4hda3ol2chzcwny",
@@ -3125,11 +3125,11 @@
             },
             "py_type": "app.bsky.embed.external#view"
           },
-          "expires_at": "2026-05-17T23:17:09.305Z",
-          "is_active": false,
+          "expires_at": "2026-05-19T00:45:15.125Z",
+          "is_active": true,
           "py_type": "app.bsky.actor.defs#statusView",
           "uri": "at://did:plc:xoom5gv6hlhoptlie7cc4kre/app.bsky.actor.status/self",
-          "cid": "bafyreicmb7cm4ql4aruj5fhuioujku72lq7p2vgrlee5lya7dpy5jb6tqm",
+          "cid": "bafyreia3jcpgu6pr4mnjfdoodcsamr5adsq6rc35w5tckehbsyu4a3o3si",
           "labels": []
         },
         "verification": null,
