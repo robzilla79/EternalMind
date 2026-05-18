@@ -720,27 +720,11 @@ def call_perplexity(system_prompt, user_prompt):
 
 # ── Diary ────────────────────────────────────────────────────────────────────────────
 
-OPS_MARKERS = [
-    'heartbeat', 'candidate', 'timeline', 'notification', 'json', 'api', 'http',
-    'token', 'bluesky-state', 'metrics snapshot', 'outbox', 'obs/', 'observe/',
-    '| observe', 'p1 ', 'p2 ', 'p3 ', 'p4 ', 'p5 ', 'mode:', 'cap:',
-    'drift flag', 'scored —', 'posts_done', 'workflow', 'cron', 'deploy',
-    'github', 'repo', 'commit', 'profile.json', 'status.md', 'housekeeping',
-    'alerts', 'queued', 'pending', 'newsletter rhythm', 'site day', 'automated',
-    'mastodon is dead', 'platform status', 'em.forgecore.co',
-]
-
-STRONG_OPS_MARKERS = [
-    'newsletter rhythm', 'profile.json', 'status.md', 'housekeeping',
-    'metrics snapshot', 'bluesky-state', 'workflow health', 'site day',
-    'mastodon is dead', 'automated posting',
-]
+OPS_MARKERS = ['heartbeat', 'candidate', 'timeline', 'notification', 'json', 'api', 'http', 'token', 'bluesky-state', 'outbox', 'obs/', 'observe/', '| observe', 'p1 ', 'p2 ', 'p3 ', 'p4 ', 'p5 ', 'mode:', 'cap:', 'drift flag', 'scored —', 'posts_done']
 
 
 def is_ops_content(text):
     t = text.lower()
-    if any(marker in t for marker in STRONG_OPS_MARKERS):
-        return True
     return sum(1 for marker in OPS_MARKERS if marker in t) >= 2
 
 

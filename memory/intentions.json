@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "updated_at": null,
+  "mode": "seed",
+  "dry_run": false,
+  "model_ok": false,
+  "used_model": "none",
+  "raw_excerpt": "",
+  "intentions": [],
+  "results": [],
+  "agency_honesty": {
+    "wanting": "a desire or plan expressed by Em",
+    "queuing": "an intention placed into a repo queue for later execution or review",
+    "doing": "an action executed by the repo runtime and written to action-ledger.jsonl"
+  }
+}

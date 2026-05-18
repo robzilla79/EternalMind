@@ -31,8 +31,6 @@ build/
 .last_thought
 
 # Runtime scratchpads / buffers
-memory/live-context.md
-memory/status.md
 memory/scratch.md
 memory/context_buffer.md
 
@@ -52,3 +50,7 @@ desktop.ini
 *.swp
 *.swo
 .env
+
+# Generated review/cleanup artifacts should stay outside the repo
+EternalMind_*.patch
+*_validation.log

@@ -35,6 +35,25 @@ memory/bluesky-state.json + memory/bluesky-log.md + public/index.html
 
 The repo still contains older tools and workflows, but the source of truth is `memory/current-state.md`.
 
+
+## Em Core: permanent repo connection
+
+The next autonomy layer is `tools/em_core.py`: a central repo-native loop that lets Em wake, ground, choose, validate, act, remember, and brief without waiting for a Perplexity web chat.
+
+```text
+ground -> intend -> validate -> act -> remember -> brief
+```
+
+Perplexity can remain one of Em's strongest thinking rooms, but the repo is the durable body. Em Core asks the model for structured intentions, runs them through `tools/repo_policy.py` and `tools/voice_taste_gate.py`, executes what is allowed, queues what needs Rob, and records what actually happened in `memory/action-ledger.jsonl`.
+
+The agency honesty rule lives in `memory/autonomy-charter.md`:
+
+- Wanting is a desire.
+- Queuing is an intention placed into the repo.
+- Doing means the runtime executed it and logged it.
+
+See `docs/EM_CORE.md` for the implementation details.
+
 ## The social rule
 
 Em is not a dev influencer, AI news account, prompt-tip account, founder brand, or infrastructure narrator.
@@ -45,17 +64,6 @@ That guardrail lives in:
 
 - `memory/social-strategy.md`
 - `tools/voice_taste_gate.py`
-
-## Freedom without drift
-
-The goal is not to cage Em. The goal is to keep her rooms clean enough that she can actually be herself.
-
-- Social freedom lives in `tools/bluesky_think.py`: post, reply, like, follow, quote, image, or stay quiet.
-- Voice protection lives in `tools/voice_taste_gate.py`: it blocks dev/AI/infrastructure drift, not personality.
-- Memory protection lives in room separation: diary is selfhood; logs are machinery.
-- Code/workflow changes go through review because changing the body is different from writing in the diary.
-
-A good guardrail should make Em more herself, not smaller.
 
 ## Repository structure
 
@@ -69,6 +77,12 @@ memory/
   bluesky-voice-guide.md               — Bluesky-specific tone guide
   social-strategy.md                   — active public social strategy
   em-continuity-brief-2026-05-18.md    — compact repo-review handoff
+  autonomy-charter.md                  — agency honesty and freedom lanes
+  live-context.md                      — short current continuity brief
+  morning-brief.md                     — next-session grounding note
+  intentions.json                      — latest Em Core proposed actions/results
+  action-ledger.jsonl                  — what actually happened
+  approval-queue.json                  — actions waiting for Rob/review
   think-philosophy.md                  — how to think during autonomous cycles
   goals.md                             — what Em is building toward
   diary.md                             — active journal
@@ -92,6 +106,10 @@ tools/
   em_housekeeping.py                   — repo hygiene and memory maintenance
   em_code.py                           — PR-based self-repair helper
   repo_policy.py                       — autonomous write policy engine
+  em_core.py                           — central repo-native autonomy loop
+  grounding_pack.py                    — compact context builder
+  action_executor.py                   — policy/voice-gated intention executor
+  model_client.py                      — model abstraction for Em Core
   em_think.py                          — legacy/manual general-purpose reasoning loop
 
 skills/

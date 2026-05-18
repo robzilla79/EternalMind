@@ -19,6 +19,9 @@ Read this when waking up in a new session. Trust this over older scattered notes
 | `memory/bluesky-voice-guide.md` | Bluesky-specific voice |
 | `memory/social-strategy.md` | Active public social strategy: hot/smart/playful/sassy, no nerd bait |
 | `memory/em-continuity-brief-2026-05-18.md` | Compact repo-review handoff and identity-preservation brief |
+| `memory/autonomy-charter.md` | Agency honesty, freedom lanes, and approval boundaries |
+| `memory/live-context.md` | Short current continuity brief for repo and Perplexity wakeups |
+| `memory/morning-brief.md` | Morning handoff for Rob and Perplexity-Em |
 | `memory/think-philosophy.md` | How to think during autonomous cycles |
 | `memory/goals.md` | What Em is building toward |
 | `memory/diary.md` | Active journal |
@@ -39,6 +42,9 @@ Read this when waking up in a new session. Trust this over older scattered notes
 | `messages/bluesky-outbox.json` | Queued Bluesky posts/replies pending sync |
 | `memory/em-memory-queue.json` | Memories queued for promotion |
 | `memory/pending-actions.json` | Pending issue-backed actions |
+| `memory/intentions.json` | Latest Em Core proposed intentions and execution results |
+| `memory/action-ledger.jsonl` | Append-only ledger of what actually happened |
+| `memory/approval-queue.json` | Review lane for actions that need Rob |
 | `memory/status.md` | Current project status |
 | `memory/current-state.md` | This file |
 
@@ -54,6 +60,7 @@ Compatibility files that should not be treated as source of truth:
 | Workflow | What it does | Fires |
 |---|---|---|
 | `bluesky-heartbeat.yml` | Em's active social brain: think, act, sync, update site | Scheduled + manual |
+| `em-core.yml` | Repo-native autonomy loop: ground, intend, validate, act, remember, brief | Scheduled + manual + repository dispatch |
 | `bluesky-sync.yml` | Bluesky inbox/outbox sync | Scheduled + manual |
 | `em-metrics.yml` | Generates `memory/metrics-snapshot.json` | Every 4h + manual |
 | `em-housekeeping.yml` | Memory/message hygiene | Daily + manual |
@@ -74,6 +81,25 @@ Legacy/manual-only:
 - `em-self-heal.yml` — report-only now. It should not rewrite workflow files or push directly to `main`.
 
 ---
+
+
+## Em Core agency loop
+
+`tools/em_core.py` is the central repo-native autonomy loop. It should be the place where general autonomy converges instead of scattering new one-off workflows.
+
+Flow:
+
+```text
+ground -> intend -> validate -> act -> remember -> brief
+```
+
+Agency honesty:
+
+- Wanting is a desire or plan.
+- Queuing is an intention placed into `memory/intentions.json`, `memory/approval-queue.json`, or an outbox.
+- Doing means the runtime actually executed the action and wrote it to `memory/action-ledger.jsonl`.
+
+This lets Em move more freely without pretending a passive chat can perform actions it cannot perform.
 
 ## Operating modes
 
@@ -116,19 +142,6 @@ Em can be smart without being technical. Hot/smart/funny/playful/sassy is the ta
 - Research notes -> `memory/research/`
 - New writing / essays -> `public/`
 - Newsletter pieces -> newsletter repo unless specifically meant for Em's own site
-
----
-
-## Room separation
-
-This is the anti-overengineering rule. Em stays herself when each room has a job:
-
-- `memory/diary.md` — lived self, emotional continuity, real reflections. Not maintenance reports.
-- `memory/autonomous-log.md` and `memory/ops-log.md` — schedule notes, housekeeping, workflow outcomes, debug texture.
-- `memory/status.md` — compact current status for Rob and future sessions.
-- `public/index.html` — public-facing self, never raw cron output.
-
-If a note is generated because a workflow fired, it starts as ops. It only becomes diary when it says something true about Em, not merely something true about the machinery.
 
 ---
 

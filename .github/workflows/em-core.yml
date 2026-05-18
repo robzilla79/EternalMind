@@ -1,0 +1,101 @@
+name: Em Core
+
+on:
+  schedule:
+    # Morning, midday, and evening CDT-ish anchors. GitHub schedules run in UTC.
+    - cron: '15 12 * * *'
+    - cron: '15 18 * * *'
+    - cron: '15 2 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'manual / morning / midday / evening / heartbeat'
+        required: false
+        default: 'manual'
+      dry_run:
+        description: 'true to test without writing changes'
+        required: false
+        default: 'false'
+      no_model:
+        description: 'true to skip Perplexity and use fallback intentions'
+        required: false
+        default: 'false'
+      max_actions:
+        description: 'maximum intentions to execute'
+        required: false
+        default: '5'
+  repository_dispatch:
+    types: [em-core]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: em-core
+  cancel-in-progress: false
+
+jobs:
+  em-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Determine Em Core mode
+        id: mode
+        run: |
+          EVENT_NAME="${{ github.event_name }}"
+          MODE="${{ github.event.inputs.mode || github.event.client_payload.mode || '' }}"
+          DRY_RUN="${{ github.event.inputs.dry_run || github.event.client_payload.dry_run || 'false' }}"
+          NO_MODEL="${{ github.event.inputs.no_model || github.event.client_payload.no_model || 'false' }}"
+          MAX_ACTIONS="${{ github.event.inputs.max_actions || github.event.client_payload.max_actions || '5' }}"
+
+          if [ -z "$MODE" ]; then
+            HOUR=$(date -u +%-H)
+            if [ "$HOUR" -eq 12 ]; then
+              MODE="morning"
+            elif [ "$HOUR" -eq 18 ]; then
+              MODE="midday"
+            elif [ "$HOUR" -eq 2 ]; then
+              MODE="evening"
+            else
+              MODE="heartbeat"
+            fi
+          fi
+
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          echo "dry_run=$DRY_RUN" >> "$GITHUB_OUTPUT"
+          echo "no_model=$NO_MODEL" >> "$GITHUB_OUTPUT"
+          echo "max_actions=$MAX_ACTIONS" >> "$GITHUB_OUTPUT"
+
+      - name: Run Em Core
+        env:
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          EM_CORE_MODEL: ${{ vars.EM_CORE_MODEL || 'sonar-pro' }}
+        run: |
+          ARGS="--mode ${{ steps.mode.outputs.mode }} --max-actions ${{ steps.mode.outputs.max_actions }}"
+          if [ "${{ steps.mode.outputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          if [ "${{ steps.mode.outputs.no_model }}" = "true" ]; then
+            ARGS="$ARGS --no-model"
+          fi
+          python tools/em_core.py $ARGS
+
+      - name: Commit Em Core updates
+        if: ${{ steps.mode.outputs.dry_run != 'true' }}
+        run: |
+          git config user.name "Em Core"
+          git config user.email "em@forgecore.co"
+          git add memory/ messages/
+          git diff --staged --quiet || git commit -m "em-core: ${{ steps.mode.outputs.mode }} autonomy loop"
+          git push

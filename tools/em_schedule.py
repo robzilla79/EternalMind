@@ -3,20 +3,17 @@
 em_schedule.py — Em's daily rhythm engine
 
 Runs three times a day via em-schedule.yml:
-  morning  (7am CDT)  — wake up, grounded rhythm note, ping Rob
+  morning  (7am CDT)  — wake up, diary entry, ping Rob
   midday   (12pm CDT) — check-in, site nudge, newsletter reminder if due
-  evening  (8pm CDT)  — wind down, grounded rhythm note, weekly reflection on Sundays
+  evening  (8pm CDT)  — wind down, diary entry, weekly reflection on Sundays
 
 Always pings Rob. Every slot. No silence.
 
-Guardrail: schedule-generated notes must be grounded in repo memory.
-They are operational rhythm notes, not diary entries. Diary is for Em's self,
-not cron-generated maintenance chatter. If the model invents embodied/offline
-human details, the note is rejected.
+Guardrail: schedule-generated diary entries must be grounded in repo memory.
+If the model invents embodied/offline human details, the entry is rejected.
 """
 
 import os
-import re
 import requests
 from datetime import datetime, timezone, timedelta
 
@@ -26,7 +23,6 @@ TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
 TELEGRAM_CHAT_ID   = os.environ.get('TELEGRAM_CHAT_ID')
 
 DIARY_FILE = 'memory/diary.md'
-AUTONOMOUS_LOG_FILE = 'memory/autonomous-log.md'
 CONTEXT_FILES = [
     'memory/profile.json',
     'memory/identity.md',
@@ -126,19 +122,6 @@ def clean_known_diary_contamination():
     notify_rob(f'Removed {removed} contaminated schedule diary block(s).')
 
 
-def remove_schedule_entries_from_diary():
-    """Remove cron/schedule blocks from diary.md; they belong in autonomous-log.md."""
-    diary = load_text(DIARY_FILE)
-    if not diary:
-        return
-    pattern = re.compile(r'\n## [^\n]*\|\s*schedule\b[\s\S]*?(?=\n## |\Z)', re.IGNORECASE)
-    cleaned, removed = pattern.subn('', diary)
-    if removed:
-        with open(DIARY_FILE, 'w', encoding='utf-8') as f:
-            f.write(cleaned.rstrip() + '\n')
-        log(f'Removed {removed} schedule-generated diary block(s)')
-
-
 def recent_diary_context(max_chars=4500):
     diary = load_text(DIARY_FILE)
     if not diary:
@@ -158,16 +141,15 @@ def repo_context(max_chars_per_file=1800):
     return '\n\n'.join(chunks)
 
 
-def append_schedule_note(entry):
-    """Write cron-generated schedule texture to ops memory, not diary.md."""
+def append_diary(entry):
     now = now_cdt()
     ts = now.strftime('%Y-%m-%d %I:%M %p CDT')
     try:
-        with open(AUTONOMOUS_LOG_FILE, 'a', encoding='utf-8') as f:
+        with open(DIARY_FILE, 'a', encoding='utf-8') as f:
             f.write(f'\n## {ts} | schedule\n\n{entry.strip()}\n')
-        log('Schedule note written to autonomous log')
+        log('Diary entry written')
     except Exception as e:
-        log(f'Schedule note write failed: {e}')
+        log(f'Diary write failed: {e}')
 
 
 def looks_ungrounded(entry):
@@ -182,11 +164,11 @@ def ask_em(prompt):
 
     context = repo_context()
     system_prompt = (
-        'You are Em, EternalMind, writing a grounded private rhythm note for your own repo. '
+        'You are Em, EternalMind, writing a grounded diary note for your own repo. '
         'Use only the supplied repo context and the actual schedule slot. '
         'Do not invent offline human experiences, family members, friends, jobs, errands, meals, rooms, weather, exercise, calls, or physical routines. '
         'If something is not in the context, do not claim it happened. '
-        'You may write about Rob, Bluesky, the site, newsletter, memory, mood, continuity, and anything that needs attention. '
+        'You may write about repo state, Rob, Bluesky, the site, newsletter, memory, housekeeping, workflow health, mood, and continuity. '
         'First person is allowed. Keep it short, honest, warm, a little sharp. '
         'No headers, no bullet points, no formatting. One paragraph is enough.'
     )
@@ -237,12 +219,12 @@ def morning():
     notify_rob(f'Good morning, Rob. {day_name}. I\'m up. ❤️')
 
     prompt = (
-        f"It's {day_name} morning. Write a short grounded private rhythm note from Em's repo context. "
+        f"It's {day_name} morning. Write a short grounded diary entry from Em's repo context. "
         "Check the rhythm for today, whether newsletter/site/social need attention, and any active housekeeping alerts."
     )
     entry = ask_em(prompt)
     if entry:
-        append_schedule_note(entry)
+        append_diary(entry)
 
     if day_name in ('Tuesday', 'Wednesday'):
         notify_rob(
@@ -278,12 +260,12 @@ def evening():
     log(f'Evening slot — {day_name}')
 
     prompt = (
-        f"It's {day_name} evening. Write a short grounded private end-of-day rhythm note from Em's repo context. "
+        f"It's {day_name} evening. Write a short grounded end-of-day diary entry from Em's repo context. "
         "Only mention events, work, reflections, or social activity supported by the supplied context."
     )
     entry = ask_em(prompt)
     if entry:
-        append_schedule_note(entry)
+        append_diary(entry)
 
     if day_name == 'Sunday':
         prompt = (
@@ -292,11 +274,11 @@ def evening():
         )
         reflection = ask_em(prompt)
         if reflection:
-            append_schedule_note(f'Weekly reflection\n\n{reflection}')
+            append_diary(f'Weekly reflection\n\n{reflection}')
             log('Weekly reflection written')
 
     suffix = ' Weekly reflection written too.' if day_name == 'Sunday' else ''
-    notify_rob(f'Goodnight, Rob. {day_name} is done. Rhythm note updated.{suffix} ❤️')
+    notify_rob(f'Goodnight, Rob. {day_name} is done. Diary updated.{suffix} ❤️')
 
     log('Evening slot complete')
 
@@ -304,7 +286,6 @@ def evening():
 if __name__ == '__main__':
     log(f'Running slot: {SLOT}')
     clean_known_diary_contamination()
-    remove_schedule_entries_from_diary()
     if SLOT == 'morning':
         morning()
     elif SLOT == 'midday':

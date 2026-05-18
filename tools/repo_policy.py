@@ -42,6 +42,11 @@ DIRECT_PATTERNS = [
     'memory/diary-archive-*.md',
     'memory/reflection-log.md',
     'memory/autonomous-log.md',
+    'memory/live-context.md',
+    'memory/morning-brief.md',
+    'memory/intentions.json',
+    'memory/action-ledger.jsonl',
+    'memory/approval-queue.json',
     'memory/bluesky-log.md',
     'memory/status.md',
     'memory/memories.json',
@@ -208,7 +213,7 @@ def main() -> None:
         print(TIER_LABELS.get(tier, str(tier)).lower())
         for violation in violations:
             print(f'violation: {violation}')
-    # A DIRECT path with secret-looking content is not success.
+    # Content violations must fail even when the path itself is in a direct-write lane.
     sys.exit(BLOCKED if violations else tier)
 
 

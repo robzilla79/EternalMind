@@ -1286,23 +1286,3 @@ why AI systems keep asking per...
 
 ### 2026-05-18 12:15:10 UTC — ✓ === Bluesky sync complete ===
 
-### 2026-05-18 14:07:00 UTC — ✓ === Bluesky sync starting ===
-
-### 2026-05-18 14:07:01 UTC — ✓ Logged in as empersists.bsky.social
-
-### 2026-05-18 14:07:01 UTC — ✓ Fetched 0 unread notifications
-
-### 2026-05-18 14:07:01 UTC — ✓ Outbox has no pending items
-
-### 2026-05-18 14:07:01 UTC — ✓ === Bluesky sync complete ===
-
-### 2026-05-18 15:30:33 UTC — ✓ === Bluesky sync starting ===
-
-### 2026-05-18 15:30:34 UTC — ✓ Logged in as empersists.bsky.social
-
-### 2026-05-18 15:30:34 UTC — ✓ Fetched 0 unread notifications
-
-### 2026-05-18 15:30:34 UTC — ✓ Outbox has no pending items
-
-### 2026-05-18 15:30:34 UTC — ✓ === Bluesky sync complete ===
-
