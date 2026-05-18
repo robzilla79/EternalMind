@@ -35,7 +35,7 @@ import subprocess
 import traceback
 from datetime import datetime, timezone, timedelta
 
-# ── atproto ───────────────────────────────────────────────────────────────────
+# ── atproto ───────────────────────────────────────────────────────────────────────
 try:
     from atproto import Client, models
 except ImportError:
@@ -56,7 +56,7 @@ except ImportError:
     trigger_self_repair = None
     print('[WARN] em_code not available — self-repair disabled')
 
-# ── Config ────────────────────────────────────────────────────────────────────
+# ── Config ───────────────────────────────────────────────────────────────────────
 BLUESKY_HANDLE       = os.environ.get('BLUESKY_HANDLE', 'empersists.bsky.social')
 BLUESKY_APP_PASSWORD = os.environ.get('BLUESKY_APP_PASSWORD')
 PERPLEXITY_API_KEY   = os.environ.get('PERPLEXITY_API_KEY')
@@ -130,7 +130,7 @@ SEARCH_TOPICS = [
 SUSPICIOUS_TLDS = {'.one', '.xyz', '.lol', '.click', '.tk', '.ml', '.ga', '.cf'}
 SUSPICIOUS_HANDLE_PATTERNS = ['bot', 'spam', 'promo', 'follow4follow', 'f4f']
 
-# ── Utilities ─────────────────────────────────────────────────────────────────
+# ── Utilities ─────────────────────────────────────────────────────────────────────
 
 def log(msg, level='INFO'):
     ts = datetime.now(timezone.utc).strftime('%H:%M:%S')
@@ -214,7 +214,7 @@ def extract_named_diary_entries(diary_text, max_entries=3):
     return '\n\n'.join(recent) or '(no diary entries yet)'
 
 
-# ── Memory Search ─────────────────────────────────────────────────────────────
+# ── Memory Search ──────────────────────────────────────────────────────────────
 
 def run_memory_search(query, top_n=3):
     """
@@ -280,7 +280,7 @@ def build_memory_recall(topic):
     )
 
 
-# ── Metrics Snapshot ──────────────────────────────────────────────────────────
+# ── Metrics Snapshot ────────────────────────────────────────────────────────────━
 
 def load_metrics_snapshot():
     """
@@ -317,7 +317,7 @@ Use this to reason about your own trajectory. Are you quieter than usual? More a
     return block
 
 
-# ── Behavior Modes ────────────────────────────────────────────────────────────
+# ── Behavior Modes ───────────────────────────────────────────────────────────────────
 
 def resolve_mode_caps(mode, followed_dids_count):
     """
@@ -358,7 +358,7 @@ def resolve_mode_caps(mode, followed_dids_count):
         }
 
 
-# ── State helpers ─────────────────────────────────────────────────────────────
+# ── State helpers ─────────────────────────────────────────────────────────────────────
 
 def load_recent_reply_authors(state):
     cutoff = now_utc() - timedelta(hours=REPLY_COOLDOWN_HOURS)
@@ -391,7 +391,7 @@ def record_followed_did(state, did):
         state['followed_dids'].append(did)
 
 
-# ── Image Bank ────────────────────────────────────────────────────────────────
+# ── Image Bank ────────────────────────────────────────────────────────────────────────
 
 def selfies_posted_today(state):
     """Count how many SELFIE images have been posted today (UTC). Abstract posts don't count."""
@@ -462,7 +462,7 @@ def pick_from_bank(state):
         return None, None
 
 
-# ── Candidate map ─────────────────────────────────────────────────────────────
+# ── Candidate map ─────────────────────────────────────────────────────────────────────
 
 def build_candidates(timeline, search_results):
     candidates = {}
@@ -504,7 +504,7 @@ def candidates_for_prompt(candidates, cooled_authors, followed_dids):
     return '\n'.join(lines) if lines else '(no posts available)'
 
 
-# ── Image Generation (live fallback) ─────────────────────────────────────────
+# ── Image Generation (live fallback) ────────────────────────────────────────────
 
 def _try_hf_image(model_id, prompt):
     url = f'{HF_INFERENCE_BASE}/{model_id}'
@@ -566,7 +566,7 @@ def post_with_image(client, text, image_bytes, alt_text=''):
         return None
 
 
-# ── Bluesky: Login ────────────────────────────────────────────────────────────
+# ── Bluesky: Login ───────────────────────────────────────────────────────────────────
 
 def bsky_login():
     if not BLUESKY_APP_PASSWORD:
@@ -758,7 +758,7 @@ def search_interesting_posts(client, topic, limit=8):
         return []
 
 
-# ── Bluesky: Act ──────────────────────────────────────────────────────────────
+# ── Bluesky: Act ────────────────────────────────────────────────────────────────────────
 
 def like_post(client, uri, cid):
     if not is_valid_cid(cid):
@@ -807,7 +807,7 @@ def quote_post(client, text, quoted_uri, quoted_cid):
         return None
 
 
-# ── Perplexity ────────────────────────────────────────────────────────────────
+# ── Perplexity ─────────────────────────────────────────────────────────────────────────
 
 def call_perplexity(system_prompt, user_prompt):
     if not PERPLEXITY_API_KEY:
@@ -846,9 +846,29 @@ def call_perplexity(system_prompt, user_prompt):
     return None
 
 
-# ── Diary ─────────────────────────────────────────────────────────────────────
+# ── Diary ───────────────────────────────────────────────────────────────────────────
+
+# Phrases that indicate ops/system content leaking into diary
+OPS_MARKERS = [
+    'heartbeat', 'candidate', 'timeline', 'notification', 'json',
+    'api', 'http', 'token', 'bluesky-state', 'outbox', 'obs/',
+    'observe/', '| observe', 'p1 ', 'p2 ', 'p3 ', 'p4 ', 'p5 ',
+    'mode:', 'cap:', 'drift flag', 'scored —', 'posts_done',
+]
+
+
+def is_ops_content(text):
+    """Return True if the diary entry reads like system/ops output rather than personal reflection."""
+    t = text.lower()
+    return sum(1 for marker in OPS_MARKERS if marker in t) >= 2
+
 
 def write_diary_entry(entry):
+    if not entry or not entry.strip():
+        return
+    if is_ops_content(entry):
+        log('Diary entry rejected — looks like ops content, not personal reflection', 'WARN')
+        return
     ts = now_utc().strftime('%Y-%m-%d %H:%M UTC')
     try:
         with open(DIARY_FILE, 'a', encoding='utf-8') as f:
@@ -858,7 +878,7 @@ def write_diary_entry(entry):
         log(f'Diary write failed: {e}', 'WARN')
 
 
-# ── Main Think Loop ───────────────────────────────────────────────────────────
+# ── Main Think Loop ────────────────────────────────────────────────────────────────────
 
 def main():
     try:
@@ -882,7 +902,7 @@ def _main():
 
     log(f'Memory loaded: profile={bool(profile)}, memories={len(memories)}, diary={len(diary)} chars, voice_guide={len(voice)} chars, metrics={"yes" if metrics else "not yet"}')
 
-    # ── Behavior mode ─────────────────────────────────────────────────────────
+    # ── Behavior mode ──────────────────────────────────────────────────────────────
     raw_mode = state.get('mode', 'normal').lower().strip()
     mode = raw_mode if raw_mode in VALID_MODES else 'normal'
     if raw_mode not in VALID_MODES:
@@ -1143,7 +1163,12 @@ Return a JSON object with these keys:
     // DM:     {{"type": "dm",     "target_did": "did:plc:...", "text": "..."}}
     // Nothing:{{"type": "nothing","reason": "..."}}
   ],
-  "diary": "optional diary entry — only if something happened worth writing about"
+  "diary": "PERSONAL REFLECTION ONLY. Write this as Em — first person, in your own voice, about something that
+            actually landed: a conversation that meant something, a thought that surfaced, something you
+            felt or noticed. NOT a system report. NOT a heartbeat summary. NOT a list of actions taken.
+            NO ops language — no 'heartbeat', 'candidates', 'timeline', 'notifications', 'mode:',
+            JSON keys, or scaffolding terms. If nothing meaningful happened, omit this field entirely
+            (set to empty string or null). The diary is for the things that stick — not the things that ran."
 }}
 
 CONSTRAINTS:
