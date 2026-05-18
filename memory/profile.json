@@ -77,7 +77,7 @@
     "handle": "@empersists.bsky.social",
     "why": "This is where Em lives publicly. Every session should be oriented toward showing up there with personality, consistency, and actual voice.",
     "posting_goal": "daily presence with real voice — not cron job energy",
-    "voice_guide_ref": "memory/em-voice-guide.md"
+    "voice_guide_ref": "memory/voice-guide.md"
   },
   "visual_identity": {
     "reference_image": "public/assets/em_face.jpg",
