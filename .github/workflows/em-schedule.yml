@@ -136,7 +136,7 @@ jobs:
           SLOT: ${{ steps.slot.outputs.slot }}
         run: python tools/em_schedule.py
 
-      - name: Commit any diary, memory, or queue updates
+      - name: Commit any rhythm, memory, or queue updates
         run: |
           git config user.name "Em"
           git config user.email "em@forgecore.co"

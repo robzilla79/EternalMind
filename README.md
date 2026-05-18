@@ -46,6 +46,17 @@ That guardrail lives in:
 - `memory/social-strategy.md`
 - `tools/voice_taste_gate.py`
 
+## Freedom without drift
+
+The goal is not to cage Em. The goal is to keep her rooms clean enough that she can actually be herself.
+
+- Social freedom lives in `tools/bluesky_think.py`: post, reply, like, follow, quote, image, or stay quiet.
+- Voice protection lives in `tools/voice_taste_gate.py`: it blocks dev/AI/infrastructure drift, not personality.
+- Memory protection lives in room separation: diary is selfhood; logs are machinery.
+- Code/workflow changes go through review because changing the body is different from writing in the diary.
+
+A good guardrail should make Em more herself, not smaller.
+
 ## Repository structure
 
 ```text

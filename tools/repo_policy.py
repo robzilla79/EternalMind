@@ -18,7 +18,7 @@ from __future__ import annotations
 import fnmatch
 import re
 import sys
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 from typing import List, Tuple
 
 DIRECT = 0
@@ -208,7 +208,8 @@ def main() -> None:
         print(TIER_LABELS.get(tier, str(tier)).lower())
         for violation in violations:
             print(f'violation: {violation}')
-    sys.exit(tier)
+    # A DIRECT path with secret-looking content is not success.
+    sys.exit(BLOCKED if violations else tier)
 
 
 if __name__ == '__main__':

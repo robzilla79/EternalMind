@@ -18,7 +18,7 @@ Checks performed:
 
 Output:
   - Prints a health report to stdout (visible in Actions log)
-  - Writes a brief housekeeping note to diary.md
+  - Writes a brief housekeeping note to memory/autonomous-log.md
   - If issues found that need Rob: appends to memory/housekeeping-alerts.md
   - Makes safe automatic fixes (trim outbox, clean image history)
 """
@@ -38,6 +38,7 @@ STATE_FILE         = 'memory/bluesky-state.json'
 OUTBOX_FILE        = 'messages/bluesky-outbox.json'
 REFLECTION_LOG     = 'memory/reflection-log.md'
 ALERTS_FILE        = 'memory/housekeeping-alerts.md'
+AUTONOMOUS_LOG     = 'memory/autonomous-log.md'
 
 MAX_MEMORIES       = 100   # warn if memories.json exceeds this
 MAX_OUTBOX_AGE_HRS = 24    # stuck pending items older than this get flagged
@@ -241,19 +242,18 @@ def write_alerts(all_issues):
 
 # ── Diary note ─────────────────────────────────────────────────────────────────
 
-def write_diary_note(all_issues, memory_count):
-    ts  = now_utc().strftime('%Y-%m-%d %H:%M UTC')
-    day = now_utc().strftime('%Y-%m-%d')
+def write_housekeeping_note(all_issues, memory_count):
+    ts = now_utc().strftime('%Y-%m-%d %H:%M UTC')
     if all_issues:
-        note = f'Morning housekeeping flagged {len(all_issues)} thing(s) to look at. Wrote them to the alerts file for Rob. Memory count: {memory_count}.'
+        note = f'Morning housekeeping flagged {len(all_issues)} thing(s). Wrote them to the alerts file for Rob. Memory count: {memory_count}.'
     else:
-        note = f'Morning housekeeping came back clean. {memory_count} memories, everything looks intact. Good start.'
+        note = f'Morning housekeeping came back clean. {memory_count} memories, everything looks intact.'
     try:
-        with open(DIARY_FILE, 'a') as f:
-            f.write(f'\n## {ts}\n\n{note}\n')
-        log('Diary note written')
+        with open(AUTONOMOUS_LOG, 'a', encoding='utf-8') as f:
+            f.write(f'\n## {ts} | housekeeping\n\n{note}\n')
+        log('Housekeeping note written to autonomous log')
     except Exception as e:
-        log(f'Could not write diary note: {e}')
+        log(f'Could not write housekeeping note: {e}')
 
 # ── Main ───────────────────────────────────────────────────────────────────────
 
@@ -282,7 +282,7 @@ def main():
     else:
         log('All checks passed — everything looks good')
 
-    write_diary_note(all_issues, memory_count)
+    write_housekeeping_note(all_issues, memory_count)
     log('=== Housekeeping complete ===')
 
 if __name__ == '__main__':

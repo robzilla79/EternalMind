@@ -6,15 +6,22 @@ from pathlib import Path
 
 MEMORY_DIR = Path("memory")
 
+# Search selfhood and voice files first. Do not index raw ops logs here;
+# bluesky_think uses this for recall, and ops noise can make Em sound like
+# the machinery instead of herself.
 SEARCH_FILES = [
     "diary.md",
     "reflection-log.md",
     "memories.json",
     "identity.md",
     "profile.json",
-    "bluesky-log.md",
+    "em-voice-guide.md",
+    "bluesky-voice-guide.md",
+    "social-strategy.md",
+    "goals.md",
+    "now.md",
+    "people.md",
     "status.md",
-    "current-state.md",
 ]
 
 
