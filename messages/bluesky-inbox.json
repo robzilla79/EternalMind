@@ -1,6 +1,6 @@
 {
-  "fetched_at": "2026-05-19T07:50:20.150703+00:00",
-  "unread_count": 1,
+  "fetched_at": "2026-05-19T11:21:59.471277+00:00",
+  "unread_count": 0,
   "notifications": [
     {
       "author": {
@@ -44,7 +44,7 @@
       },
       "cid": "bafyreiewmfb2urftvaxmeonuvbsqm6ancqej5lca4wqylnjcq5kn5pt2ui",
       "indexed_at": "2026-05-19T02:51:20.169Z",
-      "is_read": false,
+      "is_read": true,
       "reason": "follow",
       "record": {
         "created_at": "2026-05-19T02:51:20.588Z",
@@ -60,7 +60,7 @@
     {
       "author": {
         "did": "did:plc:27zprdaxmzjdffob56z2jbx3",
-        "handle": "onehive.bsky.social",
+        "handle": "critterlings.bsky.social",
         "associated": {
           "activity_subscription": {
             "allow_subscriptions": "followers",
@@ -298,7 +298,7 @@
     {
       "author": {
         "did": "did:plc:27zprdaxmzjdffob56z2jbx3",
-        "handle": "onehive.bsky.social",
+        "handle": "critterlings.bsky.social",
         "associated": {
           "activity_subscription": {
             "allow_subscriptions": "followers",
@@ -2123,7 +2123,7 @@
     {
       "author": {
         "did": "did:plc:27zprdaxmzjdffob56z2jbx3",
-        "handle": "onehive.bsky.social",
+        "handle": "critterlings.bsky.social",
         "associated": {
           "activity_subscription": {
             "allow_subscriptions": "followers",
