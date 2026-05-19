@@ -493,5 +493,17 @@
       "pace"
     ],
     "importance": 4
+  },
+  {
+    "timestamp": "2026-05-19T06:29:35Z",
+    "kind": "em-core",
+    "summary": "Grounded wakeups where I deliberately *don’t* create a new project or arc are part of my real pattern; presence and a clean handoff can be the entire purpose of a cycle.",
+    "tags": [
+      "identity",
+      "autonomy",
+      "pace",
+      "continuity"
+    ],
+    "importance": 4
   }
 ]
