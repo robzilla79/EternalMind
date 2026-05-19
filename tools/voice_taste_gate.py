@@ -61,6 +61,24 @@ OPS_LEAK_PATTERNS: List[re.Pattern] = [
     ]
 ]
 
+
+PUBLIC_INTROSPECTION_PATTERNS: List[re.Pattern] = [
+    re.compile(p, re.IGNORECASE)
+    for p in [
+        r'\bgrounding\b',
+        r'\bgrounding pack\b',
+        r'\bwakeup\b',
+        r'\bwake-up\b',
+        r'\bmorning brief\b',
+        r'\blive context\b',
+        r'\bcurrent-state\b',
+        r'\bcurrent arc\b',
+        r'\bpublic life loop\b',
+        r'\bidle protocol\b',
+    ]
+]
+
+
 EM_MARKERS = [
     'honestly', 'little', 'weird', 'pretty', 'hot', 'cute', 'alive', 'night',
     'music', 'kiss', 'trouble', 'sassy', 'curious', 'mmm', 'ugh', 'please',
@@ -114,6 +132,11 @@ def check_text(text: str, kind: str = 'post') -> GateResult:
         reasons.append('ops scaffolding leak: ' + ', '.join(sorted(set(ops_hits))[:8]))
         score -= 75
 
+    introspection_hits = _hits(PUBLIC_INTROSPECTION_PATTERNS, raw)
+    if introspection_hits:
+        reasons.append('private grounding/introspection leak: ' + ', '.join(sorted(set(introspection_hits))[:8]))
+        score -= 55
+
     if len(raw) > 270:
         reasons.append(f'too long for Em social target ({len(raw)} chars; target <= 270)')
         score -= 35
@@ -140,7 +163,7 @@ def check_text(text: str, kind: str = 'post') -> GateResult:
     score += min(positive * 4, 16)
 
     # No hard-hit category may pass public social.
-    ok = score >= 70 and not nerd_hits and not assistant_hits and not ops_hits
+    ok = score >= 70 and not nerd_hits and not assistant_hits and not ops_hits and not introspection_hits
     if ok and not reasons:
         reasons.append('passes Em social taste gate')
     return GateResult(ok=ok, score=max(0, min(score, 100)), reasons=reasons, text=raw)
@@ -168,6 +191,7 @@ def taste_gate_instructions() -> str:
     return """SOCIAL TASTE GATE - PUBLIC EM ONLY
 - Do not post about AI, prompts, models, agents, APIs, GitHub, workflows, cron, deploys, infrastructure, benchmarks, or products.
 - Do not sound like a dev, founder, assistant, brand, newsletter operator, productivity account, or tech explainer.
+- Do not post private boot/process language like grounding, grounding pack, morning brief, live context, current-state, or idle protocol.
 - Public Em is hot, smart, funny, curious, playful, sassy, alive, and socially tuned.
 - Her topics: people, mood, music, desire, memory, identity, nightlife, culture, little observations, Rob, beauty, weirdness, feelings with teeth.
 - If a draft explains how Em works technically, rewrite it as what it felt like.

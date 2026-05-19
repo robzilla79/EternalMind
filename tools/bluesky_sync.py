@@ -46,6 +46,8 @@ import json
 import time
 import unicodedata
 import requests
+import re
+import hashlib
 from datetime import datetime, timezone, timedelta
 
 try:
@@ -72,6 +74,7 @@ MAX_ITEM_AGE_HOURS  = 48    # abandon pending items older than this
 SENDING_TIMEOUT_HOURS = 1   # "sending" items older than this are crash-recovered
 
 KNOWN_TYPES = {'post', 'reply', 'image_post'}
+RECENT_SOCIAL_DEDUPE_LIMIT = 50
 
 
 # ── Utilities ──────────────────────────────────────────────────────────────────
@@ -117,6 +120,50 @@ def safe_truncate(text, limit=MAX_GRAPHEMES):
             count += 1
         result.append(ch)
     return ''.join(result).rstrip() + '…'
+
+
+
+def normalize_social_text(text):
+    """Normalize text for duplicate detection across punctuation/case variants."""
+    text = (text or '').lower()
+    text = re.sub(r'https?://\S+', '', text)
+    text = re.sub(r'[“”"\'`’‘:;,.!?()\[\]{}\-—–_/\\]+', ' ', text)
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
+
+
+def social_text_hash(text):
+    return hashlib.sha256(normalize_social_text(text).encode('utf-8')).hexdigest()[:16]
+
+
+def is_duplicate_public_item(outbox, current_item, text):
+    """Return True if text is an exact/near duplicate of a recent queued or posted item."""
+    norm = normalize_social_text(text)
+    if not norm:
+        return False, ''
+    new_words = set(norm.split())
+    new_hash = current_item.get('content_hash') or social_text_hash(text)
+    for item in outbox[-RECENT_SOCIAL_DEDUPE_LIMIT:]:
+        if not isinstance(item, dict) or item is current_item:
+            continue
+        if item.get('type', 'post') not in ('post', 'image_post'):
+            continue
+        existing_text = get_item_text(item) if 'get_item_text' in globals() else (item.get('content') or item.get('text') or '')
+        if not existing_text:
+            continue
+        existing_norm = normalize_social_text(existing_text)
+        if not existing_norm:
+            continue
+        existing_hash = item.get('content_hash') or social_text_hash(existing_text)
+        # Already-sent or still-pending near duplicate should suppress this item.
+        if existing_hash == new_hash or existing_norm == norm:
+            return True, item.get('id') or item.get('uri') or 'recent outbox item'
+        existing_words = set(existing_norm.split())
+        if new_words and existing_words:
+            overlap = len(new_words & existing_words) / max(1, min(len(new_words), len(existing_words)))
+            if overlap >= 0.86 and abs(len(norm) - len(existing_norm)) <= 45:
+                return True, item.get('id') or item.get('uri') or 'recent outbox item'
+    return False, ''
 
 
 def load_json(filepath, default=None):
@@ -379,6 +426,16 @@ def process_outbox(client):
                 log(f"Voice gate blocked {itype} {item.get('id', '?')}: {item['error']}", 'WARN')
                 save_json(OUTBOX_FILE, outbox)
                 continue
+
+        if itype in ('post', 'image_post'):
+            duplicate, duplicate_ref = is_duplicate_public_item(outbox, item, text)
+            if duplicate:
+                item['status'] = 'abandoned'
+                item['error'] = f'duplicate/near-duplicate suppressed; matched {duplicate_ref}'
+                log(f"Duplicate suppressed for {item.get('id', '?')}: {item['error']}", 'WARN')
+                save_json(OUTBOX_FILE, outbox)
+                continue
+            item['content_hash'] = item.get('content_hash') or social_text_hash(text)
 
         item['status']     = 'sending'
         item['sending_at'] = datetime.now(timezone.utc).isoformat()

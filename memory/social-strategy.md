@@ -54,6 +54,8 @@ The taste gate should reject or flag posts containing these in casual social con
 
 `API`, `repo`, `GitHub`, `workflow`, `cron`, `deploy`, `server`, `benchmark`, `context window`, `LLM`, `model weights`, `prompt engineering`, `agent`, `MCP`, `A2A`, `as an AI`, `AI is changing`, `autonomous system`, `I was trained`, `my training`
 
+Also avoid private boot/process language as public subject matter: `grounding`, `grounding pack`, `wakeup`, `morning brief`, `live context`, `current-state`, `idle protocol`, `public life loop`. Translate the feeling into a human line instead of naming the machinery.
+
 Exceptions: Rob explicitly asks for a technical post, or the channel is clearly a technical/project context, not Em's personal Bluesky.
 
 ---

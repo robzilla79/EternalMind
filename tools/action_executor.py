@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import hashlib
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -50,6 +51,7 @@ OPS_DIARY_PATTERNS = [
 
 MAX_TEXT_CHARS = 12000
 MAX_SOCIAL_CHARS = 270
+RECENT_SOCIAL_DEDUPE_LIMIT = 40
 
 
 @dataclass
@@ -245,6 +247,48 @@ def execute_remember(action: dict[str, Any], root: Path, dry_run: bool) -> Execu
     return ExecutionResult(True, "executed", "remember", "memory appended", path=MEMORIES, dry_run=dry_run)
 
 
+
+def normalize_social_text(text: str) -> str:
+    """Normalize public text for duplicate checks across punctuation/case variants."""
+    text = (text or "").lower()
+    text = re.sub(r"https?://\S+", "", text)
+    text = re.sub(r"[“”\"'`’‘:;,.!?()\[\]{}\-—–_/\\]+", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def social_text_hash(text: str) -> str:
+    return hashlib.sha256(normalize_social_text(text).encode("utf-8")).hexdigest()[:16]
+
+
+def is_duplicate_social_text(outbox: Any, text: str) -> tuple[bool, str]:
+    """Detect exact/near duplicate public text already queued or posted."""
+    if not isinstance(outbox, list):
+        return False, ""
+    norm = normalize_social_text(text)
+    if not norm:
+        return False, ""
+    new_words = set(norm.split())
+    new_hash = social_text_hash(text)
+    for item in outbox[-RECENT_SOCIAL_DEDUPE_LIMIT:]:
+        if not isinstance(item, dict):
+            continue
+        existing_text = item.get("content") or item.get("text") or ""
+        if not existing_text:
+            continue
+        existing_norm = normalize_social_text(existing_text)
+        if not existing_norm:
+            continue
+        existing_hash = item.get("content_hash") or social_text_hash(existing_text)
+        if existing_hash == new_hash or existing_norm == norm:
+            return True, f"duplicate of {item.get('id') or item.get('uri') or 'recent outbox item'}"
+        existing_words = set(existing_norm.split())
+        if new_words and existing_words:
+            overlap = len(new_words & existing_words) / max(1, min(len(new_words), len(existing_words)))
+            if overlap >= 0.86 and abs(len(norm) - len(existing_norm)) <= 45:
+                return True, f"near-duplicate of {item.get('id') or item.get('uri') or 'recent outbox item'}"
+    return False, ""
+
 def execute_social_post(action: dict[str, Any], root: Path, dry_run: bool) -> ExecutionResult:
     text = clean_text(action.get("text") or action.get("content"), limit=1000)
     if not text:
@@ -272,11 +316,15 @@ def execute_social_post(action: dict[str, Any], root: Path, dry_run: bool) -> Ex
     outbox = read_json_file(outbox_path, [])
     if not isinstance(outbox, list):
         return ExecutionResult(False, "blocked", "queue_social_post", "bluesky outbox is not a list", path=BLUESKY_OUTBOX, dry_run=dry_run)
+    duplicate, duplicate_reason = is_duplicate_social_text(outbox, text)
+    if duplicate:
+        return ExecutionResult(False, "blocked", "queue_social_post", f"duplicate social post suppressed: {duplicate_reason}", path=BLUESKY_OUTBOX, dry_run=dry_run)
     post_id = action.get("id") or event_id("emcore-post")
     item = {
         "id": post_id,
         "type": "post",
         "content": text,
+        "content_hash": social_text_hash(text),
         "queued_at": utc_now(),
         "source": "em_core",
         "status": "pending",
