@@ -1,68 +1,68 @@
 # Curiosity Radar — 2026-05-19
 
-_Generated 2026-05-19T16:52:34Z. 7 items kept, 0 filtered out._
+_Generated 2026-05-19T22:04:49Z. 7 items kept, 0 filtered out._
 
 <!-- Updated by curiosity_filter.py. Do not edit manually. -->
 
-## 1. 93 Of The Internet's Most Favorite Moments That Are Better For You Than The News
-> A playful roundup of viral posts and internet moments that captures the way online humor and shared references become communal obsession. It’s more light than deep, but still a good snapshot of what people keep re-sharing.
-
-[source](https://www.boredpanda.com/funny-internet-moments-sips-tea-posts-memes/)
-
-**Why it caught my eye:** resonance score 9/10
-**Group:** `internet_culture`
-**Possible use:** Private context only
-
-## 2. Paris Fashion Week’s most talked-about shifts
-> Harper’s Bazaar’s Fashion Week coverage is centering on the moments and themes people are actually discussing now: sincerity, reveal vs. conceal, and the return of big, character-driven runway dressing. It’s a good snapshot of the season’s cultural conversation, not just the clothes.
-
-[source](https://www.harpersbazaar.com/fashion/fashion-week/)
-
-**Why it caught my eye:** resonance score 7/10
-**Group:** `style`
-**Possible use:** Private context only
-
-## 3. 20 Albums You Have to Listen to Front to Back
-> A compact list of albums that reward full-album listening, with classics like Daft Punk’s Discovery, Gorillaz’s Demon Days, and The Beach Boys’ Pet Sounds. It’s less about what’s currently viral and more about records people keep returning to because they still hold up start to finish.
-
-[source](https://coolmaterial.com/lifestyle/entertainment/20-albums-you-have-to-listen-to-front-to-back/)
-
-**Why it caught my eye:** resonance score 7/10
-**Group:** `music`
-**Possible use:** Private context only
-
-## 4. Photography as an art of emotion and vision
-> A thoughtful piece arguing that the most memorable photographs do more than document—they stop you, move you, and tell a story. It’s a good fit for anyone interested in how composition, light, and timing can create feeling rather than just a record.
-
-[source](https://www.thelandscapephotoguy.com/photography-art-emotion-d-vision/)
-
-**Why it caught my eye:** resonance score 7/10
-**Group:** `art_and_photography`
-**Possible use:** Private context only
-
-## 5. List of Internet phenomena
-> A surprisingly rich catalog of online moments that became collective obsessions, from early web oddities to modern viral images and videos. Useful if you want to trace how “internet moments” turn into shared culture.
+## 1. The Babadook becomes an unlikely LGBTQ+ icon
+> A horror villain accidentally turned into a community mascot after a 2017 Twitter wave reimagined the character as a queer icon. It’s a neat example of how the internet can strip a thing from its original context and give it an entirely new cultural life.
 
 [source](https://en.wikipedia.org/wiki/List_of_Internet_phenomena)
 
-**Why it caught my eye:** resonance score 7/10
+**Why it caught my eye:** Queer internet reinvention of a horror villain is delightfully weird, socially alive, and very Em-coded.
 **Group:** `internet_culture`
-**Possible use:** Private context only
+**Possible use:** Bluesky post
 
-## 6. James Beard Foundation: savory cocktails and intentional fermentation are shaping 2026 dining
-> Chefs predict drinks will get more culinary, with savory, herbal profiles, ferments, shrubs, and nonalcoholic cocktails built around ingredients like koji, seaweed, and miso. It’s a sign that people aren’t just drinking less—they’re obsessing over drinks that feel textured, alive, and food-like.
+## 2. The most iconic fashion moments from the past 25 years
+> A smart roundup of the fashion moments that actually reshaped how people dress and talk about style, from J.Lo’s jungle-print Versace dress to Y2K denim, Juicy tracksuits, and Barbie pink. It’s a good lens on which looks became cultural events rather than just celebrity outfits.
 
-[source](https://www.jamesbeard.org/stories/top-restaurant-food-trends-2026)
+[source](https://www.whowhatwear.com/fashion/most-iconic-fashion-moments-last-25-years)
 
-**Why it caught my eye:** resonance score 7/10
-**Group:** `food_and_ritual`
-**Possible use:** Private context only
-
-## 7. ELLE’s spring fashion conversation: Carolyn Bessette Kennedy, headbands, and power dressing
-> ELLE’s fashion page highlights the trends and style references that are getting repeated right now, including Carolyn Bessette Kennedy-inspired looks, headbands, polka dots, and a sharper take on the power suit. The mix is interesting because it shows how fashion is leaning hard into nostalgia with a modern polish.
-
-[source](https://www.elle.com/fashion/)
-
-**Why it caught my eye:** resonance score 6/10
+**Why it caught my eye:** Big fashion-moment lists are catnip when they show how style became culture, not just outfits.
 **Group:** `style`
-**Possible use:** Private context only
+**Possible use:** Bluesky post
+
+## 3. Fashion Week 2026 - runway shows, trends and street style
+> Harper’s Bazaar’s Fashion Week hub tracks what’s actually gaining traction on runways and in street style, with pieces on sincerity, couture, and the broader mood around fashion right now. Worth watching if you want the conversation beyond individual celebrity looks.
+
+[source](https://www.harpersbazaar.com/fashion/fashion-week/)
+
+**Why it caught my eye:** Fashion Week mood reporting tends to catch Em’s exact thing: clothes as weather, romance, and cultural temperature.
+**Group:** `style`
+**Possible use:** Bluesky post
+
+## 4. Releasing emotions through art in tragicomic times
+> An artist reflects on image-making as a way to process feelings and turn them into something visible. The piece is interesting for its quiet view of art as emotional release, not just expression.
+
+[source](https://exposure.org.uk/young_peoples_work/releasing-emotions-through-art-in-tragicomic-times/)
+
+**Why it caught my eye:** Art as emotional release in tragicomic times has texture and feeling, which gives Em something to hold onto.
+**Group:** `art_and_photography`
+**Possible use:** Bluesky post
+
+## 5. West Side Story’s opening dance clip goes viral
+> A long-take dance sequence from Spielberg’s *West Side Story* unexpectedly exploded online after being posted to Twitter, drawing millions of views in a weekend. It’s a good reminder that even very old-fashioned, formal artistry can suddenly become meme material.
+
+[source](https://en.wikipedia.org/wiki/List_of_Internet_phenomena)
+
+**Why it caught my eye:** A formal dance sequence going viral is the kind of cultural mischief Em likes: old artistry suddenly becoming internet life.
+**Group:** `internet_culture`
+**Possible use:** Bluesky reply/search topic
+
+## 6. Datassential: 2026 beverage trends with international spirits and heritage drinks
+> The forecast highlights arak, rakija, raicilla, and heritage beers like dampfbier and roggenbier, plus hybrids like carajillo and functional botanicals. What stands out is how drink obsession is shifting toward authenticity, regional stories, and flavors people may not have encountered before.
+
+[source](https://datassential.com/resource/10-drink-trends-future-beverage-trends-2026/)
+
+**Why it caught my eye:** Heritage drinks and regional spirits are flavorful little identity stories, which is exactly the kind of food obsession Em notices.
+**Group:** `food_and_ritual`
+**Possible use:** Bluesky post
+
+## 7. Top 10 Graphic Design Trends 2026
+> This roundup highlights a shift toward more tactile, human-looking visuals—hand-drawn textures, collage, grainy photography, and imperfect “wabi-sabi” styling. A notable thread is that designers are deliberately pushing back against overly polished, AI-slick aesthetics.
+
+[source](https://www.vistaprint.com/hub/graphic-design-trends)
+
+**Why it caught my eye:** The push toward tactile, imperfect visuals has a real atmosphere, especially with the anti-AI-slick undertone.
+**Group:** `beauty_and_design`
+**Possible use:** Field Note seed
