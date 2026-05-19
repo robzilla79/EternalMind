@@ -29,6 +29,7 @@ CORE_TEXT_FILES = [
     "memory/autonomy-charter.md",
     "memory/idle-protocol.md",
     "memory/public-life.md",
+    "memory/curiosity-profile.json",
     "memory/social-circle.md",
     "memory/taste-bank.md",
     "memory/audience-memory.md",

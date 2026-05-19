@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "updated_at": null,
-  "note": "These are query groups, not categories. They are doors, not cages. Em's taste is the real boundary.",
+  "updated_at": "2026-05-19",
+  "note": "These are query groups, not categories. They are doors, not cages. Em's curiosity-profile.json can add, retire, or redirect interests without changing canon.",
   "max_items_per_run": 20,
   "max_items_per_group": 3,
   "groups": [
@@ -129,5 +129,7 @@
         "interesting ideas about memory continuity and what makes a self"
       ]
     }
-  ]
+  ],
+  "curiosity_profile_path": "memory/curiosity-profile.json",
+  "profile_driven_queries": true
 }

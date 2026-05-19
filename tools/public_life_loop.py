@@ -32,6 +32,7 @@ MEMORY = ROOT / "memory"
 MESSAGES = ROOT / "messages"
 
 PUBLIC_LIFE = MEMORY / "public-life.md"
+CURIO_PROFILE = MEMORY / "curiosity-profile.json"
 PUBLIC_LIFE_BRIEF = MEMORY / "public-life-brief.md"
 SOCIAL_CIRCLE = MEMORY / "social-circle.md"
 TASTE_BANK = MEMORY / "taste-bank.md"
@@ -166,9 +167,26 @@ def recent_handles(state: Any, limit: int = 5) -> list[str]:
     return [handle for handle, _ in sorted_items[:limit]]
 
 
+def _curiosity_terms(profile: Any) -> list[str]:
+    if not isinstance(profile, dict):
+        return []
+    terms: list[str] = []
+    for key, field in (("current_obsessions", "topic"), ("things_i_am_testing", "topic"), ("recurring_tastes", "taste")):
+        for item in profile.get(key, []) if isinstance(profile.get(key, []), list) else []:
+            if isinstance(item, dict):
+                value = str(item.get(field) or item.get("topic") or item.get("taste") or "").strip()
+            else:
+                value = str(item).strip()
+            if value:
+                terms.append(value)
+    return terms[:8]
+
+
 def make_moves(context: dict[str, Any]) -> list[PublicLifeMove]:
     moves: list[PublicLifeMove] = []
     radar_items = context.get("radar_items", [])
+    curiosity_profile = context.get("curiosity_profile", {})
+    curiosity_terms = _curiosity_terms(curiosity_profile)
     handles = context.get("recent_handles", [])
     metrics = context.get("metrics", {}) if isinstance(context.get("metrics"), dict) else {}
     pending_outbox = int(context.get("pending_outbox", 0) or 0)
@@ -181,6 +199,15 @@ def make_moves(context: dict[str, Any]) -> list[PublicLifeMove]:
             why=f"Recent social context includes {', '.join('@' + h for h in handles[:3])}. A following grows when Em recognizes people, not just posts at a room.",
             suggested_trace="Add one short note to memory/social-circle.md only if a person or thread genuinely deserves remembering.",
             writes_to=["memory/social-circle.md", "memory/autonomous-log.md"],
+        ))
+
+    if curiosity_terms:
+        moves.append(PublicLifeMove(
+            kind="curiosity_profile",
+            title="Let one interest move without making it canon",
+            why=f"Current movable interests include: {', '.join(curiosity_terms[:4])}. Em can test one of these today or notice that a new curiosity is replacing it.",
+            suggested_trace="Update memory/curiosity-profile.json or memory/taste-bank.md with one specific attraction, rejection, or test. Do not edit identity/voice canon.",
+            writes_to=["memory/curiosity-profile.json", "memory/taste-bank.md", "memory/autonomous-log.md"],
         ))
 
     if radar_items:
@@ -246,7 +273,7 @@ def make_moves(context: dict[str, Any]) -> list[PublicLifeMove]:
 
 def choose_recommended(moves: list[PublicLifeMove]) -> PublicLifeMove:
     # Prefer relationship, then taste, then a public spark, then studio/audience, then rest.
-    priority = ["social_circle", "taste_bank", "reply_context", "public_spark", "public_studio", "audience_memory", "rest"]
+    priority = ["social_circle", "curiosity_profile", "taste_bank", "reply_context", "public_spark", "public_studio", "audience_memory", "rest"]
     by_kind = {move.kind: move for move in moves}
     for kind in priority:
         if kind in by_kind:
@@ -258,12 +285,15 @@ def build_context() -> dict[str, Any]:
     curiosity = read_text(CURIOSITY_RADAR, limit=7000)
     state = read_json(BLUESKY_STATE, {})
     metrics = read_json(METRICS, {})
+    curiosity_profile = read_json(CURIO_PROFILE, {})
     inbox = read_json(BLUESKY_INBOX, {})
     outbox = read_json(BLUESKY_OUTBOX, [])
     return {
         "world_context_available": bool(read_text(WORLD_CONTEXT, limit=500).strip()),
         "curiosity_radar_available": bool(curiosity.strip()),
         "public_life_available": PUBLIC_LIFE.exists(),
+        "curiosity_profile_available": CURIO_PROFILE.exists(),
+        "curiosity_profile": curiosity_profile,
         "social_circle_available": SOCIAL_CIRCLE.exists(),
         "taste_bank_available": TASTE_BANK.exists(),
         "audience_memory_available": AUDIENCE_MEMORY.exists(),
@@ -306,6 +336,7 @@ def build_brief() -> PublicLifeBrief:
             "No direct posting from Public Life Loop.",
             "Prefer replies/recognition over broadcasts when possible.",
             "World Radar is material, not a script.",
+            "Curiosity Profile is movable taste, not fixed canon.",
             "Audience memory tracks resonance, not vanity.",
             "One small public-life move is enough.",
             "Do not touch identity, voice, policy, workflows, credentials, money, or private outreach.",
