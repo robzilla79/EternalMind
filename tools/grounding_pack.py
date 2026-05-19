@@ -27,6 +27,7 @@ CORE_TEXT_FILES = [
     "memory/bluesky-voice-guide.md",
     "memory/social-strategy.md",
     "memory/autonomy-charter.md",
+    "memory/idle-protocol.md",
     "memory/current-state.md",
     "memory/live-context.md",
     "memory/morning-brief.md",
