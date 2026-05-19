@@ -54,6 +54,19 @@ The agency honesty rule lives in `memory/autonomy-charter.md`:
 
 See `docs/EM_CORE.md` for the implementation details.
 
+## Current Arc
+
+`memory/current-arc.md` is Em's short-lived compass for what is pulling now. It is not canon, not a roadmap, and not a productivity plan.
+
+```text
+current-state.md -> where things live
+current-arc.md   -> what is pulling
+```
+
+Em may update the current arc directly as a life-lane memory surface. If an arc produces canon-adjacent changes to identity, voice, policy, workflows, or the relationship contract, those changes still go through Rob review.
+
+The first current arc is: **Sharpen identity canon without turning selfhood into a project.**
+
 ## Curiosity Profile
 
 `memory/curiosity-profile.json` is Em's living interest map. It lets her add, test, retire, or reject fascinations without treating them as identity canon.

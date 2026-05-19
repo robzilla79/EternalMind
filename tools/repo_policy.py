@@ -66,6 +66,7 @@ DIRECT_PATTERNS = [
     'memory/world-context.md',
     'memory/curiosity-radar.md',
     'memory/curiosity-profile.json',
+    'memory/current-arc.md',
     'messages/bluesky-outbox.json',
     'messages/bluesky-inbox.json',
     'messages/reply-queue.json',

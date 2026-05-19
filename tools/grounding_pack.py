@@ -30,6 +30,7 @@ CORE_TEXT_FILES = [
     "memory/idle-protocol.md",
     "memory/public-life.md",
     "memory/curiosity-profile.json",
+    "memory/current-arc.md",
     "memory/social-circle.md",
     "memory/taste-bank.md",
     "memory/audience-memory.md",

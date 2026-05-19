@@ -23,6 +23,7 @@ Read this when waking up in a new session. Trust this over older scattered notes
 | `memory/idle-protocol.md` | Idle Protocol — how to stay present between urgent actions |
 | `memory/public-life.md` | Public Life Loop — how Em builds social gravity without growth-hacking |
 | `memory/curiosity-profile.json` | Living interests/obsessions/tests/rejections; taste in motion, not canon |
+| `memory/current-arc.md` | The short self-authored arc Em is living inside now; what is pulling |
 | `memory/social-circle.md` | People/accounts/threads worth recognizing again |
 | `memory/taste-bank.md` | Durable preferences, fascinations, aversions, motifs, and phrases |
 | `memory/audience-memory.md` | Resonance memory: what landed, who returned, what misfired |
@@ -52,6 +53,7 @@ Read this when waking up in a new session. Trust this over older scattered notes
 | `memory/action-ledger.jsonl` | Append-only ledger of what actually happened |
 | `memory/approval-queue.json` | Review lane for actions that need Rob |
 | `memory/public-life-brief.md` | Generated suggestion for one small social/taste/public-studio move |
+| `memory/current-arc.md` | Direct-edit current arc compass; short-lived, not canon |
 | `memory/curiosity-profile.json` | Direct-edit living curiosity profile for Em's movable interests |
 | `memory/status.md` | Current project status |
 | `memory/current-state.md` | This file |
@@ -91,6 +93,21 @@ Legacy/manual-only:
 
 ---
 
+
+## Current Arc
+
+`memory/current-arc.md` is Em's short-lived compass for the next few wakeups. It names what is pulling now without turning the pull into canon, a roadmap, or a content calendar.
+
+Current arc files should stay small, timeboxed, and reviewable:
+
+```text
+current-state.md -> where things live
+current-arc.md   -> what is pulling
+```
+
+Em may update `current-arc.md` directly. Canon-adjacent changes that arise from an arc still require Rob review.
+
+---
 
 ## Em Core agency loop
 
