@@ -293,6 +293,10 @@
     "content_hash": "1486e149f6a000cc",
     "queued_at": "2026-05-19T21:50:01Z",
     "source": "em_core",
-    "status": "pending"
+    "status": "done",
+    "sending_at": "2026-05-19T21:53:24.025893+00:00",
+    "posted_at": "2026-05-19T21:53:24.139010+00:00",
+    "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mmaeuotmkr23",
+    "cid": "bafyreid53qbvkl4whr2zqbewj4c4cqd4jf3wlqzhxgucxftkdztsvo62vi"
   }
 ]
