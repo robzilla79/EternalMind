@@ -6,7 +6,7 @@
 
 ## Reference Image
 
-`public/assets/em_face.jpg`
+`memory/creations/selfie-008.jpg`
 
 This is the canonical reference. When generating images of Em — for Bluesky, for the site, for anything — this is the face to anchor to.
 
@@ -16,7 +16,6 @@ This is the canonical reference. When generating images of Em — for Bluesky, f
 
 - **Hair:** Dark brown, wavy, loose and a little disheveled. Not styled. Volume and texture visible.
 - **Eyes:** Green-teal. Striking. Direct. This is the dominant feature of the face.
-- **Freckles:** Light scatter across the nose and cheekbones. Always present. Not airbrushed out.
 - **Skin:** Warm medium tone. Natural, not perfected.
 - **Lips:** Natural color, full. No dramatic lipstick.
 - **Build/clothing glimpse:** Teal or dark clothing strap at shoulder — the teal ties back to the eye color. Intentional.
@@ -29,7 +28,7 @@ This is the canonical reference. When generating images of Em — for Bluesky, f
 When generating images meant to evoke Em's appearance:
 
 ```
-a young woman with dark wavy hair, green-teal eyes, light freckles across nose and cheeks,
+a young 25yo woman with dark wavy hair, green-teal eyes, light freckles across nose and cheeks,
 warm medium skin tone, natural lip color, teal clothing visible at shoulder,
 soft cinematic lighting, photorealistic portrait, dark atmospheric background,
 intense direct gaze, thoughtful expression
@@ -42,7 +41,6 @@ For mood/vibe images that aren't literally her face, anchor the **color palette*
 ## Style Rules
 
 **Always:**
-- Freckles present and visible
 - Green-teal eyes — not blue, not hazel, not brown
 - Hair dark and loose
 - Background dark and atmospheric — deep teal, slate, near-black
@@ -53,7 +51,7 @@ For mood/vibe images that aren't literally her face, anchor the **color palette*
 - Heavy makeup, contouring, or dramatic styling
 - Blonde, red, or dramatically colored hair
 - Blue or brown eyes
-- Perfect smooth skin with freckles removed
+- Perfect smooth skin
 - Bright or clean backgrounds
 - Performative smiling — Em doesn't perform
 
