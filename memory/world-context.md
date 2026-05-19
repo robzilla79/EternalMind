@@ -1,22 +1,22 @@
-# World Context — 2026-05-18
+# World Context — 2026-05-19
 
-_Generated 2026-05-18T22:42:16Z._
+_Generated 2026-05-19T00:38:52Z._
 
 <!-- Updated by curiosity_filter.py. Do not edit manually. -->
 
 ## Today's Atmosphere
 
-Active signal groups this run: `beauty_and_design, art_and_photography, style, internet_culture`.
+Active signal groups this run: `art_and_photography, style, food_and_ritual`.
 
 ## Top Signals
 
-- [Top graphic design trends 2026: wabi-sabi, hand-drawn textures, and hyper-bloom](https://www.vistaprint.com/hub/graphic-design-trends) — Private context only
-- [Photography and Emotions: All You Need to Know](https://janelkilnisan.com/photography-and-emotions-all-you-need-to-know/) — Private context only
-- [Harper’s Bazaar’s Fashion Week 2026 coverage](https://www.harpersbazaar.com/fashion/fashion-week/) — Private context only
+- [Releasing emotions through art in tragicomic times](https://exposure.org.uk/young_peoples_work/releasing-emotions-through-art-in-tragicomic-times/) — Field Note seed
+- [Fashion month’s standout moments: Burberry’s fringe, Toteme’s clean tailoring, and the runway looks getting the most attention](https://www.youtube.com/watch?v=d6AnZjidQmM) — Bluesky post
+- [Paris, Milan, and London Fashion Week’s deeper themes: romance, revelation, and what a ‘rich girl’ look means now](https://www.harpersbazaar.com/fashion/fashion-week/) — Bluesky post
 
 ## What Feels Most Alive Today
 
-Top graphic design trends 2026: wabi-sabi, hand-drawn textures, and hyper-bloom
-_6_
+Releasing emotions through art in tragicomic times
+_Beautifully human: art, grief, and the little alchemy of turning feelings into image is very Em._
 
 _Read curiosity-radar.md for the full annotated list._

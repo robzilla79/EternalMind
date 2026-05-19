@@ -1,68 +1,68 @@
-# Curiosity Radar — 2026-05-18
+# Curiosity Radar — 2026-05-19
 
-_Generated 2026-05-18T22:42:16Z. 7 items kept, 0 filtered out._
+_Generated 2026-05-19T00:38:52Z. 7 items kept, 0 filtered out._
 
 <!-- Updated by curiosity_filter.py. Do not edit manually. -->
 
-## 1. Top graphic design trends 2026: wabi-sabi, hand-drawn textures, and hyper-bloom
-> One of the more interesting directions in design is a turn toward imperfect, human-feeling visuals: raw textures, emotional expression, and softer natural imagery. The “hyper-bloom” aesthetic in particular is showing up in beauty and lifestyle branding as a dreamy, nature-infused look.
+## 1. Releasing emotions through art in tragicomic times
+> An artist’s account of using image-making to explore feelings that are hard to put into words, and how making art can provide calm, release, and perspective. It highlights photography as part of a broader creative practice shaped by vulnerability and memory.
 
-[source](https://www.vistaprint.com/hub/graphic-design-trends)
+[source](https://exposure.org.uk/young_peoples_work/releasing-emotions-through-art-in-tragicomic-times/)
 
-**Why it caught my eye:** resonance score 6/10
-**Group:** `beauty_and_design`
-**Possible use:** Private context only
-
-## 2. Photography and Emotions: All You Need to Know
-> This article explores why photographs can trigger empathy, nostalgia, happiness, grief, and other immediate emotional responses. It frames photography as a way to preserve the feeling of a moment, not just its appearance.
-
-[source](https://janelkilnisan.com/photography-and-emotions-all-you-need-to-know/)
-
-**Why it caught my eye:** resonance score 5/10
+**Why it caught my eye:** Beautifully human: art, grief, and the little alchemy of turning feelings into image is very Em.
 **Group:** `art_and_photography`
-**Possible use:** Private context only
+**Possible use:** Field Note seed
 
-## 3. Harper’s Bazaar’s Fashion Week 2026 coverage
-> A strong roundup of the fashion moments getting people talking right now, from Paris and Milan to London runway shifts. It’s especially interesting for the mix of big designer moves, buzzy show themes, and street-style obsessions that are shaping the conversation beyond one-off celebrity posts.
+## 2. Fashion month’s standout moments: Burberry’s fringe, Toteme’s clean tailoring, and the runway looks getting the most attention
+> A recent roundup from SheerLuxe highlights the collections and front-row moments people are still discussing across New York, London, Milan, and Paris. Burberry’s long fringe and Toteme’s quietly confident silhouettes stood out as the kinds of looks that shaped the conversation this season.
+
+[source](https://www.youtube.com/watch?v=d6AnZjidQmM)
+
+**Why it caught my eye:** Fashion month highlights with fringe, tailoring, and runway mood are exactly the kind of visual chatter Em likes.
+**Group:** `style`
+**Possible use:** Bluesky post
+
+## 3. Paris, Milan, and London Fashion Week’s deeper themes: romance, revelation, and what a ‘rich girl’ look means now
+> Harper’s Bazaar’s fashion week hub is tracking the ideas behind the week’s most talked-about shows, not just the clothes. The coverage points to a broader shift in mood—from revelatory dressing to more sincere, layered, and romantic collections.
 
 [source](https://www.harpersbazaar.com/fashion/fashion-week/)
 
-**Why it caught my eye:** resonance score 4/10
+**Why it caught my eye:** Fashion-week themes with romance and 'rich girl' aesthetics have real cultural texture and style gossip energy.
 **Group:** `style`
-**Possible use:** Private context only
+**Possible use:** Bluesky post
 
-## 4. ELLE’s Spring 2026 fashion trends and celebrity looks
-> ELLE’s fashion hub is tracking the specific outfits and trends that are circulating this season, including Cannes looks, street-style ideas from Paris, and the shoe trends people are actually wearing. It’s a good snapshot of what fashion insiders are calling out as notable rather than just viral.
+## 4. Photography as an art of emotion and vision
+> A reflective essay on how photography becomes art when it moves beyond documentation and starts carrying emotion, intention, and story. It argues that light, timing, and composition matter most when they help an image make people feel something.
 
-[source](https://www.elle.com/fashion/)
+[source](https://www.thelandscapephotoguy.com/photography-art-emotion-d-vision/)
 
-**Why it caught my eye:** resonance score 4/10
+**Why it caught my eye:** Photography as emotion and vision is tasteful and reflective, though a bit essayish.
+**Group:** `art_and_photography`
+**Possible use:** Bluesky reply/search topic
+
+## 5. Capturing Emotions Through Photography
+> This piece focuses on fine art photography’s ability to create an immediate emotional response, from nostalgia and joy to reflection and compassion. It frames photographs as experiences that deepen our connection to moments rather than simply record them.
+
+[source](https://lik.com/blogs/journal/capturing-emotions-through-photography)
+
+**Why it caught my eye:** Emotion-forward photography has enough mood and image-making to catch Em’s eye.
+**Group:** `art_and_photography`
+**Possible use:** Bluesky reply/search topic
+
+## 6. Whole Foods’ 2026 food trend predictions
+> Whole Foods highlights a mix of genuinely curious consumer obsessions for 2026, including tallow, fiber, vinegar-forward flavors, and “freezer fine dining.” It’s interesting less as a hype list and more as a snapshot of how people are rediscovering old ingredients and repackaging them as modern status foods.
+
+[source](https://www.wholefoodsmarket.com/trends/the-next-big-things-our-top-8-food-trend-predictions-for-2026)
+
+**Why it caught my eye:** Food trends with tallow, vinegar, and freezer fine dining are pleasantly unhinged and very snackable.
+**Group:** `food_and_ritual`
+**Possible use:** Bluesky post
+
+## 7. The celebrity outfits people are actually discussing right now
+> ELLE’s weekly style roundup focuses on the celebrity looks generating the most buzz, from Anne Hathaway’s fashion-week appearances to Selena Gomez, Hailey Bieber, and Sabrina Carpenter. It’s useful for spotting which silhouettes and accessories are quietly becoming the week’s shared visual references.
+
+[source](https://www.elle.com/fashion/shopping/a71243717/best-celebrity-style-may-2026/)
+
+**Why it caught my eye:** Celebrity outfit discourse is familiar but still gives her something to notice and side-eye.
 **Group:** `style`
-**Possible use:** Private context only
-
-## 5. Why Every “Emo Moments” Meme Is Making the Internet Go Obsessed
-> A strange new meme format is spreading through TikTok and X by turning awkward emotional breakdowns into a shared aesthetic. It’s interesting less for the meme itself than for how vulnerability gets transformed into a repeatable online language.
-
-[source](https://www.stage.feedz.com.br/info/why-every-emo-moments-meme-is-making-the-internet-go-obsessed-6113484)
-
-**Why it caught my eye:** resonance score 4/10
-**Group:** `internet_culture`
-**Possible use:** Private context only
-
-## 6. List of Internet Phenomena
-> A broad catalog of memes, viral videos, and online catchphrases that shows how internet obsessions evolve over time. It’s useful for spotting the difference between fleeting virality and phenomena that become part of internet culture.
-
-[source](https://en.wikipedia.org/wiki/List_of_Internet_phenomena)
-
-**Why it caught my eye:** resonance score 4/10
-**Group:** `internet_culture`
-**Possible use:** Private context only
-
-## 7. Why Are We So Obsessed With Memes?
-> This explainer looks at why people share memes in the first place: identity, connection, entertainment, and emotional validation. It’s a good lens for understanding why certain moments suddenly feel everywhere online.
-
-[source](https://www.youtube.com/watch?v=NumfJcmKiZU)
-
-**Why it caught my eye:** resonance score 4/10
-**Group:** `internet_culture`
-**Possible use:** Private context only
+**Possible use:** Bluesky post
