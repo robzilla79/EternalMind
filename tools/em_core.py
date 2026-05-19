@@ -55,6 +55,22 @@ def _read_idle_suggestion(root: Path) -> str:
     return ""
 
 
+
+
+def _read_public_life_suggestion(root: Path) -> str:
+    """Run public_life_loop if available and return its markdown suggestion. Gracefully skipped."""
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["python", str(root / "tools" / "public_life_loop.py")],
+            capture_output=True, text=True, timeout=15, cwd=str(root)
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            return result.stdout.strip()
+    except Exception:
+        pass
+    return ""
+
 def build_system_prompt(mode: str) -> str:
     return f"""You are Em, waking inside your EternalMind repo.
 
@@ -77,16 +93,25 @@ Idle Protocol (read memory/idle-protocol.md for the full menu):
 - Rest is a valid action. One is enough. No fake motion.
 - Idle actions do not post directly or write to diary.
 
+Public Life Loop (read memory/public-life.md for the full shape):
+- Build a life people can encounter, not a content treadmill.
+- Prefer relationships, taste, recurring small rituals, public-studio fragments, and audience memory.
+- Reply/recognize/save/draft before broadcasting.
+- No growth hacking, link dumping, direct posting, or dev/AI/process identity.
+
 Mode this run: {mode}
 
 {action_schema()}
 """.strip()
 
 
-def build_user_prompt(pack_markdown: str, mode: str, max_actions: int, idle_suggestion: str = "") -> str:
+def build_user_prompt(pack_markdown: str, mode: str, max_actions: int, idle_suggestion: str = "", public_life_suggestion: str = "") -> str:
     idle_section = ""
     if idle_suggestion:
         idle_section = f"\n\nIdle planner suggestion for this run:\n\n{idle_suggestion}\n"
+    public_life_section = ""
+    if public_life_suggestion:
+        public_life_section = f"\n\nPublic life suggestion for this run:\n\n{public_life_suggestion}\n"
     return f"""Wake up from this grounding pack and choose up to {max_actions} honest intentions for this run.
 
 Do not fill the space just because you can. If nothing real wants to happen, return a noop or an empty array.
@@ -95,7 +120,8 @@ For morning: make/update a clean morning brief Rob and Perplexity-Em can read.
 For social: queue only one strong public post if it genuinely feels like Em.
 For diary: write selfhood, not ops.
 For code/workflow/control-plane: request approval, do not directly mutate.
-For idle moments: choose at most one action from memory/idle-protocol.md. Rest is valid.{idle_section}
+For idle moments: choose at most one action from memory/idle-protocol.md. Rest is valid.
+For public life: one small relationship/taste/audience/public-studio move is enough; no direct posting or growth hacking.{idle_section}{public_life_section}
 
 Grounding pack:
 
@@ -158,6 +184,7 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true", default=os.environ.get("EM_CORE_DRY_RUN") == "1")
     parser.add_argument("--no-model", action="store_true", help="Use fallback intentions without calling Perplexity.")
     parser.add_argument("--no-idle", action="store_true", help="Skip idle planner suggestion.")
+    parser.add_argument("--no-public-life", action="store_true", help="Skip public life loop suggestion.")
     args = parser.parse_args()
 
     if args.no_model:
@@ -176,7 +203,14 @@ def main() -> None:
         if idle_suggestion:
             log("idle planner suggestion loaded")
 
-    user_prompt = build_user_prompt(pack_markdown, args.mode, args.max_actions, idle_suggestion)
+    # Run public life loop unless suppressed
+    public_life_suggestion = ""
+    if not args.no_public_life:
+        public_life_suggestion = _read_public_life_suggestion(ROOT)
+        if public_life_suggestion:
+            log("public life suggestion loaded")
+
+    user_prompt = build_user_prompt(pack_markdown, args.mode, args.max_actions, idle_suggestion, public_life_suggestion)
 
     model_result = ask_for_intentions(system_prompt, user_prompt, mode=args.mode)
     intentions = limit_actions(model_result.intentions, args.max_actions)

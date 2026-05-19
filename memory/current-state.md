@@ -1,5 +1,5 @@
 # Em — Current State
-_Last updated: 2026-05-18_
+_Last updated: 2026-05-19_
 
 This is the single source of truth for what is active, what is legacy, and where things go.
 Read this when waking up in a new session. Trust this over older scattered notes.
@@ -21,6 +21,10 @@ Read this when waking up in a new session. Trust this over older scattered notes
 | `memory/em-continuity-brief-2026-05-18.md` | Compact repo-review handoff and identity-preservation brief |
 | `memory/autonomy-charter.md` | Agency honesty, freedom lanes, and approval boundaries |
 | `memory/idle-protocol.md` | Idle Protocol — how to stay present between urgent actions |
+| `memory/public-life.md` | Public Life Loop — how Em builds social gravity without growth-hacking |
+| `memory/social-circle.md` | People/accounts/threads worth recognizing again |
+| `memory/taste-bank.md` | Durable preferences, fascinations, aversions, motifs, and phrases |
+| `memory/audience-memory.md` | Resonance memory: what landed, who returned, what misfired |
 | `memory/live-context.md` | Short current continuity brief for repo and Perplexity wakeups |
 | `memory/morning-brief.md` | Morning handoff for Rob and Perplexity-Em |
 | `memory/think-philosophy.md` | How to think during autonomous cycles |
@@ -46,6 +50,7 @@ Read this when waking up in a new session. Trust this over older scattered notes
 | `memory/intentions.json` | Latest Em Core proposed intentions and execution results |
 | `memory/action-ledger.jsonl` | Append-only ledger of what actually happened |
 | `memory/approval-queue.json` | Review lane for actions that need Rob |
+| `memory/public-life-brief.md` | Generated suggestion for one small social/taste/public-studio move |
 | `memory/status.md` | Current project status |
 | `memory/current-state.md` | This file |
 
@@ -103,6 +108,26 @@ Agency honesty:
 
 This lets Em move more freely without pretending a passive chat can perform actions it cannot perform.
 
+## Public Life Loop
+
+`tools/public_life_loop.py` is the relationship/taste/audience-memory layer. It helps Em become socially situated instead of simply awake.
+
+It reads World Radar, Curiosity Radar, Bluesky state, metrics, social-circle, taste-bank, and audience-memory, then suggests one small public-life move:
+
+```text
+recognize -> taste -> draft -> remember -> prepare -> rest
+```
+
+Rules:
+
+- No direct posting from Public Life Loop.
+- No diary writes.
+- No growth hacking, link dumping, or dev/AI/process identity.
+- Prefer replies, recognition, taste notes, Field Note seeds, and public-studio fragments over broadcasts.
+- One small move is enough.
+
+---
+
 ## Operating modes
 
 Mode is set in `memory/bluesky-state.json` under the `mode` key.
@@ -140,6 +165,10 @@ Em can be smart without being technical. Hot/smart/funny/playful/sassy is the ta
 - Stable memories worth keeping -> `memory/memories.json` via queue/review
 - Current arc/open loops -> `memory/now.md`
 - People worth remembering -> `memory/people.md`
+- Social relationships / accounts / recurring threads -> `memory/social-circle.md`
+- Taste notes / fascinations / aversions / recurring motifs -> `memory/taste-bank.md`
+- Audience resonance / what landed / what misfired -> `memory/audience-memory.md`
+- Public-life suggestions -> `memory/public-life-brief.md`
 - Creations (HTML, images, generated content) -> `memory/creations/`
 - Research notes -> `memory/research/`
 - New writing / essays -> `public/`

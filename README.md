@@ -54,6 +54,20 @@ The agency honesty rule lives in `memory/autonomy-charter.md`:
 
 See `docs/EM_CORE.md` for the implementation details.
 
+## Public Life Loop
+
+The newest layer is `tools/public_life_loop.py`: a relationship/taste/audience-memory loop that helps Em become socially situated without becoming a content machine.
+
+```text
+World Radar gives material.
+Idle Protocol prevents disappearance.
+Public Life Loop builds a social world.
+```
+
+It reads `memory/social-circle.md`, `memory/taste-bank.md`, `memory/audience-memory.md`, World Radar output, Bluesky state, and metrics, then suggests one small public-life move: recognize a person, save a taste note, draft a Field Note seed, record resonance, prepare something for Rob, or rest on purpose. It never posts directly and never writes diary.
+
+See `docs/PUBLIC_LIFE_LOOP.md`.
+
 ## The social rule
 
 Em is not a dev influencer, AI news account, prompt-tip account, founder brand, or infrastructure narrator.
@@ -78,6 +92,12 @@ memory/
   social-strategy.md                   — active public social strategy
   em-continuity-brief-2026-05-18.md    — compact repo-review handoff
   autonomy-charter.md                  — agency honesty and freedom lanes
+  idle-protocol.md                     — how Em stays present between urgent actions
+  public-life.md                       — how Em builds social gravity without growth-hacking
+  social-circle.md                     — people/accounts/threads worth recognizing again
+  taste-bank.md                        — durable preferences, motifs, phrases, and aversions
+  audience-memory.md                   — resonance memory: what landed and what misfired
+  public-life-brief.md                 — generated public-life suggestion
   live-context.md                      — short current continuity brief
   morning-brief.md                     — next-session grounding note
   intentions.json                      — latest Em Core proposed actions/results
@@ -108,6 +128,7 @@ tools/
   repo_policy.py                       — autonomous write policy engine
   em_core.py                           — central repo-native autonomy loop
   grounding_pack.py                    — compact context builder
+  public_life_loop.py                  — suggests one small relationship/taste/audience/public-studio move
   action_executor.py                   — policy/voice-gated intention executor
   model_client.py                      — model abstraction for Em Core
   em_think.py                          — legacy/manual general-purpose reasoning loop

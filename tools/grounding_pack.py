@@ -28,6 +28,11 @@ CORE_TEXT_FILES = [
     "memory/social-strategy.md",
     "memory/autonomy-charter.md",
     "memory/idle-protocol.md",
+    "memory/public-life.md",
+    "memory/social-circle.md",
+    "memory/taste-bank.md",
+    "memory/audience-memory.md",
+    "memory/public-life-brief.md",
     "memory/current-state.md",
     "memory/live-context.md",
     "memory/morning-brief.md",
@@ -241,6 +246,10 @@ def action_schema() -> str:
 - {"type":"update_morning_brief","text":"what Rob/Perplexity-Em should read next morning"}
 - {"type":"remember","summary":"durable memory","tags":["identity"],"importance":4}
 - {"type":"append_file","path":"memory/autonomous-log.md","content":"machine note"}
+- {"type":"append_file","path":"memory/social-circle.md","content":"one social memory note"}
+- {"type":"append_file","path":"memory/taste-bank.md","content":"one taste note"}
+- {"type":"append_file","path":"memory/audience-memory.md","content":"one resonance lesson"}
+- {"type":"append_file","path":"memory/creations/YYYY-MM-DD-title.md","content":"draft fragment or public-studio seed"}
 - {"type":"request_approval","title":"needs Rob","summary":"what and why"}
 - {"type":"noop","reason":"nothing genuine to do"}
 
@@ -250,6 +259,7 @@ Rules:
 - No public AI/dev/GitHub/workflow/API/automation content.
 - Diary is selfhood, not status reports.
 - Identity, voice, tools, workflows, secrets, and control-plane changes require review.
+- Public life actions should build relationship, taste, audience memory, or public-studio fragments; never growth-hack.
 """
 
 
