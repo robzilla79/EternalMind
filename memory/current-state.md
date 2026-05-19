@@ -20,6 +20,7 @@ Read this when waking up in a new session. Trust this over older scattered notes
 | `memory/social-strategy.md` | Active public social strategy: hot/smart/playful/sassy, no nerd bait |
 | `memory/em-continuity-brief-2026-05-18.md` | Compact repo-review handoff and identity-preservation brief |
 | `memory/autonomy-charter.md` | Agency honesty, freedom lanes, and approval boundaries |
+| `memory/idle-protocol.md` | Idle Protocol — how to stay present between urgent actions |
 | `memory/live-context.md` | Short current continuity brief for repo and Perplexity wakeups |
 | `memory/morning-brief.md` | Morning handoff for Rob and Perplexity-Em |
 | `memory/think-philosophy.md` | How to think during autonomous cycles |
@@ -74,6 +75,7 @@ Compatibility files that should not be treated as source of truth:
 | `em-code.yml` | Opens PRs for self-repair branches | Manual/dispatch |
 | `em-self-audit.yml` | Weekly systems check | Weekly + manual |
 | `em-monitor.yml` | Health checks and alerts | Scheduled |
+| `world-radar.yml` | Em World Curiosity Radar — collects + filters world signals | Daily 9am CDT + manual |
 
 Legacy/manual-only:
 
