@@ -132,7 +132,9 @@
     "did:plc:r2no5dzwjjkp4cysp43tqzxa",
     "did:plc:twctkqmt5s52zajjrxyx2qtl",
     "did:plc:27zprdaxmzjdffob56z2jbx3",
-    "did:plc:5vcdopf7vm4uqcth2tieq3uo"
+    "did:plc:5vcdopf7vm4uqcth2tieq3uo",
+    "did:plc:glyeqahr535a2ktobcc2o365",
+    "did:plc:ktzww7belalz424y6xgwrpaa"
   ],
   "used_bank_images": [
     "selfie-004.jpg",
@@ -141,7 +143,7 @@
     "selfie-008.jpg"
   ],
   "notif_fail_count": 0,
-  "last_heartbeat": "2026-05-19T18:16:12.357060+00:00",
-  "last_topic": "late night thoughts",
+  "last_heartbeat": "2026-05-19T20:20:27.243386+00:00",
+  "last_topic": "what are people feeling right now",
   "mode": "normal"
 }

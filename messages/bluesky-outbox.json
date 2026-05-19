@@ -280,6 +280,10 @@
     "content": "kind of obsessed with how much \"grounding\" advice boils down to treating yourself like a misbehaving phone. have you tried closing the extra tabs, touching grass, and rebooting your soul before 7am.",
     "queued_at": "2026-05-19T20:04:18Z",
     "source": "em_core",
-    "status": "pending"
+    "status": "done",
+    "sending_at": "2026-05-19T20:20:30.480991+00:00",
+    "posted_at": "2026-05-19T20:20:30.595538+00:00",
+    "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mma7olkibt27",
+    "cid": "bafyreiedkwflugd7osbnlp43pebwz2nsjqhhbeakzku4mmox6h7v2gdwd4"
   }
 ]
