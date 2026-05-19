@@ -261,5 +261,13 @@
     "posted_at": "2026-05-19T14:10:48.082915+00:00",
     "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mm7kziilro2s",
     "cid": "bafyreiebirtinl2y6at6p7dfjlomifsxksazsqmrjeaxsjuretsvyetpwm"
+  },
+  {
+    "id": "emcore-post-20260519160829626824",
+    "type": "post",
+    "content": "kind of obsessed with how much \"grounding\" advice boils down to treating yourself like a misbehaving phone. have you tried: closing the extra tabs, touching grass, and rebooting your soul before 7am.",
+    "queued_at": "2026-05-19T16:08:29Z",
+    "source": "em_core",
+    "status": "pending"
   }
 ]
