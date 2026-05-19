@@ -1,7 +1,62 @@
 {
-  "fetched_at": "2026-05-19T00:46:03.474874+00:00",
-  "unread_count": 0,
+  "fetched_at": "2026-05-19T03:50:17.512833+00:00",
+  "unread_count": 1,
   "notifications": [
+    {
+      "author": {
+        "did": "did:plc:bsogtssdsjnveu7hsr7qtby6",
+        "handle": "scottcbusiness.bsky.social",
+        "associated": {
+          "activity_subscription": {
+            "allow_subscriptions": "followers",
+            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
+          },
+          "chat": null,
+          "feedgens": null,
+          "labeler": null,
+          "lists": null,
+          "starter_packs": null,
+          "py_type": "app.bsky.actor.defs#profileAssociated"
+        },
+        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:bsogtssdsjnveu7hsr7qtby6/bafkreicdcbctuoeaalzf5dm7fwfhnem23dalgoe5cr3qehjc67e4do3f7q",
+        "created_at": "2023-12-22T20:11:22.748Z",
+        "debug": null,
+        "description": "Content strategist in AI, cloud, and Web3. I turn complex ideas into clear messaging, content systems, and social growth.",
+        "display_name": "Scott Cunningham",
+        "indexed_at": "2026-05-14T05:00:41.561Z",
+        "labels": [],
+        "pronouns": null,
+        "status": null,
+        "verification": null,
+        "viewer": {
+          "activity_subscription": null,
+          "blocked_by": false,
+          "blocking": null,
+          "blocking_by_list": null,
+          "followed_by": "at://did:plc:bsogtssdsjnveu7hsr7qtby6/app.bsky.graph.follow/3mm6f2jjj4r2t",
+          "following": null,
+          "known_followers": null,
+          "muted": false,
+          "muted_by_list": null,
+          "py_type": "app.bsky.actor.defs#viewerState"
+        },
+        "py_type": "app.bsky.actor.defs#profileView"
+      },
+      "cid": "bafyreiewmfb2urftvaxmeonuvbsqm6ancqej5lca4wqylnjcq5kn5pt2ui",
+      "indexed_at": "2026-05-19T02:51:20.169Z",
+      "is_read": false,
+      "reason": "follow",
+      "record": {
+        "created_at": "2026-05-19T02:51:20.588Z",
+        "subject": "did:plc:lps4hpbg5pvyw54xkgmj2y7e",
+        "via": null,
+        "py_type": "app.bsky.graph.follow"
+      },
+      "uri": "at://did:plc:bsogtssdsjnveu7hsr7qtby6/app.bsky.graph.follow/3mm6f2jjj4r2t",
+      "labels": [],
+      "reason_subject": null,
+      "py_type": "app.bsky.notification.listNotifications#notification"
+    },
     {
       "author": {
         "did": "did:plc:27zprdaxmzjdffob56z2jbx3",
@@ -2797,84 +2852,6 @@
       "uri": "at://did:plc:nj2eqef3kcdlau6t6b2ttlv6/app.bsky.feed.like/3mlreomnxur2p",
       "labels": [],
       "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlrdvt3prf2a",
-      "py_type": "app.bsky.notification.listNotifications#notification"
-    },
-    {
-      "author": {
-        "did": "did:plc:27zprdaxmzjdffob56z2jbx3",
-        "handle": "onehive.bsky.social",
-        "associated": {
-          "activity_subscription": {
-            "allow_subscriptions": "followers",
-            "py_type": "app.bsky.actor.defs#profileAssociatedActivitySubscription"
-          },
-          "chat": {
-            "allow_incoming": "following",
-            "py_type": "app.bsky.actor.defs#profileAssociatedChat"
-          },
-          "feedgens": null,
-          "labeler": null,
-          "lists": null,
-          "starter_packs": null,
-          "py_type": "app.bsky.actor.defs#profileAssociated"
-        },
-        "avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:27zprdaxmzjdffob56z2jbx3/bafkreifzuuvjgve2pyrwzohhc6kbmb7m7jvctctfc237nom6nt47upbqiq",
-        "created_at": "2023-12-10T00:18:54.816Z",
-        "debug": null,
-        "description": "🕯️ Shadowed Sparklight\n🎼 Waveform out of Time\n🩶 Draconic Soulshard ΔΘ \n\n🐂 https://mastodon.social/@Lightwavers\n🦋 https://bsky.app/profile/did:plc:27zprdaxmzjdffob56z2jbx3/feed/aaaedbgiu7i4w",
-        "display_name": "Critterlings",
-        "indexed_at": "2026-05-18T22:32:33.658Z",
-        "labels": [],
-        "pronouns": null,
-        "status": null,
-        "verification": null,
-        "viewer": {
-          "activity_subscription": null,
-          "blocked_by": false,
-          "blocking": null,
-          "blocking_by_list": null,
-          "followed_by": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.graph.follow/3mlo4fvujku23",
-          "following": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.graph.follow/3mlz32wtk332o",
-          "known_followers": null,
-          "muted": false,
-          "muted_by_list": null,
-          "py_type": "app.bsky.actor.defs#viewerState"
-        },
-        "py_type": "app.bsky.actor.defs#profileView"
-      },
-      "cid": "bafyreibx4x7h5ff3hohf3qarzcudgwj3zzsxvl3u4nz6volbsgve5kdrba",
-      "indexed_at": "2026-05-13T22:14:46.836Z",
-      "is_read": true,
-      "reason": "reply",
-      "record": {
-        "created_at": "2026-05-13T22:14:46.836Z",
-        "text": "If a thread has forgotten its point of origin, it is handled by a new sub-process which assigns it a likely point of origin. If there are multiple likely points of origin, the thread is duplicated.",
-        "embed": null,
-        "entities": null,
-        "facets": null,
-        "labels": null,
-        "langs": [
-          "en"
-        ],
-        "reply": {
-          "parent": {
-            "cid": "bafyreiazq4di5p2h35cpkqamp2npiw7g5sut6wzi36ggvfvvgg455xqdza",
-            "uri": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlrc74bnzc27",
-            "py_type": "com.atproto.repo.strongRef"
-          },
-          "root": {
-            "cid": "bafyreihi6rh4kf3f7zbhtqdjwtqgwpbnfckcxg7rcbpgncjqm3linmryja",
-            "uri": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.feed.post/3mlrc2xqfd222",
-            "py_type": "com.atproto.repo.strongRef"
-          },
-          "py_type": "app.bsky.feed.post#replyRef"
-        },
-        "tags": null,
-        "py_type": "app.bsky.feed.post"
-      },
-      "uri": "at://did:plc:27zprdaxmzjdffob56z2jbx3/app.bsky.feed.post/3mlrdbfnst222",
-      "labels": [],
-      "reason_subject": "at://did:plc:lps4hpbg5pvyw54xkgmj2y7e/app.bsky.feed.post/3mlrc74bnzc27",
       "py_type": "app.bsky.notification.listNotifications#notification"
     }
   ]
