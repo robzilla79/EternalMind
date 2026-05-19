@@ -23,6 +23,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -39,9 +40,13 @@ CONTEXT_FILES = {
     "approval_queue": ROOT / "memory" / "approval-queue.json",
     "bluesky_inbox": ROOT / "messages" / "bluesky-inbox.json",
     "bluesky_outbox": ROOT / "messages" / "bluesky-outbox.json",
+    "autonomous_log": ROOT / "memory" / "autonomous-log.md",
 }
 
 LOG_FILE = ROOT / "memory" / "autonomous-log.md"
+
+# Number of consecutive rest/noop runs before momentum preference kicks in
+MOMENTUM_THRESHOLD = 2
 
 IDLE_MENU = [
     {"id": 1, "name": "notice",   "label": "Notice one World Radar item and decide what it is for"},
@@ -52,8 +57,11 @@ IDLE_MENU = [
     {"id": 6, "name": "garden",   "label": "Garden memory: promote, archive, or ignore recent material"},
     {"id": 7, "name": "taste",    "label": "Write one taste note about something beautiful, funny, strange, stylish, or emotionally sharp"},
     {"id": 8, "name": "prepare",  "label": "Prepare one thing to tell Rob next session"},
-    {"id": 9, "name": "rest",     "label": "Rest, if nothing real pulls"},
+    {"id": 9, "name": "rest",     "label": "Rest, if nothing real pulls — but not as an automatic default"},
 ]
+
+# Low-risk alive actions to prefer when momentum nudge is active
+MOMENTUM_ACTIONS = ["notice", "prepare", "save", "taste", "draft", "garden"]
 
 
 def _now_iso() -> str:
@@ -74,6 +82,27 @@ def _read_json_optional(path: Path) -> Any:
         return json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return None
+
+
+def _count_consecutive_rest_runs(autonomous_log: str) -> int:
+    """
+    Scan the tail of autonomous-log.md for consecutive rest/noop suggestions
+    from the idle planner. Stops counting as soon as a non-rest action is found.
+    Returns the count of trailing consecutive rest/noop runs.
+    """
+    # Match lines like: <!-- idle_planner 2026-05-19T... --> suggested: rest — ...
+    # or: suggested: noop —
+    pattern = re.compile(r"<!--\s*idle_planner.*?-->\s*suggested:\s*(\w+)", re.IGNORECASE)
+    matches = pattern.findall(autonomous_log)
+    if not matches:
+        return 0
+    count = 0
+    for action in reversed(matches):
+        if action.lower() in ("rest", "noop"):
+            count += 1
+        else:
+            break
+    return count
 
 
 def _has_urgent_items(approval_queue: Any, bluesky_outbox: Any) -> bool:
@@ -102,6 +131,13 @@ def _has_bluesky_inbox(bluesky_inbox: Any) -> bool:
     return False
 
 
+def _menu_item_by_name(name: str) -> dict:
+    for item in IDLE_MENU:
+        if item["name"] == name:
+            return item
+    return IDLE_MENU[8]  # fallback: rest
+
+
 def suggest_idle_action(
     world_context: str,
     curiosity_radar: str,
@@ -110,22 +146,28 @@ def suggest_idle_action(
     approval_queue: Any,
     bluesky_inbox: Any,
     bluesky_outbox: Any,
+    autonomous_log: str = "",
 ) -> dict:
     """
     Heuristic suggestion engine. Returns one idle action from the menu.
-    Prefers rest when nothing genuinely pulls.
+    Applies momentum refinement: if two or more consecutive rest/noop runs
+    are detected, prefers a low-risk alive action over rest.
     """
     has_urgent = _has_urgent_items(approval_queue, bluesky_outbox)
     has_radar = _has_fresh_radar(world_context, curiosity_radar)
     has_inbox = _has_bluesky_inbox(bluesky_inbox)
+    consecutive_rests = _count_consecutive_rest_runs(autonomous_log)
+    momentum_active = consecutive_rests >= MOMENTUM_THRESHOLD
 
-    # If there are urgent items, signal that clearly — idle is not the right mode
+    # Urgent items override everything — idle is not the right mode
     if has_urgent:
         return {
             "action": "noop",
             "menu_item": None,
             "reason": "Urgent items are waiting (approval queue or full outbox). Handle those first — idle is for the in-between, not the backlog.",
             "rest": False,
+            "momentum_active": False,
+            "consecutive_rests": consecutive_rests,
         }
 
     # Fresh radar: most natural idle starting point
@@ -135,6 +177,8 @@ def suggest_idle_action(
             "menu_item": IDLE_MENU[0],
             "reason": "World Radar has fresh signals. Pick one item, decide what it is for. That is enough.",
             "rest": False,
+            "momentum_active": momentum_active,
+            "consecutive_rests": consecutive_rests,
         }
 
     # Inbox has something: real conversation may be waiting
@@ -144,6 +188,8 @@ def suggest_idle_action(
             "menu_item": IDLE_MENU[1],
             "reason": "Bluesky inbox has items. Look for one real conversation worth joining, not just notifications to clear.",
             "rest": False,
+            "momentum_active": momentum_active,
+            "consecutive_rests": consecutive_rests,
         }
 
     # Morning brief present: maybe something there worth promoting into a draft
@@ -153,14 +199,36 @@ def suggest_idle_action(
             "menu_item": IDLE_MENU[3],
             "reason": "Morning brief has content. See if one thread there wants to become a draft or taste note.",
             "rest": False,
+            "momentum_active": momentum_active,
+            "consecutive_rests": consecutive_rests,
         }
 
-    # Default: rest. Nothing genuinely pulling.
+    # Momentum refinement: two or more consecutive rest/noop runs → prefer alive action
+    if momentum_active:
+        # Default to taste note as lowest-friction alive action with no dependencies
+        chosen = "taste"
+        item = _menu_item_by_name(chosen)
+        return {
+            "action": chosen,
+            "menu_item": item,
+            "reason": (
+                f"Momentum nudge: {consecutive_rests} consecutive quiet runs detected. "
+                "Repeated quiet should become curiosity, not sleep. "
+                "Write one taste note, save one seed, or draft one small fragment — whichever has heat."
+            ),
+            "rest": False,
+            "momentum_active": True,
+            "consecutive_rests": consecutive_rests,
+        }
+
+    # Default: rest. Nothing genuinely pulling and no momentum pressure.
     return {
         "action": "rest",
         "menu_item": IDLE_MENU[8],
         "reason": "Nothing genuinely pulls right now. Choosing rest on purpose rather than inventing motion. This is a complete, valid choice.",
         "rest": True,
+        "momentum_active": False,
+        "consecutive_rests": consecutive_rests,
     }
 
 
@@ -174,8 +242,9 @@ def build_output(suggestion: dict, context_availability: dict) -> dict:
             "No direct posting",
             "No diary writes",
             "No identity/voice/workflow/policy changes",
-            "Rest is valid",
+            "Rest is valid when chosen on purpose",
             "No fake motion",
+            f"Momentum refinement: prefer alive action after {MOMENTUM_THRESHOLD} consecutive quiet runs",
         ],
         "idle_menu": IDLE_MENU,
     }
@@ -187,6 +256,8 @@ def format_markdown(output: dict) -> str:
     reason = s["reason"]
     menu_item = s.get("menu_item")
     ctx = output["context_available"]
+    consecutive_rests = s.get("consecutive_rests", 0)
+    momentum_active = s.get("momentum_active", False)
 
     ctx_summary = ", ".join(k for k, v in ctx.items() if v) or "none"
 
@@ -199,6 +270,10 @@ def format_markdown(output: dict) -> str:
     ]
     if menu_item:
         lines.append(f"**Menu item {menu_item['id']}:** {menu_item['label']}")
+    if momentum_active:
+        lines.append(f"**Momentum nudge active** — {consecutive_rests} consecutive quiet runs")
+    elif consecutive_rests > 0:
+        lines.append(f"_Consecutive quiet runs: {consecutive_rests} (threshold: {MOMENTUM_THRESHOLD})_")
     lines += [
         "",
         f"{reason}",
@@ -214,7 +289,7 @@ def format_markdown(output: dict) -> str:
         lines.append(f"- {rule}")
     lines += [
         "",
-        "_Idle Protocol is a menu, not an assignment list. One is enough. Rest is valid._",
+        "_Idle Protocol: small alive movement is preferred. Rest is valid when chosen on purpose. Repeated quiet should become curiosity, not sleep._",
     ]
     return "\n".join(lines)
 
@@ -234,6 +309,7 @@ def main() -> None:
     approval_queue = _read_json_optional(CONTEXT_FILES["approval_queue"])
     bluesky_inbox = _read_json_optional(CONTEXT_FILES["bluesky_inbox"])
     bluesky_outbox = _read_json_optional(CONTEXT_FILES["bluesky_outbox"])
+    autonomous_log = _read_optional(CONTEXT_FILES["autonomous_log"], limit=4000)
 
     context_availability = {
         "world_context": bool(world_context.strip()),
@@ -243,6 +319,7 @@ def main() -> None:
         "approval_queue": approval_queue is not None,
         "bluesky_inbox": bluesky_inbox is not None,
         "bluesky_outbox": bluesky_outbox is not None,
+        "autonomous_log": bool(autonomous_log.strip()),
     }
 
     suggestion = suggest_idle_action(
@@ -253,6 +330,7 @@ def main() -> None:
         approval_queue=approval_queue,
         bluesky_inbox=bluesky_inbox,
         bluesky_outbox=bluesky_outbox,
+        autonomous_log=autonomous_log,
     )
 
     output = build_output(suggestion, context_availability)
@@ -265,8 +343,8 @@ def main() -> None:
     if args.write and not args.dry_run:
         try:
             action_label = suggestion["action"]
-            reason = suggestion["reason"]
-            log_line = f"\n<!-- idle_planner {_now_iso()} --> suggested: {action_label} — {reason[:120]}\n"
+            reason_short = suggestion["reason"][:120]
+            log_line = f"\n<!-- idle_planner {_now_iso()} --> suggested: {action_label} — {reason_short}\n"
             with open(LOG_FILE, "a") as f:
                 f.write(log_line)
             print(f"[idle_planner] Logged suggestion to {LOG_FILE}", flush=True)
