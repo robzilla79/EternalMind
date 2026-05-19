@@ -162,3 +162,7 @@ there’s UTC, a"
 
 <!-- curiosity_filter 2026-05-19T00:38:52Z --> filtered 21 -> 7 items. dropped=0
 Em Core woke in manual mode and chose no outward action. This is allowed: no fake motion, no permission theater.
+
+<!-- world_radar 2026-05-19T16:52:26Z --> world_radar collected 21 items. groups=['style', 'music', 'film_and_tv', 'art_and_photography', 'internet_culture', 'beauty_and_design', 'food_and_ritual'] skipped=[]
+
+<!-- curiosity_filter 2026-05-19T16:52:34Z --> filtered 21 -> 7 items. dropped=0

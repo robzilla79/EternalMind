@@ -1,9 +1,10 @@
 {
   "version": 1,
-  "generated_at": "2026-05-19T00:38:42Z",
+  "generated_at": "2026-05-19T16:52:26Z",
   "note": "Raw intake. Temporary. Overwritten each run. Not for diary. Not for posting.",
   "stats": {
     "total": 21,
+    "curiosity_profile_available": true,
     "groups_used": [
       "style",
       "music",
@@ -18,214 +19,214 @@
   },
   "items": [
     {
-      "id": "9f799f69da",
-      "title": "Fashion month’s standout moments: Burberry’s fringe, Toteme’s clean tailoring, and the runway looks getting the most attention",
-      "snippet": "A recent roundup from SheerLuxe highlights the collections and front-row moments people are still discussing across New York, London, Milan, and Paris. Burberry’s long fringe and Toteme’s quietly confident silhouettes stood out as the kinds of looks that shaped the conversation this season.",
-      "url": "https://www.youtube.com/watch?v=d6AnZjidQmM",
-      "source": "perplexity",
-      "group": "style",
-      "query": "fashion moments people are talking about this week",
-      "fetched_at": "2026-05-19T00:38:23Z"
-    },
-    {
-      "id": "d633f469bb",
-      "title": "Paris, Milan, and London Fashion Week’s deeper themes: romance, revelation, and what a ‘rich girl’ look means now",
-      "snippet": "Harper’s Bazaar’s fashion week hub is tracking the ideas behind the week’s most talked-about shows, not just the clothes. The coverage points to a broader shift in mood—from revelatory dressing to more sincere, layered, and romantic collections.",
+      "id": "09e55f11ed",
+      "title": "Paris Fashion Week’s most talked-about shifts",
+      "snippet": "Harper’s Bazaar’s Fashion Week coverage is centering on the moments and themes people are actually discussing now: sincerity, reveal vs. conceal, and the return of big, character-driven runway dressing. It’s a good snapshot of the season’s cultural conversation, not just the clothes.",
       "url": "https://www.harpersbazaar.com/fashion/fashion-week/",
       "source": "perplexity",
       "group": "style",
       "query": "fashion moments people are talking about this week",
-      "fetched_at": "2026-05-19T00:38:23Z"
+      "fetched_at": "2026-05-19T16:52:02Z"
     },
     {
-      "id": "dcf8be9942",
-      "title": "The celebrity outfits people are actually discussing right now",
-      "snippet": "ELLE’s weekly style roundup focuses on the celebrity looks generating the most buzz, from Anne Hathaway’s fashion-week appearances to Selena Gomez, Hailey Bieber, and Sabrina Carpenter. It’s useful for spotting which silhouettes and accessories are quietly becoming the week’s shared visual references.",
-      "url": "https://www.elle.com/fashion/shopping/a71243717/best-celebrity-style-may-2026/",
+      "id": "090bc17097",
+      "title": "ELLE’s spring fashion conversation: Carolyn Bessette Kennedy, headbands, and power dressing",
+      "snippet": "ELLE’s fashion page highlights the trends and style references that are getting repeated right now, including Carolyn Bessette Kennedy-inspired looks, headbands, polka dots, and a sharper take on the power suit. The mix is interesting because it shows how fashion is leaning hard into nostalgia with a modern polish.",
+      "url": "https://www.elle.com/fashion/",
       "source": "perplexity",
       "group": "style",
       "query": "fashion moments people are talking about this week",
-      "fetched_at": "2026-05-19T00:38:23Z"
+      "fetched_at": "2026-05-19T16:52:02Z"
+    },
+    {
+      "id": "239fd5f002",
+      "title": "The fashion moment behind the rise of the “bradigan”",
+      "snippet": "One of the more genuinely memorable style moments in recent fashion chatter is Katie Holmes’s cashmere bra-and-cardigan look, which helped push the term “bradigan” into the wider conversation. It’s a small outfit with a surprisingly lasting cultural footprint.",
+      "url": "https://www.whowhatwear.com/fashion/most-iconic-fashion-moments-last-25-years",
+      "source": "perplexity",
+      "group": "style",
+      "query": "fashion moments people are talking about this week",
+      "fetched_at": "2026-05-19T16:52:02Z"
+    },
+    {
+      "id": "9d0c053a91",
+      "title": "20 Albums You Have to Listen to Front to Back",
+      "snippet": "A compact list of albums that reward full-album listening, with classics like Daft Punk’s Discovery, Gorillaz’s Demon Days, and The Beach Boys’ Pet Sounds. It’s less about what’s currently viral and more about records people keep returning to because they still hold up start to finish.",
+      "url": "https://coolmaterial.com/lifestyle/entertainment/20-albums-you-have-to-listen-to-front-to-back/",
+      "source": "perplexity",
+      "group": "music",
+      "query": "songs and albums people can't stop listening to right now",
+      "fetched_at": "2026-05-19T16:52:07Z"
+    },
+    {
+      "id": "f41a671f22",
+      "title": "The artists we can’t stop listening to right now on Spotify",
+      "snippet": "A current-leaning roundup of artists people are looping lately, including names like Elderbrook and Charli XCX. Useful if you want a snapshot of what listeners are repeatedly playing rather than just what’s being promoted.",
+      "url": "https://www.remixmagazine.com/culture/the-artists-we-cant-stop-listening-to-right-now-on-spotify/",
+      "source": "perplexity",
+      "group": "music",
+      "query": "songs and albums people can't stop listening to right now",
+      "fetched_at": "2026-05-19T16:52:07Z"
     },
     {
       "id": "1a4f28b18f",
       "title": "The 10 Albums I Couldn't Stop Listening to in 2025",
-      "snippet": "A personal, end-of-year style list focused on records that kept pulling the listener back, valued for emotional and sonic staying power rather than hype. It’s a useful window into what has real replay value for one person across the year.",
+      "snippet": "A personal, emotional list of albums that kept drawing the listener back throughout the year. It focuses on records with staying power, which makes it a good fit for the idea of music people can't stop returning to.",
       "url": "https://www.youtube.com/watch?v=yGAXlxtB2C4",
       "source": "perplexity",
       "group": "music",
       "query": "songs and albums people can't stop listening to right now",
-      "fetched_at": "2026-05-19T00:38:27Z"
+      "fetched_at": "2026-05-19T16:52:07Z"
     },
     {
-      "id": "6002722dfb",
-      "title": "Five Albums We Can't Stop Listening To",
-      "snippet": "This roundup highlights albums that reviewers found unusually hard to put down, from Wytch Hazel’s *III: Pentecost* to John Batiste’s *WE ARE*. The appeal is less about novelty and more about music that keeps rewarding repeat listens.",
-      "url": "https://ramblingeveron.com/2022/04/04/five-albums-we-cant-stop/",
-      "source": "perplexity",
-      "group": "music",
-      "query": "songs and albums people can't stop listening to right now",
-      "fetched_at": "2026-05-19T00:38:27Z"
-    },
-    {
-      "id": "8a099a034c",
-      "title": "8 albums to deep listen to in confinement",
-      "snippet": "Though framed by lockdown, the piece is really about albums with enough depth and atmosphere to keep listeners returning to them. It includes striking picks like Nick Drake’s *Pink Moon* and other records that repay close attention.",
-      "url": "https://offthebw.wordpress.com/2020/04/05/8-albums-to-deep-listen-to-in-confinement/",
-      "source": "perplexity",
-      "group": "music",
-      "query": "songs and albums people can't stop listening to right now",
-      "fetched_at": "2026-05-19T00:38:27Z"
-    },
-    {
-      "id": "9499a337ab",
-      "title": "Lord of the Flies: Limited Series",
-      "snippet": "A fresh retelling of William Golding’s novel is drawing strong attention, with Rotten Tomatoes highlighting its thoughtful take on boyhood and a notably strong cast of child actors. It’s the kind of prestige adaptation people seem to be genuinely locking into right now.",
+      "id": "a498a8a55a",
+      "title": "The emotional aftershocks of *Lord of the Flies* on TV",
+      "snippet": "Rotten Tomatoes’ current TV list puts *Lord of the Flies: Limited Series* at #1, with critics praising how it “fleshes out” the novel with thoughtful observations about boyhood and a strong young cast. It’s the kind of adaptation that feels less like a remake and more like a serious conversation with the original.",
       "url": "https://editorial.rottentomatoes.com/guide/popular-tv-shows/",
       "source": "perplexity",
       "group": "film_and_tv",
       "query": "movies and shows people are obsessed with right now",
-      "fetched_at": "2026-05-19T00:38:30Z"
+      "fetched_at": "2026-05-19T16:52:11Z"
     },
     {
-      "id": "d7cc8b40f0",
-      "title": "The Pitt",
-      "snippet": "This hospital drama has become a binge-worthy obsession for viewers because each episode covers one hour of a single chaotic shift, creating a real-time intensity that keeps the tension high. Its structure makes it feel unusually immediate and immersive.",
+      "id": "87d9ef1712",
+      "title": "A one-shift hospital drama that hooks people fast",
+      "snippet": "*The Pitt* is drawing attention because of its unusual structure: the entire season unfolds across one hospital shift, with each episode covering one hour in real time. That simple constraint gives it a tense, propulsive feel that’s been making it a binge favorite.",
       "url": "https://jalisaevaughn.com/what-im-binge-watching-right-now-jalisas-current-tv-show-list/",
       "source": "perplexity",
       "group": "film_and_tv",
       "query": "movies and shows people are obsessed with right now",
-      "fetched_at": "2026-05-19T00:38:30Z"
+      "fetched_at": "2026-05-19T16:52:11Z"
     },
     {
-      "id": "22cdedb344",
-      "title": "Widow's Bay",
-      "snippet": "Apple TV+’s thriller is staying near the top of the popularity charts, suggesting it has quietly become one of the shows people keep returning to. It stands out as a less flashy but clearly sticky watch.",
-      "url": "https://editorial.rottentomatoes.com/guide/popular-tv-shows/",
+      "id": "7fb2cae72a",
+      "title": "A dark, character-driven spin on *Lord of the Flies*–adjacent tension",
+      "snippet": "*MobLand* is getting singled out as gritty, dark, and high-stakes — the sort of show people mention when they want something stressful in a good way. It’s less about hype and more about the specific appeal of dense crime drama with sharp momentum.",
+      "url": "https://jalisaevaughn.com/what-im-binge-watching-right-now-jalisas-current-tv-show-list/",
       "source": "perplexity",
       "group": "film_and_tv",
       "query": "movies and shows people are obsessed with right now",
-      "fetched_at": "2026-05-19T00:38:30Z"
+      "fetched_at": "2026-05-19T16:52:11Z"
     },
     {
       "id": "3ab41a204b",
       "title": "Photography as an art of emotion and vision",
-      "snippet": "A reflective essay on how photography becomes art when it moves beyond documentation and starts carrying emotion, intention, and story. It argues that light, timing, and composition matter most when they help an image make people feel something.",
+      "snippet": "A thoughtful piece arguing that the most memorable photographs do more than document—they stop you, move you, and tell a story. It’s a good fit for anyone interested in how composition, light, and timing can create feeling rather than just a record.",
       "url": "https://www.thelandscapephotoguy.com/photography-art-emotion-d-vision/",
       "source": "perplexity",
       "group": "art_and_photography",
       "query": "art or photography making people feel something right now",
-      "fetched_at": "2026-05-19T00:38:32Z"
-    },
-    {
-      "id": "8947c45054",
-      "title": "Capturing Emotions Through Photography",
-      "snippet": "This piece focuses on fine art photography’s ability to create an immediate emotional response, from nostalgia and joy to reflection and compassion. It frames photographs as experiences that deepen our connection to moments rather than simply record them.",
-      "url": "https://lik.com/blogs/journal/capturing-emotions-through-photography",
-      "source": "perplexity",
-      "group": "art_and_photography",
-      "query": "art or photography making people feel something right now",
-      "fetched_at": "2026-05-19T00:38:32Z"
+      "fetched_at": "2026-05-19T16:52:15Z"
     },
     {
       "id": "2552064a5e",
       "title": "Releasing emotions through art in tragicomic times",
-      "snippet": "An artist’s account of using image-making to explore feelings that are hard to put into words, and how making art can provide calm, release, and perspective. It highlights photography as part of a broader creative practice shaped by vulnerability and memory.",
+      "snippet": "A young artist reflects on image-making as a way to explore emotions that are hard to put into words. The piece is grounded in the idea that art can calm, clarify, and transform a feeling into something visible.",
       "url": "https://exposure.org.uk/young_peoples_work/releasing-emotions-through-art-in-tragicomic-times/",
       "source": "perplexity",
       "group": "art_and_photography",
       "query": "art or photography making people feel something right now",
-      "fetched_at": "2026-05-19T00:38:32Z"
+      "fetched_at": "2026-05-19T16:52:15Z"
     },
     {
-      "id": "c562caaf7f",
-      "title": "List of Internet phenomena",
-      "snippet": "A broad reference list of internet memes, catchphrases, and viral moments, with examples ranging from early web oddities to modern meme formats. It’s useful for spotting which online moments actually stuck and became cultural artifacts.",
-      "url": "https://en.wikipedia.org/wiki/List_of_Internet_phenomena",
+      "id": "0c28f697f7",
+      "title": "Photography and Emotions: All You Need to Know",
+      "snippet": "An accessible meditation on why photographs can hit us so directly, from nostalgia and compassion to empathy. It emphasizes photography’s ability to bring back a moment’s emotional charge, not just its appearance.",
+      "url": "https://janelkilnisan.com/photography-and-emotions-all-you-need-to-know/",
       "source": "perplexity",
-      "group": "internet_culture",
-      "query": "internet moments or memes people are suddenly obsessed with",
-      "fetched_at": "2026-05-19T00:38:35Z"
+      "group": "art_and_photography",
+      "query": "art or photography making people feel something right now",
+      "fetched_at": "2026-05-19T16:52:15Z"
     },
     {
-      "id": "0b3e54eaa4",
-      "title": "Why Are We So Obsessed With Memes?",
-      "snippet": "A short explainer on why people share and fixate on memes, touching on identity, belonging, and the psychology of repetition. It’s more thoughtful than a simple “viral roundup” and helps explain why certain moments suddenly take over feeds.",
+      "id": "f225a3875f",
+      "title": "Why We’re So Obsessed With Memes",
+      "snippet": "A clear, thoughtful explainer on why memes spread so fast: they help people signal identity, share emotion, and feel less alone. It also touches on the psychology of why we keep passing them around even when they’re fleeting.",
       "url": "https://www.youtube.com/watch?v=NumfJcmKiZU",
       "source": "perplexity",
       "group": "internet_culture",
       "query": "internet moments or memes people are suddenly obsessed with",
-      "fetched_at": "2026-05-19T00:38:35Z"
+      "fetched_at": "2026-05-19T16:52:18Z"
     },
     {
-      "id": "cd1c51c6c0",
-      "title": "93 Of The Internet’s Most Favorite Moments That Are Better For You Than The News",
-      "snippet": "A curated collection of memorable internet moments rather than current headlines, showing the kinds of clips, posts, and jokes people keep returning to. It’s a good browse if you want examples of what actually becomes an enduring online obsession.",
+      "id": "c562caaf7f",
+      "title": "List of Internet phenomena",
+      "snippet": "A surprisingly rich catalog of online moments that became collective obsessions, from early web oddities to modern viral images and videos. Useful if you want to trace how “internet moments” turn into shared culture.",
+      "url": "https://en.wikipedia.org/wiki/List_of_Internet_phenomena",
+      "source": "perplexity",
+      "group": "internet_culture",
+      "query": "internet moments or memes people are suddenly obsessed with",
+      "fetched_at": "2026-05-19T16:52:18Z"
+    },
+    {
+      "id": "b880760bf6",
+      "title": "93 Of The Internet's Most Favorite Moments That Are Better For You Than The News",
+      "snippet": "A playful roundup of viral posts and internet moments that captures the way online humor and shared references become communal obsession. It’s more light than deep, but still a good snapshot of what people keep re-sharing.",
       "url": "https://www.boredpanda.com/funny-internet-moments-sips-tea-posts-memes/",
       "source": "perplexity",
       "group": "internet_culture",
       "query": "internet moments or memes people are suddenly obsessed with",
-      "fetched_at": "2026-05-19T00:38:35Z"
+      "fetched_at": "2026-05-19T16:52:18Z"
     },
     {
-      "id": "b1ef929e31",
-      "title": "Makeup is becoming more skincare-like",
-      "snippet": "A notable shift in beauty is the rise of products that blur the line between makeup and skin care, like tinted sunscreens and serum foundations. People seem to want coverage that also hydrates, protects, and supports skin health rather than hiding it.",
-      "url": "https://meetglimpse.com/trends/beauty-trends/",
+      "id": "7e34df8171",
+      "title": "Beauty trends for 2026: longevity, personalization, and skincare-makeup hybrids",
+      "snippet": "Industry coverage points to a shift toward longevity-driven beauty, with biometric tracking, AI-powered diagnostics, and highly personalized routines. Another notable trend is the continued blending of makeup and skincare, especially in products designed to enhance natural features rather than mask them.",
+      "url": "https://www.wallpaper.com/fashion-beauty/beauty-trends-2026",
       "source": "perplexity",
       "group": "beauty_and_design",
       "query": "beauty or design trends people are loving right now",
-      "fetched_at": "2026-05-19T00:38:39Z"
+      "fetched_at": "2026-05-19T16:52:22Z"
     },
     {
-      "id": "1075b9ef09",
-      "title": "Beauty shoppers are gravitating toward ingredients and sun protection",
-      "snippet": "Consumer interest has moved toward clearer ingredient benefits, especially clean formulas and SPF, with sun protection becoming a daily habit for many. That makes sunscreen-infused and skin-focused products feel less like extras and more like essentials.",
-      "url": "https://www.numerator.com/resources/blog/beauty-trends/",
+      "id": "33dad04ef9",
+      "title": "Beauty industry trends: clean ingredients, biotech, and hyper-personalization",
+      "snippet": "A recent trends roundup highlights sustained demand for natural and organic ingredients, along with cleaner formulations and biotech-backed sustainability. It also notes that AI and AR are becoming central to personalized beauty recommendations and try-on experiences.",
+      "url": "https://explodingtopics.com/blog/beauty-trends",
       "source": "perplexity",
       "group": "beauty_and_design",
       "query": "beauty or design trends people are loving right now",
-      "fetched_at": "2026-05-19T00:38:39Z"
+      "fetched_at": "2026-05-19T16:52:22Z"
     },
     {
-      "id": "7bc8afa9f5",
-      "title": "Biotech and personalized skincare are gaining momentum",
-      "snippet": "Another interesting trend is the use of biotech in beauty, alongside AI-driven skin analysis and custom formulas. It points to a future where routines are less generic and more tailored to individual skin needs.",
-      "url": "https://www.mckinsey.com/industries/consumer-packaged-goods/our-insights/state-of-beauty",
+      "id": "45e92aaedf",
+      "title": "Top graphic design trends: wabi-sabi, hand-drawn textures, and hyper-bloom",
+      "snippet": "Design is moving toward more human, tactile aesthetics, including raw imperfections, hand-drawn textures, and emotionally expressive visuals. The 'hyper-bloom' look is also gaining traction, using dreamy botanical imagery and soft, surreal palettes to create immersive brand worlds.",
+      "url": "https://www.vistaprint.com/hub/graphic-design-trends",
       "source": "perplexity",
       "group": "beauty_and_design",
       "query": "beauty or design trends people are loving right now",
-      "fetched_at": "2026-05-19T00:38:39Z"
+      "fetched_at": "2026-05-19T16:52:22Z"
     },
     {
-      "id": "7f5a8ecfe4",
-      "title": "Whole Foods’ 2026 food trend predictions",
-      "snippet": "Whole Foods highlights a mix of genuinely curious consumer obsessions for 2026, including tallow, fiber, vinegar-forward flavors, and “freezer fine dining.” It’s interesting less as a hype list and more as a snapshot of how people are rediscovering old ingredients and repackaging them as modern status foods.",
+      "id": "fc56e7e36e",
+      "title": "James Beard Foundation: savory cocktails and intentional fermentation are shaping 2026 dining",
+      "snippet": "Chefs predict drinks will get more culinary, with savory, herbal profiles, ferments, shrubs, and nonalcoholic cocktails built around ingredients like koji, seaweed, and miso. It’s a sign that people aren’t just drinking less—they’re obsessing over drinks that feel textured, alive, and food-like.",
+      "url": "https://www.jamesbeard.org/stories/top-restaurant-food-trends-2026",
+      "source": "perplexity",
+      "group": "food_and_ritual",
+      "query": "food or drink things people are obsessing over",
+      "fetched_at": "2026-05-19T16:52:26Z"
+    },
+    {
+      "id": "344ab96a1d",
+      "title": "Whole Foods’ 2026 trend list spotlights tallow, vinegar, and fiber",
+      "snippet": "Whole Foods says beef tallow is coming back in whipped and herb-infused forms, alongside a wider fascination with very vinegar-forward flavors and fiber. The list is interesting because it captures the mix of nostalgia, health signaling, and “ingredient nerd” enthusiasm driving what people are putting on their plates.",
       "url": "https://www.wholefoodsmarket.com/trends/the-next-big-things-our-top-8-food-trend-predictions-for-2026",
       "source": "perplexity",
       "group": "food_and_ritual",
       "query": "food or drink things people are obsessing over",
-      "fetched_at": "2026-05-19T00:38:42Z"
+      "fetched_at": "2026-05-19T16:52:26Z"
     },
     {
-      "id": "e314b419cc",
-      "title": "Functional beverages are becoming the default drink category",
-      "snippet": "Restaurant Association research points to drinks people want for more than refreshment: energy support, gut health, personalized hydration, and low- or no-alcohol alternatives. The big shift is that beverages are turning into everyday wellness tools, not just treats.",
+      "id": "086b0be7ea",
+      "title": "Restaurant Association: functional beverages are becoming the everyday obsession",
+      "snippet": "The big drink story for 2026 is no longer just caffeine or alcohol—it’s hydration with benefits, from electrolyte customization to gut-friendly ferments like kombucha and tepache. The appeal is that people want beverages that do something: boost mood, support digestion, or feel tailored to their needs.",
       "url": "https://restaurant.org/education-and-resources/resource-library/whats-hot-in-2026-healthier-functional-beverages/",
       "source": "perplexity",
       "group": "food_and_ritual",
       "query": "food or drink things people are obsessing over",
-      "fetched_at": "2026-05-19T00:38:42Z"
-    },
-    {
-      "id": "1589b893e7",
-      "title": "Tastewise’s 2026 food forecast",
-      "snippet": "Tastewise says consumers are gravitating toward personalized food experiences, functional ingredients, and foods that signal authenticity and regional roots. That combination makes the trends feel less like fleeting internet food fads and more like a broader obsession with identity, health, and comfort.",
-      "url": "https://tastewise.io/2026-trend-forecast",
-      "source": "perplexity",
-      "group": "food_and_ritual",
-      "query": "food or drink things people are obsessing over",
-      "fetched_at": "2026-05-19T00:38:42Z"
+      "fetched_at": "2026-05-19T16:52:26Z"
     }
   ]
 }

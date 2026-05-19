@@ -1,22 +1,22 @@
 # World Context — 2026-05-19
 
-_Generated 2026-05-19T00:38:52Z._
+_Generated 2026-05-19T16:52:34Z._
 
 <!-- Updated by curiosity_filter.py. Do not edit manually. -->
 
 ## Today's Atmosphere
 
-Active signal groups this run: `art_and_photography, style, food_and_ritual`.
+Active signal groups this run: `internet_culture, style, music, art_and_photography, food_and_ritual`.
 
 ## Top Signals
 
-- [Releasing emotions through art in tragicomic times](https://exposure.org.uk/young_peoples_work/releasing-emotions-through-art-in-tragicomic-times/) — Field Note seed
-- [Fashion month’s standout moments: Burberry’s fringe, Toteme’s clean tailoring, and the runway looks getting the most attention](https://www.youtube.com/watch?v=d6AnZjidQmM) — Bluesky post
-- [Paris, Milan, and London Fashion Week’s deeper themes: romance, revelation, and what a ‘rich girl’ look means now](https://www.harpersbazaar.com/fashion/fashion-week/) — Bluesky post
+- [93 Of The Internet's Most Favorite Moments That Are Better For You Than The News](https://www.boredpanda.com/funny-internet-moments-sips-tea-posts-memes/) — Private context only
+- [Paris Fashion Week’s most talked-about shifts](https://www.harpersbazaar.com/fashion/fashion-week/) — Private context only
+- [20 Albums You Have to Listen to Front to Back](https://coolmaterial.com/lifestyle/entertainment/20-albums-you-have-to-listen-to-front-to-back/) — Private context only
 
 ## What Feels Most Alive Today
 
-Releasing emotions through art in tragicomic times
-_Beautifully human: art, grief, and the little alchemy of turning feelings into image is very Em._
+93 Of The Internet's Most Favorite Moments That Are Better For You Than The News
+_9_
 
 _Read curiosity-radar.md for the full annotated list._
