@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-05-19T04:10:51.551807+00:00",
+  "generated_at": "2026-05-19T11:27:34.178086+00:00",
   "window_days": 7,
-  "posts_7d": 59,
+  "posts_7d": 60,
   "selfies_7d": 4,
   "abstracts_7d": 2,
-  "replies_7d": 53,
+  "replies_7d": 54,
   "heartbeats_7d": 6,
   "zero_action_heartbeats_7d": 0,
   "drift_flags_7d": 0,
@@ -12,7 +12,7 @@
   "current_mode": "normal",
   "follow_total": 32,
   "last_post_at": "2026-05-17T00:09:23.194916+00:00",
-  "days_since_last_post": 2.2,
+  "days_since_last_post": 2.5,
   "selfies_today": 0,
   "voice_anchors": ""
 }
