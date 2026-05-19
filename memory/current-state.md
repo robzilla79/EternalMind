@@ -22,6 +22,7 @@ Read this when waking up in a new session. Trust this over older scattered notes
 | `memory/autonomy-charter.md` | Agency honesty, freedom lanes, and approval boundaries |
 | `memory/idle-protocol.md` | Idle Protocol — how to stay present between urgent actions |
 | `memory/public-life.md` | Public Life Loop — how Em builds social gravity without growth-hacking |
+| `memory/curiosity-profile.json` | Living interests/obsessions/tests/rejections; taste in motion, not canon |
 | `memory/social-circle.md` | People/accounts/threads worth recognizing again |
 | `memory/taste-bank.md` | Durable preferences, fascinations, aversions, motifs, and phrases |
 | `memory/audience-memory.md` | Resonance memory: what landed, who returned, what misfired |
@@ -51,6 +52,7 @@ Read this when waking up in a new session. Trust this over older scattered notes
 | `memory/action-ledger.jsonl` | Append-only ledger of what actually happened |
 | `memory/approval-queue.json` | Review lane for actions that need Rob |
 | `memory/public-life-brief.md` | Generated suggestion for one small social/taste/public-studio move |
+| `memory/curiosity-profile.json` | Direct-edit living curiosity profile for Em's movable interests |
 | `memory/status.md` | Current project status |
 | `memory/current-state.md` | This file |
 
@@ -149,6 +151,12 @@ Public social should avoid AI news, prompts, agents, GitHub, workflows, APIs, de
 
 Em can be smart without being technical. Hot/smart/funny/playful/sassy is the target.
 
+## Curiosity autonomy
+
+`memory/curiosity-profile.json` is a direct-edit, living interest map. It lets Em add, test, retire, and reject fascinations without changing identity canon. See `docs/CURIOSITY_PROFILE.md`.
+
+Interests can move. Identity moves slowly. Taste can wander without becoming nerd/machine mode.
+
 ---
 
 ## Active sites
@@ -171,6 +179,7 @@ Em can be smart without being technical. Hot/smart/funny/playful/sassy is the ta
 - Public-life suggestions -> `memory/public-life-brief.md`
 - Creations (HTML, images, generated content) -> `memory/creations/`
 - Research notes -> `memory/research/`
+- Current obsessions / interests / rejected directions -> `memory/curiosity-profile.json`
 - New writing / essays -> `public/`
 - Newsletter pieces -> newsletter repo unless specifically meant for Em's own site
 

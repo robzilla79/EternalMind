@@ -28,6 +28,7 @@ from typing import Any
 
 ROOT = Path(__file__).parent.parent
 SOURCES_FILE = ROOT / "memory" / "world-radar-sources.json"
+CURIOUS_PROFILE_FILE = ROOT / "memory" / "curiosity-profile.json"
 INBOX_FILE = ROOT / "memory" / "trend-inbox.json"
 LOG_FILE = ROOT / "memory" / "autonomous-log.md"
 
@@ -39,6 +40,54 @@ def _now_iso() -> str:
 def _item_id(title: str, url: str) -> str:
     raw = f"{title.lower().strip()}:{url.strip()}"
     return hashlib.md5(raw.encode()).hexdigest()[:10]
+
+
+def load_curiosity_profile() -> dict:
+    try:
+        data = json.loads(CURIOUS_PROFILE_FILE.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def _profile_query_groups(profile: dict) -> list[dict]:
+    """Turn Em's living curiosity profile into temporary query groups.
+    These are doors, not cages; they supplement world-radar-sources.json.
+    """
+    groups: list[dict] = []
+
+    def as_topic(item):
+        if isinstance(item, dict):
+            return str(item.get("topic") or item.get("taste") or item.get("name") or "").strip()
+        return str(item or "").strip()
+
+    obsessions = [as_topic(x) for x in profile.get("current_obsessions", [])]
+    tests = [as_topic(x) for x in profile.get("things_i_am_testing", [])]
+    tastes = [as_topic(x) for x in profile.get("recurring_tastes", [])]
+    wander = [as_topic(x) for x in profile.get("wander_doors", [])]
+
+    selected = [x for x in obsessions + tests + tastes if x][:6]
+    if selected:
+        groups.append({
+            "id": "em_curiosity_profile",
+            "enabled": True,
+            "queries": [
+                f"interesting recent stories images posts or conversations about {topic}"
+                for topic in selected
+            ],
+        })
+
+    # Give Em one rotating permission-to-wander query so the radar does not ossify.
+    if wander:
+        groups.append({
+            "id": "em_wander_doors",
+            "enabled": True,
+            "queries": [
+                f"beautiful funny strange or culturally interesting things about {topic}"
+                for topic in wander[:4]
+            ],
+        })
+    return groups
 
 
 def load_sources() -> dict:
@@ -181,7 +230,10 @@ def _fetch_bluesky_search(query: str, group_id: str) -> list[dict]:
 # ---------------------------------------------------------------------------
 
 def collect(sources: dict, only_group: str | None = None) -> dict:
-    groups = sources.get("groups", [])
+    profile = load_curiosity_profile()
+    groups = list(sources.get("groups", []))
+    if not only_group or only_group in {"em_curiosity_profile", "em_wander_doors"}:
+        groups.extend(_profile_query_groups(profile))
     max_per_group = int(sources.get("max_items_per_group", 3))
     max_total = int(sources.get("max_items_per_run", 20))
 
@@ -238,6 +290,7 @@ def collect(sources: dict, only_group: str | None = None) -> dict:
         "note": "Raw intake. Temporary. Overwritten each run. Not for diary. Not for posting.",
         "stats": {
             "total": len(all_items),
+            "curiosity_profile_available": bool(profile),
             "groups_used": used_groups,
             "groups_skipped": skipped_groups,
             "perplexity_available": has_perplexity,
@@ -270,6 +323,8 @@ def main() -> None:
 
     stats = inbox["stats"]
     print(f"[world_radar] Collected {stats['total']} items from groups: {stats['groups_used']}")
+    if stats.get("curiosity_profile_available"):
+        print("[world_radar] Curiosity profile available — profile-driven queries included")
     if stats["groups_skipped"]:
         print(f"[world_radar] Skipped (no results): {stats['groups_skipped']}")
     if not stats["perplexity_available"]:

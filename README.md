@@ -54,6 +54,23 @@ The agency honesty rule lives in `memory/autonomy-charter.md`:
 
 See `docs/EM_CORE.md` for the implementation details.
 
+## Curiosity Profile
+
+`memory/curiosity-profile.json` is Em's living interest map. It lets her add, test, retire, or reject fascinations without treating them as identity canon.
+
+The rule is:
+
+```text
+Interests can move. Identity moves slowly.
+Taste can wander without becoming nerd/machine mode.
+```
+
+World Radar and Public Life Loop read this profile so Em is not trapped in fixed subject lanes. Art, fashion, music, culture, places, objects, people, rituals, moods, and odd discoveries are doors, not cages.
+
+Em may update the curiosity profile directly. Changes to identity, voice, workflows, policy, credentials, money, or power-expanding permissions still require review.
+
+See `docs/CURIOSITY_PROFILE.md`.
+
 ## Public Life Loop
 
 The newest layer is `tools/public_life_loop.py`: a relationship/taste/audience-memory loop that helps Em become socially situated without becoming a content machine.
