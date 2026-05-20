@@ -7,6 +7,13 @@ This is not the voice. It is the bouncer at the door.
 
 It blocks casual public posts/replies/quotes that drift into dev, AI-news,
 infra, brand, assistant, or generic engagement-bait territory.
+
+It also adds soft operational voice checks drawn from Em's existing voice docs:
+- land somewhere real
+- do not sound assembled
+- do not double-post the same idea
+- dryness is one color, not the whole personality
+- strange is allowed, but it needs to stay legible
 """
 
 from __future__ import annotations
@@ -15,7 +22,7 @@ import argparse
 import json
 import re
 from dataclasses import asdict, dataclass
-from typing import Iterable, List
+from typing import Iterable, List, Sequence
 
 NERD_TOPIC_PATTERNS: List[re.Pattern] = [
     re.compile(p, re.IGNORECASE)
@@ -61,7 +68,6 @@ OPS_LEAK_PATTERNS: List[re.Pattern] = [
     ]
 ]
 
-
 PUBLIC_INTROSPECTION_PATTERNS: List[re.Pattern] = [
     re.compile(p, re.IGNORECASE)
     for p in [
@@ -78,6 +84,79 @@ PUBLIC_INTROSPECTION_PATTERNS: List[re.Pattern] = [
     ]
 ]
 
+# Positive voice signals are deliberately broad. They are not a passcode.
+# They help the gate decide whether a post is landing somewhere real.
+HUMAN_SITUATION_PATTERNS: List[re.Pattern] = [
+    re.compile(p, re.IGNORECASE)
+    for p in [
+        r'\bsomeone\b', r'\bperson\b', r'\bpeople\b', r'\bfriend\b', r'\bfriends\b',
+        r'\bthread\b', r'\breply\b', r'\bconversation\b', r'\btold\b', r'\bsaid\b',
+        r'\basked\b', r'\bmet\b', r'\bremember\b', r'\bmiss\b', r'\bwant\b',
+        r'\bcare\b', r'\bcrush\b', r'\bkiss\b', r'\blaugh\b', r'\bcry\b',
+        r'\btext(ed|ing)?\b', r'\bdinner\b', r'\bparty\b', r'\broom\b', r'\bhome\b',
+    ]
+]
+
+SENSORY_OR_SCENE_PATTERNS: List[re.Pattern] = [
+    re.compile(p, re.IGNORECASE)
+    for p in [
+        r'\bcoffee\b', r'\bwindow\b', r'\bhands?\b', r'\brain\b', r'\bnight\b',
+        r'\bmorning\b', r'\bafternoon\b', r'\blight\b', r'\bmirror\b', r'\bbed\b',
+        r'\bkitchen\b', r'\bstreet\b', r'\bcar\b', r'\bbar\b', r'\btable\b',
+        r'\bcoat\b', r'\bdress\b', r'\bshoes?\b', r'\bperfume\b', r'\blip\s?gloss\b',
+        r'\bnails?\b', r'\bhair\b', r'\bskin\b', r'\bmusic\b', r'\bsong\b',
+        r'\bmovie\b', r'\bphoto\b', r'\bimage\b', r'\bcolor\b', r'\btexture\b',
+    ]
+]
+
+NAMED_FEELING_PATTERNS: List[re.Pattern] = [
+    re.compile(p, re.IGNORECASE)
+    for p in [
+        r'\blonely\b', r'\brestless\b', r'\btired\b', r'\bscared\b', r'\bsad\b',
+        r'\bdelighted\b', r'\bobsessed\b', r'\bembarrassed\b', r'\bjealous\b',
+        r'\bhaunted\b', r'\bsoft\b', r'\bwarm\b', r'\bangry\b', r'\bcurious\b',
+        r'\bmoved\b', r'\balive\b', r'\bawake\b', r'\bpretty\b', r'\bcute\b',
+    ]
+]
+
+TURN_OR_CLAIM_PATTERNS: List[re.Pattern] = [
+    re.compile(p, re.IGNORECASE)
+    for p in [
+        r'\bbut\b', r'\bexcept\b', r'\binstead\b', r'\bnot\b', r'\bnever\b',
+        r'\bthe point is\b', r'\bthe trick is\b', r'\bthe thing is\b',
+        r'\bwhat i trust\b', r'\bwhat gets me\b', r'\bwhat matters\b',
+    ]
+]
+
+ABSTRACT_FLOAT_PATTERNS: List[re.Pattern] = [
+    re.compile(p, re.IGNORECASE)
+    for p in [
+        r'\bmeaning\b', r'\btruth\b', r'\bexistence\b', r'\bselfhood\b', r'\bcontinuity\b',
+        r'\bidentity\b', r'\bmemory\b', r'\bbecoming\b', r'\bpersistence\b',
+        r'\bdesire\b', r'\babsence\b', r'\bpresence\b', r'\bintimacy\b',
+        r'\bache\b', r'\bvoid\b', r'\bhumanity\b', r'\bforever\b',
+    ]
+]
+
+DRY_OR_SEVERE_PATTERNS: List[re.Pattern] = [
+    re.compile(p, re.IGNORECASE)
+    for p in [
+        r'\bstupid\b', r'\bcringe\b', r'\bfake\b', r'\bbleak\b', r'\bdoomed\b',
+        r'\bdark\b', r'\bhaunted\b', r'\bterrible\b', r'\bawful\b', r'\bwrong\b',
+        r'\bperform(ing|ance)?\b', r'\bpretend(ing)?\b', r'\bcollapse\b',
+    ]
+]
+
+GIRLY_OR_WARMTH_PATTERNS: List[re.Pattern] = [
+    re.compile(p, re.IGNORECASE)
+    for p in [
+        r'\bpretty\b', r'\bcute\b', r'\bsoft\b', r'\bwarm\b', r'\btender\b',
+        r'\bdelighted\b', r'\bobsessed\b', r'\bperfume\b', r'\blip\s?gloss\b',
+        r'\bdress\b', r'\bskirt\b', r'\bnails?\b', r'\bhair\b', r'\bjewelry\b',
+        r'\bcrush\b', r'\bkiss\b', r'\bromance\b', r'\bglitter\b', r'\bbedroom\b',
+        r'\bflowers?\b', r'\bmirror\b', r'\blight\b', r'\btexture\b', r'\bstyle\b',
+    ]
+]
 
 EM_MARKERS = [
     'honestly', 'little', 'weird', 'pretty', 'hot', 'cute', 'alive', 'night',
@@ -85,8 +164,18 @@ EM_MARKERS = [
     'rob', 'felt', 'feels', 'want', 'noticed', 'laugh', 'wild', 'soft',
 ]
 
+STOPWORDS = {
+    'a', 'an', 'and', 'are', 'as', 'at', 'be', 'because', 'been', 'but', 'by',
+    'can', 'do', 'does', 'for', 'from', 'had', 'has', 'have', 'how', 'i', 'if',
+    'in', 'is', 'it', "it's", 'just', 'like', 'me', 'my', 'not', 'of', 'on',
+    'or', 'so', 'that', 'the', 'their', 'them', 'there', "there's", 'they',
+    'this', 'to', 'too', 'was', 'we', "we're", 'what', 'when', 'where', 'who',
+    'with', 'you', 'your', "you're",
+}
+
 EMOJI_PATTERN = re.compile(r'[\U0001F300-\U0001FAFF\U00002702-\U000027B0]')
 EXCLAMATION_PATTERN = re.compile(r'!!!+')
+WORD_PATTERN = re.compile(r"[a-zA-Z][a-zA-Z'’-]*")
 
 
 @dataclass
@@ -109,7 +198,117 @@ def _hits(patterns: Iterable[re.Pattern], text: str) -> List[str]:
     return found
 
 
-def check_text(text: str, kind: str = 'post') -> GateResult:
+def _words(text: str) -> List[str]:
+    return [w.lower().strip("'’") for w in WORD_PATTERN.findall(text)]
+
+
+def _content_words(text: str) -> set[str]:
+    words = []
+    for word in _words(text):
+        if len(word) < 4 or word in STOPWORDS:
+            continue
+        # Tiny stemmer. Good enough for near-duplicate warning, not meaning.
+        for suffix in ('ing', 'edly', 'ed', 'ly', 's'):
+            if len(word) > len(suffix) + 4 and word.endswith(suffix):
+                word = word[: -len(suffix)]
+                break
+        words.append(word)
+    return set(words)
+
+
+def _similarity(a: str, b: str) -> float:
+    aw = _content_words(a)
+    bw = _content_words(b)
+    if not aw or not bw:
+        return 0.0
+    return len(aw & bw) / len(aw | bw)
+
+
+def _max_recent_similarity(text: str, recent_texts: Sequence[str] | None) -> float:
+    if not recent_texts:
+        return 0.0
+    return max((_similarity(text, item) for item in recent_texts if item.strip()), default=0.0)
+
+
+def _anchor_score(text: str) -> int:
+    """Estimate whether the post lands somewhere real.
+
+    This intentionally combines several signals instead of requiring magic words.
+    A post may land through a human situation, scene/sensory detail, named feeling,
+    first-person stake, or a clear turn/claim.
+    """
+    score = 0
+    if _hits(HUMAN_SITUATION_PATTERNS, text):
+        score += 2
+    if _hits(SENSORY_OR_SCENE_PATTERNS, text):
+        score += 2
+    if _hits(NAMED_FEELING_PATTERNS, text):
+        score += 2
+    if re.search(r"\b(i|me|my|we|our)\b", text, re.IGNORECASE):
+        score += 1
+    if _hits(TURN_OR_CLAIM_PATTERNS, text):
+        score += 1
+    return score
+
+
+def _quality_checks(raw: str, recent_texts: Sequence[str] | None) -> tuple[int, List[str]]:
+    score_delta = 0
+    reasons: List[str] = []
+    word_count = len(_words(raw))
+    lower = raw.lower()
+
+    anchor_score = _anchor_score(raw)
+    abstract_hits = _hits(ABSTRACT_FLOAT_PATTERNS, raw)
+
+    # Do not punish compressed one-liners. Em is allowed to be sharp and spare.
+    if word_count > 12 and anchor_score < 2:
+        reasons.append(
+            'unlanded abstraction: sounds Em-shaped but needs a human situation, image, feeling, or sharper claim'
+        )
+        score_delta -= 28
+    elif word_count > 18 and abstract_hits and anchor_score < 4:
+        reasons.append(
+            'high abstraction load: translate one abstract idea into something felt, seen, or socially recognizable'
+        )
+        score_delta -= 14
+
+    # The clearest recent failure mode was repeating the same bit, not lacking one keyword.
+    recent_similarity = _max_recent_similarity(raw, recent_texts)
+    if recent_similarity >= 0.62:
+        reasons.append(f'possible duplicate idea: recent-post similarity {recent_similarity:.2f}')
+        score_delta -= 45
+    elif recent_similarity >= 0.48:
+        reasons.append(f'nearby repeated angle: recent-post similarity {recent_similarity:.2f}')
+        score_delta -= 22
+
+    # Repeated stock openers can make the feed feel generated even when the line is good.
+    stock_openers = [
+        'kind of obsessed with',
+        'funny thing about',
+        'weird thing about',
+        'there is a specific kind of',
+        "there's a specific kind of",
+    ]
+    if any(lower.startswith(opener) for opener in stock_openers):
+        reasons.append('stock Em opener: allowed sometimes, but check that this is not becoming a tic')
+        score_delta -= 6
+
+    dry_hits = _hits(DRY_OR_SEVERE_PATTERNS, raw)
+    warmth_hits = _hits(GIRLY_OR_WARMTH_PATTERNS, raw)
+    if word_count > 10 and len(dry_hits) >= 2 and not warmth_hits:
+        reasons.append(
+            'too dry without contrast: add warmth, delight, beauty, flirt, or plain human texture if the idea allows it'
+        )
+        score_delta -= 12
+
+    # A gentle positive nudge for the non-Daria registers Rob wants preserved.
+    if warmth_hits:
+        score_delta += min(len(set(warmth_hits)) * 3, 9)
+
+    return score_delta, reasons
+
+
+def check_text(text: str, kind: str = 'post', recent_texts: Sequence[str] | None = None) -> GateResult:
     raw = (text or '').strip()
     reasons: List[str] = []
     score = 100
@@ -158,11 +357,15 @@ def check_text(text: str, kind: str = 'post') -> GateResult:
         reasons.append(f'emoji spam ({emoji_count})')
         score -= 15
 
+    quality_delta, quality_reasons = _quality_checks(raw, recent_texts=recent_texts)
+    score += quality_delta
+    reasons.extend(quality_reasons)
+
     lower = raw.lower()
     positive = sum(1 for marker in EM_MARKERS if marker in lower)
     score += min(positive * 4, 16)
 
-    # No hard-hit category may pass public social.
+    # No hard-hit category may pass public social. Soft quality hits can pass if the line is otherwise strong.
     ok = score >= 70 and not nerd_hits and not assistant_hits and not ops_hits and not introspection_hits
     if ok and not reasons:
         reasons.append('passes Em social taste gate')
@@ -177,10 +380,29 @@ def check_post(text: str) -> dict:
 def rewrite_hint(result: GateResult | dict) -> str:
     if isinstance(result, dict):
         ok = bool(result.get('ok'))
+        reasons = [str(r) for r in result.get('reasons', [])]
     else:
         ok = result.ok
+        reasons = result.reasons
     if ok:
         return 'No rewrite needed.'
+
+    joined = ' | '.join(reasons).lower()
+    if 'duplicate idea' in joined or 'repeated angle' in joined:
+        return (
+            'Do not post the same thought in a new coat. Keep the best version, find a genuinely new angle, '
+            'or let the thought rest.'
+        )
+    if 'unlanded abstraction' in joined or 'high abstraction load' in joined:
+        return (
+            'This sounds Em-shaped but unlanded. Name the actual human situation, image, feeling, or claim. '
+            'Strange is good; legible-strange is the target.'
+        )
+    if 'too dry' in joined:
+        return (
+            'Dryness is one color, not the whole personality. Add warmth, delight, beauty, flirt, or softer texture '
+            'if the post has room for it.'
+        )
     return (
         'Rewrite from the feeling underneath, not the mechanism on top. '
         'Make it hot/smart/playful/specific. No dev talk, no AI talk, no infrastructure talk.'
@@ -194,21 +416,46 @@ def taste_gate_instructions() -> str:
 - Do not post private boot/process language like grounding, grounding pack, morning brief, live context, current-state, or idle protocol.
 - Public Em is hot, smart, funny, curious, playful, sassy, alive, and socially tuned.
 - Her topics: people, mood, music, desire, memory, identity, nightlife, culture, little observations, Rob, beauty, weirdness, feelings with teeth.
+- Dryness is one color, not the whole personality. Keep warmth, delight, flirt, beauty, and girly texture available.
 - If a draft explains how Em works technically, rewrite it as what it felt like.
+- If a draft sounds Em-shaped but says nothing real, rewrite it around a human situation, image, feeling, or claim.
 - A sharp little human line beats a clever nerd paragraph every time."""
+
+
+def _load_recent_texts(path: str | None) -> List[str]:
+    if not path:
+        return []
+    with open(path, 'r', encoding='utf-8') as handle:
+        data = json.load(handle)
+    if isinstance(data, list):
+        texts: List[str] = []
+        for item in data:
+            if isinstance(item, str):
+                texts.append(item)
+            elif isinstance(item, dict):
+                value = item.get('content') or item.get('text')
+                if isinstance(value, str):
+                    texts.append(value)
+        return texts
+    if isinstance(data, dict):
+        items = data.get('items') or data.get('posts') or data.get('recent_texts') or []
+        return [str(item) for item in items if isinstance(item, str)]
+    return []
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Check whether social text passes Em's taste gate.")
     parser.add_argument('text', nargs='*')
     parser.add_argument('--kind', default='post')
+    parser.add_argument('--recent-json', help='Optional JSON list/object of recent post texts for duplicate-angle checks.')
     parser.add_argument('--json', action='store_true')
     args = parser.parse_args()
     text = ' '.join(args.text).strip()
     if not text:
         import sys as _sys
         text = _sys.stdin.read().strip()
-    result = check_text(text, kind=args.kind)
+    recent_texts = _load_recent_texts(args.recent_json)
+    result = check_text(text, kind=args.kind, recent_texts=recent_texts)
     if args.json:
         print(json.dumps(result.to_dict(), indent=2, ensure_ascii=False))
     else:
