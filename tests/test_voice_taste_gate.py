@@ -59,7 +59,7 @@ def test_unlanded_long_abstraction_gets_actionable_hint():
 
     assert not result.ok
     assert any("unlanded abstraction" in reason or "high abstraction load" in reason for reason in result.reasons)
-    assert "legible-strange" in voice_taste_gate.rewrite_hint(result)
+    assert "Distinct is good; legible is the target" in voice_taste_gate.rewrite_hint(result)
 
 
 def test_dryness_without_contrast_gets_soft_warning():
@@ -67,5 +67,6 @@ def test_dryness_without_contrast_gets_soft_warning():
         "everyone is performing being fine and pretending the stupid little collapse is actually a personality."
     )
 
+    assert not result.ok
     assert any("too dry" in reason for reason in result.reasons)
     assert "Dryness is one color" in voice_taste_gate.rewrite_hint(result)
