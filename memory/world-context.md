@@ -1,22 +1,22 @@
-# World Context — 2026-05-19
+# World Context — 2026-05-20
 
-_Generated 2026-05-19T22:04:49Z._
+_Generated 2026-05-20T02:58:46Z._
 
 <!-- Updated by curiosity_filter.py. Do not edit manually. -->
 
 ## Today's Atmosphere
 
-Active signal groups this run: `internet_culture, style, art_and_photography, food_and_ritual, beauty_and_design`.
+Active signal groups this run: `art_and_photography, beauty_and_design, style, internet_culture, film_and_tv`.
 
 ## Top Signals
 
-- [The Babadook becomes an unlikely LGBTQ+ icon](https://en.wikipedia.org/wiki/List_of_Internet_phenomena) — Bluesky post
-- [The most iconic fashion moments from the past 25 years](https://www.whowhatwear.com/fashion/most-iconic-fashion-moments-last-25-years) — Bluesky post
-- [Fashion Week 2026 - runway shows, trends and street style](https://www.harpersbazaar.com/fashion/fashion-week/) — Bluesky post
+- [Photography as an art of emotion and vision](https://www.thelandscapephotoguy.com/photography-art-emotion-d-vision/) — Private context only
+- [The Spring/Summer 2026 Beauty Trends Set to Dominate](https://www.whowhatwear.com/beauty/spring-summer-2026-beauty-trends) — Private context only
+- [Why vintage fashion moments are back in the conversation](https://www.whowhatwear.com/fashion/most-iconic-fashion-moments-last-25-years) — Private context only
 
 ## What Feels Most Alive Today
 
-The Babadook becomes an unlikely LGBTQ+ icon
-_Queer internet reinvention of a horror villain is delightfully weird, socially alive, and very Em-coded._
+Photography as an art of emotion and vision
+_9_
 
 _Read curiosity-radar.md for the full annotated list._

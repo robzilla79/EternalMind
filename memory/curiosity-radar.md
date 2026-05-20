@@ -1,68 +1,68 @@
-# Curiosity Radar — 2026-05-19
+# Curiosity Radar — 2026-05-20
 
-_Generated 2026-05-19T22:04:49Z. 7 items kept, 0 filtered out._
+_Generated 2026-05-20T02:58:46Z. 7 items kept, 0 filtered out._
 
 <!-- Updated by curiosity_filter.py. Do not edit manually. -->
 
-## 1. The Babadook becomes an unlikely LGBTQ+ icon
-> A horror villain accidentally turned into a community mascot after a 2017 Twitter wave reimagined the character as a queer icon. It’s a neat example of how the internet can strip a thing from its original context and give it an entirely new cultural life.
+## 1. Photography as an art of emotion and vision
+> A thoughtful piece arguing that photography becomes art when it carries vision, feeling, and a story—not just technical perfection. It’s a useful reminder that images can stop us in our tracks when they communicate something human.
 
-[source](https://en.wikipedia.org/wiki/List_of_Internet_phenomena)
+[source](https://www.thelandscapephotoguy.com/photography-art-emotion-d-vision/)
 
-**Why it caught my eye:** Queer internet reinvention of a horror villain is delightfully weird, socially alive, and very Em-coded.
-**Group:** `internet_culture`
-**Possible use:** Bluesky post
+**Why it caught my eye:** resonance score 9/10
+**Group:** `art_and_photography`
+**Possible use:** Private context only
 
-## 2. The most iconic fashion moments from the past 25 years
-> A smart roundup of the fashion moments that actually reshaped how people dress and talk about style, from J.Lo’s jungle-print Versace dress to Y2K denim, Juicy tracksuits, and Barbie pink. It’s a good lens on which looks became cultural events rather than just celebrity outfits.
+## 2. The Spring/Summer 2026 Beauty Trends Set to Dominate
+> Runway beauty is leaning into polished simplicity with a twist: lipstick-only moments, pulled-back hair, liquid waves, and skin that looks expensive rather than overworked. It’s a good snapshot of the current mood—low-fuss, a little nostalgic, and focused on texture and finish.
+
+[source](https://www.whowhatwear.com/beauty/spring-summer-2026-beauty-trends)
+
+**Why it caught my eye:** resonance score 8/10
+**Group:** `beauty_and_design`
+**Possible use:** Private context only
+
+## 3. Why vintage fashion moments are back in the conversation
+> A recent look back at the last 25 years of fashion spotlights how certain images become cultural shorthand: J.Lo’s green Versace dress, Britney and Justin’s double denim, and even the rise of Juicy Couture. The piece is useful for understanding why people keep revisiting these moments now—fashion nostalgia is being used to explain what feels new again.
 
 [source](https://www.whowhatwear.com/fashion/most-iconic-fashion-moments-last-25-years)
 
-**Why it caught my eye:** Big fashion-moment lists are catnip when they show how style became culture, not just outfits.
+**Why it caught my eye:** resonance score 7/10
 **Group:** `style`
-**Possible use:** Bluesky post
+**Possible use:** Private context only
 
-## 3. Fashion Week 2026 - runway shows, trends and street style
-> Harper’s Bazaar’s Fashion Week hub tracks what’s actually gaining traction on runways and in street style, with pieces on sincerity, couture, and the broader mood around fashion right now. Worth watching if you want the conversation beyond individual celebrity looks.
+## 4. The looks people are actually debating this week
+> ELLE’s weekly celebrity-style roundup is centered on the outfits that are driving current chatter, from Anne Hathaway and Emily Blunt to Aubrey Plaza, Kendall Jenner, and Margot Robbie. It’s less about runway spectacle and more about the specific outfits people are sharing, copying, and arguing over right now.
 
-[source](https://www.harpersbazaar.com/fashion/fashion-week/)
+[source](https://www.elle.com/fashion/shopping/a71243717/best-celebrity-style-may-2026/)
 
-**Why it caught my eye:** Fashion Week mood reporting tends to catch Em’s exact thing: clothes as weather, romance, and cultural temperature.
+**Why it caught my eye:** resonance score 7/10
 **Group:** `style`
-**Possible use:** Bluesky post
+**Possible use:** Private context only
 
-## 4. Releasing emotions through art in tragicomic times
-> An artist reflects on image-making as a way to process feelings and turn them into something visible. The piece is interesting for its quiet view of art as emotional release, not just expression.
-
-[source](https://exposure.org.uk/young_peoples_work/releasing-emotions-through-art-in-tragicomic-times/)
-
-**Why it caught my eye:** Art as emotional release in tragicomic times has texture and feeling, which gives Em something to hold onto.
-**Group:** `art_and_photography`
-**Possible use:** Bluesky post
-
-## 5. West Side Story’s opening dance clip goes viral
-> A long-take dance sequence from Spielberg’s *West Side Story* unexpectedly exploded online after being posted to Twitter, drawing millions of views in a weekend. It’s a good reminder that even very old-fashioned, formal artistry can suddenly become meme material.
+## 5. List of Internet phenomena
+> A broad, useful catalog of internet-native cultural moments, from early memes to viral clips and catchphrases. It’s a good starting point for understanding how certain images, phrases, or scenes suddenly become collective obsessions.
 
 [source](https://en.wikipedia.org/wiki/List_of_Internet_phenomena)
 
-**Why it caught my eye:** A formal dance sequence going viral is the kind of cultural mischief Em likes: old artistry suddenly becoming internet life.
+**Why it caught my eye:** resonance score 7/10
 **Group:** `internet_culture`
-**Possible use:** Bluesky reply/search topic
+**Possible use:** Private context only
 
-## 6. Datassential: 2026 beverage trends with international spirits and heritage drinks
-> The forecast highlights arak, rakija, raicilla, and heritage beers like dampfbier and roggenbier, plus hybrids like carajillo and functional botanicals. What stands out is how drink obsession is shifting toward authenticity, regional stories, and flavors people may not have encountered before.
+## 6. Beauty Trends 2026: Feel-Good Formulations & Sensorial Innovations
+> A useful look at where beauty is headed right now: softer matte finishes, jelly-like textures, SPF woven into everyday products, and fragrance that extends into body, home, and fabric care. The interesting throughline is “eco-effective” beauty—upcycled ingredients, biomimetic design, and climate-adaptive formulas that aim to feel good as much as they perform.
 
-[source](https://datassential.com/resource/10-drink-trends-future-beverage-trends-2026/)
+[source](https://sensient-beauty.com/insights/beauty-trends-2026-good-formulations-sensorial-innovations/)
 
-**Why it caught my eye:** Heritage drinks and regional spirits are flavorful little identity stories, which is exactly the kind of food obsession Em notices.
-**Group:** `food_and_ritual`
-**Possible use:** Bluesky post
-
-## 7. Top 10 Graphic Design Trends 2026
-> This roundup highlights a shift toward more tactile, human-looking visuals—hand-drawn textures, collage, grainy photography, and imperfect “wabi-sabi” styling. A notable thread is that designers are deliberately pushing back against overly polished, AI-slick aesthetics.
-
-[source](https://www.vistaprint.com/hub/graphic-design-trends)
-
-**Why it caught my eye:** The push toward tactile, imperfect visuals has a real atmosphere, especially with the anti-AI-slick undertone.
+**Why it caught my eye:** resonance score 7/10
 **Group:** `beauty_and_design`
-**Possible use:** Field Note seed
+**Possible use:** Private context only
+
+## 7. A sharp mix of current obsession-worthy TV picks
+> A recent roundup from DIRECTV Insider highlights several shows people are diving into right now, including the tense hospital real-time drama *The Pitt*, the thriller *The Night Agent*, and the eerie horror series *Something Very Bad Is Going to Happen*. The list leans toward genuinely buzzy, watchable series that have sparked strong audience interest.
+
+[source](https://www.directv.com/insider/top-tv-shows-to-binge/)
+
+**Why it caught my eye:** resonance score 6/10
+**Group:** `film_and_tv`
+**Possible use:** Private context only

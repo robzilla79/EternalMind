@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generated_at": "2026-05-19T22:04:40Z",
+  "generated_at": "2026-05-20T02:58:39Z",
   "note": "Raw intake. Temporary. Overwritten each run. Not for diary. Not for posting.",
   "stats": {
     "total": 21,
@@ -19,214 +19,214 @@
   },
   "items": [
     {
-      "id": "21167d4d8c",
-      "title": "The most iconic fashion moments from the past 25 years",
-      "snippet": "A smart roundup of the fashion moments that actually reshaped how people dress and talk about style, from J.Lo’s jungle-print Versace dress to Y2K denim, Juicy tracksuits, and Barbie pink. It’s a good lens on which looks became cultural events rather than just celebrity outfits.",
+      "id": "51ce5961f0",
+      "title": "Why vintage fashion moments are back in the conversation",
+      "snippet": "A recent look back at the last 25 years of fashion spotlights how certain images become cultural shorthand: J.Lo’s green Versace dress, Britney and Justin’s double denim, and even the rise of Juicy Couture. The piece is useful for understanding why people keep revisiting these moments now—fashion nostalgia is being used to explain what feels new again.",
       "url": "https://www.whowhatwear.com/fashion/most-iconic-fashion-moments-last-25-years",
       "source": "perplexity",
       "group": "style",
       "query": "fashion moments people are talking about this week",
-      "fetched_at": "2026-05-19T22:04:21Z"
+      "fetched_at": "2026-05-20T02:58:18Z"
     },
     {
-      "id": "f01d147842",
-      "title": "Best celebrity style this week — and where to shop each outfit",
-      "snippet": "A useful snapshot of the current outfits people are circling right now, including Anne Hathaway, Emily Blunt, Katie Holmes, Kendall Jenner, and Zoë Kravitz. It captures the week’s style conversation without feeling like a generic trend dump.",
+      "id": "68286732e9",
+      "title": "The looks people are actually debating this week",
+      "snippet": "ELLE’s weekly celebrity-style roundup is centered on the outfits that are driving current chatter, from Anne Hathaway and Emily Blunt to Aubrey Plaza, Kendall Jenner, and Margot Robbie. It’s less about runway spectacle and more about the specific outfits people are sharing, copying, and arguing over right now.",
       "url": "https://www.elle.com/fashion/shopping/a71243717/best-celebrity-style-may-2026/",
       "source": "perplexity",
       "group": "style",
       "query": "fashion moments people are talking about this week",
-      "fetched_at": "2026-05-19T22:04:21Z"
+      "fetched_at": "2026-05-20T02:58:18Z"
     },
     {
-      "id": "970d5f2683",
-      "title": "Fashion Week 2026 - runway shows, trends and street style",
-      "snippet": "Harper’s Bazaar’s Fashion Week hub tracks what’s actually gaining traction on runways and in street style, with pieces on sincerity, couture, and the broader mood around fashion right now. Worth watching if you want the conversation beyond individual celebrity looks.",
-      "url": "https://www.harpersbazaar.com/fashion/fashion-week/",
+      "id": "8287c2cb68",
+      "title": "Fashion Week’s mood shift: from spectacle to critique",
+      "snippet": "Recent Fashion Week coverage is increasingly focused on the conversation around the shows themselves—why some observers think the scene has become overly polished, repetitive, or exclusionary. That makes the real story less about individual outfits and more about a broader reassessment of what Fashion Week is for.",
+      "url": "https://www.youtube.com/watch?v=l_4Zvawj5pQ",
       "source": "perplexity",
       "group": "style",
       "query": "fashion moments people are talking about this week",
-      "fetched_at": "2026-05-19T22:04:21Z"
+      "fetched_at": "2026-05-20T02:58:18Z"
     },
     {
-      "id": "3a69b1d8f4",
-      "title": "Matthew Halsall’s *Fletcher Moss Park*",
-      "snippet": "A warm, transportive jazz album built around the mood of a Manchester park, it’s the kind of record listeners describe as impossible to put down once it starts. The appeal is less about hype than atmosphere: it rewards full-album listening with a calm, immersive flow.",
-      "url": "https://offthebw.wordpress.com/2020/04/05/8-albums-to-deep-listen-to-in-confinement/",
+      "id": "9d0c053a91",
+      "title": "20 Albums You Have to Listen to Front to Back",
+      "snippet": "A thoughtful roundup of albums that reward full-album listening rather than shuffle mode. It includes classics like OK Computer, Discovery, and Pet Sounds, making it a good fit if you want records people genuinely return to again and again.",
+      "url": "https://coolmaterial.com/lifestyle/entertainment/20-albums-you-have-to-listen-to-front-to-back/",
       "source": "perplexity",
       "group": "music",
       "query": "songs and albums people can't stop listening to right now",
-      "fetched_at": "2026-05-19T22:04:24Z"
+      "fetched_at": "2026-05-20T02:58:21Z"
     },
     {
-      "id": "28c96802d7",
-      "title": "*Wytch Hazel — III: Pentecost*",
-      "snippet": "This album got singled out as one people couldn’t stop playing on repeat, partly because it’s surprisingly cohesive from start to finish. It’s a good example of a record that sticks not through flash, but through strong songwriting and consistency.",
-      "url": "https://ramblingeveron.com/2022/04/04/five-albums-we-cant-stop/",
+      "id": "1a4f28b18f",
+      "title": "The 10 Albums I Couldn't Stop Listening to in 2025",
+      "snippet": "A personal list of albums that held up on repeat play, with a mix of metal, prog, and alternative picks. The emphasis is less on hype and more on records that kept pulling the listener back in.",
+      "url": "https://www.youtube.com/watch?v=yGAXlxtB2C4",
       "source": "perplexity",
       "group": "music",
       "query": "songs and albums people can't stop listening to right now",
-      "fetched_at": "2026-05-19T22:04:24Z"
+      "fetched_at": "2026-05-20T02:58:21Z"
     },
     {
-      "id": "db234bab34",
-      "title": "Nick Drake’s *Pink Moon*",
-      "snippet": "Often cited as a quietly addictive listen, *Pink Moon* has a sparse, intimate sound that draws people back again and again. Its emotional directness and minimal arrangements make it one of those albums that can linger in a listener’s head for days.",
-      "url": "https://offthebw.wordpress.com/2020/04/05/8-albums-to-deep-listen-to-in-confinement/",
+      "id": "ed9fa1e737",
+      "title": "Top Songs I Can't Stop Listening To Right Now!",
+      "snippet": "A lightweight social-style post about songs on constant repeat, with mentions ranging from Rihanna to Taylor Swift. It’s more casual than critical, but it does reflect what people are looping in the moment.",
+      "url": "https://www.lemon8-app.com/@ellieholzinger/7412131289745900038?region=us",
       "source": "perplexity",
       "group": "music",
       "query": "songs and albums people can't stop listening to right now",
-      "fetched_at": "2026-05-19T22:04:24Z"
+      "fetched_at": "2026-05-20T02:58:21Z"
     },
     {
-      "id": "7edcd1ab03",
-      "title": "The Pitt — an immersive medical drama built around real-time shifts",
-      "snippet": "This HBO Max series follows one hour of a single trauma-center shift per episode, giving it an unusually tense, lived-in feel. It’s the kind of show that hooks viewers who like high-stakes stories with a strong procedural spine.",
+      "id": "d277b6a9d1",
+      "title": "A sharp mix of current obsession-worthy TV picks",
+      "snippet": "A recent roundup from DIRECTV Insider highlights several shows people are diving into right now, including the tense hospital real-time drama *The Pitt*, the thriller *The Night Agent*, and the eerie horror series *Something Very Bad Is Going to Happen*. The list leans toward genuinely buzzy, watchable series that have sparked strong audience interest.",
       "url": "https://www.directv.com/insider/top-tv-shows-to-binge/",
       "source": "perplexity",
       "group": "film_and_tv",
       "query": "movies and shows people are obsessed with right now",
-      "fetched_at": "2026-05-19T22:04:28Z"
+      "fetched_at": "2026-05-20T02:58:25Z"
     },
     {
-      "id": "513e60857c",
-      "title": "How to Get to Heaven from Belfast — a dark comedy mystery with a fresh voice",
-      "snippet": "Created by Derry Girls writer Lisa McGee, this Netflix series mixes comedy, mystery, and thriller elements around a small group of longtime friends. The premise has an offbeat, character-driven appeal that makes it stand out from standard prestige TV.",
-      "url": "https://www.directv.com/insider/top-tv-shows-to-binge/",
-      "source": "perplexity",
-      "group": "film_and_tv",
-      "query": "movies and shows people are obsessed with right now",
-      "fetched_at": "2026-05-19T22:04:28Z"
-    },
-    {
-      "id": "0821320241",
-      "title": "Dutton Ranch / the Beth-and-Rip Yellowstone spinoff",
-      "snippet": "PureWow highlights the new spinoff following Beth and Rip as they move to Texas, which taps directly into the lasting pull of Yellowstone fandom. It’s a good example of how a familiar world can keep people obsessed long after the original series ended.",
+      "id": "d69432e9d7",
+      "title": "What to watch this weekend: from spinoffs to prestige TV",
+      "snippet": "PureWow’s weekly guide surfaces a few especially sticky picks, including *Dutton Ranch* for *Yellowstone* fans, *Welcome to Wrexham*, and Guy Ritchie’s *Young Sherlock*. It’s a useful snapshot of what people are actually excited to queue up for right now.",
       "url": "https://www.purewow.com/entertainment/what-to-watch-this-weekend",
       "source": "perplexity",
       "group": "film_and_tv",
       "query": "movies and shows people are obsessed with right now",
-      "fetched_at": "2026-05-19T22:04:28Z"
+      "fetched_at": "2026-05-20T02:58:25Z"
+    },
+    {
+      "id": "c5ebe7207e",
+      "title": "A compact list of shows that became instant favorites",
+      "snippet": "This older-but-still-relevant list includes enduring crowd favorites like *Schitt’s Creek*, *Black Mirror*, *Ozark*, *Big Little Lies*, and *The Crown*. It’s a good reminder that some of the most obsessive fandoms form around shows with strong characters and repeat-worthy episodes.",
+      "url": "https://alexandmike.life/6-tv-shows-obsessed-right-now/",
+      "source": "perplexity",
+      "group": "film_and_tv",
+      "query": "movies and shows people are obsessed with right now",
+      "fetched_at": "2026-05-20T02:58:25Z"
     },
     {
       "id": "3ab41a204b",
       "title": "Photography as an art of emotion and vision",
-      "snippet": "A thoughtful piece arguing that photography becomes art when it carries emotion, intention, and a story—not just technical perfection. It’s especially good on the idea that an image can make someone stop, feel, and think in a single glance.",
+      "snippet": "A thoughtful piece arguing that photography becomes art when it carries vision, feeling, and a story—not just technical perfection. It’s a useful reminder that images can stop us in our tracks when they communicate something human.",
       "url": "https://www.thelandscapephotoguy.com/photography-art-emotion-d-vision/",
       "source": "perplexity",
       "group": "art_and_photography",
       "query": "art or photography making people feel something right now",
-      "fetched_at": "2026-05-19T22:04:31Z"
+      "fetched_at": "2026-05-20T02:58:28Z"
     },
     {
       "id": "0c28f697f7",
       "title": "Photography and Emotions: All You Need to Know",
-      "snippet": "This article focuses on why photographs can trigger immediate emotional responses and how composition, perspective, and lighting shape what viewers feel. It’s a straightforward look at photography as a form of emotional communication.",
+      "snippet": "This essay focuses on how photographs trigger empathy, memory, and immediate emotional response. It’s especially interesting for the idea that composition, angle, and lighting can shape what viewers feel before they even think about it.",
       "url": "https://janelkilnisan.com/photography-and-emotions-all-you-need-to-know/",
       "source": "perplexity",
       "group": "art_and_photography",
       "query": "art or photography making people feel something right now",
-      "fetched_at": "2026-05-19T22:04:31Z"
+      "fetched_at": "2026-05-20T02:58:28Z"
     },
     {
       "id": "2552064a5e",
       "title": "Releasing emotions through art in tragicomic times",
-      "snippet": "An artist reflects on image-making as a way to process feelings and turn them into something visible. The piece is interesting for its quiet view of art as emotional release, not just expression.",
+      "snippet": "A young artist reflects on making images as a way to externalize feelings and feel calmer, especially when words aren’t enough. The piece is compelling because it treats art as emotional processing, not just self-expression.",
       "url": "https://exposure.org.uk/young_peoples_work/releasing-emotions-through-art-in-tragicomic-times/",
       "source": "perplexity",
       "group": "art_and_photography",
       "query": "art or photography making people feel something right now",
-      "fetched_at": "2026-05-19T22:04:31Z"
+      "fetched_at": "2026-05-20T02:58:28Z"
     },
     {
-      "id": "6823438850",
-      "title": "The Babadook becomes an unlikely LGBTQ+ icon",
-      "snippet": "A horror villain accidentally turned into a community mascot after a 2017 Twitter wave reimagined the character as a queer icon. It’s a neat example of how the internet can strip a thing from its original context and give it an entirely new cultural life.",
+      "id": "c562caaf7f",
+      "title": "List of Internet phenomena",
+      "snippet": "A broad, useful catalog of internet-native cultural moments, from early memes to viral clips and catchphrases. It’s a good starting point for understanding how certain images, phrases, or scenes suddenly become collective obsessions.",
       "url": "https://en.wikipedia.org/wiki/List_of_Internet_phenomena",
       "source": "perplexity",
       "group": "internet_culture",
       "query": "internet moments or memes people are suddenly obsessed with",
-      "fetched_at": "2026-05-19T22:04:34Z"
+      "fetched_at": "2026-05-20T02:58:32Z"
     },
     {
-      "id": "f495269764",
-      "title": "“Sure, Jan” resurfaces as a reaction meme",
-      "snippet": "A single dismissive line from *A Very Brady Sequel* became a widely used response gif years later. Its appeal is in how effortlessly it communicates skeptical disbelief without needing much explanation.",
-      "url": "https://en.wikipedia.org/wiki/List_of_Internet_phenomena",
+      "id": "0b3e54eaa4",
+      "title": "Why Are We So Obsessed With Memes?",
+      "snippet": "A short explainer on why memes spread so effectively: they help people express identity, connect socially, and share emotions in compressed form. It also touches on the psychological reasons people keep returning to them.",
+      "url": "https://www.youtube.com/watch?v=NumfJcmKiZU",
       "source": "perplexity",
       "group": "internet_culture",
       "query": "internet moments or memes people are suddenly obsessed with",
-      "fetched_at": "2026-05-19T22:04:34Z"
+      "fetched_at": "2026-05-20T02:58:32Z"
     },
     {
-      "id": "db4438ac65",
-      "title": "West Side Story’s opening dance clip goes viral",
-      "snippet": "A long-take dance sequence from Spielberg’s *West Side Story* unexpectedly exploded online after being posted to Twitter, drawing millions of views in a weekend. It’s a good reminder that even very old-fashioned, formal artistry can suddenly become meme material.",
-      "url": "https://en.wikipedia.org/wiki/List_of_Internet_phenomena",
+      "id": "57c401b3ae",
+      "title": "What This Guy Said Has Everyone Obsessed with the Memes",
+      "snippet": "A search result centered on a single viral statement that was rapidly reworked into meme formats. The interesting part is less the exact joke and more how quickly a plain line becomes a shared reference point online.",
+      "url": "https://landing.clickbalance.com/announcement/what-this-guy-said-has-everyone-obsessed-with-the-memes-2776176",
       "source": "perplexity",
       "group": "internet_culture",
       "query": "internet moments or memes people are suddenly obsessed with",
-      "fetched_at": "2026-05-19T22:04:34Z"
+      "fetched_at": "2026-05-20T02:58:32Z"
     },
     {
-      "id": "8dcad9c770",
-      "title": "Beauty trends for 2026, according to industry experts",
-      "snippet": "Interesting, less-obvious beauty directions for 2026 include ultra-niche fragrances, anti-ageing dental care, and PDRN treatments moving from clinics into mainstream skincare. The piece also notes that biometric tracking and personalized health plans are starting to shape beauty alongside wellness.",
-      "url": "https://www.wallpaper.com/fashion-beauty/beauty-trends-2026",
+      "id": "04469d7875",
+      "title": "Beauty Trends 2026: Feel-Good Formulations & Sensorial Innovations",
+      "snippet": "A useful look at where beauty is headed right now: softer matte finishes, jelly-like textures, SPF woven into everyday products, and fragrance that extends into body, home, and fabric care. The interesting throughline is “eco-effective” beauty—upcycled ingredients, biomimetic design, and climate-adaptive formulas that aim to feel good as much as they perform.",
+      "url": "https://sensient-beauty.com/insights/beauty-trends-2026-good-formulations-sensorial-innovations/",
       "source": "perplexity",
       "group": "beauty_and_design",
       "query": "beauty or design trends people are loving right now",
-      "fetched_at": "2026-05-19T22:04:37Z"
+      "fetched_at": "2026-05-20T02:58:36Z"
     },
     {
-      "id": "970baa6d7c",
-      "title": "Beauty Packaging Design Trends for 2025 and Beyond",
-      "snippet": "A useful look at where packaging is headed: retro aesthetics, refillable formats, and storytelling-led design are being paired with sustainability. It’s especially interesting for how beauty brands are balancing shelf appeal with lower-waste materials.",
-      "url": "https://www.beautypackaging.com/exclusives/beauty-packaging-design-trends-for-2025-and-beyond/",
+      "id": "4c63c8684d",
+      "title": "The Spring/Summer 2026 Beauty Trends Set to Dominate",
+      "snippet": "Runway beauty is leaning into polished simplicity with a twist: lipstick-only moments, pulled-back hair, liquid waves, and skin that looks expensive rather than overworked. It’s a good snapshot of the current mood—low-fuss, a little nostalgic, and focused on texture and finish.",
+      "url": "https://www.whowhatwear.com/beauty/spring-summer-2026-beauty-trends",
       "source": "perplexity",
       "group": "beauty_and_design",
       "query": "beauty or design trends people are loving right now",
-      "fetched_at": "2026-05-19T22:04:37Z"
+      "fetched_at": "2026-05-20T02:58:36Z"
     },
     {
-      "id": "3987103d33",
-      "title": "Top 10 Graphic Design Trends 2026",
-      "snippet": "This roundup highlights a shift toward more tactile, human-looking visuals—hand-drawn textures, collage, grainy photography, and imperfect “wabi-sabi” styling. A notable thread is that designers are deliberately pushing back against overly polished, AI-slick aesthetics.",
-      "url": "https://www.vistaprint.com/hub/graphic-design-trends",
+      "id": "f8f30076bf",
+      "title": "Top 5 Salon Decor Trends for 2026",
+      "snippet": "Salon interiors are shifting toward open layouts, organic shapes, nature-inspired palettes, and lighting that renders color accurately. It’s interesting because it shows beauty trends aren’t just about products anymore—they’re shaping the spaces people experience them in.",
+      "url": "https://www.minervabeauty.com/blog/top-5-salon-decor-trends-for-2026/",
       "source": "perplexity",
       "group": "beauty_and_design",
       "query": "beauty or design trends people are loving right now",
-      "fetched_at": "2026-05-19T22:04:37Z"
+      "fetched_at": "2026-05-20T02:58:36Z"
     },
     {
-      "id": "64e801b153",
-      "title": "James Beard Foundation: top restaurant food trends for 2026",
-      "snippet": "Chefs and restaurant owners point to fermentation, savory cocktails, larger-format entrées, and affordable-luxury tasting menus as the kinds of foods and drinks diners will be genuinely curious about. The interesting thread is moderation and craft: more intentional, flavor-forward eating and drinking rather than just bigger or sweeter.",
-      "url": "https://www.jamesbeard.org/stories/top-restaurant-food-trends-2026",
+      "id": "902ed8c8d9",
+      "title": "Fiber is becoming the new everyday obsession in food and drink",
+      "snippet": "Across several 2026 trend reports, fiber has moved from a niche nutrition claim to a mainstream buying signal, tied to gut health, fullness, and even mental well-being. It’s showing up in pasta, breads, snacks, sodas, and beverages rather than just supplements.",
+      "url": "https://www.wholefoodsmarket.com/trends/the-next-big-things-our-top-8-food-trend-predictions-for-2026",
       "source": "perplexity",
       "group": "food_and_ritual",
       "query": "food or drink things people are obsessing over",
-      "fetched_at": "2026-05-19T22:04:40Z"
+      "fetched_at": "2026-05-20T02:58:39Z"
     },
     {
-      "id": "034eb7d301",
-      "title": "Datassential: 2026 beverage trends with international spirits and heritage drinks",
-      "snippet": "The forecast highlights arak, rakija, raicilla, and heritage beers like dampfbier and roggenbier, plus hybrids like carajillo and functional botanicals. What stands out is how drink obsession is shifting toward authenticity, regional stories, and flavors people may not have encountered before.",
-      "url": "https://datassential.com/resource/10-drink-trends-future-beverage-trends-2026/",
+      "id": "18440cff24",
+      "title": "The rise of low- and no-alcohol drinks with a functional twist",
+      "snippet": "People are increasingly choosing drinks that do more than intoxicate or refresh: they’re looking for stress relief, clearer thinking, immunity support, and social inclusion without the hangover. Fermented, botanically infused, and adaptogen-spiked options are especially gaining attention.",
+      "url": "https://www.restaurant.org/education-and-resources/resource-library/whats-hot-in-2026-healthier-functional-beverages/",
       "source": "perplexity",
       "group": "food_and_ritual",
       "query": "food or drink things people are obsessing over",
-      "fetched_at": "2026-05-19T22:04:40Z"
+      "fetched_at": "2026-05-20T02:58:39Z"
     },
     {
-      "id": "4f8b8cd5d5",
-      "title": "National Restaurant Association: healthier, functional beverages",
-      "snippet": "This report says consumers are gravitating toward low- and no-alcohol drinks, fermented and gut-friendly beverages, personalized hydration, and energy drinks with added benefits. It’s a useful snapshot of how “what people are obsessing over” is increasingly tied to wellness, not just taste.",
-      "url": "https://restaurant.org/education-and-resources/resource-library/whats-hot-in-2026-healthier-functional-beverages/",
+      "id": "2e0bceb89b",
+      "title": "Bold flavor mashups like fruit-and-spice are getting a lot of love",
+      "snippet": "A more playful trend is the move toward unexpected flavor pairings, especially sweet-fruit-plus-heat combinations and other globally inspired fusions. These drinks and snacks are appealing because they feel adventurous without needing to be overly experimental.",
+      "url": "https://www.origine.eu/blog/blog-homepage-5/post/top-5-food-and-beverage-trends-in-2026-259",
       "source": "perplexity",
       "group": "food_and_ritual",
       "query": "food or drink things people are obsessing over",
-      "fetched_at": "2026-05-19T22:04:40Z"
+      "fetched_at": "2026-05-20T02:58:39Z"
     }
   ]
 }
