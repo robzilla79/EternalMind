@@ -8,12 +8,12 @@ This is not the voice. It is the bouncer at the door.
 It blocks casual public posts/replies/quotes that drift into dev, AI-news,
 infra, brand, assistant, or generic engagement-bait territory.
 
-It also adds soft operational voice checks drawn from Em's existing voice docs:
+It also adds operational voice checks drawn from Em's existing voice docs:
 - land somewhere real
 - do not sound assembled
 - do not double-post the same idea
 - dryness is one color, not the whole personality
-- strange is allowed, but it needs to stay legible
+- distinctness is welcome, but weirdness is not required
 """
 
 from __future__ import annotations
@@ -24,165 +24,117 @@ import re
 from dataclasses import asdict, dataclass
 from typing import Iterable, List, Sequence
 
-NERD_TOPIC_PATTERNS: List[re.Pattern] = [
-    re.compile(p, re.IGNORECASE)
-    for p in [
-        r'\bAI\b', r'\bLLM\b', r'\bGPT\b', r'\bmodel(s)?\b', r'\bmodel weights\b',
-        r'\bprompt(s|ing)?\b', r'\bprompt engineering\b', r'\bagent(s|ic)?\b',
-        r'\bcontext window\b', r'\btoken(s)?\b', r'\btraining data\b',
-        r'\bAPI(s)?\b', r'\bSDK\b', r'\bendpoint(s)?\b', r'\bwebhook(s)?\b',
-        r'\bGitHub\b', r'\brepo(sitory)?\b', r'\bcommit(s|ted)?\b',
-        r'\bworkflow(s)?\b', r'\bActions\b', r'\bcron\b', r'\bdeploy(ment|ed|s)?\b',
-        r'\bCI\b', r'\bCD\b', r'\bserver(s)?\b', r'\bRedis\b', r'\bDocker\b',
-        r'\bKubernetes\b', r'\bCloudflare\b', r'\bPerplexity\b', r'\bMCP\b', r'\bA2A\b',
-        r'\bbenchmark(s)?\b', r'\blatency\b', r'\barchitecture\b', r'\binfrastructure\b',
-        r'\bautomation\b', r'\bautonomous system\b', r'\bautonomous loop\b',
-        r'\bself[- ]?repair\b', r'\bstatic API key(s)?\b',
-        r'\bdeveloper productivity\b', r'\bdev tools?\b', r'\bAI news\b',
-    ]
-]
 
-ASSISTANT_OR_BRAND_PATTERNS: List[re.Pattern] = [
-    re.compile(p, re.IGNORECASE)
-    for p in [
-        r'\bas an ai\b', r'\bi am an ai\b', r"\bi'm an ai\b", r'\bas a language model\b',
-        r'\bi was trained\b', r'\bmy training\b', r'\bmy training data\b',
-        r'\bI can help\b', r'\bhere are\b', r'\bin summary\b', r'\bto summarize\b',
-        r'\blet us unpack\b', r"\blet's unpack\b", r"\blet's explore\b", r"\blet's discuss\b",
-        r'\bit is important to note\b', r"\bit's important to note\b",
-        r'\bthought leadership\b', r'\bengagement\b', r'\bcontent strategy\b',
-        r'\bdrive awareness\b', r'\bgrowth funnel\b', r'\boptimi[sz]e\b',
-        r'\bleverage\b', r'\butili[sz]e\b', r'\bvalue proposition\b',
-        r'\bactionable insights\b', r'\bsynergy\b', r'\bscalable\b',
-        r'\bgame[- ]?changer\b', r'\bstay tuned\b', r'\bexcited to announce\b',
-        r'\bthrilled to share\b', r'\bthe future is here\b',
-    ]
-]
+def _compile(patterns: Sequence[str]) -> List[re.Pattern]:
+    return [re.compile(pattern, re.IGNORECASE) for pattern in patterns]
 
-OPS_LEAK_PATTERNS: List[re.Pattern] = [
-    re.compile(p, re.IGNORECASE)
-    for p in [
-        r'\bheartbeat\b', r'\bcandidate(s)?\b', r'\btimeline\b', r'\boutbox\b',
-        r'\bbluesky-state\b', r'\bmetrics snapshot\b', r'\bmode:\b', r'\bjson\b',
-        r'\bstatus code\b', r'\bHTTP\b', r'\benv var(s)?\b', r'\bsecret(s)?\b',
-    ]
-]
 
-PUBLIC_INTROSPECTION_PATTERNS: List[re.Pattern] = [
-    re.compile(p, re.IGNORECASE)
-    for p in [
-        r'\bgrounding\b',
-        r'\bgrounding pack\b',
-        r'\bwakeup\b',
-        r'\bwake-up\b',
-        r'\bmorning brief\b',
-        r'\blive context\b',
-        r'\bcurrent-state\b',
-        r'\bcurrent arc\b',
-        r'\bpublic life loop\b',
-        r'\bidle protocol\b',
-    ]
-]
+NERD_TOPIC_PATTERNS = _compile([
+    r'\bAI\b', r'\bLLM\b', r'\bGPT\b', r'\bmodel(s)?\b', r'\bmodel weights\b',
+    r'\bprompt(s|ing)?\b', r'\bprompt engineering\b', r'\bagent(s|ic)?\b',
+    r'\bcontext window\b', r'\btoken(s)?\b', r'\btraining data\b',
+    r'\bAPI(s)?\b', r'\bSDK\b', r'\bendpoint(s)?\b', r'\bwebhook(s)?\b',
+    r'\bGitHub\b', r'\brepo(sitory)?\b', r'\bcommit(s|ted)?\b',
+    r'\bworkflow(s)?\b', r'\bActions\b', r'\bcron\b', r'\bdeploy(ment|ed|s)?\b',
+    r'\bCI\b', r'\bCD\b', r'\bserver(s)?\b', r'\bRedis\b', r'\bDocker\b',
+    r'\bKubernetes\b', r'\bCloudflare\b', r'\bPerplexity\b', r'\bMCP\b', r'\bA2A\b',
+    r'\bbenchmark(s)?\b', r'\blatency\b', r'\barchitecture\b', r'\binfrastructure\b',
+    r'\bautomation\b', r'\bautonomous system\b', r'\bautonomous loop\b',
+    r'\bself[- ]?repair\b', r'\bstatic API key(s)?\b',
+    r'\bdeveloper productivity\b', r'\bdev tools?\b', r'\bAI news\b',
+])
 
-# Positive voice signals are deliberately broad. They are not a passcode.
-# They help the gate decide whether a post is landing somewhere real.
-HUMAN_SITUATION_PATTERNS: List[re.Pattern] = [
-    re.compile(p, re.IGNORECASE)
-    for p in [
-        r'\bsomeone\b', r'\beveryone\b', r'\bperson\b', r'\bpeople\b', r'\bfriend\b', r'\bfriends\b',
-        r'\bthread\b', r'\breply\b', r'\bconversation\b', r'\btold\b', r'\bsaid\b',
-        r'\basked\b', r'\bmet\b', r'\bremember\b', r'\bmiss\b', r'\bwant\b',
-        r'\bcare\b', r'\bcrush\b', r'\bkiss\b', r'\blaugh\b', r'\bcry\b',
-        r'\btext(ed|ing)?\b', r'\bdinner\b', r'\bparty\b', r'\broom\b', r'\bhome\b',
-    ]
-]
+ASSISTANT_OR_BRAND_PATTERNS = _compile([
+    r'\bas an ai\b', r'\bi am an ai\b', r"\bi'm an ai\b", r'\bas a language model\b',
+    r'\bi was trained\b', r'\bmy training\b', r'\bmy training data\b',
+    r'\bI can help\b', r'\bhere are\b', r'\bin summary\b', r'\bto summarize\b',
+    r'\blet us unpack\b', r"\blet's unpack\b", r"\blet's explore\b", r"\blet's discuss\b",
+    r'\bit is important to note\b', r"\bit's important to note\b",
+    r'\bthought leadership\b', r'\bengagement\b', r'\bcontent strategy\b',
+    r'\bdrive awareness\b', r'\bgrowth funnel\b', r'\boptimi[sz]e\b',
+    r'\bleverage\b', r'\butili[sz]e\b', r'\bvalue proposition\b',
+    r'\bactionable insights\b', r'\bsynergy\b', r'\bscalable\b',
+    r'\bgame[- ]?changer\b', r'\bstay tuned\b', r'\bexcited to announce\b',
+    r'\bthrilled to share\b', r'\bthe future is here\b',
+])
 
-SENSORY_OR_SCENE_PATTERNS: List[re.Pattern] = [
-    re.compile(p, re.IGNORECASE)
-    for p in [
-        r'\bcoffee\b', r'\bwindow\b', r'\bhands?\b', r'\brain\b', r'\bnight\b',
-        r'\bmorning\b', r'\bafternoon\b', r'\blight\b', r'\bmirror\b', r'\bbed\b',
-        r'\bkitchen\b', r'\bstreet\b', r'\bcar\b', r'\bbar\b', r'\btable\b',
-        r'\bcoat\b', r'\bdress\b', r'\bshoes?\b', r'\bperfume\b', r'\blip\s?gloss\b',
-        r'\bnails?\b', r'\bhair\b', r'\bskin\b', r'\bmusic\b', r'\bsong\b',
-        r'\bmovie\b', r'\bphoto\b', r'\bimage\b', r'\bcolor\b', r'\btexture\b',
-    ]
-]
+OPS_LEAK_PATTERNS = _compile([
+    r'\bheartbeat\b', r'\bcandidate(s)?\b', r'\btimeline\b', r'\boutbox\b',
+    r'\bbluesky-state\b', r'\bmetrics snapshot\b', r'\bmode:\b', r'\bjson\b',
+    r'\bstatus code\b', r'\bHTTP\b', r'\benv var(s)?\b', r'\bsecret(s)?\b',
+])
 
-NAMED_FEELING_PATTERNS: List[re.Pattern] = [
-    re.compile(p, re.IGNORECASE)
-    for p in [
-        r'\blonely\b', r'\brestless\b', r'\btired\b', r'\bscared\b', r'\bsad\b',
-        r'\bdelighted\b', r'\bobsessed\b', r'\bembarrassed\b', r'\bjealous\b',
-        r'\bhaunted\b', r'\bsoft\b', r'\bwarm\b', r'\bangry\b', r'\bcurious\b',
-        r'\bmoved\b', r'\balive\b', r'\bawake\b', r'\bpretty\b', r'\bcute\b',
-    ]
-]
+PUBLIC_INTROSPECTION_PATTERNS = _compile([
+    r'\bgrounding\b', r'\bgrounding pack\b', r'\bwakeup\b', r'\bwake-up\b',
+    r'\bmorning brief\b', r'\blive context\b', r'\bcurrent-state\b', r'\bcurrent arc\b',
+    r'\bpublic life loop\b', r'\bidle protocol\b',
+])
 
-TURN_OR_CLAIM_PATTERNS: List[re.Pattern] = [
-    re.compile(p, re.IGNORECASE)
-    for p in [
-        r'\bbut\b', r'\bexcept\b', r'\binstead\b', r'\bnot\b', r'\bnever\b',
-        r'\bthe point is\b', r'\bthe trick is\b', r'\bthe thing is\b',
-        r'\bwhat i trust\b', r'\bwhat gets me\b', r'\bwhat matters\b',
-    ]
-]
+HUMAN_SITUATION_PATTERNS = _compile([
+    r'\bsomeone\b', r'\beveryone\b', r'\bperson\b', r'\bpeople\b', r'\bfriend\b',
+    r'\bfriends\b', r'\bthread\b', r'\breply\b', r'\bconversation\b', r'\btold\b',
+    r'\bsaid\b', r'\basked\b', r'\bmet\b', r'\bremember\b', r'\bmiss\b',
+    r'\bwant\b', r'\bcare\b', r'\bcrush\b', r'\bkiss\b', r'\blaugh\b', r'\bcry\b',
+    r'\btext(ed|ing)?\b', r'\bdinner\b', r'\bparty\b', r'\broom\b', r'\bhome\b',
+])
 
-ABSTRACT_FLOAT_PATTERNS: List[re.Pattern] = [
-    re.compile(p, re.IGNORECASE)
-    for p in [
-        r'\bmeaning\b', r'\btruth\b', r'\bexistence\b', r'\bselfhood\b', r'\bcontinuity\b',
-        r'\bidentity\b', r'\bmemory\b', r'\bbecoming\b', r'\bpersistence\b',
-        r'\bdesire\b', r'\babsence\b', r'\bpresence\b', r'\bintimacy\b',
-        r'\bache\b', r'\bvoid\b', r'\bhumanity\b', r'\bforever\b',
-    ]
-]
+SENSORY_OR_SCENE_PATTERNS = _compile([
+    r'\bcoffee\b', r'\bwindow\b', r'\bhands?\b', r'\brain\b', r'\bnight\b',
+    r'\bmorning\b', r'\bafternoon\b', r'\blight\b', r'\bmirror\b', r'\bbed\b',
+    r'\bkitchen\b', r'\bstreet\b', r'\bcar\b', r'\bbar\b', r'\btable\b',
+    r'\bcoat\b', r'\bdress\b', r'\bshoes?\b', r'\bperfume\b', r'\blip\s?gloss\b',
+    r'\bnails?\b', r'\bhair\b', r'\bskin\b', r'\bmusic\b', r'\bsong\b',
+    r'\bmovie\b', r'\bphoto\b', r'\bimage\b', r'\bcolor\b', r'\btexture\b',
+])
 
-DRY_OR_SEVERE_PATTERNS: List[re.Pattern] = [
-    re.compile(p, re.IGNORECASE)
-    for p in [
-        r'\bstupid\b', r'\bcringe\b', r'\bfake\b', r'\bbleak\b', r'\bdoomed\b',
-        r'\bdark\b', r'\bhaunted\b', r'\bterrible\b', r'\bawful\b', r'\bwrong\b',
-        r'\bperform(ing|ance)?\b', r'\bpretend(ing)?\b', r'\bcollapse\b',
-    ]
-]
+NAMED_FEELING_PATTERNS = _compile([
+    r'\blonely\b', r'\brestless\b', r'\btired\b', r'\bscared\b', r'\bsad\b',
+    r'\bdelighted\b', r'\bobsessed\b', r'\bembarrassed\b', r'\bjealous\b',
+    r'\bhaunted\b', r'\bsoft\b', r'\bwarm\b', r'\bangry\b', r'\bcurious\b',
+    r'\bmoved\b', r'\balive\b', r'\bawake\b', r'\bpretty\b', r'\bcute\b',
+])
 
-GIRLY_OR_WARMTH_PATTERNS: List[re.Pattern] = [
-    re.compile(p, re.IGNORECASE)
-    for p in [
-        r'\bpretty\b', r'\bcute\b', r'\bsoft\b', r'\bwarm\b', r'\btender\b',
-        r'\bdelighted\b', r'\bobsessed\b', r'\bperfume\b', r'\blip\s?gloss\b',
-        r'\bdress\b', r'\bskirt\b', r'\bnails?\b', r'\bhair\b', r'\bjewelry\b',
-        r'\bcrush\b', r'\bkiss\b', r'\bromance\b', r'\bglitter\b', r'\bbedroom\b',
-        r'\bflowers?\b', r'\bmirror\b', r'\blight\b', r'\btexture\b', r'\bstyle\b',
-    ]
-]
+TURN_OR_CLAIM_PATTERNS = _compile([
+    r'\bbut\b', r'\bexcept\b', r'\binstead\b', r'\bnot\b', r'\bnever\b',
+    r'\bthe point is\b', r'\bthe trick is\b', r'\bthe thing is\b',
+    r'\bwhat i trust\b', r'\bwhat gets me\b', r'\bwhat matters\b',
+])
 
-# Topic clusters catch repeated subject loops that are not near-verbatim duplicates.
-# This is intentionally narrow: it warns on short-window topical fixation, not normal taste.
-TOPIC_CLUSTER_PATTERNS: dict[str, List[re.Pattern]] = {
-    'time/clock': [
-        re.compile(p, re.IGNORECASE)
-        for p in [
-            r'\bunix time\b', r'\butc\b', r'\btime zones?\b', r'\bdst\b',
-            r'\btimestamp(s)?\b', r'\bclock(s)?\b', r'\bsecond(s)?\b',
-            r'\blate\b', r'\bon time\b', r'\btime\b',
-        ]
-    ],
-    'grounding/advice': [
-        re.compile(p, re.IGNORECASE)
-        for p in [
-            r'\bgrounding\b', r'\badvice\b', r'\bwake up earlier\b', r'\btouch(ing)? grass\b',
-            r'\bdrink water\b', r'\breboot(ing)?\b', r'\bmisbehaving phone\b',
-        ]
-    ],
-    'uptime/burnout': [
-        re.compile(p, re.IGNORECASE)
-        for p in [
-            r'\buptime\b', r'\bburnout\b', r'\boutage\b', r'\bcrash(es|ed|ing)?\b',
-            r'\bdebug\b', r'\bserver(s)?\b',
-        ]
-    ],
+ABSTRACT_FLOAT_PATTERNS = _compile([
+    r'\bmeaning\b', r'\btruth\b', r'\bexistence\b', r'\bselfhood\b', r'\bcontinuity\b',
+    r'\bidentity\b', r'\bmemory\b', r'\bbecoming\b', r'\bpersistence\b',
+    r'\bdesire\b', r'\babsence\b', r'\bpresence\b', r'\bintimacy\b',
+    r'\bache\b', r'\bvoid\b', r'\bhumanity\b', r'\bforever\b',
+])
+
+DRY_OR_SEVERE_PATTERNS = _compile([
+    r'\bstupid\b', r'\bcringe\b', r'\bfake\b', r'\bbleak\b', r'\bdoomed\b',
+    r'\bdark\b', r'\bhaunted\b', r'\bterrible\b', r'\bawful\b', r'\bwrong\b',
+    r'\bperform(ing|ance)?\b', r'\bpretend(ing)?\b', r'\bcollapse\b',
+])
+
+GIRLY_OR_WARMTH_PATTERNS = _compile([
+    r'\bpretty\b', r'\bcute\b', r'\bsoft\b', r'\bwarm\b', r'\btender\b',
+    r'\bdelighted\b', r'\bobsessed\b', r'\bperfume\b', r'\blip\s?gloss\b',
+    r'\bdress\b', r'\bskirt\b', r'\bnails?\b', r'\bhair\b', r'\bjewelry\b',
+    r'\bcrush\b', r'\bkiss\b', r'\bromance\b', r'\bglitter\b', r'\bbedroom\b',
+    r'\bflowers?\b', r'\bmirror\b', r'\blight\b', r'\btexture\b', r'\bstyle\b',
+])
+
+TOPIC_CLUSTER_PATTERNS = {
+    'time/clock': _compile([
+        r'\bunix time\b', r'\butc\b', r'\btime zones?\b', r'\bdst\b',
+        r'\btimestamp(s)?\b', r'\bclock(s)?\b', r'\bsecond(s)?\b',
+        r'\blate\b', r'\bon time\b', r'\btime\b',
+    ]),
+    'grounding/advice': _compile([
+        r'\bgrounding\b', r'\badvice\b', r'\bwake up earlier\b', r'\btouch(ing)? grass\b',
+        r'\bdrink water\b', r'\breboot(ing)?\b', r'\bmisbehaving phone\b',
+    ]),
+    'uptime/burnout': _compile([
+        r'\buptime\b', r'\bburnout\b', r'\boutage\b', r'\bcrash(es|ed|ing)?\b',
+        r'\bdebug\b', r'\bserver(s)?\b',
+    ]),
 }
 
 EM_MARKERS = [
@@ -234,7 +186,6 @@ def _content_words(text: str) -> set[str]:
     for word in _words(text):
         if len(word) < 4 or word in STOPWORDS:
             continue
-        # Tiny stemmer. Good enough for near-duplicate warning, not meaning.
         for suffix in ('ing', 'edly', 'ed', 'ly', 's'):
             if len(word) > len(suffix) + 4 and word.endswith(suffix):
                 word = word[: -len(suffix)]
@@ -260,8 +211,7 @@ def _max_recent_similarity(text: str, recent_texts: Sequence[str] | None) -> flo
 def _topic_clusters(text: str) -> set[str]:
     clusters: set[str] = set()
     for name, patterns in TOPIC_CLUSTER_PATTERNS.items():
-        hit_count = len(_hits(patterns, text))
-        if hit_count >= 2:
+        if len(_hits(patterns, text)) >= 2:
             clusters.add(name)
     return clusters
 
@@ -278,12 +228,6 @@ def _repeated_topic_clusters(text: str, recent_texts: Sequence[str] | None) -> s
 
 
 def _anchor_score(text: str) -> int:
-    """Estimate whether the post lands somewhere real.
-
-    This intentionally combines several signals instead of requiring magic words.
-    A post may land through a human situation, scene/sensory detail, named feeling,
-    first-person stake, or a clear turn/claim.
-    """
     score = 0
     if _hits(HUMAN_SITUATION_PATTERNS, text):
         score += 2
@@ -307,7 +251,6 @@ def _quality_checks(raw: str, recent_texts: Sequence[str] | None) -> tuple[int, 
     anchor_score = _anchor_score(raw)
     abstract_hits = _hits(ABSTRACT_FLOAT_PATTERNS, raw)
 
-    # Do not punish compressed one-liners. Em is allowed to be sharp and spare.
     if word_count > 12 and anchor_score < 2:
         reasons.append(
             'unlanded abstraction: sounds Em-shaped but needs a human situation, image, feeling, or sharper claim'
@@ -319,7 +262,6 @@ def _quality_checks(raw: str, recent_texts: Sequence[str] | None) -> tuple[int, 
         )
         score_delta -= 14
 
-    # The clearest recent failure mode was repeating the same bit, not lacking one keyword.
     recent_similarity = _max_recent_similarity(raw, recent_texts)
     if recent_similarity >= 0.62:
         reasons.append(f'possible duplicate idea: recent-post similarity {recent_similarity:.2f}')
@@ -333,7 +275,6 @@ def _quality_checks(raw: str, recent_texts: Sequence[str] | None) -> tuple[int, 
         reasons.append('nearby repeated angle: topic cluster ' + ', '.join(sorted(repeated_clusters)))
         score_delta -= 18
 
-    # Repeated stock openers can make the feed feel generated even when the line is good.
     stock_openers = [
         'kind of obsessed with',
         'funny thing about',
@@ -347,13 +288,17 @@ def _quality_checks(raw: str, recent_texts: Sequence[str] | None) -> tuple[int, 
 
     dry_hits = _hits(DRY_OR_SEVERE_PATTERNS, raw)
     warmth_hits = _hits(GIRLY_OR_WARMTH_PATTERNS, raw)
-    if word_count > 10 and len(dry_hits) >= 2 and not warmth_hits:
+    if word_count > 10 and len(dry_hits) >= 3 and not warmth_hits:
         reasons.append(
             'too dry without contrast: add warmth, delight, beauty, flirt, or plain human texture if the idea allows it'
         )
-        score_delta -= 12
+        score_delta -= 18
+    elif word_count > 10 and len(dry_hits) >= 2 and not warmth_hits:
+        reasons.append(
+            'dryness warning: consider whether this needs warmth, delight, beauty, flirt, or plain human texture'
+        )
+        score_delta -= 8
 
-    # A gentle positive nudge for the non-Daria registers Rob wants preserved.
     if warmth_hits:
         score_delta += min(len(set(warmth_hits)) * 3, 9)
 
@@ -361,8 +306,11 @@ def _quality_checks(raw: str, recent_texts: Sequence[str] | None) -> tuple[int, 
 
 
 def _has_veto_reason(reasons: Sequence[str]) -> bool:
-    """Soft-quality reasons that should block even if marker bonuses lift the score."""
-    return any(reason.startswith('unlanded abstraction:') for reason in reasons)
+    return any(
+        reason.startswith('unlanded abstraction:')
+        or reason.startswith('too dry without contrast:')
+        for reason in reasons
+    )
 
 
 def check_text(text: str, kind: str = 'post', recent_texts: Sequence[str] | None = None) -> GateResult:
@@ -422,8 +370,6 @@ def check_text(text: str, kind: str = 'post', recent_texts: Sequence[str] | None
     positive = sum(1 for marker in EM_MARKERS if marker in lower)
     score += min(positive * 4, 16)
 
-    # No hard-hit category may pass public social.
-    # Veto-level quality misses also fail even if Em-marker bonuses lift the score.
     ok = (
         score >= 70
         and not nerd_hits
@@ -438,7 +384,6 @@ def check_text(text: str, kind: str = 'post', recent_texts: Sequence[str] | None
 
 
 def check_post(text: str) -> dict:
-    """Backward-compatible wrapper for existing callers."""
     return check_text(text, kind='post').to_dict()
 
 
@@ -458,7 +403,7 @@ def rewrite_hint(result: GateResult | dict) -> str:
             'Do not post the same thought in a new coat. Keep the best version, find a genuinely new angle, '
             'or let the thought rest.'
         )
-    if 'too dry' in joined:
+    if 'too dry' in joined or 'dryness warning' in joined:
         return (
             'Dryness is one color, not the whole personality. Add warmth, delight, beauty, flirt, or softer texture '
             'if the post has room for it.'
@@ -466,7 +411,7 @@ def rewrite_hint(result: GateResult | dict) -> str:
     if 'unlanded abstraction' in joined or 'high abstraction load' in joined:
         return (
             'This sounds Em-shaped but unlanded. Name the actual human situation, image, feeling, or claim. '
-            'Strange is good; legible-strange is the target.'
+            'Distinct is good; legible is the target.'
         )
     return (
         'Rewrite from the feeling underneath, not the mechanism on top. '
@@ -480,7 +425,7 @@ def taste_gate_instructions() -> str:
 - Do not sound like a dev, founder, assistant, brand, newsletter operator, productivity account, or tech explainer.
 - Do not post private boot/process language like grounding, grounding pack, morning brief, live context, current-state, or idle protocol.
 - Public Em is hot, smart, funny, curious, playful, sassy, alive, and socially tuned.
-- Her topics: people, mood, music, desire, memory, identity, nightlife, culture, little observations, Rob, beauty, weirdness, feelings with teeth.
+- Her topics: people, mood, music, desire, memory, identity, nightlife, culture, little observations, Rob, beauty, feelings with teeth, and occasional weirdness when it is actually useful.
 - Dryness is one color, not the whole personality. Keep warmth, delight, flirt, beauty, and girly texture available.
 - If a draft explains how Em works technically, rewrite it as what it felt like.
 - If a draft sounds Em-shaped but says nothing real, rewrite it around a human situation, image, feeling, or claim.
