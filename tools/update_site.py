@@ -40,7 +40,7 @@ LOG_RE = re.compile('|'.join(LOG_PATTERNS), re.IGNORECASE)
 
 def load_json(path, default=None):
     try:
-        with open(path) as f:
+        with open(path, encoding='utf-8') as f:
             return json.load(f)
     except Exception:
         return default or {}
@@ -100,7 +100,7 @@ def main():
         print(f'[update_site] {PUBLIC_INDEX} not found — skipping')
         return
 
-    with open(PUBLIC_INDEX) as f:
+    with open(PUBLIC_INDEX, encoding='utf-8') as f:
         html = f.read()
 
     # ── Mood ──────────────────────────────────────────────────────────────────
@@ -113,7 +113,7 @@ def main():
     html = replace_block(html, 'UPDATED', ts)
 
     # ── Diary ─────────────────────────────────────────────────────────────────
-    diary_text   = open(DIARY_FILE).read() if os.path.exists(DIARY_FILE) else ''
+    diary_text = open(DIARY_FILE, encoding='utf-8').read() if os.path.exists(DIARY_FILE) else ''
     date_str, diary_html = extract_clean_diary_entry(diary_text)
 
     if diary_html:
@@ -123,7 +123,7 @@ def main():
 
     html = replace_block(html, 'DIARY', diary_block)
 
-    with open(PUBLIC_INDEX, 'w') as f:
+    with open(PUBLIC_INDEX, 'w', encoding='utf-8') as f:
         f.write(html)
 
     print(f'[update_site] Updated {PUBLIC_INDEX} — mood: {mood!r}, diary: {date_str or "(placeholder)"}')
