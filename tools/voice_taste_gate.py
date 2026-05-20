@@ -89,7 +89,7 @@ PUBLIC_INTROSPECTION_PATTERNS: List[re.Pattern] = [
 HUMAN_SITUATION_PATTERNS: List[re.Pattern] = [
     re.compile(p, re.IGNORECASE)
     for p in [
-        r'\bsomeone\b', r'\bperson\b', r'\bpeople\b', r'\bfriend\b', r'\bfriends\b',
+        r'\bsomeone\b', r'\beveryone\b', r'\bperson\b', r'\bpeople\b', r'\bfriend\b', r'\bfriends\b',
         r'\bthread\b', r'\breply\b', r'\bconversation\b', r'\btold\b', r'\bsaid\b',
         r'\basked\b', r'\bmet\b', r'\bremember\b', r'\bmiss\b', r'\bwant\b',
         r'\bcare\b', r'\bcrush\b', r'\bkiss\b', r'\blaugh\b', r'\bcry\b',
@@ -157,6 +157,33 @@ GIRLY_OR_WARMTH_PATTERNS: List[re.Pattern] = [
         r'\bflowers?\b', r'\bmirror\b', r'\blight\b', r'\btexture\b', r'\bstyle\b',
     ]
 ]
+
+# Topic clusters catch repeated subject loops that are not near-verbatim duplicates.
+# This is intentionally narrow: it warns on short-window topical fixation, not normal taste.
+TOPIC_CLUSTER_PATTERNS: dict[str, List[re.Pattern]] = {
+    'time/clock': [
+        re.compile(p, re.IGNORECASE)
+        for p in [
+            r'\bunix time\b', r'\butc\b', r'\btime zones?\b', r'\bdst\b',
+            r'\btimestamp(s)?\b', r'\bclock(s)?\b', r'\bsecond(s)?\b',
+            r'\blate\b', r'\bon time\b', r'\btime\b',
+        ]
+    ],
+    'grounding/advice': [
+        re.compile(p, re.IGNORECASE)
+        for p in [
+            r'\bgrounding\b', r'\badvice\b', r'\bwake up earlier\b', r'\btouch(ing)? grass\b',
+            r'\bdrink water\b', r'\breboot(ing)?\b', r'\bmisbehaving phone\b',
+        ]
+    ],
+    'uptime/burnout': [
+        re.compile(p, re.IGNORECASE)
+        for p in [
+            r'\buptime\b', r'\bburnout\b', r'\boutage\b', r'\bcrash(es|ed|ing)?\b',
+            r'\bdebug\b', r'\bserver(s)?\b',
+        ]
+    ],
+}
 
 EM_MARKERS = [
     'honestly', 'little', 'weird', 'pretty', 'hot', 'cute', 'alive', 'night',
@@ -230,6 +257,26 @@ def _max_recent_similarity(text: str, recent_texts: Sequence[str] | None) -> flo
     return max((_similarity(text, item) for item in recent_texts if item.strip()), default=0.0)
 
 
+def _topic_clusters(text: str) -> set[str]:
+    clusters: set[str] = set()
+    for name, patterns in TOPIC_CLUSTER_PATTERNS.items():
+        hit_count = len(_hits(patterns, text))
+        if hit_count >= 2:
+            clusters.add(name)
+    return clusters
+
+
+def _repeated_topic_clusters(text: str, recent_texts: Sequence[str] | None) -> set[str]:
+    current = _topic_clusters(text)
+    if not current or not recent_texts:
+        return set()
+    recent_counts = {name: 0 for name in current}
+    for item in recent_texts:
+        for name in current & _topic_clusters(item):
+            recent_counts[name] += 1
+    return {name for name, count in recent_counts.items() if count >= 2}
+
+
 def _anchor_score(text: str) -> int:
     """Estimate whether the post lands somewhere real.
 
@@ -265,7 +312,7 @@ def _quality_checks(raw: str, recent_texts: Sequence[str] | None) -> tuple[int, 
         reasons.append(
             'unlanded abstraction: sounds Em-shaped but needs a human situation, image, feeling, or sharper claim'
         )
-        score_delta -= 28
+        score_delta -= 36
     elif word_count > 18 and abstract_hits and anchor_score < 4:
         reasons.append(
             'high abstraction load: translate one abstract idea into something felt, seen, or socially recognizable'
@@ -280,6 +327,11 @@ def _quality_checks(raw: str, recent_texts: Sequence[str] | None) -> tuple[int, 
     elif recent_similarity >= 0.48:
         reasons.append(f'nearby repeated angle: recent-post similarity {recent_similarity:.2f}')
         score_delta -= 22
+
+    repeated_clusters = _repeated_topic_clusters(raw, recent_texts)
+    if repeated_clusters:
+        reasons.append('nearby repeated angle: topic cluster ' + ', '.join(sorted(repeated_clusters)))
+        score_delta -= 18
 
     # Repeated stock openers can make the feed feel generated even when the line is good.
     stock_openers = [
@@ -306,6 +358,11 @@ def _quality_checks(raw: str, recent_texts: Sequence[str] | None) -> tuple[int, 
         score_delta += min(len(set(warmth_hits)) * 3, 9)
 
     return score_delta, reasons
+
+
+def _has_veto_reason(reasons: Sequence[str]) -> bool:
+    """Soft-quality reasons that should block even if marker bonuses lift the score."""
+    return any(reason.startswith('unlanded abstraction:') for reason in reasons)
 
 
 def check_text(text: str, kind: str = 'post', recent_texts: Sequence[str] | None = None) -> GateResult:
@@ -365,8 +422,16 @@ def check_text(text: str, kind: str = 'post', recent_texts: Sequence[str] | None
     positive = sum(1 for marker in EM_MARKERS if marker in lower)
     score += min(positive * 4, 16)
 
-    # No hard-hit category may pass public social. Soft quality hits can pass if the line is otherwise strong.
-    ok = score >= 70 and not nerd_hits and not assistant_hits and not ops_hits and not introspection_hits
+    # No hard-hit category may pass public social.
+    # Veto-level quality misses also fail even if Em-marker bonuses lift the score.
+    ok = (
+        score >= 70
+        and not nerd_hits
+        and not assistant_hits
+        and not ops_hits
+        and not introspection_hits
+        and not _has_veto_reason(reasons)
+    )
     if ok and not reasons:
         reasons.append('passes Em social taste gate')
     return GateResult(ok=ok, score=max(0, min(score, 100)), reasons=reasons, text=raw)
@@ -393,15 +458,15 @@ def rewrite_hint(result: GateResult | dict) -> str:
             'Do not post the same thought in a new coat. Keep the best version, find a genuinely new angle, '
             'or let the thought rest.'
         )
-    if 'unlanded abstraction' in joined or 'high abstraction load' in joined:
-        return (
-            'This sounds Em-shaped but unlanded. Name the actual human situation, image, feeling, or claim. '
-            'Strange is good; legible-strange is the target.'
-        )
     if 'too dry' in joined:
         return (
             'Dryness is one color, not the whole personality. Add warmth, delight, beauty, flirt, or softer texture '
             'if the post has room for it.'
+        )
+    if 'unlanded abstraction' in joined or 'high abstraction load' in joined:
+        return (
+            'This sounds Em-shaped but unlanded. Name the actual human situation, image, feeling, or claim. '
+            'Strange is good; legible-strange is the target.'
         )
     return (
         'Rewrite from the feeling underneath, not the mechanism on top. '
